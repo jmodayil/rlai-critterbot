@@ -5,6 +5,17 @@
  *  Created by Marc G. Bellemare on 08/04/08
  *  Last Revision: 30/06/08
  *
+ *  The LED driver has two parts. The first one defines code to deal with 
+ *   a set of LED controllers. For efficiency, some parts of the code 
+ *   directly encode the number of controllers (e.g. ledctl_senddata_all).
+ *  
+ *  The second part of the driver contains functions which are specific to
+ *  the critterbot. In particular, they assume three LED controllers, each
+ *  one driving a single color channel for 16 LEDs. It also assumes that
+ *  the three LED controllers are chained and that we may send the data
+ *  via the SSC on a single line, in color order: blue, green, red.
+ *  
+ *
  */
 #include <stdio.h>
 #include <string.h>
@@ -26,6 +37,8 @@
 // I/O lines connected to the BLANK/XLAT inputs of the LED controllers
 #define LEDCTL_PIN_BLANK 4
 #define LEDCTL_PIN_XLAT 5
+// @@@ This pin needs to be defined
+#define LEDCTL_PIN_XERR -1
 
 #define TC_INTERRUPT_LEVEL 6
 // Number of clock cycles in 1/100th of a second when using a T/C with
@@ -38,16 +51,21 @@ unsigned int ledctl_txdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 unsigned int ledctl_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 struct spi_packet ledctl_spi_packet[LEDCTL_NUM_CONTROLLERS];
 
+unsigned int ledctl_xerr;
+
 void ledctl_newcycle ( void )
 {
   // Tell the LED controllers to start a new cycle; the sequence is
   // BLANK-on XLAT-on XLAT-off BLANK-off
   //  This relies a CPU clock cycle being slower than 20ns
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_BLANK);
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_BLANK);
-  
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+
+  // Set the XERR bit if the XERR line is low
+  ledctl_xerr = 
+    (!AT91F_PIO_IsInputSet ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR ));
   // Send the data for the next cycle
   // @@@ Test for finished flag first - do what if not finished?
   ledctl_senddata_all();
@@ -55,16 +73,15 @@ void ledctl_newcycle ( void )
 
 void ledctl_senddata(int device)
 {
-  spi_send_packet(&ledctl_spi_packet[device]);
+  ssc_send_packet(&ledctl_spi_packet[device]);
 }
 
 void ledctl_senddata_all()
 {
   // Chunk out the four SPI packets into the SPI driver
-  spi_send_packet(&ledctl_spi_packet[0]);
-  spi_send_packet(&ledctl_spi_packet[1]);
-  spi_send_packet(&ledctl_spi_packet[2]);
-  spi_send_packet(&ledctl_spi_packet[3]);
+  ssc_send_packet(&ledctl_spi_packet[0]);
+  ssc_send_packet(&ledctl_spi_packet[1]);
+  ssc_send_packet(&ledctl_spi_packet[2]);
 }
 
 inline void ledctl_setvalue(int device, int led, int value)
@@ -82,9 +99,18 @@ inline int ledctl_getstatus(int device, int led)
   return ledctl_rxdata[device][led];
 }
 
-inline int ledctl_setled(int led, int red, int green, int blue)
+/** Critterbot specific functions **/
+
+inline int ledctl_setcolor(int led, int red, int green, int blue)
 {
-  
+  ledctl_txdata[RED_CONTROLLER][led] = red;
+  ledctl_txdata[GREEN_CONTROLLER][led] = green;
+  ledctl_txdata[BLUE_CONTROLLER][led] = blue;
+}
+
+inline int ledctl_getcolor(int led, int color)
+{
+  return ledctl_txdata[color][led];
 }
 
 /** End LED controller core driver **/
@@ -132,8 +158,8 @@ void ledctl_init( void )
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
     ledctl_spi_packet[i].num_words = LEDCTL_NUM_LEDS;
-    // Assume that the LED controllers are on CS0-3
-    ledctl_spi_packet[i].device_id = i;
+    // There is no device_id for the SSC
+    ledctl_spi_packet[i].device_id = 0;
     ledctl_spi_packet[i].data_to_write = ledctl_txdata[i];
     ledctl_spi_packet[i].read_data = ledctl_rxdata[i];
   
@@ -150,13 +176,14 @@ void ledctl_init( void )
   // Configure the PIO pins properly
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PIOA );
   
-  AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_BLANK );
-  AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, LEDCTL_PIN_XLAT );
-
+  AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK );
+  AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT );
+  AT91F_PIO_CfgInput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
 }
 
 int main()
 {
+  /** @@@ This function is obsolete and should be removed! */
   char statusString[256];
   char commandString[256];
 
@@ -169,7 +196,7 @@ int main()
   unsigned int base;
 
   // Initialize the SPI - assume no one else is doing so
-  spi_init();
+  ssc_init();
   // Now initialize a timer/counter at 100Hz
   ledctl_inittimer();
   
