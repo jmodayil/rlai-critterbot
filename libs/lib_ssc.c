@@ -8,6 +8,8 @@
  *
  */
 
+#include "AT91SAM7S256.h"
+#include "lib_AT91SAM7S256.h"
 #include "lib_ssc.h"
 #include <stdio.h>
 

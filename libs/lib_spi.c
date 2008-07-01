@@ -7,6 +7,8 @@
  *
  */
 
+#include "AT91SAM7S256.h"
+#include "lib_AT91SAM7S256.h"
 #include "lib_spi.h"
 #include <stdio.h>
 

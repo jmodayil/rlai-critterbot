@@ -8,6 +8,7 @@
  */
 
 #include "lib_ui.h"
+#include "lib_ledctl.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
