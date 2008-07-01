@@ -102,7 +102,7 @@ inline int ledctl_getstatus(int device, int led)
 
 /** Critterbot specific functions **/
 
-inline int ledctl_setcolor(int led, int red, int green, int blue)
+inline void ledctl_setcolor(int led, int red, int green, int blue)
 {
   ledctl_txdata[RED_CONTROLLER][led] = red;
   ledctl_txdata[GREEN_CONTROLLER][led] = green;

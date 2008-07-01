@@ -60,7 +60,7 @@ inline int ledctl_getstatus(int device, int led);
   *  led must be in range 0-15
   *  red, green, blue must be in the range 0-4095
   */
-inline int ledctl_setcolor(int led, int red, int green, int blue);
+inline void ledctl_setcolor(int led, int red, int green, int blue);
 
 /** Interface to the LED controller driver
   *  Returns one of the three color values of a LED
