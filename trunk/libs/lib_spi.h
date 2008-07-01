@@ -3,20 +3,21 @@
  *  
  *
  *  Created by Michael Sokolsky on 4/11/08.
- *  Last Revision: 4/24/08
+ *  Last Revision: 01/07/08
  *
  */
 
 #include "AT91SAM7S256.h"
+#include "compiler.h"
 
 // Delay between CS signal changes = value / MCK
 // Min = 6, Max = 255
-#define DELAY_BETWEEN_CS 6 << 24;
+#define DELAY_BETWEEN_CS (6 << 24)
 
-#define SPI_INTERRUPT_PRIORITY 1;
+#define SPI_INTERRUPT_PRIORITY 1
 
 // Pins that will be assigned to the SPI peripheral
-#define SPI_A_PINS  ( AT91C_PA14_SPCK | AT91C_PA13_MOSI | 
+#define SPI_A_PINS  ( AT91C_PA14_SPCK | AT91C_PA13_MOSI | \
                       AT91C_PA12_MISO | AT91C_PA11_NPCS0 | AT91C_PA31_NPCS1 )
 #define SPI_B_PINS  ( AT91C_PA10_NPCS2 | AT91C_PA22_NPCS3 )
 
@@ -34,10 +35,10 @@
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
 #define SPI_CSO_3_FLAGS 0x0
-#define SPI_CSR0_SETTINGS = ( SPI_CS0_3_DELAY_BETWEEN_TRANSFERS<<24 | 
-                              SPI_CS0_3_DELAY_BEFORE_CLOCK<<16 | 
-                              SPI_CS0_3_BAUD_RATE<<8 |
-                              SPI_CSO_3_WORD_SIZE<<4 |
+#define SPI_CSR0_SETTINGS ( SPI_CS0_3_DELAY_BETWEEN_TRANSFERS<<24 | \
+                              SPI_CS0_3_DELAY_BEFORE_CLOCK<<16 | \
+                              SPI_CS0_3_BAUD_RATE<<8 | \
+                              SPI_CSO_3_WORD_SIZE<<4 | \
                               SPI_CSO_3_FLAGS )
 
 
@@ -55,10 +56,10 @@
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
 #define SPI_CS4_7_FLAGS 0x0
-#define SPI_CSR1_SETTINGS = ( SPI_CS4_7_DELAY_BETWEEN_TRANSFERS<<24 | 
-                              SPI_CS4_7_DELAY_BEFORE_CLOCK<<16 | 
-                              SPI_CS4_7_BAUD_RATE<<8 |
-                              SPI_CS4_7_WORD_SIZE<<4 |
+#define SPI_CSR1_SETTINGS ( SPI_CS4_7_DELAY_BETWEEN_TRANSFERS<<24 | \
+                              SPI_CS4_7_DELAY_BEFORE_CLOCK<<16 | \
+                              SPI_CS4_7_BAUD_RATE<<8 | \
+                              SPI_CS4_7_WORD_SIZE<<4 | \
                               SPI_CS4_7_FLAGS )
 
 
@@ -76,10 +77,10 @@
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
 #define SPI_CS8_11_FLAGS 0x0
-#define SPI_CSR2_SETTINGS = ( SPI_CS8_11_DELAY_BETWEEN_TRANSFERS<<24 | 
-                              SPI_CS8_11_DELAY_BEFORE_CLOCK<<16 | 
-                              SPI_CS8_11_BAUD_RATE<<8 |
-                              SPI_CS8_11_WORD_SIZE<<4 |
+#define SPI_CSR2_SETTINGS ( SPI_CS8_11_DELAY_BETWEEN_TRANSFERS<<24 | \
+                              SPI_CS8_11_DELAY_BEFORE_CLOCK<<16 | \
+                              SPI_CS8_11_BAUD_RATE<<8 | \
+                              SPI_CS8_11_WORD_SIZE<<4 | \
                               SPI_CS8_11_FLAGS )
 
 
@@ -97,10 +98,10 @@
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
 #define SPI_CS12_14_FLAGS 0x0
-#define SPI_CSR3_SETTINGS = ( SPI_CS12_14_DELAY_BETWEEN_TRANSFERS<<24 | 
-                              SPI_CS12_14_DELAY_BEFORE_CLOCK<<16 | 
-                              SPI_CS12_14_BAUD_RATE<<8 |
-                              SPI_CS12_14_WORD_SIZE<<4 |
+#define SPI_CSR3_SETTINGS ( SPI_CS12_14_DELAY_BETWEEN_TRANSFERS<<24 | \
+                              SPI_CS12_14_DELAY_BEFORE_CLOCK<<16 | \
+                              SPI_CS12_14_BAUD_RATE<<8 | \
+                              SPI_CS12_14_WORD_SIZE<<4 | \
                               SPI_CS12_14_FLAGS )
 
 /*
@@ -116,14 +117,14 @@
  *  finished = this is incremented every time new data is read from the SPI
  *  spi_packet = Internal reference.  Do not change.
  */
-struct spi_packet {
+typedef struct spi_packet {
   unsigned int device_id;
   unsigned int num_words;
   unsigned int* data_to_write;
   unsigned int* read_data;
   unsigned int finished;
   struct spi_packet *next_packet;
-}
+} * spi_packet_p;
 
 // SPI list pointers
 struct spi_packet *spi_data_head, *spi_data_tail;
@@ -144,4 +145,4 @@ void spi_send_packet( struct spi_packet *packet );
  *  GCC will likely require different handling than IAR
  *  to accomplish this.
  */
-RAM_FUNCTION void spi_isr();
+FL_RAMFUNC void spi_isr();

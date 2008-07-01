@@ -3,11 +3,12 @@
  *  
  *
  *  Created by Michael Sokolsky on 4/11/08.
- *  Last Revision: 4/24/08
+ *  Last Revision: 01/07/08
  *
  */
 
 #include "lib_spi.h"
+#include <stdio.h>
 
 /*
  *  Initialize the SPI unit
@@ -90,8 +91,8 @@ void spi_send_packet( struct spi_packet *packet ) {
   // start the transfer
   else {
     spi_data_tail = spi_data_head = packet;
-    spi->SPI_TPR = spi_data_tail->data_to_write;
-    spi->SPI_RPR = spi_data_tail->read_data;
+    spi->SPI_TPR = (unsigned int) spi_data_tail->data_to_write;
+    spi->SPI_RPR = (unsigned int) spi_data_tail->read_data;
     // If read_data is NULL, we're ignoring received data
     if( spi_data_tail->read_data != NULL )  
       spi->SPI_RCR = spi_data_tail->num_words;
@@ -110,7 +111,7 @@ void spi_send_packet( struct spi_packet *packet ) {
  *  GCC will likely require different handling than IAR
  *  to accomplish this.
  */
-RAM_FUNCTION void spi_isr() {
+FL_RAMFUNC void spi_isr() {
   
   AT91PS_SPI spi = AT91C_BASE_SPI;
   
@@ -122,7 +123,7 @@ RAM_FUNCTION void spi_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if( spi->SPI_SR & ( AT91C_SPI_ENDRX | AT91C_SPI_ENDTX ) {
+  if( spi->SPI_SR & ( AT91C_SPI_ENDRX | AT91C_SPI_ENDTX ) ) {
     // Disable PDC transfers just to be safe
     spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
     // Let the packet's client know we're done
@@ -135,8 +136,8 @@ RAM_FUNCTION void spi_isr() {
      */
     if( spi_data_tail->next_packet != NULL ) {
       spi_data_tail = spi_data_tail->next_packet;
-      spi->SPI_TPR = spi_data_tail->data_to_write;
-      spi->SPI_RPR = spi_data_tail->read_data;
+      spi->SPI_TPR = (unsigned int)spi_data_tail->data_to_write;
+      spi->SPI_RPR = (unsigned int)spi_data_tail->read_data;
       // If read_data is NULL, we're ignoring received data
       if( spi_data_tail->read_data != NULL )
         spi->SPI_RCR = spi_data_tail->num_words;
