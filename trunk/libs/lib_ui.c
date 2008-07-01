@@ -94,7 +94,7 @@ void ui_setled(char * cmdstr)
   // @@@ ensure: num E [0,15], colors E ?
 
   // Set the LED's three colors
-  ledctl_setled(ledNum, ledColors[0], ledColors[1], ledColors[2]);
+  ledctl_setcolor(ledNum, ledColors[0], ledColors[1], ledColors[2]);
 }
 
 /** Returns the status of a given led (0-15) */

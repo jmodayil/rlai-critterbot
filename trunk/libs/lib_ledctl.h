@@ -7,8 +7,13 @@
  *
  */
 
-#ifndef LIB_LEDCTL
-#define LIB_LEDCTL
+#ifndef LIB_LEDCTL_H
+#define LIB_LEDCTL_H
+
+// Defines which LED controller deals which each color channel
+#define BLUE_CONTROLLER  0
+#define GREEN_CONTROLLER 1
+#define RED_CONTROLLER   2
 
 // Send one of the controllers' data to the controller via the SPI
 void ledctl_senddata(int device); 
@@ -65,4 +70,4 @@ inline int ledctl_setcolor(int led, int red, int green, int blue);
   */
 inline int ledctl_getcolor(int led, int color);
 
-#endif /* LIB_LEDCTL */
+#endif /* LIB_LEDCTL_H */
