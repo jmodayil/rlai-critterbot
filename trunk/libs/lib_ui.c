@@ -1,13 +1,13 @@
 /*
- *  ui.c
+ *  lib_ui.c
  *  
  *
  *  Created by Marc G. Bellemare on 27/06/08.
- *  Last Revision: 27/06/08
+ *  Last Revision: 1/07/08
  *
  */
 
-#include "ui.h"
+#include "lib_ui.h"
 
 // Included for EOF, NULL
 #include <stdio.h>

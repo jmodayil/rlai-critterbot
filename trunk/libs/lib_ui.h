@@ -1,5 +1,14 @@
-#ifndef USER_INTERFACE_H 
-#define USER_INTERFACE_H
+/*
+ *  lib_ui.h
+ *  
+ *
+ *  Created by Marc G. Bellemare on 27/06/08.
+ *  Last Revision: 1/07/08
+ *
+ */
+
+#ifndef LIB_UI_H
+#define LIB_UI_H
 
 typedef void (*ui_function) (char * cmdstr);
 
@@ -17,4 +26,4 @@ void ui_getled (char * cmdstr);
 void ui_statled (char * cmdstr);
 void ui_help (char * cmdstr);
 
-#endif /* USER_INTERFACE_H */
+#endif /* LIB_UI_H */
