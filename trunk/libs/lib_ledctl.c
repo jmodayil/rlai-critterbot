@@ -22,6 +22,7 @@
 
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
+#include "lib_AT91SAM7S256.h"
 // #include <lib_dbguconsole.c>
 
 // SPI polarity is 0 (from the diagram of the SCLK in led datasheet)
