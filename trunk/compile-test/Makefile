@@ -5,6 +5,8 @@
 # It will also compile the startup assembly file for you.
 
 THUMB=-mthumb-interwork
+GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
+GCC_LIBS=$(GCC_LIB_DIR)/thumb/libgcc.a
 
 all: armcode.hex
 
@@ -14,8 +16,15 @@ armcode.hex: armcode.elf
 
 # Object linking
 # Can alternatively be done using arm-elf-gcc, which provides crt0 and such
-armcode.elf: startup_SAM7S.o
-	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o --output armcode.elf
+armcode.elf: startup_SAM7S.o a1.o
+# Currently being compiled with arm-elf-gcc because of missing libgcc
+	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o $(GCC_LIBS) --output armcode.elf
 
+# Startup code
 startup_SAM7S.o: startup_SAM7S.S
 	arm-elf-gcc $(THUMB) -mcpu=arm7tdmi -c -Wall -x assembler-with-cpp startup_SAM7S.S
+
+# Simple program (from assignment 1)
+a1.o: a1.c
+	arm-elf-gcc $(THUMB) -mcpu=arm7tdmi -c -Wall a1.c
+	
