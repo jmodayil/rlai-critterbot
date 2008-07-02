@@ -1,0 +1,5 @@
+This directory is meant to be a 'sandbox' for determining how to properly
+compile our project using arm-elf-gcc/ld. Avoid modifying things here unless
+necessary.
+
+- Marc G. Bellemare
