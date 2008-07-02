@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "compiler.h"
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
 #include "lib_AT91SAM7S256.h"

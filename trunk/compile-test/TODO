@@ -1,0 +1,4 @@
+Modify the linker script for our project
+Modify the startup code
+Modify the Makefile / make a proper one
+Add a header file that defines RAMFUNC properly

@@ -7,6 +7,7 @@
  *
  */
 
+#include "compiler.h"
 #include "lib_ui.h"
 #include "lib_ledctl.h"
 
