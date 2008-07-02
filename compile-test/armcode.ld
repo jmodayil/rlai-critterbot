@@ -1,14 +1,17 @@
 /***********************************************************************/
-/*  This file is part of the ARM Compiler package                      */
-/*  Copyright KEIL ELEKTRONIK GmbH 1992-2004                           */
-/***********************************************************************/
 /*                                                                     */
-/*  TARGET.LD:  Linker Script File                                     */
+/*  Linker Script File for the AT91SAM7S64 - Code in ROM               */
 /*                                                                     */
 /***********************************************************************/
-
-/* warning: this file has not been modified for the
-   WinARM example - TODO */
+/*  modified for arm-elf-gcc by Martin Thomas                          */
+/*  extensions: - Section for Functions in RAM,                        */
+/*                Exeception-Vector remapping                          */
+/*  modifications Copyright Martin Thomas 2005                         */
+/*                                                                     */
+/*                                                                     */
+/*  Based on file that has been a part of the uVision/ARM development  */
+/*  tools, Copyright KEIL ELEKTRONIK GmbH 2002-2004                    */
+/***********************************************************************/
 
 
 /*
@@ -33,8 +36,8 @@
 
 MEMORY
 {
-  CODE (rx) : ORIGIN = 0x00200000, LENGTH = 0x00002000
-  DATA (rw) : ORIGIN = 0x00202000, LENGTH = 0x00002000
+  CODE (rx) : ORIGIN = 0x00100000, LENGTH = 0x00010000
+  DATA (rw) : ORIGIN = 0x00200000, LENGTH = 0x00004000
 }
 
 
@@ -47,36 +50,58 @@ SECTIONS
 
   .text :
   {
-    *startup.o (.text)         /* Startup code */
-    *(.text)                   /* remaining code */
-
-    *(.glue_7t) *(.glue_7)
-
+/*  *startup.o (.text)  */       /* Startup code */
+		KEEP(*(.vectrom))        /* added by mthomas */
+		KEEP(*(.init))
+		*(.text .text.*)
+		*(.gnu.linkonce.t.*)
+		*(.glue_7t .glue_7)
+		KEEP(*(.fini))
+		*(.gcc_except_table)
   } >CODE =0
 
   . = ALIGN(4);
+  
+  
+	/* .ctors .dtors are used for c++ constructors/destructors */
+	/* added by mthomas, based on an Anglia-Designs example for STR7 */
+	
+	.ctors :
+	{
+		PROVIDE(__ctors_start__ = .);
+		KEEP(*(SORT(.ctors.*)))
+		KEEP(*(.ctors))
+		PROVIDE(__ctors_end__ = .);
+	} >CODE
+
+	.dtors :
+	{
+		PROVIDE(__dtors_start__ = .); 
+		KEEP(*(SORT(.dtors.*)))
+		KEEP(*(.dtors))
+		PROVIDE(__dtors_end__ = .);
+	} >CODE
 
   /* .rodata section which is used for read-only data (constants) */
 
   .rodata :
   {
-    *(.rodata)
+   	*(.rodata .rodata.*)
+	*(.gnu.linkonce.r.*)
   } >CODE
 
   . = ALIGN(4);
-
   _etext = . ;
   PROVIDE (etext = .);
-
-  /* .data section which is used for initialized data */
-
+   
   .data : AT (_etext)
   {
     _data = . ;
+	KEEP(*(.vectram))   /* added by mthomas */
     *(.data)
     SORT(CONSTRUCTORS)
 	. = ALIGN(4);
-	*(.fastrun) /* "RAM-Functions" */
+	*(.fastrun)         /* "RAM-Functions" */ /* added by mthomas */
   } >DATA
   . = ALIGN(4);
 
