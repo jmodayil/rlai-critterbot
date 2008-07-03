@@ -1,3 +1,6 @@
+#include "include/compiler.h"
+#include "include/AT91SAM7S256.h"
+#include "include/lib_AT91SAM7S256.h"
 
 #define BUF_SIZE 128
 
