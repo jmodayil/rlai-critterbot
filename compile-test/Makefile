@@ -12,19 +12,19 @@ all: armcode.hex
 
 # Object translation
 armcode.hex: armcode.elf
-	arm-elf-objcopy -O ihex armcode.elf armcode.hex
+	arm-elf-objcopy -O binary armcode.elf armcode.bin
 
 # Object linking
 # Can alternatively be done using arm-elf-gcc, which provides crt0 and such
-armcode.elf: startup_SAM7S.o a1.o
+armcode.elf: startup_SAM7S.o serialecho.o
 # Currently being compiled with arm-elf-gcc because of missing libgcc
-	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o $(GCC_LIBS) --output armcode.elf
+	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm serialecho.o $(GCC_LIBS) --output armcode.elf
 
 # Startup code
 startup_SAM7S.o: startup_SAM7S.S
 	arm-elf-gcc $(THUMB) -mcpu=arm7tdmi -c -Wall -x assembler-with-cpp startup_SAM7S.S
 
 # Simple program (from assignment 1)
-a1.o: a1.c
-	arm-elf-gcc $(THUMB) -mcpu=arm7tdmi -c -Wall a1.c
+serialecho.o: serialecho.c
+	arm-elf-gcc $(THUMB) -mcpu=arm7tdmi -c -Wall serialecho.c
 	
