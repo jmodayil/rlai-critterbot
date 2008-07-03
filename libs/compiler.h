@@ -10,6 +10,8 @@
 #define OS_H
 
 #ifdef __GNUC__
+// Necessary to avoid duplicate definitions, behavior unknown
+#define __inline static inline
 #define FL_RAMFUNC
 #define FL_ARM
 #else

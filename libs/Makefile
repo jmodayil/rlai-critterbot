@@ -1,7 +1,7 @@
 CC = arm-elf-gcc
 LD = arm-elf-ld
 
-CFLAGS = -c -mcpu=arm7tdmi -Wall -O3
+CFLAGS = -c -mcpu=arm7tdmi -Winline -O3
 
 THUMB = -mthumb-interwork
 
