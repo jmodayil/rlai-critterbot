@@ -10,6 +10,8 @@
 #include <stdarg.h>
 #include "./armio.h"
 
+static char *read_loc;
+
 main(int argc, char *argv[]) {
 	
 	char *msg="This is the end, beautiful friend";
@@ -33,6 +35,111 @@ main(int argc, char *argv[]) {
 	return 0;
 }
 
+int armsscanf(char *source, char *format, ...) {
+
+  va_list ap;
+  int pnum, ret;
+  char *sval;
+  int *ival;
+  unsigned int *uival;
+  
+  pnum = 0;
+  va_start(ap, format);
+  while(*format != '\0') {
+    while(*source == ' ' || *source == '\t' || *source == '\n')
+      source++;
+    if(*source == '\0')
+      return pnum;
+    if(*format == ' ' || *format == '\t' || *format == '\n') {
+      format++;
+      continue;
+    }
+    if(*format != '%') {
+      if(*format != *source)
+        return pnum;
+      continue;
+    }
+    switch(*++format) {
+      case 'd':
+        ival = va_arg(ap,int *); 
+        if( ret = atoi(source, ival) )
+          pnum++;
+        else
+          return pnum;
+        source += ret;
+        break;
+      case 'u':
+        uival = va_arg(ap,unsigned int *);
+        if( ret = atoi(source, (int*)uival) )
+          pnum++;
+        else
+          return pnum;
+        source += ret;
+      case 'c':
+        sval = va_arg(ap,char *);
+        *sval = *source++;
+        break;
+      case 's':
+        while(*source != ' ' && *source != '\n' && *source !='\t' && *source !='\0')
+          source++;
+        break;
+      case '\0':
+        return pnum;
+      default:
+        if(*format != *source)
+          return pnum;
+        break;
+    }
+    format++;
+  }  
+}
+
+int atoi(char str[], int *val) {
+  
+  int base, ival, digit, sign, i;
+  
+  i = 0;
+  sign = (str[i] == '-') ? -1 : 1;
+  if(str[i] == '+' || str[i] == '-')
+    str++;
+  while(str[i] == '0')
+    i++;
+  switch(str[i]) {
+    case 'x':
+    case 'X':
+      base = 16;
+      i++;
+      break;
+    case 'o':
+      base = 8;
+      i++;
+      break;
+    case 'b':
+      base = 2;
+      i++;
+      break;
+    default:
+      base = 10;
+      break;
+  }
+  ival = 0;
+  while((digit = getvalue(str[i])) != -1) {
+    ival = base * ival + digit;
+    i++; 
+  }
+  *val = sign * ival;
+  return i;
+}
+
+__inline int getvalue(char digit) {
+
+  if(digit >= '0' && digit <= '9')
+    return digit - '0';
+  if(digit >= 'A' && digit <= 'F')
+    return digit - 'A' + 10;
+  return -1;
+}
+
 void armprintf(char *format, ...) {
 	
 	va_list ap;
@@ -44,7 +151,7 @@ void armprintf(char *format, ...) {
 	va_start(ap, format);
 	for(p = format; *p; p++) {
 		if(*p != '%') {
-			putchar(*p);
+			armputchar(*p);
 			continue;
 		}
 		switch(*++p) {
@@ -52,13 +159,13 @@ void armprintf(char *format, ...) {
 				uival = va_arg(ap, unsigned int);
 				itoa(uival, buf, 10, UNSIGNED);
 				for(sval = buf; *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
 			case 'd':
 				ival = va_arg(ap, int);
 				itoa(ival, buf, 10, SIGNED);
 				for(sval = buf; *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
 			case 'p':
 			case 'x':
@@ -66,31 +173,33 @@ void armprintf(char *format, ...) {
 				uival = va_arg(ap, unsigned int);
 				itoa(uival, buf, 16, UNSIGNED);
 				for(sval = buf; *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
 			case 'o':
 				uival = va_arg(ap, unsigned int);
 				itoa(uival, buf, 8, UNSIGNED);
 				for(sval = buf; *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
 			case 'b':
 			case 'B':
 				uival = va_arg(ap, unsigned int);
 				itoa(uival, buf, 2, UNSIGNED);
 				for(sval = buf; *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
 			case 'c':
 				*sval = (char)va_arg(ap, int);
-				putchar(*sval);
+				armputchar(*sval);
 				break;
 			case 's':
 				for(sval = va_arg(ap, char *); *sval; sval++)
-					putchar(*sval);
+					armputchar(*sval);
 				break;
+      case '\0':
+        return;
 			default:
-				putchar(*p);
+				armputchar(*p);
 				break;
 		}
 	}
@@ -135,4 +244,93 @@ void strrev(char *str) {
 		*str++ = tmp;
 	}
 	
+}
+
+void armputchar(char val) {
+  
+  if(ser_tx_head == ser_tx_buf + SER_TX_BUF_SIZE) 
+    return;
+  *ser_tx_head++ = val;
+  AT91C_BASE_US0->US_TCR++;
+}
+
+int armgetchar(void) {
+  
+  char gotchar;
+  
+  if((unsigned int)ser_rx_head == AT91C_BASE_US0->US_RPR)
+    return EOF;
+  if(read_loc == ser_rx_head)
+    read_loc++;
+  gotchar = *ser_rx_head++;
+  return gotchar;
+}
+
+int armreadline(char *read_to, int max_size) {
+  
+  int size;
+  char *buf_end, *cur_ptr;
+
+  if(read_to == NULL || max_size == 0)
+    return EOF;
+  
+  buf_end = ser_rx_buf + SER_RX_BUF_SIZE;
+  cur_ptr = (char*)AT91C_BASE_US0->US_RPR;
+  
+  while(*read_loc != '\n') {
+    if(read_loc == cur_ptr)
+      return EOF;
+    if(++read_loc == buf_end)
+      read_loc = ser_rx_buf;
+  }
+  
+  for(size = 0; ser_rx_head != read_loc; size++) {
+    if(size == max_size)
+      return EOF;
+    *read_to++ = *ser_rx_head++;
+    if(ser_rx_head == buf_end)
+      ser_rx_head = ser_rx_buf;
+  }
+  *read_to = '\0';
+  if(++read_loc == buf_end)
+    read_loc = ser_rx_buf;
+  return size;
+}
+
+ARM_CODE RAM_FUNCTION void ser_isr(void) {
+
+  unsigned int status = AT91C_BASE_US0->US_CSR;
+
+  if(status & AT91C_US_ENDRX) {
+    AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
+    AT91C_BASE_US0->US_RNPR = (unsigned int)ser_rx_buf;
+  }
+  if(status & AT91C_US_TXBUFE) 
+    AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
+}
+
+void init_serial_port_stdio(void) {
+  
+  AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US0);
+  AT91F_PIO_CfgPeriph(AT91C_BASE_PIOA, SERIAL_A_PINS, SERIAL_B_PINS);
+  AT91C_BASE_US0->US_MR = (AT91C_US_CHRL_8_BITS | AT91C_US_PAR_NONE);
+  AT91C_BASE_US0->US_BRGR = SER_BRGR;
+  AT91C_BASE_US0->US_CR = (AT91C_US_RXRDY | AT91C_US_TXRDY | AT91C_US_RSTSTA );
+  AT91F_AIC_ConfigureIt(AT91C_BASE_AIC,
+                        AT91C_ID_US0,
+                        AT91C_AIC_PRIOR_LOWEST,
+                        AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
+                        ser_isr );
+  AT91C_BASE_US0->US_IER = AT91C_US_ENDRX | AT91C_US_TXBUFE;
+  AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
+
+  AT91C_BASE_US0->US_RPR = (unsigned int)(read_loc = ser_rx_head = ser_rx_buf);
+  AT91C_BASE_US0->US_RCR = SER_RX_BUF_SIZE;
+  AT91C_BASE_US0->US_RNPR = (unsigned int)ser_rx_buf;
+  AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
+
+  AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
+  AT91C_BASE_US0->US_TNPR = (unsigned int)ser_tx_buf;
+  
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN;
 }
