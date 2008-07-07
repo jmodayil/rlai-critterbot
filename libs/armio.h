@@ -8,12 +8,17 @@
 #ifndef ARMIO_H
 #define ARMIO_H
 
+#include "compiler.h"
+#include <string.h>
+#include <stdarg.h>
 #include "AT91SAM7S256.h"
 #include "lib_AT91SAM7S256.h"
 
 #define MAX_INT_PRINT_SIZE 32
 #define SIGNED 1
 #define UNSIGNED 0
+#define EOF -1
+#define MCK 47923200
 #define SER_BRGR (MCK / 16 / SER_BAUD_RATE)
 
 #define SERIAL_A_PINS (AT91C_PA5_RXD0 | AT91C_PA6_TXD0)
@@ -27,7 +32,7 @@ char ser_tx_buf[SER_TX_BUF_SIZE];
 char ser_rx_buf[SER_RX_BUF_SIZE];
 char *ser_rx_head, *ser_rx_tail;
 char *ser_tx_head, *ser_tx_tail;
-
+char *read_loc;
 /*
  * outputs a character to the serial port
  */ 
@@ -74,8 +79,8 @@ void armprintf(char*, ...);
  */
 int armsscanf(char*, char*, ...);
 
-void itoa(int, char*, int, int );
-int atoi(char*, int*);
+void armitoa(int, char*, int, int );
+int armatoi(char*, int*);
 void strrev(char*);
 __inline int getvalue(char);
 
@@ -83,7 +88,7 @@ __inline int getvalue(char);
  * Interrupt routine for serial port.
  * Must be run in RAM.
  */ 
-ARM_CODE RAM_FUNCTION void ser_isr(void);
+RAMFUNC void ser_isr(void);
 
 /*
  * Initialize the serail port for character stream input/output

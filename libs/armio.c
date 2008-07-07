@@ -5,35 +5,7 @@
  *
  */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdarg.h>
 #include "./armio.h"
-
-static char *read_loc;
-
-main(int argc, char *argv[]) {
-	
-	char *msg="This is the end, beautiful friend";
-	char character = 'n';
-	int temp;
-	unsigned int temp2;
-	
-	if (argc != 3)
-		return 1;
-	
-	sscanf(argv[1], "%d", &temp);
-	sscanf(argv[2], "%u", &temp2);
-	printf("second arg: %u\n", temp2);
-	
-	armprintf("Signed:   %d\n", temp);
-	armprintf("Unsigned: %u\n", temp);
-	armprintf("Hex:      %x\n", temp);
-	armprintf("Signed:   %d\n", temp2);
-	armprintf("Unsigned: %u\n", temp2);
-	armprintf("Hex:      %x\n", temp2);
-	return 0;
-}
 
 int armsscanf(char *source, char *format, ...) {
 
@@ -43,8 +15,8 @@ int armsscanf(char *source, char *format, ...) {
   int *ival;
   unsigned int *uival;
   
-  pnum = 0;
   va_start(ap, format);
+  pnum = 0;
   while(*format != '\0') {
     while(*source == ' ' || *source == '\t' || *source == '\n')
       source++;
@@ -57,12 +29,14 @@ int armsscanf(char *source, char *format, ...) {
     if(*format != '%') {
       if(*format != *source)
         return pnum;
+      format++;
+      source++;
       continue;
     }
     switch(*++format) {
       case 'd':
         ival = va_arg(ap,int *); 
-        if( ret = atoi(source, ival) )
+        if(ret = armatoi(source, ival))
           pnum++;
         else
           return pnum;
@@ -70,18 +44,23 @@ int armsscanf(char *source, char *format, ...) {
         break;
       case 'u':
         uival = va_arg(ap,unsigned int *);
-        if( ret = atoi(source, (int*)uival) )
+        if(ret = armatoi(source, (int*)uival))
           pnum++;
         else
           return pnum;
         source += ret;
+        break;
       case 'c':
         sval = va_arg(ap,char *);
         *sval = *source++;
+        pnum++;
         break;
       case 's':
+        sval = va_arg(ap,char *);
         while(*source != ' ' && *source != '\n' && *source !='\t' && *source !='\0')
-          source++;
+          *sval++ = *source++;
+        *sval = '\0';
+        pnum++;
         break;
       case '\0':
         return pnum;
@@ -92,16 +71,18 @@ int armsscanf(char *source, char *format, ...) {
     }
     format++;
   }  
+  return pnum;
 }
 
-int atoi(char str[], int *val) {
+int armatoi(char str[], int *val) {
   
   int base, ival, digit, sign, i;
   
   i = 0;
   sign = (str[i] == '-') ? -1 : 1;
-  if(str[i] == '+' || str[i] == '-')
+  if(str[i] == '+' || str[i] == '-') {
     str++;
+  }
   while(str[i] == '0')
     i++;
   switch(str[i]) {
@@ -128,7 +109,7 @@ int atoi(char str[], int *val) {
     i++; 
   }
   *val = sign * ival;
-  return i;
+  return sign == 1 ? i : i + 1;
 }
 
 __inline int getvalue(char digit) {
@@ -157,13 +138,13 @@ void armprintf(char *format, ...) {
 		switch(*++p) {
 			case 'u':
 				uival = va_arg(ap, unsigned int);
-				itoa(uival, buf, 10, UNSIGNED);
+				armitoa(uival, buf, 10, UNSIGNED);
 				for(sval = buf; *sval; sval++)
 					armputchar(*sval);
 				break;
 			case 'd':
 				ival = va_arg(ap, int);
-				itoa(ival, buf, 10, SIGNED);
+				armitoa(ival, buf, 10, SIGNED);
 				for(sval = buf; *sval; sval++)
 					armputchar(*sval);
 				break;
@@ -171,20 +152,20 @@ void armprintf(char *format, ...) {
 			case 'x':
 			case 'X':
 				uival = va_arg(ap, unsigned int);
-				itoa(uival, buf, 16, UNSIGNED);
+				armitoa(uival, buf, 16, UNSIGNED);
 				for(sval = buf; *sval; sval++)
 					armputchar(*sval);
 				break;
 			case 'o':
 				uival = va_arg(ap, unsigned int);
-				itoa(uival, buf, 8, UNSIGNED);
+				armitoa(uival, buf, 8, UNSIGNED);
 				for(sval = buf; *sval; sval++)
 					armputchar(*sval);
 				break;
 			case 'b':
 			case 'B':
 				uival = va_arg(ap, unsigned int);
-				itoa(uival, buf, 2, UNSIGNED);
+				armitoa(uival, buf, 2, UNSIGNED);
 				for(sval = buf; *sval; sval++)
 					armputchar(*sval);
 				break;
@@ -206,7 +187,7 @@ void armprintf(char *format, ...) {
 	
 }
 
-void itoa(int val, char str[], int base, int valsigned) {
+void armitoa(int val, char str[], int base, int valsigned) {
 	
 	int i, sign;
 	unsigned int tmp, uval;
@@ -297,7 +278,7 @@ int armreadline(char *read_to, int max_size) {
   return size;
 }
 
-ARM_CODE RAM_FUNCTION void ser_isr(void) {
+RAMFUNC void ser_isr(void) {
 
   unsigned int status = AT91C_BASE_US0->US_CSR;
 
