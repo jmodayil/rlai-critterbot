@@ -148,13 +148,16 @@ void ui_statled(char * cmdstr)
 
 
 
-static fortune_idx = 0;
+static int fortune_idx = 0;
 
 char * fortunes[] = {
   "It usually takes more than three weeks to prepare a good impromptu speech. (Mark Twain)",
   "Qui vole un oeuf vole un boeuf",
   "Father, I want to kill you. Mother, I want to oooo-doo-dii",
-  "You should be working"
+  "You should be working",
+
+  // Keep this 0 here!
+  0
   };
 
 /** Unecessary waste of work time */
@@ -162,5 +165,7 @@ void ui_fortune(char * cmdstr)
 {
   armprintf (fortunes[fortune_idx]);
   fortune_idx++;
+  if (fortunes[fortune_idx] == 0)
+    fortune_idx = 0;
 }
 
