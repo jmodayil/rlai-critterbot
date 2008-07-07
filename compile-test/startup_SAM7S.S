@@ -165,7 +165,8 @@
 */
         .equ    PMC_SETUP,      1
         .equ    PMC_MOR_Val,    0x00000601
-        .equ    PMC_PLLR_Val,   0x00191C05
+// mgb       .equ    PMC_PLLR_Val,   0x00191C05
+        .equ    PMC_PLLR_Val, 0x00481C0E
         .equ    PMC_MCKR_Val,   0x00000007
 
 
@@ -313,6 +314,8 @@ PLL_Loop:       LDR     R2, [R0, #PMC_SR]
 .endif
 
 //  Select Clock
+// mgb: differs from Atmel startup - sets both CSS_PLL_CLK and PRE
+//  at the same time
                 LDR     R1, =PMC_MCKR_Val
                 STR     R1, [R0, #PMC_MCKR]
 .endif
