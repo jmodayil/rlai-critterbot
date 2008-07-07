@@ -8,17 +8,21 @@ BINDIR=bin
 GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
 STDC_LIB_DIR=/opt/local/arm-elf/lib/
 
+LIBS=$(GCC_LIB_DIR)/libgcc.a $(STDC_LIB_DIR)/libc.a
+
+# Uncomment to produce a memory map
+# PRODUCE_MEMORY_MAP=-Wl,-M
+PRODUCE_MEMORY_MAP=
+#PRODUCE_MEMORY_MAP_LD=-M
+PRODUCE_MEMORY_MAP_LD=
+
 # Compiler flags
 COMMONFLAGS = -c -mcpu=arm7tdmi
 AFLAGS = -x assembler-with-cpp
 CFLAGS = -Winline -O3 -ffunction-sections -fdata-sections
-LDFLAGS = --gc-sections
-LIBS=$(GCC_LIB_DIR)/libgcc.a $(STDC_LIB_DIR)/libc.a
-# Uncomment to produce a memory map
-# PRODUCE_MEMORY_MAP=-Wl,-M
-PRODUCE_MEMORY_MAP=
-PRODUCE_MEMORY_MAP_LD=-M
-#PRODUCE_MEMORY_MAP_LD=
+
+# Linker flags
+LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
 
 THUMB = -marm
 
@@ -28,11 +32,14 @@ COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.s
 AOBJ = $(ASRC:.s=.o)
 
+# Test targets
+TESTBINS = $(BINDIR)/lib_ui_test.bin
+
 # Builds libraries (but nothing else)
 all: all_libs
 
 # Builds all tests
-tests: lib_ui_test
+tests: $(TESTBINS)
 
 clean:
 	rm -f *.o
@@ -43,13 +50,14 @@ all_libs: $(AOBJ) $(COBJ)
 #	$(CC) $(CFLAGS) $(THUMB) $(CSRC)
 
 # Test binaries
-lib_ui_test: all_libs
+$(TESTBINS): all_libs
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) lib_ui_test.c
-	$(LD) -T$(LDDIR)/lib_ui_test.ld --oformat elf32-littlearm $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf $(PRODUCE_MEMORY_MAP_LD)
+	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
+	@echo $@ $(basename $@)
 #	$(CC) -Wl,-T$(LDDIR)/lib_ui_test.ld -mcpu=arm7tdmi $(THUMB) $(COBJ) lib_ui_test.o -o $(BINDIR)/lib_ui_test.elf $(PRODUCE_MEMORY_MAP) -Wl,--verbose
-	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
+	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
 	@echo
-	@echo Binary size: `ls -l $(BINDIR)/lib_ui_test.bin | awk '{print $$5}'` bytes
+	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
 
 $(COBJ): %.o : %.c
 	@echo $<
