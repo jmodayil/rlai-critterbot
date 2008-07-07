@@ -16,10 +16,9 @@
 
 /** PIN definitions */
 // I/O lines connected to the BLANK/XLAT inputs of the LED controllers
-#define LEDCTL_PIN_BLANK 4
-#define LEDCTL_PIN_XLAT 5
-// @@@ This pin needs to be defined
-#define LEDCTL_PIN_XERR -1
+#define LEDCTL_PIN_BLANK 9
+#define LEDCTL_PIN_XLAT 26
+#define LEDCTL_PIN_XERR 25
 
 
 #endif /* ARM_CONFIG_H */

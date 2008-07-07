@@ -58,7 +58,7 @@ ui_cmd_item * ui_parse_command(char * cmdstr)
 void ui_event()
 {
   // Check wthether we have new data
-  if (armgetline(ui_command_string, sizeof(ui_command_string)) == EOF)
+  if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return;
 
   // Parse command, return false if not found
