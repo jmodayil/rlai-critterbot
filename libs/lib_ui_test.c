@@ -18,12 +18,6 @@
 #include "lib_ledctl.h"
 #include "lib_ui.h"
 
-// This function is here until Mike implements armgetline
-int armgetline(char * str, int bufferSize)
-{
-  return EOF;
-}
-
 int main()
 {
   // Initialize the serial port and the LED controller
