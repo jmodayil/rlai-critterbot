@@ -22,11 +22,13 @@ int main()
 {
   // Initialize the serial port and the LED controller
   init_serial_port_stdio();
+  armprintf("Hello World\n");
   ledctl_init();
+  armprintf("Initialized ledctl.\n");
   // @@@ This function will have to be replaced when we get a proper 100Hz
   //  event clock
   ledctl_inittimer();
-  
+  armprintf("Initialized timer.\n");
   // Repeatedly loop for events
   while (1)
   {
