@@ -45,13 +45,10 @@ char ui_cmdname[64];
 ui_cmd_item * ui_parse_command(char * cmdstr)
 {
   int idx;
-
-  armsscanf(cmdstr, "%s", ui_cmdname);
-
+  if(armsscanf(cmdstr, "%s", ui_cmdname) < 1) return NULL;
   for (idx = 0; idx < ui_ncommands; idx++)
     if (strncmp(ui_commands[idx].name, ui_cmdname, sizeof(ui_cmdname)) == 0)
       return &ui_commands[idx];
-
   return NULL;
 }
 
@@ -60,7 +57,6 @@ void ui_event()
   // Check wthether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return;
-
   // Parse command, return false if not found
   ui_cmd_item * cmd = ui_parse_command(ui_command_string);
   // Not found, write error message

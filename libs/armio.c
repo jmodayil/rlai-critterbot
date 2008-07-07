@@ -128,7 +128,7 @@ void armprintf(char *format, ...) {
 	char *p, *sval;
 	int ival;
 	unsigned int uival;
-	
+
 	va_start(ap, format);
 	for(p = format; *p; p++) {
 		if(*p != '%') {
@@ -233,6 +233,8 @@ void armputchar(char val) {
     return;
   *ser_tx_head++ = val;
   AT91C_BASE_US0->US_TCR++;
+
+  
 }
 
 int armgetchar(void) {
@@ -258,13 +260,15 @@ int armreadline(char *read_to, int max_size) {
   buf_end = ser_rx_buf + SER_RX_BUF_SIZE;
   cur_ptr = (char*)AT91C_BASE_US0->US_RPR;
   
+  if(cur_ptr == ser_rx_head)
+    return EOF;
   while(*read_loc != '\n') {
     if(read_loc == cur_ptr)
       return EOF;
     if(++read_loc == buf_end)
       read_loc = ser_rx_buf;
   }
-  
+  armputchar('^'); 
   for(size = 0; ser_rx_head != read_loc; size++) {
     if(size == max_size)
       return EOF;
@@ -275,6 +279,7 @@ int armreadline(char *read_to, int max_size) {
   *read_to = '\0';
   if(++read_loc == buf_end)
     read_loc = ser_rx_buf;
+  armputchar('*');
   return size;
 }
 
@@ -288,6 +293,7 @@ RAMFUNC void ser_isr(void) {
   }
   if(status & AT91C_US_TXBUFE) 
     AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
+  return;
 }
 
 void init_serial_port_stdio(void) {
@@ -295,17 +301,19 @@ void init_serial_port_stdio(void) {
   AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US0);
   AT91F_PIO_CfgPeriph(AT91C_BASE_PIOA, SERIAL_A_PINS, SERIAL_B_PINS);
   AT91C_BASE_US0->US_MR = (AT91C_US_CHRL_8_BITS | AT91C_US_PAR_NONE);
-  AT91C_BASE_US0->US_BRGR = SER_BRGR;
-  AT91C_BASE_US0->US_CR = (AT91C_US_RXRDY | AT91C_US_TXRDY | AT91C_US_RSTSTA );
+  AT91C_BASE_US0->US_BRGR = 13; //SER_BRGR;
+  AT91C_BASE_US0->US_CR = (AT91C_US_RXEN | AT91C_US_TXEN | AT91C_US_RSTSTA );
   AT91F_AIC_ConfigureIt(AT91C_BASE_AIC,
                         AT91C_ID_US0,
                         AT91C_AIC_PRIOR_LOWEST,
                         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
                         ser_isr );
   AT91C_BASE_US0->US_IER = AT91C_US_ENDRX | AT91C_US_TXBUFE;
+  
   AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
 
-  AT91C_BASE_US0->US_RPR = (unsigned int)(read_loc = ser_rx_head = ser_rx_buf);
+  AT91C_BASE_US0->US_RPR = (unsigned int)ser_rx_buf;
+  read_loc = ser_rx_head = ser_rx_buf;
   AT91C_BASE_US0->US_RCR = SER_RX_BUF_SIZE;
   AT91C_BASE_US0->US_RNPR = (unsigned int)ser_rx_buf;
   AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
@@ -313,5 +321,12 @@ void init_serial_port_stdio(void) {
   AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
   AT91C_BASE_US0->US_TNPR = (unsigned int)ser_tx_buf;
   
-  AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN;
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
+  
+  armprintf("rpr: %p\n", AT91C_BASE_US0->US_RPR);
+  
+  // Disable Amplifier
+  AT91C_BASE_PIOA->PIO_PER = 1 << 8;
+  AT91C_BASE_PIOA->PIO_OER = 1 << 8;
+  AT91C_BASE_PIOA->PIO_SODR = 1 << 8;
 }
