@@ -4,25 +4,33 @@
 #  You can get object files by compiling the ../libs directory
 # It will also compile the startup assembly file for you.
 
-THUMB=
+THUMB=-marm
+
+# Directories
 GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
-GCC_LIBS=$(GCC_LIB_DIR)/thumb/libgcc.a
+
+GCC_LIBS=$(GCC_LIB_DIR)/libgcc.a
 INCLUDES=-Iinclude -I.
 
-all: armcode.hex
+# Flags
+# Uncomment to generate memory map
+# Rename to -Wl,-M if arm-elf-gcc is used to link
+PRODUCE_MEMORY_MAP=-M
+# PRODUCE_MEMORY_MAP=
+
+all: armcode.bin
 clean:
 	rm *.o
 	rm -f armcode.elf armcode.hex armcode.bin
 	
 # Object translation
-armcode.hex: armcode.elf
+armcode.bin: armcode.elf
 	arm-elf-objcopy -O binary armcode.elf armcode.bin
 
 # Object linking
 # Can alternatively be done using arm-elf-gcc, which provides crt0 and such
 armcode.elf: startup_SAM7S.o serialecho.o
-# Currently being compiled with arm-elf-gcc because of missing libgcc
-	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o $(GCC_LIBS) --output armcode.elf
+	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o $(GCC_LIBS) --output armcode.elf $(PRODUCE_MEMORY_MAP)
 
 # Startup code
 startup_SAM7S.o: startup_SAM7S.S

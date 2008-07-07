@@ -12,8 +12,8 @@
 #ifdef __GNUC__
 // Necessary to avoid duplicate definitions, behavior unknown
 #define __inline static inline
-#define FL_RAMFUNC
-#define FL_ARM
+#define RAMFUNC
+#define ARM_CODE
 #else
 #error Unsupported compiler! Contact the authors.
 #endif

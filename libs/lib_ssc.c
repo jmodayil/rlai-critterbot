@@ -138,7 +138,7 @@ void ssc_send_packet( struct spi_packet *packet ) {
  *
  * Copied from spi_isr
  */
-FL_RAMFUNC FL_ARM void ssc_isr() {
+ARM_CODE RAMFUNC void ssc_isr() {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
   

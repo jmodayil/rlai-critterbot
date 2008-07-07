@@ -26,4 +26,11 @@ void ui_getled (char * cmdstr);
 void ui_statled (char * cmdstr);
 void ui_help (char * cmdstr);
 
+/** Main User Interface function.
+  * Should be called at regular intervals.
+  *
+  * Does a non-blocking check for input, which it immediately processes.
+  */
+void ui_event();
+
 #endif /* LIB_UI_H */
