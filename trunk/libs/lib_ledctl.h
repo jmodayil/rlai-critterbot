@@ -15,6 +15,15 @@
 #define GREEN_CONTROLLER 1
 #define RED_CONTROLLER   2
 
+// Number of LEDs per controller
+#define LEDCTL_NUM_LEDS 16
+
+// Number of controllers
+#define LEDCTL_NUM_CONTROLLERS 3
+
+// Maximum LED values - arbitrarily set at 1024 for now
+#define LEDCTL_MAX_VALUE 1024
+
 // Send one of the controllers' data to the controller via the SPI
 void ledctl_senddata(int device); 
 // Send all data
@@ -34,7 +43,7 @@ void ledctl_inittimer ();
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
-inline void ledctl_setvalue(int device, int led, int value);
+void ledctl_setvalue(int device, int led, int value);
 
 /** Interface to the LED controller driver
   *  Retrieve a LED value from the driver arrays 
@@ -43,7 +52,7 @@ inline void ledctl_setvalue(int device, int led, int value);
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
-inline int ledctl_getvalue(int device, int led);
+int ledctl_getvalue(int device, int led);
 
 /** Interface to the LED controller driver
   *  Returns the status of a LED, as per the LED controller
@@ -52,7 +61,7 @@ inline int ledctl_getvalue(int device, int led);
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
-inline int ledctl_getstatus(int device, int led);
+int ledctl_getstatus(int device, int led);
 
 /** Interface to the LED controller driver
   *  Sets the color of a LED
@@ -60,7 +69,7 @@ inline int ledctl_getstatus(int device, int led);
   *  led must be in range 0-15
   *  red, green, blue must be in the range 0-4095
   */
-inline void ledctl_setcolor(int led, int red, int green, int blue);
+void ledctl_setcolor(int led, int red, int green, int blue);
 
 /** Interface to the LED controller driver
   *  Returns one of the three color values of a LED
@@ -68,6 +77,6 @@ inline void ledctl_setcolor(int led, int red, int green, int blue);
   *  led must be in range 0-15
   *  color must be in range 0-2
   */
-inline int ledctl_getcolor(int led, int color);
+int ledctl_getcolor(int led, int color);
 
 #endif /* LIB_LEDCTL_H */

@@ -114,7 +114,7 @@ void spi_send_packet( struct spi_packet *packet ) {
  *  GCC will likely require different handling than IAR
  *  to accomplish this.
  */
-FL_RAMFUNC void spi_isr() {
+ARM_CODE RAMFUNC void spi_isr() {
   
   AT91PS_SPI spi = AT91C_BASE_SPI;
   

@@ -10,9 +10,9 @@
 
 #ifndef LIB_SSC_H
 #define LIB_SSC_H
+#include "compiler.h"
 #include "AT91SAM7S256.h"
 #include "lib_spi.h"
-#include "compiler.h"
 
 #define SSC_INTERRUPT_PRIORITY 1
 
@@ -69,6 +69,6 @@ void ssc_send_packet( struct spi_packet *packet );
  *  GCC will likely require different handling than IAR
  *  to accomplish this.
  */
-FL_RAMFUNC FL_ARM void ssc_isr();
+ARM_CODE RAMFUNC void ssc_isr();
 
 #endif /* LIB_SSC_H */

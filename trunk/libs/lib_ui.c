@@ -21,13 +21,16 @@ typedef struct {
   char * description;
 } ui_cmd_item;
 
+void ui_fortune(char * cmdstr);
+
 ui_cmd_item ui_commands[] = {
   { "help", ui_help, "Do you need help?"}, // help
   { "set_led", ui_setled, "set_led <led #> <red> <green> <blue>"}, 
     // set_led <led num, 0-15> <red> <green> <blue>
   { "get_led", ui_getled, "get_led <led #>"},
     // get_led <led_num, 0-15>
-  {"stat_led", ui_statled, "stat_led"}
+  {"stat_led", ui_statled, "stat_led"},
+  {"fortune", ui_fortune, "fortune"}
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -43,10 +46,10 @@ ui_cmd_item * ui_parse_command(char * cmdstr)
 {
   int idx;
 
-  armscanf(cmdstr, "%s", ui_cmdname);
+  armsscanf(cmdstr, "%s", ui_cmdname);
 
   for (idx = 0; idx < ui_ncommands; idx++)
-    if (strncmp(ui_commands[idx], ui_cmdname, sizeof(ui_cmdname)) == 0)
+    if (strncmp(ui_commands[idx].name, ui_cmdname, sizeof(ui_cmdname)) == 0)
       return &ui_commands[idx];
 
   return NULL;
@@ -90,10 +93,23 @@ void ui_setled(char * cmdstr)
   int ledColors[3];
 
   // parse in num, color
-  armscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
-    &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]);
+  if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
+    &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
+  {
+    armprintf ("Invalid number of arguments to set_led.\n");
+    return;
+  }
 
-  // @@@ ensure: num E [0,15], colors E ?
+  if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS ||
+      ledColors[0] < 0 || ledColors[1] < 0 || ledColors[2] < 0 ||
+      ledColors[0] >= LEDCTL_MAX_VALUE || 
+      ledColors[1] >= LEDCTL_MAX_VALUE ||
+      ledColors[2] >= LEDCTL_MAX_VALUE)
+  {
+    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    armprintf ("Colors must be in range 0..%d\n", LEDCTL_MAX_VALUE);
+    return;
+  }
 
   // Set the LED's three colors
   ledctl_setcolor(ledNum, ledColors[0], ledColors[1], ledColors[2]);
@@ -106,9 +122,18 @@ void ui_getled (char * cmdstr)
   int ledColors[3]; 
   int color;
 
-  armscanf (cmdstr, "%s %d", ui_cmdname, &ledNum);
+  if (armsscanf (cmdstr, "%s %d", ui_cmdname, &ledNum) < 2)
+  {
+    armprintf ("Invalid number of arguments to get_led.\n");
+    return;
+  }
 
-  // @@@ ensure: num E [0,15], colors E ?
+  if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
+  {
+    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    return;
+  }
+  
   for (color = 0; color < 3; color++)
     ledColors[color] = ledctl_getcolor(ledNum, color);
 
@@ -120,3 +145,22 @@ void ui_statled(char * cmdstr)
 {
   armprintf ("Aha! LED status not implemented!\n");
 }
+
+
+
+static fortune_idx = 0;
+
+char * fortunes[] = {
+  "It usually takes more than three weeks to prepare a good impromptu speech. (Mark Twain)",
+  "Qui vole un oeuf vole un boeuf",
+  "Father, I want to kill you. Mother, I want to oooo-doo-dii",
+  "You should be working"
+  };
+
+/** Unecessary waste of work time */
+void ui_fortune(char * cmdstr)
+{
+  armprintf (fortunes[fortune_idx]);
+  fortune_idx++;
+}
+

@@ -21,6 +21,7 @@
 #include <string.h>
 
 #include "compiler.h"
+#include "armconfig.h"
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
 #include "lib_AT91SAM7S256.h"
@@ -28,20 +29,8 @@
 
 // SPI polarity is 0 (from the diagram of the SCLK in led datasheet)
 // The LED controller shifts on the rising edge, so SPI uses phase 1
-// For now, we are using slave 0 in the SPI
 
-// Number of LEDs per controller
-#define LEDCTL_NUM_LEDS 16
-
-// Number of controllers
-#define LEDCTL_NUM_CONTROLLERS 3
-
-// I/O lines connected to the BLANK/XLAT inputs of the LED controllers
-#define LEDCTL_PIN_BLANK 4
-#define LEDCTL_PIN_XLAT 5
-// @@@ This pin needs to be defined
-#define LEDCTL_PIN_XERR -1
-
+// Rename!
 #define TC_INTERRUPT_LEVEL 6
 // Number of clock cycles in 1/100th of a second when using a T/C with
 //  clock MCK/1024
@@ -183,9 +172,9 @@ void ledctl_init( void )
   AT91F_PIO_CfgInput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
 }
 
+/*
 int main()
 {
-  /** @@@ This function is obsolete and should be removed! */
   char statusString[256];
   char commandString[256];
 
@@ -251,3 +240,4 @@ int main()
     }
   }
 }
+*/
