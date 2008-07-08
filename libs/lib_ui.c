@@ -11,6 +11,7 @@
 #include "compiler.h"
 #include "lib_ui.h"
 #include "lib_ledctl.h"
+#include "lib_ssc.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -23,6 +24,8 @@ typedef struct {
 } ui_cmd_item;
 
 void ui_fortune(char * cmdstr);
+
+extern struct ssc_packet ledctl_ssc_packet[];
 
 ui_cmd_item ui_commands[] = {
   { "help", ui_help, "Do you need help?"}, // help
@@ -111,6 +114,7 @@ void ui_setled(char * cmdstr)
   // Set the LED's three colors
   ledctl_setcolor(ledNum, ledColors[0], ledColors[1], ledColors[2]);
   armprintf("_________DEBUG__________\n");
+  armprintf("ssc_packet.numwords = %d\n", ledctl_ssc_packet[0].num_words);
   armprintf("SSC Status:\nSSC_CR: %b\nSSC_CMR: %b\nSSC_RCMR: %b\n", AT91C_BASE_SSC->SSC_CR,
       AT91C_BASE_SSC->SSC_CMR, AT91C_BASE_SSC->SSC_RCMR);
   armprintf("SSC_RFMR: %b\nSSC_TCMR: %b\nSSC_TFMR: %b\n",AT91C_BASE_SSC->SSC_RFMR, 
