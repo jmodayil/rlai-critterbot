@@ -52,10 +52,12 @@ all_libs: $(AOBJ) $(COBJ)
 # Test binaries
 $(TESTBINS): all_libs
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) lib_ui_test.c
-	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
-	@echo $@ $(basename $@)
+#	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
+#	@echo $@ $(basename $@)
 #	$(CC) -Wl,-T$(LDDIR)/lib_ui_test.ld -mcpu=arm7tdmi $(THUMB) $(COBJ) lib_ui_test.o -o $(BINDIR)/lib_ui_test.elf $(PRODUCE_MEMORY_MAP) -Wl,--verbose
-	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
+#	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
+	$(LD) -T$(LDDIR)/lib_ui_test.ld $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
+	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
 	@echo
 	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
 
