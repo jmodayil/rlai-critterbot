@@ -25,9 +25,9 @@
 #define SSC_DELAY_BEFORE_TRANSFER 0
 // rate = MCK / (value*2); min=1, max=4095 (so baud rates between MCK/2 &
 //  MCK/8190)
-#define SSC_BAUD_RATE 1
+#define SSC_BAUD_RATE 2
 // bits = value; min=2, max=31
-#define SSC_WORD_SIZE 0xC
+#define SSC_WORD_SIZE 12 
 // whether to operate in big-endian mode
 #define SSC_BIG_ENDIAN 0
 // Number of frames (a delay of DELAY_BEFORE_TRANSFER is inserted after
