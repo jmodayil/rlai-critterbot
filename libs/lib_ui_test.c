@@ -23,6 +23,7 @@ int main()
   // Initialize the serial port and the LED controller
   init_serial_port_stdio();
   armprintf("Hello, World.\n");
+  armprintf("sizeof(unsigned short) = %d.\n", sizeof(unsigned short));
   ssc_init();
   armprintf("Initialized ssc.\n"); 
   ledctl_init();

@@ -25,14 +25,14 @@
 #define SSC_DELAY_BEFORE_TRANSFER 0
 // rate = MCK / (value*2); min=1, max=4095 (so baud rates between MCK/2 &
 //  MCK/8190)
-#define SSC_BAUD_RATE 2
+#define SSC_BAUD_RATE 8
 // bits = value; min=2, max=31
 #define SSC_WORD_SIZE 12 
 // whether to operate in big-endian mode
-#define SSC_BIG_ENDIAN 0
+#define SSC_BIG_ENDIAN 1
 // Number of frames (a delay of DELAY_BEFORE_TRANSFER is inserted after
 //  each frame)
-#define SSC_FRAME_SIZE 0x1
+#define SSC_FRAME_SIZE 0
 
 /*
  * SSC settings
@@ -50,8 +50,16 @@
                     ((SSC_BIG_ENDIAN & 0x1) << 7) | \
                     ((SSC_FRAME_SIZE << 8) & AT91C_SSC_DATNB)
 
+typedef struct ssc_packet {
+  unsigned int num_words;
+  unsigned short *data_to_write;
+  unsigned short *read_data;
+  unsigned int finished;
+  struct ssc_packet *next_packet;
+} *ssc_packet_p;
+  
 // SSC list pointers
-struct spi_packet *ssc_data_head, *ssc_data_tail;
+struct ssc_packet *ssc_data_head, *ssc_data_tail;
 
 /*
  *  Initialize the SPI unit
@@ -61,7 +69,7 @@ void ssc_init();
 /*
  *  Add a new packet to the SPI queue
  */
-void ssc_send_packet( struct spi_packet *packet );
+void ssc_send_packet( struct ssc_packet *packet );
 
 /*
  *  SSC Interrupt routine

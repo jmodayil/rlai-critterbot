@@ -40,7 +40,7 @@
 unsigned short ledctl_txdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 // Array to receive the 16 status values from the LED controller
 unsigned short ledctl_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
-struct spi_packet ledctl_spi_packet[LEDCTL_NUM_CONTROLLERS];
+struct ssc_packet ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS];
 
 unsigned int ledctl_xerr;
 
@@ -64,15 +64,14 @@ void ledctl_newcycle ( void )
 
 void ledctl_senddata(int device)
 {
-  ssc_send_packet(&ledctl_spi_packet[device]);
+  ssc_send_packet(&ledctl_ssc_packet[device]);
 }
 
 void ledctl_senddata_all()
 {
-  // Chunk out the four SPI packets into the SPI driver
-  ssc_send_packet(&ledctl_spi_packet[0]);
-  ssc_send_packet(&ledctl_spi_packet[1]);
-  ssc_send_packet(&ledctl_spi_packet[2]);
+  int i;
+  for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+    ledctl_senddata(i);
 }
 
 inline void ledctl_setvalue(int device, int led, int value)
@@ -135,7 +134,7 @@ void ledctl_inittimer ( void )
 
   // Enable the TC0 interrupt to trigger on RC compare
   AT91F_AIC_ConfigureIt(pAic, AT91C_ID_TC0, TC_INTERRUPT_LEVEL,
-    AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE, tc0_irq_handler);
+  AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE, tc0_irq_handler);
   AT91F_TC_InterruptEnable(AT91C_BASE_TC0, AT91C_TC_CPCS);
   AT91F_AIC_EnableIt (pAic, AT91C_ID_TC0);
 
@@ -160,11 +159,9 @@ void ledctl_init( void )
   // Initalize the SPI packet
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
-    ledctl_spi_packet[i].num_words = LEDCTL_NUM_LEDS;
-    // There is no device_id for the SSC
-    ledctl_spi_packet[i].device_id = 0;
-    ledctl_spi_packet[i].data_to_write = ledctl_txdata[i];
-    ledctl_spi_packet[i].read_data = ledctl_rxdata[i];
+    ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS;
+    ledctl_ssc_packet[i].data_to_write = ledctl_txdata[i];
+    ledctl_ssc_packet[i].read_data = ledctl_rxdata[i];
   
     // Initialize LED values to 0
     for (l = 0; l < LEDCTL_NUM_LEDS; l++)

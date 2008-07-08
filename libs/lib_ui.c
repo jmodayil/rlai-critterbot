@@ -7,6 +7,7 @@
  *
  */
 
+#include "AT91SAM7S256.h"
 #include "compiler.h"
 #include "lib_ui.h"
 #include "lib_ledctl.h"
@@ -109,6 +110,14 @@ void ui_setled(char * cmdstr)
 
   // Set the LED's three colors
   ledctl_setcolor(ledNum, ledColors[0], ledColors[1], ledColors[2]);
+  armprintf("_________DEBUG__________\n");
+  armprintf("SSC Status:\nSSC_CR: %b\nSSC_CMR: %b\nSSC_RCMR: %b\n", AT91C_BASE_SSC->SSC_CR,
+      AT91C_BASE_SSC->SSC_CMR, AT91C_BASE_SSC->SSC_RCMR);
+  armprintf("SSC_RFMR: %b\nSSC_TCMR: %b\nSSC_TFMR: %b\n",AT91C_BASE_SSC->SSC_RFMR, 
+      AT91C_BASE_SSC->SSC_TCMR, AT91C_BASE_SSC->SSC_TFMR);
+  armprintf("SSC_SR: %b\nSSC_IMR: %b\n~~~~~~~~~~~~~~~~~~~~~!!\n", AT91C_BASE_SSC->SSC_SR,
+      AT91C_BASE_SSC->SSC_IMR);
+  armprintf("Done with DEBUG\n");
 }
 
 /** Returns the status of a given led (0-15) */
