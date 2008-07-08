@@ -22,7 +22,7 @@
 #define LEDCTL_NUM_CONTROLLERS 3
 
 // Maximum LED values - arbitrarily set at 1024 for now
-#define LEDCTL_MAX_VALUE 1024
+#define LEDCTL_MAX_VALUE 4096 
 
 // Send one of the controllers' data to the controller via the SPI
 void ledctl_senddata(int device); 

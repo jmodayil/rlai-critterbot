@@ -152,6 +152,20 @@ void ledctl_inittimer ( void )
   AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
 }
 
+void ledctl_dc( void ) {
+  
+  memset(ledctl_txdata, 0xFF, 48*sizeof(unsigned short));
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
+  ledctl_ssc_packet[2].finished = 0;
+  ledctl_senddata_all();
+  while(!(ledctl_ssc_packet[2].finished));
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
+  
+  memset(ledctl_txdata, 0x00, 48*sizeof(unsigned short));
+}
+
 void ledctl_init( void )
 {
   int i, l;
@@ -178,6 +192,8 @@ void ledctl_init( void )
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK );
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT );
   AT91F_PIO_CfgInput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
+  AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
+  ledctl_dc();  
 }
 
 /*

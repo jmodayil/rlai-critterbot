@@ -19,6 +19,6 @@
 #define LEDCTL_PIN_BLANK 9
 #define LEDCTL_PIN_XLAT 26
 #define LEDCTL_PIN_XERR 25
-
+#define LEDCTL_PIN_MODE 15
 
 #endif /* ARM_CONFIG_H */
