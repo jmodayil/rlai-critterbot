@@ -31,7 +31,7 @@
 // The LED controller shifts on the rising edge, so SPI uses phase 1
 
 // Rename!
-#define TC_INTERRUPT_LEVEL 6
+#define TC_INTERRUPT_LEVEL 1
 // Number of clock cycles in 1/100th of a second when using a T/C with
 //  clock MCK/1024
 #define TC_TIMER_DIV5_100HZ_RC 468
@@ -106,7 +106,7 @@ inline int ledctl_getcolor(int led, int color)
 
 /** End LED controller core driver **/
 
-void tc0_irq_handler ( void )
+RAMFUNC void tc0_irq_handler ( void )
 {
   AT91PS_TC pTC = AT91C_BASE_TC0;
 
@@ -125,7 +125,9 @@ void ledctl_inittimer ( void )
 
   // Enable power to the PIO (for sending BLANK/XLAT) and to the TC0
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_TC0 );
-
+  // Enable power to the PWM controller for GSClock
+  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
+  
   // Configure TC0 to run at 100Hz
   AT91C_BASE_TC0->TC_CMR = (AT91C_TC_CLKS_TIMER_DIV5_CLOCK | 
                             AT91C_TC_WAVE | AT91C_TC_WAVESEL_UP_AUTO);
@@ -139,6 +141,16 @@ void ledctl_inittimer ( void )
 
   // Start the timer - do we need the software trigger?
   AT91C_BASE_TC0->TC_CCR =  ( AT91C_TC_CLKEN | AT91C_TC_SWTRG);
+
+  // Setup the PWM
+  AT91C_BASE_PIOA->PIO_PDR = AT91C_PA23_PWM0;
+  AT91C_BASE_PIOA->PIO_BSR = AT91C_PA23_PWM0;
+
+  AT91C_BASE_PWMC->PWMC_MR = 1 | AT91C_PWMC_PREA_MCK;
+  AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
+  AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
+  AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
+  AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
 }
 
 void ledctl_init( void )

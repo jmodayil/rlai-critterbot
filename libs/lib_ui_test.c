@@ -22,7 +22,9 @@ int main()
 {
   // Initialize the serial port and the LED controller
   init_serial_port_stdio();
-  armprintf("Hello World\n");
+  armprintf("Hello, World.\n");
+  ssc_init();
+  armprintf("Initialized ssc.\n"); 
   ledctl_init();
   armprintf("Initialized ledctl.\n");
   // @@@ This function will have to be replaced when we get a proper 100Hz
