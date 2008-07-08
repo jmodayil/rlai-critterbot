@@ -69,11 +69,9 @@ void ledctl_senddata(int device)
 
 void ledctl_senddata_all()
 {
-  /*int i;
+  int i;
   for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
     ledctl_senddata(i);
-*/
-  ssc_send_packet(&ledctl_ssc_packet[0]);
 }
 
 inline void ledctl_setvalue(int device, int led, int value)
@@ -161,11 +159,9 @@ void ledctl_init( void )
   // Initalize the SPI packet
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
-    //ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS * LEDCTL_NUM_CONTROLLERS;
-    ledctl_ssc_packet[i].num_words = 32;
+    ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet[i].data_to_write = ledctl_txdata[i];
     ledctl_ssc_packet[i].read_data = ledctl_rxdata[i];
-    //ledctl_ssc_packet[i].read_data = NULL;
     // Initialize LED values to 0
     for (l = 0; l < LEDCTL_NUM_LEDS; l++)
     {
