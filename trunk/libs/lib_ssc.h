@@ -27,7 +27,7 @@
 //  MCK/8190)
 #define SSC_BAUD_RATE 1
 // bits = value; min=2, max=31
-#define SSC_WORD_SIZE 0x8
+#define SSC_WORD_SIZE 0xC
 // whether to operate in big-endian mode
 #define SSC_BIG_ENDIAN 0
 // Number of frames (a delay of DELAY_BEFORE_TRANSFER is inserted after

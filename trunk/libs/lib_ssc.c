@@ -21,6 +21,7 @@ void ssc_init() {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
 
+  ssc_data_head = ssc_data_tail = NULL;
   *AT91C_PMC_PCER = 1 << AT91C_ID_SSC;
 
   // Configure the PIO pins
@@ -65,7 +66,6 @@ void ssc_init() {
                     AT91C_SSC_START_CONTINOUS | // [sic] also!
                     ((SSC_DELAY_BEFORE_TRANSFER << 16) & AT91C_SSC_STTDLY)
                   );
-  
   // @@@ some error checking - wordsize > 1, PDC size depends on DATLEN
   /*
    * SSC Receive Frame Mode Register, Transmit Frame Mode Register
@@ -80,7 +80,7 @@ void ssc_init() {
    */
   ssc->SSC_RFMR = SSC_SETTINGS;
   ssc->SSC_TFMR = SSC_SETTINGS;
-
+  armprintf("Configuring SSC Interrupts.\n");
   // Enable an interrupt on end of transfer/receive
   AT91F_AIC_ConfigureIt ( AT91C_BASE_AIC,
                           AT91C_ID_SSC,
@@ -88,10 +88,12 @@ void ssc_init() {
                           AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
                           ssc_isr);
   ssc->SSC_IER = AT91C_SSC_ENDTX | AT91C_SSC_ENDRX;
+  armprintf("Enabling SSC Interrupts.\n");
   AT91F_AIC_EnableIt ( AT91C_BASE_AIC, AT91C_ID_SSC );
-
+  armprintf("Arm Interrupts Enabled.\n");
   // Enable SSC
   ssc->SSC_CR = AT91C_SSC_RXEN | AT91C_SSC_TXEN;
+  armprintf("SSC Enabled.\n");
 }
 
 
@@ -142,6 +144,10 @@ ARM_CODE RAMFUNC void ssc_isr() {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
   
+
+  // This is temporary hack.
+  if(ssc_data_tail == NULL)
+    return;
   /* Check if both ENDRX and ENDTX flags are set
    * 
    * The transmission isn't done until both are set, as ENDTX will occur
