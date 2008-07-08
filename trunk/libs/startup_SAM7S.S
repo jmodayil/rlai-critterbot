@@ -52,6 +52,10 @@
         .equ    AIC_IVR,        0x100
         .equ    AIC_EOICR,      0x130
         .equ    AT91C_BASE_AIC, 0xFFFFF000
+// Added by MGB - for dying ungracefully
+        .equ    US_THR,         0x01C
+        .equ    US_CSR,         0x014
+        .equ    AT91C_BASE_US0, 0xFFFC0000
 
 // Internal Memory Base Addresses
         .equ    FLASH_BASE,     0x00100000   
@@ -236,10 +240,14 @@ FIQ_HandlerR:    B       FIQ_HandlerR
 			.section .vectrom, "ax"
 
 Vectors:        LDR     PC,Reset_Addr         
-                LDR     PC,Undef_Addr
-                LDR     PC,SWI_Addr
-                LDR     PC,PAbt_Addr
-                LDR     PC,DAbt_Addr
+//                LDR     PC,Undef_Addr
+//                LDR     PC,SWI_Addr
+//                LDR     PC,PAbt_Addr
+//                LDR     PC,DAbt_Addr
+                B       Die_Ungracefully
+                B       Die_Ungracefully
+                B       Die_Ungracefully
+                B       Die_Ungracefully
                 NOP                            /* Reserved Vector */
 //                LDR     PC,IRQ_Addr
 //                LDR     PC,[PC,#-0xF20]        /* Vector From AIC_IVR */
@@ -313,6 +321,24 @@ IRQ_Handler_Entry:
 
 // Restore adjusted  LR_irq from IRQ stack directly in the PC
             ldmia       sp!, {pc}^
+
+
+// Exception handler for bad memory accesses and software interrupts, which
+//  are otherwise infinite loops
+// This puts data on the serial port repeatedly
+Die_Ungracefully:
+// Put a character (0x3F, ?)
+    ldr         r14, =AT91C_BASE_US0
+	  ldr         r0 , =0x3F
+    str         r14, [r14, #US_THR]
+
+// Wait for the character to have been sent 
+Send_Wait:       
+    LDR     R0, [R14, #US_CSR]
+    ANDS    R0, R0, #0x2
+    BEQ     Send_Wait
+
+    B     Die_Ungracefully
 
 // Startup Code must be linked first at Address at which it expects to run.
 
