@@ -102,7 +102,7 @@ void ssc_init() {
  *  Add a new packet to the SSC transmission queue
  * Copied from spi_send_packet
  */
-void ssc_send_packet( struct spi_packet *packet ) {
+void ssc_send_packet( struct ssc_packet *packet ) {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
   int i;
