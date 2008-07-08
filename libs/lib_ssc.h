@@ -53,7 +53,7 @@ typedef struct ssc_packet {
   unsigned int num_words;
   unsigned short *data_to_write;
   unsigned short *read_data;
-  unsigned int finished;
+  volatile unsigned int finished;
   struct ssc_packet *next_packet;
 } *ssc_packet_p;
   
