@@ -12,7 +12,12 @@
 #ifdef __GNUC__
 // Necessary to avoid duplicate definitions, behavior unknown
 #define __inline static inline
+#define NO_RAMFUNC
+#ifndef NO_RAMFUNC
+#define RAMFUNC __attribute__ ((long_call, section (".fastrun")))
+#else
 #define RAMFUNC
+#endif
 #define ARM_CODE
 #else
 #error Unsupported compiler! Contact the authors.

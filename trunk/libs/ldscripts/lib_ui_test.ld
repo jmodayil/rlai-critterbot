@@ -98,7 +98,7 @@ SECTIONS
   .data : AT (_etext)
   {
     _data = . ;
-	KEEP(*(.vectram))   /* added by mthomas */
+	KEEP(*(.vectrom))   /* added by mthomas */
     *(.data)
     SORT(CONSTRUCTORS)
 	. = ALIGN(4);

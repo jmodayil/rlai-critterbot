@@ -11,10 +11,10 @@ STDC_LIB_DIR=/opt/local/arm-elf/lib/
 LIBS=$(GCC_LIB_DIR)/libgcc.a $(STDC_LIB_DIR)/libc.a
 
 # Uncomment to produce a memory map
-# PRODUCE_MEMORY_MAP=-Wl,-M
+# PRODUCE_MEMORY_MAP=-Wl,-Map=memory.map
 PRODUCE_MEMORY_MAP=
-#PRODUCE_MEMORY_MAP_LD=-M
-PRODUCE_MEMORY_MAP_LD=
+PRODUCE_MEMORY_MAP_LD=-Map=memory.map
+#PRODUCE_MEMORY_MAP_LD=
 
 # Compiler flags
 COMMONFLAGS = -c -mcpu=arm7tdmi
@@ -39,22 +39,21 @@ TESTBINS = $(BINDIR)/lib_ui_test.bin
 all: all_libs
 
 # Builds all tests
-tests: $(TESTBINS)
+tests: $(BINDIR)/lib_ui_test.bin
 
 clean:
 	rm -f *.o
-	rm -f bin/*
+	rm -f $(BINDIR)/*
 
 # For now, we compile everything using gcc because inline functions are dup'ed
 all_libs: $(AOBJ) $(COBJ)
 #	$(CC) $(CFLAGS) $(THUMB) $(CSRC)
 
 # Test binaries
-$(TESTBINS): all_libs
+$(BINDIR)/lib_ui_test.bin: all_libs lib_ui_test.c
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) lib_ui_test.c
 #	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
 #	@echo $@ $(basename $@)
-#	$(CC) -Wl,-T$(LDDIR)/lib_ui_test.ld -mcpu=arm7tdmi $(THUMB) $(COBJ) lib_ui_test.o -o $(BINDIR)/lib_ui_test.elf $(PRODUCE_MEMORY_MAP) -Wl,--verbose
 #	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
 	$(LD) -T$(LDDIR)/lib_ui_test.ld $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
 	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
