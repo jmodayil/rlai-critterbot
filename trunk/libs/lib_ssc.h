@@ -12,7 +12,6 @@
 #define LIB_SSC_H
 #include "compiler.h"
 #include "AT91SAM7S256.h"
-#include "lib_spi.h"
 
 #define SSC_INTERRUPT_PRIORITY 1
 

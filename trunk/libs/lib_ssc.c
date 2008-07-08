@@ -123,10 +123,10 @@ void ssc_send_packet( struct ssc_packet *packet ) {
     ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
     // If read_data is NULL, we're ignoring received data
     if( ssc_data_tail->read_data != NULL )  
-      ssc->SSC_RCR = spi_data_tail->num_words;
+      ssc->SSC_RCR = ssc_data_tail->num_words;
     else
       ssc->SSC_RCR = 0;
-    ssc->SSC_TCR = spi_data_tail->num_words;
+    ssc->SSC_TCR = ssc_data_tail->num_words;
     ssc->SSC_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
   }
   
