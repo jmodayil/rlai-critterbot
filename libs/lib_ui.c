@@ -34,6 +34,8 @@ ui_cmd_item ui_commands[] = {
   { "get_led", ui_getled, "get_led <led #>"},
     // get_led <led_num, 0-15>
   {"stat_led", ui_statled, "stat_led"},
+  {"clearall", ui_clearall, "clear"},
+  {"setall", ui_setall, "setall"},
   {"fortune", ui_fortune, "fortune"}
 };
 
@@ -155,6 +157,28 @@ void ui_statled(char * cmdstr)
   armprintf ("Aha! LED status not implemented!\n");
 }
 
+void ui_clearall(char * cmdstr)
+{
+  int l;
+
+  for (l = 0; l < LEDCTL_NUM_LEDS; l++)
+    ledctl_setcolor(l, 0, 0, 0);
+}
+
+void ui_setall(char * cmdstr)
+{
+  int colValue;
+  int l;
+
+  if (armsscanf (cmdstr, "%s %d", ui_cmdname, &colValue) < 2)
+  {
+    armprintf ("Invalid number of arguments to setall.\n");
+    return;
+  }
+
+  for (l = 0; l < LEDCTL_NUM_LEDS; l++)
+    ledctl_setcolor(l, colValue, colValue, colValue);
+}
 
 
 static int fortune_idx = 0;
