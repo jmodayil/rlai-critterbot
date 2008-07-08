@@ -37,9 +37,9 @@
 #define TC_TIMER_DIV5_100HZ_RC 468
 
 // Array holding the 16 grayscale LED values
-unsigned int ledctl_txdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
+unsigned short ledctl_txdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 // Array to receive the 16 status values from the LED controller
-unsigned int ledctl_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
+unsigned short ledctl_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 struct spi_packet ledctl_spi_packet[LEDCTL_NUM_CONTROLLERS];
 
 unsigned int ledctl_xerr;
@@ -87,7 +87,7 @@ inline int ledctl_getvalue(int device, int led)
 
 inline int ledctl_getstatus(int device, int led)
 {
-  return ledctl_rxdata[device][led];
+  return (short)ledctl_rxdata[device][led];
 }
 
 /** Critterbot specific functions **/

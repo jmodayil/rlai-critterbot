@@ -46,7 +46,8 @@ void ssc_init() {
    *  PERIOD = 0 (no sync signal)
    */
   ssc->SSC_RCMR = ( AT91C_SSC_CKS_TK | 
-                    AT91C_SSC_CKO_DATA_TX |
+                    AT91C_SSC_CKO_NONE |
+                    AT91C_SSC_CKI |
                     AT91C_SSC_START_CONTINOUS | // [sic]!
                     ((SSC_DELAY_BEFORE_TRANSFER << 16) & AT91C_SSC_STTDLY)
                   );
