@@ -23,8 +23,6 @@ typedef struct {
   char * description;
 } ui_cmd_item;
 
-void ui_fortune(char * cmdstr);
-
 extern struct ssc_packet ledctl_ssc_packet[];
 
 ui_cmd_item ui_commands[] = {
@@ -36,6 +34,7 @@ ui_cmd_item ui_commands[] = {
   {"stat_led", ui_statled, "stat_led"},
   {"clearall", ui_clearall, "clear"},
   {"setall", ui_setall, "setall"},
+  {"test", ui_test, "test [ramfunc|sanity]"},
   {"fortune", ui_fortune, "fortune"}
 };
 
@@ -43,6 +42,7 @@ int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
 
 char ui_command_string[256];
 char ui_cmdname[64];
+char ui_strarg[64];
 
 /** Finds the requested command in our list of commands.
   * Returns the corresponding item if found, NULL otherwise.
@@ -82,11 +82,13 @@ void ui_help(char * cmdstr)
 {
   int idx;
   
-  armprintf ("List of commands: \n");
+  armprintf ("List of commands and usage: \n");
 
   for (idx = 0; idx < ui_ncommands; idx++)
     armprintf ("%s - %s\n", ui_commands[idx].name, 
       ui_commands[idx].description);
+  
+  armprintf ("\nNote! Commands and arguments are case-sensitive.\n");
 }
 
 void ui_setled(char * cmdstr)
@@ -180,6 +182,30 @@ void ui_setall(char * cmdstr)
     ledctl_setcolor(l, colValue, colValue, colValue);
 }
 
+RAMFUNC void ui_test_ramfunc(char * cmdstr)
+{
+  armprintf (cmdstr);
+}
+
+/** Tests something, specified by the first argument. E.g.
+  * test ramfunc
+  */
+void ui_test (char * cmdstr)
+{
+  if (armsscanf("%s %s", ui_cmdname, ui_strarg) < 2)
+  {
+    armprintf ("Test what?\n");
+    return;
+  }
+
+  if (strncmp (ui_strarg, "ramfunc", sizeof(ui_strarg)) == 0)
+  {
+    armprintf ("Test RAM function at address %x\n", (int)ui_test_ramfunc);
+    ui_test_ramfunc(cmdstr);
+  }
+  else
+    armprintf ("Invalid argument.\n");
+}
 
 static int fortune_idx = 0;
 
@@ -188,7 +214,10 @@ char * fortunes[] = {
   "Qui vole un oeuf vole un boeuf",
   "Father, I want to kill you. Mother, I want to oooo-doo-dii",
   "You should be working",
-
+  "Has it been powered on?",
+  "Have you compiled?",
+  "Have you reprogrammed the chip?",
+  "Is it connected to the internet?",
   // Keep this 0 here!
   0
   };
