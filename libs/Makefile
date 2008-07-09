@@ -39,7 +39,7 @@ TESTBINS = $(BINDIR)/lib_ui_test.bin
 all: all_libs
 
 # Builds all tests
-tests: $(BINDIR)/lib_ui_test.bin
+tests: $(TESTBINS)
 
 clean:
 	rm -f *.o
@@ -50,17 +50,20 @@ all_libs: $(AOBJ) $(COBJ)
 #	$(CC) $(CFLAGS) $(THUMB) $(CSRC)
 
 # Test binaries
-$(BINDIR)/lib_ui_test.bin: all_libs lib_ui_test.c
-	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) lib_ui_test.c
-#	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
+$(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
+	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
 #	@echo $@ $(basename $@)
-#	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
-	$(LD) -T$(LDDIR)/lib_ui_test.ld $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
-	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
+	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
+#	$(LD) -T$(LDDIR)/lib_ui_test.ld $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
+#	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
 	@echo
 	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
 
 $(COBJ): %.o : %.c
+	@echo $<
+	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $< -o $@
+
+$(notdir $(TESTBINS:.bin=.o)): %.o : %.c
 	@echo $<
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $< -o $@
 
