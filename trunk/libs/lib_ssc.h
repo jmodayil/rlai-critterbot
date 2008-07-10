@@ -25,8 +25,8 @@
 // rate = MCK / (value*2); min=1, max=4095 (so baud rates between MCK/2 &
 //  MCK/8190)
 #define SSC_BAUD_RATE 8
-// bits = value; min=2, max=31
-#define SSC_WORD_SIZE 12 
+// bits = value+1; min=2, max=31
+#define SSC_WORD_SIZE 11
 // whether to operate in big-endian mode
 #define SSC_BIG_ENDIAN 1
 // Number of frames (a delay of DELAY_BEFORE_TRANSFER is inserted after
@@ -45,7 +45,7 @@
  * LOOP/DATDEF, FSOS, FSLEN, FSDEN, FSEDGE ignored
  * @@@ handle FSDEN?
  */
-#define SSC_SETTINGS ((SSC_WORD_SIZE-1) & AT91C_SSC_DATLEN) | \
+#define SSC_SETTINGS ((SSC_WORD_SIZE) & AT91C_SSC_DATLEN) | \
                     ((SSC_BIG_ENDIAN & 0x1) << 7) | \
                     ((SSC_FRAME_SIZE << 8) & AT91C_SSC_DATNB)
 
