@@ -21,8 +21,11 @@
 // Number of controllers
 #define LEDCTL_NUM_CONTROLLERS 3
 
-// Maximum LED values - arbitrarily set at 1024 for now
+// Maximum LED values - arbitrarily set at 4096 for now
 #define LEDCTL_MAX_VALUE 4096 
+
+// Maxium Dot Correction value
+#define LEDCTL_DC_MAX_VALUE 64
 
 // Send one of the controllers' data to the controller via the SPI
 void ledctl_senddata(int device); 
@@ -35,6 +38,15 @@ void ledctl_senddata_all();
 void ledctl_init ();
 /** Will be made obsolete - runs the 100Hz timer. */
 void ledctl_inittimer ();
+
+/** Enables the LED driver (default: disabled) */
+void ledctl_enable();
+/** Disables the LED driver by not sending new BLANK/XLAT signals */
+void ledctl_disable();
+
+/** Returns whether the grayscale data has been sent; this information is
+    only useful when the caller has actually requested data to be sent. */
+unsigned int ledctl_data_sent();
 
 /** Interface to the LED controller driver
   *  Set an LED value

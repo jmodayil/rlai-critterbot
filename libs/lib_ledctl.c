@@ -44,8 +44,25 @@ struct ssc_packet ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS];
 
 unsigned int ledctl_xerr;
 
+unsigned char ledctl_disabled = 1;
+
+// Dot correction data, arranged by channel then LED
+// Valid values are between 0 and 63
+unsigned char ledctl_dc_data[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS] = {
+  {  0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F,
+     0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F },
+  {  0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F,
+     0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F },
+  {  0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F,
+     0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F }
+};
+
+struct ssc_packet ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS];
+
 void ledctl_newcycle ( void )
 {
+  if (ledctl_disabled) return;
+
   // Tell the LED controllers to start a new cycle; the sequence is
   // BLANK-on XLAT-on XLAT-off BLANK-off
   //  This relies a CPU clock cycle being slower than 20ns
@@ -70,8 +87,14 @@ void ledctl_senddata(int device)
 void ledctl_senddata_all()
 {
   int i;
+
   for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+  {
+    // @@@ Error detection: if finished != 0 for some packet, be unhappy
+    // This also will require starting with finished = 1
+    ledctl_ssc_packet[i].finished = 0;
     ledctl_senddata(i);
+  }
 }
 
 inline void ledctl_setvalue(int device, int led, int value)
@@ -124,8 +147,6 @@ void ledctl_inittimer ( void )
 
   // Enable power to the PIO (for sending BLANK/XLAT) and to the TC0
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_TC0 );
-  // Enable power to the PWM controller for GSClock
-  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
   
   // Configure TC0 to run at 100Hz
   AT91C_BASE_TC0->TC_CMR = (AT91C_TC_CLKS_TIMER_DIV5_CLOCK | 
@@ -141,41 +162,91 @@ void ledctl_inittimer ( void )
   // Start the timer - do we need the software trigger?
   AT91C_BASE_TC0->TC_CCR =  ( AT91C_TC_CLKEN | AT91C_TC_SWTRG);
 
-  // Setup the PWM
-  AT91C_BASE_PIOA->PIO_PDR = AT91C_PA23_PWM0;
-  AT91C_BASE_PIOA->PIO_BSR = AT91C_PA23_PWM0;
-
-  AT91C_BASE_PWMC->PWMC_MR = 1 | AT91C_PWMC_PREA_MCK;
-  AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
-  AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
-  AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
-  AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
 }
 
+/**
+  * Applies dot correction
+  */
 void ledctl_dc( void ) {
+  AT91PS_SSC ssc = AT91C_BASE_SSC;
+  int bits_per_word;
+  int tfmr_status;
+  unsigned int ledctl_is_disabled = ledctl_disabled;
+  int i;
+
+  // First, disable the LED controller; we can't disable the 100Hz 
+  //  interrupt as others might need it
+  ledctl_disable();
+
+  // Store the TFMR status
+  tfmr_status = ssc->SSC_TFMR;
+  bits_per_word = tfmr_status & AT91C_SSC_DATLEN;
+
+  // Set up the SSC to send 6 bits words, leaving the rest of the mode
+  //  register unchanged
+  ssc->SSC_TFMR = (5 & AT91C_SSC_DATLEN) | (tfmr_status & ~AT91C_SSC_DATLEN);
+  // Disable receiving (@@@ should we receive something?)
+  ssc->SSC_CR = AT91C_SSC_RXDIS;
   
-  memset(ledctl_txdata, 0xFF, 48*sizeof(unsigned short));
+  // Change to dot correction mode
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
-  ledctl_ssc_packet[2].finished = 0;
-  ledctl_senddata_all();
-  while(!(ledctl_ssc_packet[2].finished));
+  ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished = 0;
+
+  // Send all three DC packets
+  for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+    ssc_send_packet(&ledctl_ssc_packet_dc[i]);
+
+  // Wait for the data to have been sent
+  while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
+
+  // We need to XLAT to send the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
+
+  // Reset the mode to grayscale mode 
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE);
   
-  memset(ledctl_txdata, 0x00, 48*sizeof(unsigned short));
+  // Reset the previous configuration
+  ssc->SSC_TFMR = bits_per_word | tfmr_status;
+  // Enable receiving again
+  ssc->SSC_CR = AT91C_SSC_RXEN;
+  // Enable the LED driver
+  if (!ledctl_is_disabled)
+    ledctl_enable();
+
+}
+
+void ledctl_disable()
+{
+  ledctl_disabled = 1;
+}
+
+void ledctl_enable()
+{
+  ledctl_disabled = 0;
+}
+
+unsigned int ledctl_data_sent()
+{
+  return (ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS-1].finished > 0);
 }
 
 void ledctl_init( void )
 {
   int i, l;
-  
-  // Initalize the SPI packet
+
+  armprintf ("LEDCTL init packets\n");
+
+  // Initalize the packets for both data and dot correction
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
     ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet[i].data_to_write = ledctl_txdata[i];
     ledctl_ssc_packet[i].read_data = ledctl_rxdata[i];
+    ledctl_ssc_packet_dc[i].num_words = LEDCTL_NUM_LEDS;
+    ledctl_ssc_packet_dc[i].data_to_write = (unsigned short*)ledctl_dc_data[i];
+    ledctl_ssc_packet_dc[i].read_data = NULL;
+
     // Initialize LED values to 0
     for (l = 0; l < LEDCTL_NUM_LEDS; l++)
     {
@@ -193,75 +264,40 @@ void ledctl_init( void )
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT );
   AT91F_PIO_CfgInput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
-  ledctl_dc();  
-}
+ 
+  armprintf ("LEDCTL dot correction\n");
 
-/*
-int main()
-{
-  char statusString[256];
-  char commandString[256];
-
-  char * pStr;
-  int len;
-  int num_chars;
-  int i;
-  int hasCommand = 0;
-  unsigned int ledNum;
-  unsigned int base;
-
-  // Initialize the SPI - assume no one else is doing so
-  ssc_init();
-  // Now initialize a timer/counter at 100Hz
-  ledctl_inittimer();
+  // Run dot-correction initially
+  ledctl_dc(); 
   
-  ledctl_init();
+  armprintf ("LEDCTL send data\n");
+  // Send the initial LED data, which should be all 0's
+  ledctl_senddata_all();
+  // Wait for the data to have been sent
+  while (!ledctl_data_sent()) ;
 
-  while (1)
-  {
-    hasCommand = 0;
+  // Now BLANK and XLAT in order to load the new data into the LED controllers
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+ 
+  // Start the grayscale clock - must be done after dot correction and
+  //  sending the LED data to avoid 'flashing' the LEDs
 
-    // Read in any command
-    if ( dbgu_read_string(commandString, 256) == 0 )
-    {
-      hasCommand = 1;
-      // Parse it, value by value (use strsep instead?)
-      pStr = strtok(commandString, " ");
-      ledNum = atoi(pStr);
-      base = ledNum * 3;
+  // Enable power to the PWM controller for GSClock
+  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
+  // Setup the PWM
+  AT91C_BASE_PIOA->PIO_PDR = AT91C_PA23_PWM0;
+  AT91C_BASE_PIOA->PIO_BSR = AT91C_PA23_PWM0;
 
-      // Read in the three channels
-      for (i = 0; pStr && i < 3; pStr = strtok(NULL, " "), i++)
-      {
-        // Only set LEDs on device 0 for now
-        ledctl_setvalue(0, i + base, atoi(pStr));
-      }
-      
-      // Error on malformed data, unless it's a newline
-      if (i < 3 || ledNum > 4)
-        if (commandString[0] != 0)
-          dbgu_write_string ("Bad command or file name.");
-    }
-    
-    // Print out status if we received a command
-    if (hasCommand)
-    {
-      pStr = statusString;
-      len = 256;
+  AT91C_BASE_PWMC->PWMC_MR = 1 | AT91C_PWMC_PREA_MCK;
+  AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
+  AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
+  AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
+  AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
 
-      // Move pStr forward by the number of characters printed
-      num_chars = snprintf (statusString, 256, "Status:");
-      pStr += num_chars;
-      len -= num_chars;
-
-      for (i = 0; i < LEDCTL_NUM_LEDS; i++)
-      {
-        num_chars = snprintf (pStr, len, " %x", ledctl_getstatus(0, i)); 
-      }
-
-      // print to serial
-      dbgu_write_string (statusString);
-    }
-  }
+  // Enable the LED driver
+  ledctl_enable();
 }
-*/
+
