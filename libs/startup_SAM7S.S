@@ -142,6 +142,7 @@
         .equ    PMC_PRES,       (7<<2)      /* Prescaler Selection */
         .equ    PMC_MOSCS,      (1<<0)      /* Main Oscillator Stable */
         .equ    PMC_LOCK,       (1<<2)      /* PLL Lock Status */
+        .equ    PMC_MCKRDY,     (1<<3)      /* Master Clock Status */
 
 /*
 // <e> Power Mangement Controller (PMC)
@@ -178,6 +179,9 @@
         .equ    PMC_MOR_Val,    0x00000601
 // mgb       .equ    PMC_PLLR_Val,   0x00191C05
         .equ    PMC_PLLR_Val, 0x00481C0E
+// MCKR value, prescaler only
+        .equ    PMC_MCKR_PRES_Val, 0x00000004
+// MCKR value, prescaler and PLL clock selection
         .equ    PMC_MCKR_Val,   0x00000007
 
 
@@ -398,10 +402,21 @@ PLL_Loop:       LDR     R2, [R0, #PMC_SR]
 .endif
 
 //  Select Clock
-// mgb: differs from Atmel startup - sets both CSS_PLL_CLK and PRE
-//  at the same time
+// MGB: I had to modify M. Thomas' code, which set both PRES and CSS
+//  together. The EK docs mention that this is bad as it could result in 
+//  the CPU running faster than expected (and permitted)
+                LDR     R1, =PMC_MCKR_PRES_Val
+                STR     R1, [R0, #PMC_MCKR]
+PMC_PRES_Loop:  LDR     R2, [R0, #PMC_SR]
+                ANDS    R2, R2, #PMC_MCKRDY
+                BEQ     PMC_PRES_Loop
+
+// Now set the PLL input
                 LDR     R1, =PMC_MCKR_Val
                 STR     R1, [R0, #PMC_MCKR]
+PMC_MCK_Loop:   LDR     R2, [R0, #PMC_SR]
+                ANDS    R2, R2, #PMC_MCKRDY
+                BEQ     PMC_MCK_Loop
 .endif
 
 

@@ -45,6 +45,17 @@
         .equ    I_Bit,          0x80    /* when I bit is set, IRQ is disabled */
         .equ    F_Bit,          0x40    /* when F bit is set, FIQ is disabled */
 
+        .equ    ARM_MODE_IRQ,   0x12
+        .equ    ARM_MODE_SVC,   0x13
+
+// Added by MGB - needed for IRQ_Handler_Entry
+        .equ    AIC_IVR,        0x100
+        .equ    AIC_EOICR,      0x130
+        .equ    AT91C_BASE_AIC, 0xFFFFF000
+// Added by MGB - for dying ungracefully
+        .equ    US_THR,         0x01C
+        .equ    US_CSR,         0x014
+        .equ    AT91C_BASE_US0, 0xFFFC0000
 
 // Internal Memory Base Addresses
         .equ    FLASH_BASE,     0x00100000   
@@ -229,13 +240,18 @@ FIQ_HandlerR:    B       FIQ_HandlerR
 			.section .vectrom, "ax"
 
 Vectors:        LDR     PC,Reset_Addr         
-                LDR     PC,Undef_Addr
-                LDR     PC,SWI_Addr
-                LDR     PC,PAbt_Addr
-                LDR     PC,DAbt_Addr
+//                LDR     PC,Undef_Addr
+//                LDR     PC,SWI_Addr
+//                LDR     PC,PAbt_Addr
+//                LDR     PC,DAbt_Addr
+                B       Die_Ungracefully
+                B       Die_Ungracefully
+                B       Die_Ungracefully
+                B       Die_Ungracefully
                 NOP                            /* Reserved Vector */
 //                LDR     PC,IRQ_Addr
-                LDR     PC,[PC,#-0xF20]        /* Vector From AIC_IVR */
+//                LDR     PC,[PC,#-0xF20]        /* Vector From AIC_IVR */
+                B       IRQ_Handler_Entry
 //                LDR     PC,FIQ_Addr
                 LDR     PC,[PC,#-0xF20]        /* Vector From AIC_FVR */
 
@@ -245,18 +261,86 @@ SWI_Addr:       .word   SWI_Handler
 PAbt_Addr:      .word   PAbt_Handler
 DAbt_Addr:      .word   DAbt_Handler
                 .word   0                      /* Reserved Address */
-IRQ_Addr:       .word   IRQ_Handler
 FIQ_Addr:       .word   FIQ_Handler
 
 Undef_Handler:  B       Undef_Handler
 SWI_Handler:    B       SWI_Handler
 PAbt_Handler:   B       PAbt_Handler
 DAbt_Handler:   B       DAbt_Handler
-IRQ_Handler:    B       IRQ_Handler
 FIQ_Handler:    B       FIQ_Handler
 
+// Taken from Cstartup.S
 
-// Starupt Code must be linked first at Address at which it expects to run.
+IRQ_Handler_Entry:
+
+/* Manage Exception Entry
+   Adjust and save LR_irq in IRQ stack */
+            sub         lr, lr, #4
+            stmfd       sp!, {lr}
+
+// Save SPSR need to be saved for nested interrupt
+            mrs         r14, SPSR
+            stmfd       sp!, {r14}
+
+// Save and r0 in IRQ stack
+            stmfd       sp!, {r0}
+
+// Write in the IVR to support Protect Mode
+// No effect in Normal Mode
+// De-assert the NIRQ and clear the source in Protect Mode
+            ldr         r14, =AT91C_BASE_AIC
+	    ldr         r0 , [r14, #AIC_IVR]
+	    str         r14, [r14, #AIC_IVR]
+
+// Enable Interrupt and Switch in Supervisor Mode
+           msr         CPSR_c, #ARM_MODE_SVC
+
+// Save scratch/used registers and LR in User Stack
+            stmfd       sp!, { r1-r3, r12, r14}
+
+// Branch to the routine pointed by the AIC_IVR
+            mov         r14, pc
+            bx          r0
+
+// Restore scratch/used registers and LR from User Stack
+            ldmia       sp!, { r1-r3, r12, r14}
+
+// Disable Interrupt and switch back in IRQ mode
+            msr         CPSR_c, #I_Bit | ARM_MODE_IRQ
+
+// Mark the End of Interrupt on the AIC
+            ldr         r14, =AT91C_BASE_AIC
+            str         r14, [r14, #AIC_EOICR]
+
+// Restore R0
+            ldmia       sp!, {r0}
+
+// Restore SPSR_irq and r0 from IRQ stack
+            ldmia       sp!, {r14}
+            msr         SPSR_cxsf, r14
+
+// Restore adjusted  LR_irq from IRQ stack directly in the PC
+            ldmia       sp!, {pc}^
+
+
+// Exception handler for bad memory accesses and software interrupts, which
+//  are otherwise infinite loops
+// This puts data on the serial port repeatedly
+Die_Ungracefully:
+// Put a character (0x3F, ?)
+    ldr         r14, =AT91C_BASE_US0
+	  ldr         r0 , =0x3F
+    str         r14, [r14, #US_THR]
+
+// Wait for the character to have been sent 
+Send_Wait:       
+    LDR     R0, [R14, #US_CSR]
+    ANDS    R0, R0, #0x2
+    BEQ     Send_Wait
+
+    B     Die_Ungracefully
+
+// Startup Code must be linked first at Address at which it expects to run.
 
 		.text
 		.arm

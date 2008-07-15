@@ -15,8 +15,8 @@ INCLUDES=-Iinclude -I.
 # Flags
 # Uncomment to generate memory map
 # Rename to -Wl,-M if arm-elf-gcc is used to link
-PRODUCE_MEMORY_MAP=-M
-# PRODUCE_MEMORY_MAP=
+# PRODUCE_MEMORY_MAP=-M
+PRODUCE_MEMORY_MAP=
 
 all: armcode.bin
 clean:
@@ -29,7 +29,7 @@ armcode.bin: armcode.elf
 
 # Object linking
 # Can alternatively be done using arm-elf-gcc, which provides crt0 and such
-armcode.elf: startup_SAM7S.o serialecho.o
+armcode.elf: startup_SAM7S.o jlink_test.o
 	arm-elf-ld -Tarmcode.ld --oformat elf32-littlearm *.o $(GCC_LIBS) --output armcode.elf $(PRODUCE_MEMORY_MAP)
 
 # Startup code
@@ -42,6 +42,9 @@ Cstartup.o: Cstartup.S
 # Simple program (from assignment 1)
 serialecho.o: serialecho.c
 	arm-elf-gcc $(THUMB) $(INCLUDES) -mcpu=arm7tdmi -c -Wall serialecho.c
+
+jlink_test.o: serialecho.c
+	arm-elf-gcc $(THUMB) $(INCLUDES) -mcpu=arm7tdmi -c -Wall jlink_test.c
 
 Cstartup_SAM7.o: Cstartup_SAM7.c
 	arm-elf-gcc $(THUMB) $(INCLUDES) -mcpu=arm7tdmi -c -Wall Cstartup_SAM7.c

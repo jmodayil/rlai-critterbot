@@ -15,3 +15,9 @@ mww 0xfffffc30 0x00000007	# PMC_MCKR : MCK = PLL / 2 ~= 48 MHz
 sleep 10
 mww 0xffffff60 0x003c0100	# MC_FMR: flash mode (FWS=1,FMCN=60)
 sleep 100
+
+arm7_9 dcc_downloads enable
+sleep 10
+poll
+flash probe 0
+flash write 0 armcode.bin 0x0
