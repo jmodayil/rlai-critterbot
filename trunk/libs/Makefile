@@ -20,6 +20,9 @@ PRODUCE_MEMORY_MAP_LD=-Map=memory.map
 COMMONFLAGS = -c -mcpu=arm7tdmi
 AFLAGS = -x assembler-with-cpp
 CFLAGS = -Winline -O3 -ffunction-sections -fdata-sections
+# Set DEBUGFLAGS to empty for normal compilation
+# DEBUGFLAGS =
+DEBUGFLAGS = -Wall
 
 # Linker flags
 LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
@@ -61,12 +64,12 @@ $(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
 
 $(COBJ): %.o : %.c
 	@echo $<
-	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $< -o $@
+	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
 
 $(notdir $(TESTBINS:.bin=.o)): %.o : %.c
 	@echo $<
-	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $< -o $@
+	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
 
 $(AOBJ): %.o : %.s
-	arm-elf-gcc $(COMMONFLAGS) $(AFLAGS) $(THUMB) $(INCLUDES) -Wall $< -o $@
+	arm-elf-gcc $(COMMONFLAGS) $(AFLAGS) $(THUMB) $(INCLUDES) $(DEBUGFLAGS) -Wall $< -o $@
 

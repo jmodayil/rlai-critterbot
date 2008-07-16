@@ -97,12 +97,20 @@ void spi_send_packet( struct spi_packet *packet ) {
     spi->SPI_TPR = (unsigned int) spi_data_tail->data_to_write;
     spi->SPI_RPR = (unsigned int) spi_data_tail->read_data;
     // If read_data is NULL, we're ignoring received data
-    if( spi_data_tail->read_data != NULL )  
+    if( spi_data_tail->read_data != NULL )
+    {
       spi->SPI_RCR = spi_data_tail->num_words;
+      spi->SPI_PTCR = AT91C_PDC_RXTEN;
+    }
     else
+    {
       spi->SPI_RCR = 0;
+      // If SPI_RCR is 0 and we have a NULL buffer, we should disable
+      //  receiving
+      spi->SPI_PTCR = AT91C_PDC_RXTDIS;
+    }
     spi->SPI_TCR = spi_data_tail->num_words;
-    spi->SPI_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
+    spi->SPI_PTCR = AT91C_PDC_TXTEN;
   }
   
 }
@@ -143,11 +151,15 @@ ARM_CODE RAMFUNC void spi_isr() {
       spi->SPI_RPR = (unsigned int)spi_data_tail->read_data;
       // If read_data is NULL, we're ignoring received data
       if( spi_data_tail->read_data != NULL )
+      {
         spi->SPI_RCR = spi_data_tail->num_words;
-      else
+        spi->SPI_PTCR = AT91C_PDC_RXTEN;
+      }
+      else // Leave the RX disabled
         spi->SPI_RCR = 0;
+
       spi->SPI_TCR = spi_data_tail->num_words;
-      spi->SPI_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
+      spi->SPI_PTCR = AT91C_PDC_TXTEN;
     }
     // We're done for now!
     else {

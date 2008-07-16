@@ -39,6 +39,9 @@ void ledctl_init ();
 /** Will be made obsolete - runs the 100Hz timer. */
 void ledctl_inittimer ();
 
+/** Apply dot-correction (sends the current dot correction data) */
+void ledctl_dc();
+
 /** Enables the LED driver (default: disabled) */
 void ledctl_enable();
 /** Disables the LED driver by not sending new BLANK/XLAT signals */
@@ -90,5 +93,21 @@ void ledctl_setcolor(int led, int red, int green, int blue);
   *  color must be in range 0-2
   */
 int ledctl_getcolor(int led, int color);
+
+/** Interface to the LED controller driver
+  *  Sets the DC values for a LED
+  *
+  *  led must be in range 0-15
+  *  red, green, blue must be in the range 0-63
+  */
+void ledctl_setdc(int led, int red, int green, int blue);
+
+/** Interface to the LED controller driver
+  *  Returns one of the three DC values for a LED
+  *
+  *  led must be in range 0-15
+  *  color must be in range 0-2
+  */
+int ledctl_getdc(int led, int color);
 
 #endif /* LIB_LEDCTL_H */

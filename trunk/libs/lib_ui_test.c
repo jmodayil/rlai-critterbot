@@ -16,6 +16,7 @@
 
 #include "armio.h"
 #include "lib_ledctl.h"
+#include "lib_ssc.h"
 #include "lib_ui.h"
 
 int main()
