@@ -25,6 +25,7 @@
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
 #include "lib_AT91SAM7S256.h"
+#include "armio.h"
 // #include <lib_dbguconsole.c>
 
 // SPI polarity is 0 (from the diagram of the SCLK in led datasheet)
@@ -126,6 +127,18 @@ inline int ledctl_getcolor(int led, int color)
   return ledctl_txdata[color][led];
 }
 
+inline void ledctl_setdc(int led, int red, int green, int blue)
+{
+  ledctl_dc_data[RED_CONTROLLER][led] = red;
+  ledctl_dc_data[GREEN_CONTROLLER][led] = green;
+  ledctl_dc_data[BLUE_CONTROLLER][led] = blue;
+}
+
+inline int ledctl_getdc(int led, int color)
+{
+  return ledctl_dc_data[color][led];
+}
+
 /** End LED controller core driver **/
 
 RAMFUNC void tc0_irq_handler ( void )
@@ -185,8 +198,6 @@ void ledctl_dc( void ) {
   // Set up the SSC to send 6 bits words, leaving the rest of the mode
   //  register unchanged
   ssc->SSC_TFMR = (5 & AT91C_SSC_DATLEN) | (tfmr_status & ~AT91C_SSC_DATLEN);
-  // Disable receiving (@@@ should we receive something?)
-  ssc->SSC_CR = AT91C_SSC_RXDIS;
   
   // Change to dot correction mode
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );

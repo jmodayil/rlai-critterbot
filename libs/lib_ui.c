@@ -12,6 +12,7 @@
 #include "lib_ui.h"
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
+#include "armio.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -34,6 +35,8 @@ ui_cmd_item ui_commands[] = {
   {"stat_led", ui_statled, "stat_led"},
   {"clearall", ui_clearall, "clear"},
   {"setall", ui_setall, "setall"},
+  {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
+  {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
   {"test", ui_test, "test [ramfunc|sanity]"},
   {"fortune", ui_fortune, "fortune"}
 };
@@ -182,6 +185,72 @@ void ui_setall(char * cmdstr)
     ledctl_setcolor(l, colValue, colValue, colValue);
 }
 
+/** Similar to ui_setled, except that it sets dot correction data */
+void ui_setdot(char * cmdstr)
+{
+  int ledNum;
+  int ledColors[3];
+
+  // parse in num, color
+  if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
+    &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
+  {
+    armprintf ("Invalid number of arguments to set_dot.\n");
+    return;
+  }
+
+  if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS ||
+      ledColors[0] < 0 || ledColors[1] < 0 || ledColors[2] < 0 ||
+      ledColors[0] >= LEDCTL_DC_MAX_VALUE || 
+      ledColors[1] >= LEDCTL_DC_MAX_VALUE ||
+      ledColors[2] >= LEDCTL_DC_MAX_VALUE)
+  {
+    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    armprintf ("Colors must be in range 0..%d\n", LEDCTL_MAX_VALUE);
+    return;
+  }
+
+  // Set the LED's three colors
+  ledctl_setdc(ledNum, ledColors[0], ledColors[1], ledColors[2]);
+
+  // Re-apply dot-correction right away
+  armprintf ("Applying dot correction...");
+  ledctl_dc();
+  armprintf ("Done!\n");
+}
+
+/** Returns the DC of a given led (0-15) */
+void ui_getdot (char * cmdstr)
+{
+  int ledNum;
+  int ledColors[3]; 
+  int color;
+  int numArgs;
+
+  numArgs = armsscanf (cmdstr, "%s %d", ui_cmdname, &ledNum);
+  // numArgs == 1 implies get all dc data
+  if (numArgs < 2)
+    ledNum = 0;
+  else if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
+  {
+    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    return;
+  }
+
+  while (ledNum < LEDCTL_NUM_LEDS)
+  {
+    for (color = 0; color < 3; color++)
+      ledColors[color] = ledctl_getdc(ledNum, color);
+    armprintf ("LED %d dot correction: %d,%d,%d\n", ledNum, 
+      ledColors[0], ledColors[1], ledColors[2]);
+    if (numArgs == 1)
+      ledNum++;
+    else
+      break;
+  }
+
+}
+
 RAMFUNC void ui_test_ramfunc(char * cmdstr)
 {
   armprintf (cmdstr);
@@ -203,6 +272,8 @@ void ui_test (char * cmdstr)
     armprintf ("Test RAM function at address %x\n", (int)ui_test_ramfunc);
     ui_test_ramfunc(cmdstr);
   }
+  else if (strncmp (ui_strarg, "sanity", sizeof(ui_strarg)) == 0)
+    armprintf ("You rolled a 6. Sanity check failed.\n");
   else
     armprintf ("Invalid argument.\n");
 }
@@ -218,16 +289,31 @@ char * fortunes[] = {
   "Have you compiled?",
   "Have you reprogrammed the chip?",
   "Is it connected to the internet?",
+  "Mini-golf is all about patience and correcting the putter angle",
   // Keep this 0 here!
   0
   };
 
+int num_fortunes = -1;
+
 /** Unecessary waste of work time */
 void ui_fortune(char * cmdstr)
 {
-  armprintf (fortunes[fortune_idx]);
-  fortune_idx++;
-  if (fortunes[fortune_idx] == 0)
-    fortune_idx = 0;
+  int r = 0;
+
+  if (num_fortunes == -1)
+  {
+    num_fortunes = 0;
+    while (fortunes[fortune_idx] != 0)
+    {
+      fortune_idx++;
+      num_fortunes++;
+    }
+  }
+
+  // Random-number generate from TC0
+  r = (AT91C_BASE_TC0->TC_CV % num_fortunes);
+
+  armprintf (fortunes[r]);
 }
 

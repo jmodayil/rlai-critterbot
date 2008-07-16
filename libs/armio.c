@@ -36,7 +36,7 @@ int armsscanf(char *source, char *format, ...) {
     switch(*++format) {
       case 'd':
         ival = va_arg(ap,int *); 
-        if(ret = armatoi(source, ival))
+        if((ret = armatoi(source, ival)))
           pnum++;
         else
           return pnum;
@@ -44,7 +44,7 @@ int armsscanf(char *source, char *format, ...) {
         break;
       case 'u':
         uival = va_arg(ap,unsigned int *);
-        if(ret = armatoi(source, (int*)uival))
+        if((ret = armatoi(source, (int*)uival)))
           pnum++;
         else
           return pnum;
@@ -170,6 +170,8 @@ void armprintf(char *format, ...) {
 					armputchar(*sval);
 				break;
 			case 'c':
+        // MGB: Added sval = buf, seems like this would fail otherwise
+        sval = buf;
 				*sval = (char)va_arg(ap, int);
 				armputchar(*sval);
 				break;

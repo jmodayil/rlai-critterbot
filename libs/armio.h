@@ -17,7 +17,11 @@
 #define MAX_INT_PRINT_SIZE 32
 #define SIGNED 1
 #define UNSIGNED 0
+
+#ifndef EOF
 #define EOF -1
+#endif
+
 #define MCK 47923200
 #define SER_BRGR (MCK / 16 / SER_BAUD_RATE)
 

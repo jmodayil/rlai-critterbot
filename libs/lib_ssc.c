@@ -14,6 +14,7 @@
 #include "lib_ssc.h"
 #include <stdio.h>
 
+#include "armio.h"
 /*
  *  Initialize the SSC unit
  */
@@ -105,7 +106,6 @@ void ssc_init() {
 void ssc_send_packet( struct ssc_packet *packet ) {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
-  int i;
 
   // This is the last packet in the list.
   packet->next_packet = NULL;
@@ -122,12 +122,21 @@ void ssc_send_packet( struct ssc_packet *packet ) {
     ssc->SSC_TPR = (AT91_REG)ssc_data_tail->data_to_write;
     ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
     // If read_data is NULL, we're ignoring received data
-    if( ssc_data_tail->read_data != NULL )  
+    if( ssc_data_tail->read_data != NULL )
+    {
       ssc->SSC_RCR = ssc_data_tail->num_words;
+      ssc->SSC_CR = AT91C_SSC_RXEN;
+      ssc->SSC_PTCR = AT91C_PDC_RXTEN;
+    }
     else
+    {
       ssc->SSC_RCR = 0;
+      // Disable RX if not reading anything
+      ssc->SSC_CR = AT91C_SSC_RXDIS;
+      ssc->SSC_PTCR = AT91C_PDC_RXTDIS;
+    }
     ssc->SSC_TCR = ssc_data_tail->num_words;
-    ssc->SSC_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
+    ssc->SSC_PTCR = AT91C_PDC_TXTEN;
   }
   
 }
@@ -174,11 +183,20 @@ ARM_CODE RAMFUNC void ssc_isr() {
       ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
       // If read_data is NULL, we're ignoring received data
       if( ssc_data_tail->read_data != NULL )
+      {
         ssc->SSC_RCR = ssc_data_tail->num_words;
+        ssc->SSC_PTCR = AT91C_PDC_RXTEN;
+        ssc->SSC_CR = AT91C_SSC_RXEN;
+        // We can enable the RXT now as it relies on the TX clock
+      }
       else
+      {
+        // Leave the SSC disabled
         ssc->SSC_RCR = 0;
+        ssc->SSC_CR = AT91C_SSC_RXDIS;
+      }
       ssc->SSC_TCR = ssc_data_tail->num_words;
-      ssc->SSC_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
+      ssc->SSC_PTCR = AT91C_PDC_TXTEN;
     }
     // We're done for now!
     else {
