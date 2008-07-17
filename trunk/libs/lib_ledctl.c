@@ -139,6 +139,37 @@ inline int ledctl_getdc(int led, int color)
   return ledctl_dc_data[color][led];
 }
 
+unsigned short ledctl_getLOD (int color)
+{
+  // The LOD data lies in two 12-bits chunks, the first to be clocked in
+  //  for each controller.
+  unsigned int twelvebits = ledctl_rxdata[color][0] & 0xFFF;
+  unsigned int fourbits = ledctl_rxdata[color][1] >> 8;
+
+  // The MSB of the LOD data corresponds to LED 15; we keep it this way
+  return ((twelvebits << 4) | fourbits); 
+}
+
+unsigned int ledctl_getTEF()
+{
+  // The TEF comes after the LOD data and is the 17th bit of data. As such,
+  //  it is the 9th MSB of the second chunk of data (recall that we read
+  //  12 bits words from the SSC).
+  unsigned int result = 0;
+  int i;
+
+  // Store each TEF in a corresponding bit
+  for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+    result |= ((ledctl_rxdata[i][1] & 0x0800) >> 7) << i;
+
+  return result;
+}
+
+unsigned int ledctl_geterr()
+{
+  return ledctl_xerr;
+}
+
 /** End LED controller core driver **/
 
 RAMFUNC void tc0_irq_handler ( void )

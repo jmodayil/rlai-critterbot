@@ -110,4 +110,25 @@ void ledctl_setdc(int led, int red, int green, int blue);
   */
 int ledctl_getdc(int led, int color);
 
+/** Interface to the LED controller driver
+  *  Returns 16 bits, one per LED, containing LOD (LED Open Detection)
+  *   status. A set bit indicates that the LED is open.
+  *
+  *  color must be in range 0-2
+  */
+unsigned short ledctl_getLOD (int color);
+
+/** Interface to the LED controller driver
+  *  Returns nonzero if the TEF (Thermal Error Flag) of one of the LED 
+  *   controllers is high. Bit 0-2 are set for each particular TEF.
+  *
+  */
+unsigned int ledctl_getTEF();
+
+/** Interface to the LED controller driver
+  *  Returns nonzero if XERR is low, i.e. an error has been detected by
+  *   the LED controllers. Read LOD and TEF to get more detailed information.
+  *
+  */
+unsigned int ledctl_geterr();
 #endif /* LIB_LEDCTL_H */
