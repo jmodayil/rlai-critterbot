@@ -17,6 +17,8 @@
 // Included for EOF, NULL
 #include <stdio.h>
 
+#define STATUS_STRING(a) ( (a)? "OK" : "FAIL" )
+
 /* Structure used to hold command name + function pairs */
 typedef struct {
   char * name;
@@ -37,6 +39,7 @@ ui_cmd_item ui_commands[] = {
   {"setall", ui_setall, "setall"},
   {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
   {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
+  {"status", ui_status, "status"},
   {"test", ui_test, "test [ramfunc|sanity]"},
   {"fortune", ui_fortune, "fortune"}
 };
@@ -159,7 +162,22 @@ void ui_getled (char * cmdstr)
 
 void ui_statled(char * cmdstr)
 {
-  armprintf ("Aha! LED status not implemented!\n");
+  int i;
+
+  armprintf ("XERR status: %d\n", ledctl_geterr());
+  for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+    armprintf ("LOD %d status: %x\n", i, ledctl_getLOD(i));
+  armprintf ("TEF status: %x\n", ledctl_getTEF());
+
+  armprintf ("If LOD or TEF != 0 and XERR is on or vice-versa, "
+    "report to MGB.\n");
+  armprintf ("\n");
+}
+
+void ui_status(char * cmdstr)
+{
+  armprintf ("LED status: %s\n", STATUS_STRING(!ledctl_geterr()));
+  armprintf("\n");
 }
 
 void ui_clearall(char * cmdstr)
