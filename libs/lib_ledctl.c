@@ -38,6 +38,8 @@
 #define TC_TIMER_DIV5_100HZ_RC 468
 
 // Array holding the 16 grayscale LED values
+// A note about this buffer - ledctl_txdata[x][0] actually refers to the
+//  colors of LED 15, because the data is sent backwards. Use ledctl_setcolor.
 unsigned short ledctl_txdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 // Array to receive the 16 status values from the LED controller
 unsigned short ledctl_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
@@ -49,6 +51,8 @@ unsigned char ledctl_disabled = 1;
 
 // Dot correction data, arranged by channel then LED
 // Valid values are between 0 and 63
+//  Remember that ledctl_dc_data[x][0] corresponds to the 15th LED and 
+//  vice-versa (set_dc takes care of this)
 unsigned char ledctl_dc_data[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS] = {
   {  0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F,
      0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F },
@@ -100,12 +104,12 @@ void ledctl_senddata_all()
 
 inline void ledctl_setvalue(int device, int led, int value)
 {
-  ledctl_txdata[device][led] = value;
+  ledctl_txdata[device][LEDCTL_NUM_LEDS-1-led] = value;
 }
 
 inline int ledctl_getvalue(int device, int led)
 {
-  return ledctl_txdata[device][led];
+  return ledctl_txdata[device][LEDCTL_NUM_LEDS-1-led];
 }
 
 inline int ledctl_getstatus(int device, int led)
@@ -117,26 +121,31 @@ inline int ledctl_getstatus(int device, int led)
 
 inline void ledctl_setcolor(int led, int red, int green, int blue)
 {
-  ledctl_txdata[RED_CONTROLLER][led] = red;
-  ledctl_txdata[GREEN_CONTROLLER][led] = green;
-  ledctl_txdata[BLUE_CONTROLLER][led] = blue;
+  // The compiler should be smart enough to hardcode this?
+  unsigned int base=LEDCTL_NUM_LEDS-1;
+
+  ledctl_txdata[RED_CONTROLLER][base-led] = red;
+  ledctl_txdata[GREEN_CONTROLLER][base-led] = green;
+  ledctl_txdata[BLUE_CONTROLLER][base-led] = blue;
 }
 
 inline int ledctl_getcolor(int led, int color)
 {
-  return ledctl_txdata[color][led];
+  return ledctl_txdata[color][LEDCTL_NUM_LEDS-1-led];
 }
 
 inline void ledctl_setdc(int led, int red, int green, int blue)
 {
-  ledctl_dc_data[RED_CONTROLLER][led] = red;
-  ledctl_dc_data[GREEN_CONTROLLER][led] = green;
-  ledctl_dc_data[BLUE_CONTROLLER][led] = blue;
+  unsigned int base=LEDCTL_NUM_LEDS-1;
+
+  ledctl_dc_data[RED_CONTROLLER][base-led] = red;
+  ledctl_dc_data[GREEN_CONTROLLER][base-led] = green;
+  ledctl_dc_data[BLUE_CONTROLLER][base-led] = blue;
 }
 
 inline int ledctl_getdc(int led, int color)
 {
-  return ledctl_dc_data[color][led];
+  return ledctl_dc_data[color][LEDCTL_NUM_LEDS-1-led];
 }
 
 unsigned short ledctl_getLOD (int color)
@@ -284,7 +293,8 @@ void ledctl_init( void )
   {
     ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet[i].data_to_write = ledctl_txdata[i];
-    ledctl_ssc_packet[i].read_data = ledctl_rxdata[i];
+    // We reverse the buffers for reading, as the data comes back backwards
+    ledctl_ssc_packet[i].read_data = ledctl_rxdata[LEDCTL_NUM_CONTROLLERS-1-i];
     ledctl_ssc_packet_dc[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet_dc[i].data_to_write = (unsigned short*)ledctl_dc_data[i];
     ledctl_ssc_packet_dc[i].read_data = NULL;
