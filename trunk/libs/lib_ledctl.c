@@ -48,6 +48,8 @@ struct ssc_packet ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS];
 unsigned int ledctl_xerr;
 
 unsigned char ledctl_disabled = 1;
+// If enable_gsk = 1, enable the GSCk at the next 100Hz tick
+unsigned int enable_gsck = 0;
 
 // Dot correction data, arranged by channel then LED
 // Valid values are between 0 and 63
@@ -76,6 +78,12 @@ void ledctl_newcycle ( void )
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+
+  if (enable_gsck == 1)
+  {
+    AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
+    enable_gsck = 0;
+  }
 
   // Set the XERR bit if the XERR line is low
   ledctl_xerr = 
@@ -231,7 +239,6 @@ void ledctl_dc( void ) {
   // First, disable the LED controller; we can't disable the 100Hz 
   //  interrupt as others might need it
   ledctl_disable();
-  armprintf ("DC Disabled\n");
 
   // Store the TFMR status
   tfmr_status = ssc->SSC_TFMR;
@@ -245,16 +252,13 @@ void ledctl_dc( void ) {
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
   ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished = 0;
 
-  armprintf ("DC SSC Ahoy!\n");
   // Send all three DC packets
   for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
     ssc_send_packet(&ledctl_ssc_packet_dc[i]);
 
-  armprintf ("DC Waitingfor finished\n");
   // Wait for the data to have been sent
   while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
 
-  armprintf ("DC Finished\n");
   // We need to XLAT to send the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
@@ -269,17 +273,20 @@ void ledctl_dc( void ) {
   // Enable the LED driver
   if (!ledctl_is_disabled)
     ledctl_enable();
-  armprintf ("DC bye bye\n");
 }
 
 void ledctl_disable()
 {
   ledctl_disabled = 1;
+  // Disable the GSCK as well
+  AT91F_PWMC_StopChannel(AT91C_BASE_PWMC, 0);
 }
 
 void ledctl_enable()
 {
   ledctl_disabled = 0;
+  // Don't restart the GSCK right away; wait until end of cycle
+  enable_gsck = 1;
 }
 
 unsigned int ledctl_data_sent()
@@ -352,7 +359,6 @@ void ledctl_init( void )
   AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
   AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
   AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
-  AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
 
   // Enable the LED driver
   ledctl_enable();

@@ -279,7 +279,7 @@ RAMFUNC void ui_test_ramfunc(char * cmdstr)
   */
 void ui_test (char * cmdstr)
 {
-  if (armsscanf("%s %s", ui_cmdname, ui_strarg) < 2)
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
   {
     armprintf ("Test what?\n");
     return;
@@ -333,5 +333,6 @@ void ui_fortune(char * cmdstr)
   r = (AT91C_BASE_TC0->TC_CV % num_fortunes);
 
   armprintf (fortunes[r]);
+  armprintf ("\n");
 }
 
