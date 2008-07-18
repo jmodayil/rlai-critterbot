@@ -61,6 +61,7 @@ unsigned char ledctl_dc_data[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS] = {
   {  0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F,
      0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F, 0x3F }
 };
+unsigned char ledctl_dc_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 
 struct ssc_packet ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS];
 
@@ -230,6 +231,7 @@ void ledctl_dc( void ) {
   // First, disable the LED controller; we can't disable the 100Hz 
   //  interrupt as others might need it
   ledctl_disable();
+  armprintf ("DC Disabled\n");
 
   // Store the TFMR status
   tfmr_status = ssc->SSC_TFMR;
@@ -243,13 +245,16 @@ void ledctl_dc( void ) {
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
   ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished = 0;
 
+  armprintf ("DC SSC Ahoy!\n");
   // Send all three DC packets
   for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
     ssc_send_packet(&ledctl_ssc_packet_dc[i]);
 
+  armprintf ("DC Waitingfor finished\n");
   // Wait for the data to have been sent
   while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
 
+  armprintf ("DC Finished\n");
   // We need to XLAT to send the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
@@ -264,7 +269,7 @@ void ledctl_dc( void ) {
   // Enable the LED driver
   if (!ledctl_is_disabled)
     ledctl_enable();
-
+  armprintf ("DC bye bye\n");
 }
 
 void ledctl_disable()
@@ -297,7 +302,7 @@ void ledctl_init( void )
     ledctl_ssc_packet[i].read_data = ledctl_rxdata[LEDCTL_NUM_CONTROLLERS-1-i];
     ledctl_ssc_packet_dc[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet_dc[i].data_to_write = (unsigned short*)ledctl_dc_data[i];
-    ledctl_ssc_packet_dc[i].read_data = NULL;
+    ledctl_ssc_packet_dc[i].read_data = (unsigned short*)ledctl_dc_rxdata[i];
 
     // Initialize LED values to 0
     for (l = 0; l < LEDCTL_NUM_LEDS; l++)
