@@ -28,6 +28,14 @@ void spi_init() {
   *AT91C_PIOA_BSR = SPI_B_PINS;
   *AT91C_PIOA_PDR = SPI_A_PINS | SPI_B_PINS;
   
+  
+  AT91F_AIC_ConfigureIt( AT91C_BASE_AIC, 
+                         AT91C_ID_SPI,
+                         SPI_INTERRUPT_PRIORITY,
+                         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
+                         spi_isr );
+  AT91F_AIC_EnableIt( AT91C_BASE_AIC, AT91C_ID_SPI );
+  
   /*  SPI Mode Register
    *
    *  Master mode
@@ -47,13 +55,7 @@ void spi_init() {
   spi->SPI_CSR[3] = SPI_CSR3_SETTINGS;
   
   // Enable interrupts 
-  AT91F_AIC_ConfigureIt( AT91C_BASE_AIC, 
-                         AT91C_ID_SPI,
-                         SPI_INTERRUPT_PRIORITY,
-                         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
-                         spi_isr );
   spi->SPI_IER = AT91C_US_ENDRX | AT91C_US_ENDTX;
-  AT91F_AIC_EnableIt( AT91C_BASE_AIC, AT91C_ID_SPI );
   
   // Enable SPI
   spi->SPI_CR = AT91C_SPI_SPIEN;
@@ -134,6 +136,8 @@ ARM_CODE RAMFUNC void spi_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
+  if(spi_data_tail == NULL)
+    return;
   if( spi->SPI_SR & ( AT91C_SPI_ENDRX | AT91C_SPI_ENDTX ) ) {
     // Disable PDC transfers just to be safe
     spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;

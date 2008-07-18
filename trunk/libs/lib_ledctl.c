@@ -17,6 +17,9 @@
  *  
  *
  */
+
+#include "oldsim.c"
+
 #include <stdio.h>
 #include <string.h>
 
@@ -192,6 +195,7 @@ unsigned int ledctl_geterr()
 
 RAMFUNC void tc0_irq_handler ( void )
 {
+  int i;
   AT91PS_TC pTC = AT91C_BASE_TC0;
 
   unsigned int status = pTC->TC_SR;
@@ -201,6 +205,10 @@ RAMFUNC void tc0_irq_handler ( void )
     // Begin a new duty cycle for the LED controllers
     ledctl_newcycle();
   }
+  /*startup(2);
+  for(i=0;i<16;i++) {
+    ledctl_setcolor(i, LED[i].r, LED[i].g, LED[i].b);
+  }*/
 }
 
 void ledctl_inittimer ( void )
@@ -239,7 +247,7 @@ void ledctl_dc( void ) {
   // First, disable the LED controller; we can't disable the 100Hz 
   //  interrupt as others might need it
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-  ledctl_disable();
+  //ledctl_disable();
 
   // Store the TFMR status
   tfmr_status = ssc->SSC_TFMR;
@@ -269,11 +277,9 @@ void ledctl_dc( void ) {
   
   // Reset the previous configuration
   ssc->SSC_TFMR = bits_per_word | tfmr_status;
-  // Enable receiving again
-  ssc->SSC_CR = AT91C_SSC_RXEN;
   // Enable the LED driver
-  if (!ledctl_is_disabled)
-    ledctl_enable();
+  //if (!ledctl_is_disabled)
+  //  ledctl_enable();
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
 }
 
@@ -299,7 +305,7 @@ unsigned int ledctl_data_sent()
 void ledctl_init( void )
 {
   int i, l;
-
+  volatile int j;
   armprintf ("LEDCTL init packets\n");
 
   // Initalize the packets for both data and dot correction
@@ -336,12 +342,6 @@ void ledctl_init( void )
 
   // Should not be necessary, but disable anyway
   ledctl_disable();
-
-  // Now BLANK and XLAT in order to load the new data into the LED controllers
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
  
   // Run dot-correction initially
   ledctl_dc(); 
@@ -355,6 +355,20 @@ void ledctl_init( void )
   // Wait for the data to have been sent
   while (!ledctl_data_sent()) ;
   
+  // Now BLANK and XLAT in order to load the new data into the LED controllers
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
+  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+ 
+  for(j=0;j<5000000;j++);
+  
+  ledctl_senddata_all();
+  
+  // Wait for the data to have been sent
+  while (!ledctl_data_sent()) ;
+  
+  ledctl_disable(); 
   // Initialize the grayscale clock, but we won't start it until the
   //  next cycle (ledctl_enable will set up a flag for that)
 
