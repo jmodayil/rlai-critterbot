@@ -327,6 +327,7 @@ void ledctl_init( void )
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK );
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT );
   AT91F_PIO_CfgInput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
+  AT91F_PIO_CfgPullup( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
  
   armprintf ("LEDCTL dot correction\n");
