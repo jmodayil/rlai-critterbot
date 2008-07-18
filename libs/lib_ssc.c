@@ -82,7 +82,6 @@ void ssc_init() {
    */
   ssc->SSC_RFMR = SSC_SETTINGS;
   ssc->SSC_TFMR = SSC_SETTINGS;
-  armprintf("Configuring SSC Interrupts.\n");
   // Enable an interrupt on end of transfer/receive
   AT91F_AIC_ConfigureIt ( AT91C_BASE_AIC,
                           AT91C_ID_SSC,
@@ -90,12 +89,9 @@ void ssc_init() {
                           AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
                           ssc_isr);
   ssc->SSC_IER = AT91C_SSC_ENDTX | AT91C_SSC_ENDRX;
-  armprintf("Enabling SSC Interrupts.\n");
   AT91F_AIC_EnableIt ( AT91C_BASE_AIC, AT91C_ID_SSC );
-  armprintf("Arm Interrupts Enabled.\n");
   // Enable SSC
   ssc->SSC_CR = AT91C_SSC_RXEN | AT91C_SSC_TXEN;
-  armprintf("SSC Enabled.\n");
 }
 
 

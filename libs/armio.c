@@ -270,7 +270,6 @@ int armreadline(char *read_to, int max_size) {
     if(++read_loc == buf_end)
       read_loc = ser_rx_buf;
   }
-  armputchar('^'); 
   for(size = 0; ser_rx_head != read_loc; size++) {
     if(size == max_size)
       return EOF;
@@ -281,7 +280,6 @@ int armreadline(char *read_to, int max_size) {
   *read_to = '\0';
   if(++read_loc == buf_end)
     read_loc = ser_rx_buf;
-  armputchar('*');
   return size;
 }
 
