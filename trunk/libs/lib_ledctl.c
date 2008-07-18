@@ -332,23 +332,28 @@ void ledctl_init( void )
  
   armprintf ("LEDCTL dot correction\n");
 
-  // Run dot-correction initially
-  ledctl_dc(); 
-  
-  armprintf ("LEDCTL send data\n");
-  // Send the initial LED data, which should be all 0's
-  ledctl_senddata_all();
-  // Wait for the data to have been sent
-  while (!ledctl_data_sent()) ;
+  // Should not be necessary, but disable anyway
+  ledctl_disable();
 
+  // Send the initial LED data, which should be all 0's. We send this before
+  //  DC because the DC routine enables the LED controller
+  ledctl_senddata_all();
+  
   // Now BLANK and XLAT in order to load the new data into the LED controllers
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
  
-  // Start the grayscale clock - must be done after dot correction and
-  //  sending the LED data to avoid 'flashing' the LEDs
+  // Run dot-correction initially
+  ledctl_dc(); 
+  
+  armprintf ("LEDCTL send data\n");
+  // Wait for the data to have been sent
+  while (!ledctl_data_sent()) ;
+
+  // Initialize the grayscale clock, but we won't start it until the
+  //  next cycle (ledctl_enable will set up a flag for that)
 
   // Enable power to the PWM controller for GSClock
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
