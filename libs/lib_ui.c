@@ -40,6 +40,7 @@ ui_cmd_item ui_commands[] = {
   {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
   {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
   {"status", ui_status, "status"},
+  {"mode", ui_mode, "mode <led [gs|dc]>"},
   {"test", ui_test, "test [ramfunc|sanity]"},
   {"fortune", ui_fortune, "fortune"}
 };
@@ -260,9 +261,34 @@ void ui_getdot (char * cmdstr)
 
 }
 
+void ui_mode (char * cmdstr)
+{
+  char modestr[64];
+
+  if (armsscanf(cmdstr, "%s %s %s", ui_cmdname, ui_strarg, modestr) < 3)
+  {
+    armprintf ("Invalid argument(s) to ui_mode.\n");
+    return;
+  }
+
+  // Set the LED mode
+  if (strncmp(ui_strarg, "led", sizeof(ui_strarg)) == 0)
+  {
+    if (strncmp (modestr, "gs", sizeof(modestr)) == 0)
+      ledctl_setmode(FIRST_GRAYSCALE);
+    else if (strncmp(modestr, "dc", sizeof(modestr)) == 0)
+      ledctl_setmode(FIRST_DOT_CORRECTION);
+    else
+      armprintf ("Valid LED modes are: gs, dc.\n");
+  }
+  else
+    armprintf ("Valid modes are: led.\n");
+}
+
 RAMFUNC void ui_test_ramfunc(char * cmdstr)
 {
   armprintf (cmdstr);
+  armprintf ("\n");
 }
 
 /** Tests something, specified by the first argument. E.g.
