@@ -225,8 +225,8 @@ void ui_setdot(char * cmdstr)
 
   // Re-apply dot-correction right away
   armprintf ("Applying dot correction...");
-  ledctl_dc();
-  armprintf ("Done!\n");
+  // ledctl_dc();
+  armprintf ("Not yet! Use mode led dc.\n");
 }
 
 /** Returns the DC of a given led (0-15) */
