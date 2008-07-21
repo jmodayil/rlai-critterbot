@@ -18,8 +18,6 @@
  *
  */
 
-#include "oldsim.c"
-
 #include <stdio.h>
 #include <string.h>
 
@@ -50,9 +48,7 @@ struct ssc_packet ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS];
 
 unsigned int ledctl_xerr;
 
-unsigned char ledctl_disabled = 1;
-// If enable_gsk = 1, enable the GSCk at the next 100Hz tick
-unsigned int enable_gsck = 0;
+enum ledctl_state_type ledctl_state = GRAYSCALE;
 
 // Dot correction data, arranged by channel then LED
 // Valid values are between 0 and 63
@@ -70,35 +66,61 @@ unsigned char ledctl_dc_rxdata[LEDCTL_NUM_CONTROLLERS][LEDCTL_NUM_LEDS];
 
 struct ssc_packet ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS];
 
-void ledctl_newcycle ( void )
+void ledctl_event ( void )
 {
-  if (ledctl_disabled) return;
+  AT91PS_SSC ssc = AT91C_BASE_SSC;
+  int tfmr_status;
 
   // Tell the LED controllers to start a new cycle; the sequence is
-  // BLANK-on XLAT-on XLAT-off BLANK-off
+  // BLANK-on XLAT-on XLAT-off BLANK-off (if not first cycle of mode)
   //  This relies a CPU clock cycle being slower than 20ns
+  // Also, we should never reach this part of the code in GRAYSCALE or
+  //  DOT_CORRECTION state without having sent the data previously; hence
+  //  the XLAT is valid. If the state is FIRST_*, then BLANK will not be
+  //  de-asserted, and so the XLAT is harmless.
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-
-  if (enable_gsck == 1)
-  {
-    AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
-    enable_gsck = 0;
-  }
 
   // Set the XERR bit if the XERR line is low
+  // @@@ move me out
   ledctl_xerr = 
     (!AT91F_PIO_IsInputSet ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR ));
+  
   // Send the data for the next cycle
   // @@@ Test for finished flag first - do what if not finished?
-  ledctl_senddata_all();
-}
-
-void ledctl_senddata(int device)
-{
-  ssc_send_packet(&ledctl_ssc_packet[device]);
+  switch (ledctl_state)
+  {
+    case GRAYSCALE:
+      ledctl_senddata_all();
+      AT91F_PIO_ClearOutput (AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+      break;
+    case FIRST_GRAYSCALE:
+      // Set up the SSC to send 12 bits words, leaving the rest of the mode
+      //  register unchanged
+      tfmr_status = ssc->SSC_TFMR;
+      ssc->SSC_TFMR = (LEDCTL_GS_WORD_SIZE & AT91C_SSC_DATLEN) | 
+        (tfmr_status & ~AT91C_SSC_DATLEN);
+      
+      AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE ); 
+      ledctl_senddata_all();
+      ledctl_state = GRAYSCALE;
+      break;
+    case DOT_CORRECTION:
+      ledctl_senddata_dc();
+      AT91F_PIO_ClearOutput (AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+      break;
+    case FIRST_DOT_CORRECTION:
+      // Set up the SSC to send 6 bits words
+      tfmr_status = ssc->SSC_TFMR;
+      ssc->SSC_TFMR = (LEDCTL_DC_WORD_SIZE & AT91C_SSC_DATLEN) | 
+        (tfmr_status & ~AT91C_SSC_DATLEN);
+      
+      AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE ); 
+      ledctl_senddata_dc();
+      ledctl_state = DOT_CORRECTION;
+      break;
+  }
 }
 
 void ledctl_senddata_all()
@@ -110,7 +132,20 @@ void ledctl_senddata_all()
     // @@@ Error detection: if finished != 0 for some packet, be unhappy
     // This also will require starting with finished = 1
     ledctl_ssc_packet[i].finished = 0;
-    ledctl_senddata(i);
+    ssc_send_packet(&ledctl_ssc_packet[i]);
+  }
+}
+
+void ledctl_senddata_dc()
+{
+  int i;
+
+  for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+  {
+    // @@@ Error detection: if finished != 0 for some packet, be unhappy
+    // This also will require starting with finished = 1
+    ledctl_ssc_packet_dc[i].finished = 0;
+    ssc_send_packet(&ledctl_ssc_packet_dc[i]);
   }
 }
 
@@ -191,11 +226,32 @@ unsigned int ledctl_geterr()
   return ledctl_xerr;
 }
 
+void ledctl_setmode(enum ledctl_state_type mode)
+{
+  // To avoid interfering with the 100Hz timer, this simply flags the
+  //  state as FIRST_*. The proper changes are applied during the next 
+  //  100Hz cycle.
+  switch (mode)
+  {
+    case GRAYSCALE:
+    case FIRST_GRAYSCALE:
+      ledctl_state = FIRST_GRAYSCALE;
+      break;
+    case DOT_CORRECTION:
+    case FIRST_DOT_CORRECTION:
+      ledctl_state = FIRST_DOT_CORRECTION;
+      break;
+      default:
+        // Raise some sort of error flag?
+        armprintf ("Invalid mode in ledctl_setmode\n");
+        break;
+  }
+}
+
 /** End LED controller core driver **/
 
 RAMFUNC void tc0_irq_handler ( void )
 {
-  int i;
   AT91PS_TC pTC = AT91C_BASE_TC0;
 
   unsigned int status = pTC->TC_SR;
@@ -203,7 +259,7 @@ RAMFUNC void tc0_irq_handler ( void )
   if (status & AT91C_TC_CPCS)
   {
     // Begin a new duty cycle for the LED controllers
-    ledctl_newcycle();
+    ledctl_event();
   }
   /*startup(2);
   for(i=0;i<16;i++) {
@@ -216,6 +272,7 @@ void ledctl_inittimer ( void )
   AT91PS_AIC pAic = AT91C_BASE_AIC;
 
   // Enable power to the PIO (for sending BLANK/XLAT) and to the TC0
+  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PIOA );
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_TC0 );
   
   // Configure TC0 to run at 100Hz
@@ -225,7 +282,7 @@ void ledctl_inittimer ( void )
 
   // Enable the TC0 interrupt to trigger on RC compare
   AT91F_AIC_ConfigureIt(pAic, AT91C_ID_TC0, TC_INTERRUPT_LEVEL,
-  AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE, tc0_irq_handler);
+  AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE, (void*)tc0_irq_handler);
   AT91F_TC_InterruptEnable(AT91C_BASE_TC0, AT91C_TC_CPCS);
   AT91F_AIC_EnableIt (pAic, AT91C_ID_TC0);
 
@@ -235,66 +292,36 @@ void ledctl_inittimer ( void )
 }
 
 /**
-  * Applies dot correction
+  * Applies initial dot correction. The grayscale clock should be disabled
+  *  when this is called, to avoid flashing LEDs.
   */
 void ledctl_dc( void ) {
   AT91PS_SSC ssc = AT91C_BASE_SSC;
-  int bits_per_word;
   int tfmr_status;
-  unsigned int ledctl_is_disabled = ledctl_disabled;
-  int i;
-
-  // First, disable the LED controller; we can't disable the 100Hz 
-  //  interrupt as others might need it
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-  //ledctl_disable();
-
-  // Store the TFMR status
-  tfmr_status = ssc->SSC_TFMR;
-  bits_per_word = tfmr_status & AT91C_SSC_DATLEN;
-
-  // Set up the SSC to send 6 bits words, leaving the rest of the mode
-  //  register unchanged
-  ssc->SSC_TFMR = (5 & AT91C_SSC_DATLEN) | (tfmr_status & ~AT91C_SSC_DATLEN);
   
-  // Change to dot correction mode
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
-  ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished = 0;
+  // Blank as a precaution
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
 
-  // Send all three DC packets
-  for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
-    ssc_send_packet(&ledctl_ssc_packet_dc[i]);
+  // We have to set the MODE manually here, as well as word size in the SSC
+  tfmr_status = ssc->SSC_TFMR;
+  ssc->SSC_TFMR = (LEDCTL_DC_WORD_SIZE & AT91C_SSC_DATLEN) | 
+      (tfmr_status & ~AT91C_SSC_DATLEN);
+      
+  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE ); 
+
+  // Send the DC data
+  ledctl_senddata_dc();
 
   // Wait for the data to have been sent
   while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
 
-  // We need to XLAT to send the DC data in
+  // We need to XLAT to get the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
 
-  // Reset the mode to grayscale mode 
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE);
-  
-  // Reset the previous configuration
-  ssc->SSC_TFMR = bits_per_word | tfmr_status;
-  // Enable the LED driver
-  //if (!ledctl_is_disabled)
-  //  ledctl_enable();
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-}
+  ledctl_setmode(FIRST_GRAYSCALE);
 
-void ledctl_disable()
-{
-  ledctl_disabled = 1;
-  // Disable the GSCK as well
-  AT91F_PWMC_StopChannel(AT91C_BASE_PWMC, 0);
-}
-
-void ledctl_enable()
-{
-  ledctl_disabled = 0;
-  // Don't restart the GSCK right away; wait until end of cycle
-  enable_gsck = 1;
+  // Leave BLANK asserted until the next cycle to avoid flashing lights
 }
 
 unsigned int ledctl_data_sent()
@@ -302,11 +329,10 @@ unsigned int ledctl_data_sent()
   return (ledctl_ssc_packet[LEDCTL_NUM_CONTROLLERS-1].finished > 0);
 }
 
-void ledctl_init( void )
+
+void ledctl_init_packets()
 {
   int i, l;
-  volatile int j;
-  armprintf ("LEDCTL init packets\n");
 
   // Initalize the packets for both data and dot correction
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
@@ -328,6 +354,28 @@ void ledctl_init( void )
       ledctl_rxdata[i][l] = 0;
     }
   }
+}
+
+/** Initializes, but does not start, the grayscale clock sent using PWM */
+void ledctl_init_gsclock()
+{
+  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
+  // Setup the PWM
+  AT91C_BASE_PIOA->PIO_PDR = AT91C_PA23_PWM0;
+  AT91C_BASE_PIOA->PIO_BSR = AT91C_PA23_PWM0;
+
+  AT91C_BASE_PWMC->PWMC_MR = 1 | AT91C_PWMC_PREA_MCK;
+  AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
+  AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
+  AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
+  AT91F_PWMC_StartChannel(AT91C_BASE_PWMC, 0);
+}
+
+void ledctl_init( void )
+{
+  armprintf ("LEDCTL init packets\n");
+
+  ledctl_init_packets();
   
   // Configure the PIO pins properly
   AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PIOA );
@@ -340,50 +388,14 @@ void ledctl_init( void )
  
   armprintf ("LEDCTL dot correction\n");
 
-  // Should not be necessary, but disable anyway
-  ledctl_disable();
- 
-  // Run dot-correction initially
+  // Run dot-correction initially; it will set the state to FIRST_GRAYSCALE,
+  //  allowing us to begin clock grayscale data. BLANK is also left high 
+  //  and will be de-asserted only in two 100Hz cycles.
   ledctl_dc(); 
   
   armprintf ("LEDCTL send data\n");
 
-  // Send the initial LED data, which should be all 0's. We send this before
-  //  DC because the DC routine enables the LED controller
-  ledctl_senddata_all();
-  
-  // Wait for the data to have been sent
-  while (!ledctl_data_sent()) ;
-  
-  // Now BLANK and XLAT in order to load the new data into the LED controllers
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
-  AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
-  AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
- 
-  for(j=0;j<5000000;j++);
-  
-  ledctl_senddata_all();
-  
-  // Wait for the data to have been sent
-  while (!ledctl_data_sent()) ;
-  
-  ledctl_disable(); 
-  // Initialize the grayscale clock, but we won't start it until the
-  //  next cycle (ledctl_enable will set up a flag for that)
-
-  // Enable power to the PWM controller for GSClock
-  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PWMC );
-  // Setup the PWM
-  AT91C_BASE_PIOA->PIO_PDR = AT91C_PA23_PWM0;
-  AT91C_BASE_PIOA->PIO_BSR = AT91C_PA23_PWM0;
-
-  AT91C_BASE_PWMC->PWMC_MR = 1 | AT91C_PWMC_PREA_MCK;
-  AT91C_BASE_PWMC->PWMC_ENA = AT91C_PWMC_CHID0;
-  AT91C_BASE_PWMC->PWMC_CH[0].PWMC_CMR = AT91C_PWMC_CPRE_MCKA;
-  AT91F_PWMC_CfgChannel(AT91C_BASE_PWMC, 0, AT91C_PWMC_CPRE_MCKA, 117, 58);
-
-  // Enable the LED driver
-  ledctl_enable();
+  // Initialize the grayscale clock
+  ledctl_init_gsclock();
 }
 

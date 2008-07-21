@@ -30,6 +30,7 @@ void ui_test (char * cmdstr);
 void ui_setdot (char * cmdstr);
 void ui_getdot (char * cmdstr);
 void ui_status (char * cmdstr);
+void ui_mode (char * cmdstr);
 
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
