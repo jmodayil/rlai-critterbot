@@ -333,8 +333,8 @@ IRQ_Handler_Entry:
 Die_Ungracefully:
 // Put a character (0x3F, ?)
     ldr         r14, =AT91C_BASE_US0
-	  ldr         r0 , =0x3F
-    str         r14, [r14, #US_THR]
+	  ldr         r0 , =234
+    str         r0, [r14, #US_THR]
 
 // Wait for the character to have been sent 
 Send_Wait:       
@@ -342,7 +342,7 @@ Send_Wait:
     ANDS    R0, R0, #0x2
     BEQ     Send_Wait
 
-    B     Die_Ungracefully
+    B     Send_Wait
 
 // Startup Code must be linked first at Address at which it expects to run.
 

@@ -13,10 +13,10 @@
 
 #include "armio.h"
 
-unsigned char accel_txdata[ACCEL_BUFFER_SIZE];
-unsigned char accel_rxdata[ACCEL_BUFFER_SIZE];
+unsigned int accel_txdata[ACCEL_BUFFER_SIZE];
+unsigned int accel_rxdata[ACCEL_BUFFER_SIZE];
 
-unsigned char accel_status;
+unsigned int accel_status;
 // This data is signed!
 short accel_output[ACCEL_NUM_AXES];
 
@@ -40,12 +40,12 @@ void accel_init()
   // Write to the accelerometer's control registers
 
   // Power up (in little-endian)
-  accel_write_reg_block(ACCEL_REG_CTRL1, ACCEL_CTRL1_POWER_LITTLE);
+  //accel_write_reg_block(ACCEL_REG_CTRL1, ACCEL_CTRL1_POWER_ON);
   // Note that there is a 31ms (5 / 160Hz) delay before the first bit of data 
   //  becomes available after we power on the accelerometer
 
   // Switch to big-endian
-  accel_write_reg_block(ACCEL_REG_CTRL2, ACCEL_CTRL2_BIGENDIAN_LITTLE);
+  //accel_write_reg_block(ACCEL_REG_CTRL2, ACCEL_CTRL2_BIGENDIAN_LITTLE);
 
   // CTRL1 settings
   accel_write_reg_block(ACCEL_REG_CTRL1, ACCEL_CTRL1_SETTINGS);
@@ -59,6 +59,7 @@ void accel_init()
   {
     error_set (1 << ID_ACCEL);
     armprintf ("This accelerometer is a spy!\n");
+    armprintf ("Got WHOAMI: %x\n", val);
     // Disable  accelerometer?
   }
 
@@ -77,8 +78,8 @@ void accel_event()
     // The accelerometer data is split into a low part (accel_rxdata[2])
     //  and a high part (accel_rxdata[3]). The high part in 12-bit mode
     //  only has 5 significant values; bits 4-6 must be thrown out.
-    accel_output[i] = accel_rxdata[(i<<1)+2] | 
-      ((accel_rxdata[(i<<1)+3] & 0x8F) << 8);
+    accel_output[i] = (unsigned char)accel_rxdata[(i<<1)+2] | 
+      (((unsigned char)accel_rxdata[(i<<1)+3]) << 8);
   }
   
   // Request status + out values for next event

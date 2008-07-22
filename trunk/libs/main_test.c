@@ -37,6 +37,7 @@ int main()
   // Events has no dependencies
   events_init();
 
+  armprintf("Entering while loop...\n");
   while (1)
   {
     if (events_has_event())

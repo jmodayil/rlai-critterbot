@@ -57,8 +57,8 @@ char ui_strarg[64];
 
 // Reporting mode - if nonzero, the UI will spit out some status information
 //  every so often.
-int ui_report_mode = 0;
-int ui_report_clock = 0;
+volatile int ui_report_mode = 0;
+volatile int ui_report_clock = 0;
 
 /** Finds the requested command in our list of commands.
   * Returns the corresponding item if found, NULL otherwise.
@@ -86,7 +86,7 @@ void ui_event()
     }
   }
 
-  // Check wthether we have new data
+  // Check whether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return;
   // Parse command, return false if not found
