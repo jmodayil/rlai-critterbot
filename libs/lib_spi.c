@@ -172,3 +172,11 @@ ARM_CODE RAMFUNC void spi_isr() {
     }
   }
 }
+
+void spi_set_word_size(unsigned int cs, unsigned int wordsize)
+{
+  AT91PS_SPI spi = AT91C_BASE_SPI;
+  unsigned int settings = spi->SPI_CSR[cs];
+
+  spi->SPI_CSR[cs] = (settings & (~AT91C_SPI_BITS)) | (wordsize+8);
+}

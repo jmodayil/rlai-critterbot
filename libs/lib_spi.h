@@ -10,6 +10,9 @@
 #include "AT91SAM7S256.h"
 #include "compiler.h"
 
+#ifndef LIB_SPI_H
+#define LIB_SPI_H
+
 // Delay between CS signal changes = value / MCK
 // Min = 6, Max = 255
 #define DELAY_BETWEEN_CS (6 << 24)
@@ -146,3 +149,13 @@ void spi_send_packet( struct spi_packet *packet );
  *  to accomplish this.
  */
 ARM_CODE RAMFUNC void spi_isr();
+
+/** Sets the word size for one of the 4 CS (0-3).
+  * This function should not be called while the specified CS is being used
+  * to transmit or receive data.
+  *
+  * Wordsize here is between 0 and 8.
+  */
+void spi_set_word_size(unsigned int cs, unsigned int wordsize);
+
+#endif /* LIB_SPI_H */
