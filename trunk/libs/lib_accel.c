@@ -34,11 +34,12 @@ void accel_init()
   accel_spi_packet.device_id = ACCEL_SPI_DEVICE_ID;
   accel_spi_packet.data_to_write = (unsigned int*)accel_txdata;
   accel_spi_packet.read_data = (unsigned int*)accel_rxdata;
-  // num words will be set on a per-call basis
+  // num words will be set on a per-call basis, but set it to 1 for safety
+  accel_spi_packet.num_words = 1;
 
   // Write to the accelerometer's control registers
 
-  // Power up
+  // Power up (in little-endian)
   accel_write_reg_block(ACCEL_REG_CTRL1, ACCEL_CTRL1_POWER_LITTLE);
   // Note that there is a 31ms (5 / 160Hz) delay before the first bit of data 
   //  becomes available after we power on the accelerometer

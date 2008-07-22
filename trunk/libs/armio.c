@@ -307,7 +307,7 @@ void init_serial_port_stdio(void) {
                         AT91C_ID_US0,
                         AT91C_AIC_PRIOR_LOWEST,
                         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
-                        ser_isr );
+                        (void*)ser_isr );
   AT91C_BASE_US0->US_IER = AT91C_US_ENDRX | AT91C_US_TXBUFE;
   
   AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
