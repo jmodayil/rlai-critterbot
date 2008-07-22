@@ -52,8 +52,8 @@
 /** Some flags used for configuring the accelerometer. The SPI sends data
   * in big-endian, but initially the accel is in little-endian.
   */
-#define ACCEL_CTRL1_POWER_LITTLE      0x03
-#define ACCEL_CTRL2_BIGENDIAN_LITTLE  0x04
+//#define ACCEL_CTRL1_POWER_ON          0xD0
+//#define ACCEL_CTRL2_BIGENDIAN_LITTLE  0x04
 
 /** CTRL1 is: PD1-0 DF1-0 ST Zen Yen Xen
   * Corresponding to 11010111
@@ -75,9 +75,7 @@
 #define ACCEL_CTRL2_DRDY      (1 << 2)
 
 // Don't remove BLE or I will come and get you!
-#define ACCEL_CTRL2_SETTINGS          (ACCEL_CTRL2_FULLSCALE | \
-                                       ACCEL_CTRL2_BDU | \
-                                       ACCEL_CTRL2_BLE | \
+#define ACCEL_CTRL2_SETTINGS          (ACCEL_CTRL2_BDU | \
                                        ACCEL_CTRL2_DRDY)
 
 #define ACCEL_WHOAMI_VALUE    0x3A
@@ -138,7 +136,7 @@ void accel_read (unsigned int address, unsigned count);
 
 // Some variables needed by our inline functions
 extern struct spi_packet accel_spi_packet;
-extern unsigned char accel_status;
+extern unsigned int accel_status;
 extern short accel_output[ACCEL_NUM_AXES];
 
 

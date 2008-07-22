@@ -17,11 +17,11 @@
 #include "lib_error.h"
 #include "lib_events.h"
 
-unsigned int events_status;
+volatile unsigned int events_status;
 
 unsigned int events_has_event()
 {
-  unsigned result = events_status;
+  unsigned int result = events_status;
 
   // Clear and return the status bit
   events_status = 0;
@@ -55,13 +55,20 @@ void events_init()
   AT91C_BASE_TC0->TC_CCR =  ( AT91C_TC_CLKEN | AT91C_TC_SWTRG);
   
   events_status = 0;
+  armprintf("Initialized event timer.\n");
 }
 
 ARM_CODE RAMFUNC void events_isr()
 {
-  // Test for overrun
-  if (events_status)
-    error_set (1 << ID_EVENTS);
-  // Set the flag
-  events_status = 1;
+  AT91PS_TC pTC = AT91C_BASE_TC0;
+
+  unsigned int status = pTC->TC_SR;
+  if(status & AT91C_TC_CPCS) {
+  
+    // Test for overrun
+    if (events_status)
+      error_set (1 << ID_EVENTS);
+    // Set the flag
+    events_status = 1;
+  }
 }

@@ -26,14 +26,15 @@ int main()
 {
   struct spi_packet testdata;
   unsigned int send, receive;
+  volatile int i;
   
-  testdata.device_id = 8;
+  testdata.device_id = 9;
   testdata.num_words = 1;
   testdata.data_to_write = &send;
   testdata.read_data = &receive;
   testdata.finished = 0;
   
-  send = 0;
+  send = 1;
   receive = 0;
   // Initialize the serial port and the LED controller
   init_serial_port_stdio();
@@ -58,7 +59,7 @@ int main()
     //while(!testdata.finished);
     //testdata.finished = 0;
     //armprintf("spi data back: %d\n", (receive & 0xFF));
-    //send = receive;
+    //send = receive + 1;
     //for(i=0;i<1000000;i++);
   }
 }
