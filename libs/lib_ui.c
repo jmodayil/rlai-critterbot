@@ -12,6 +12,7 @@
 #include "lib_ui.h"
 #include "lib_ledctl.h"
 #include "lib_ssc.h"
+#include "lib_accel.h"
 #include "armio.h"
 
 // Included for EOF, NULL
@@ -39,7 +40,9 @@ ui_cmd_item ui_commands[] = {
   {"setall", ui_setall, "setall"},
   {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
   {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
+  {"get_accel", ui_getaccel, "get_accel"},
   {"status", ui_status, "status"},
+  {"report", ui_report, "report"},
   {"mode", ui_mode, "mode <led [gs|dc]>"},
   {"test", ui_test, "test [ramfunc|sanity]"},
   {"fortune", ui_fortune, "fortune"}
@@ -50,6 +53,11 @@ int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
 char ui_command_string[256];
 char ui_cmdname[64];
 char ui_strarg[64];
+
+// Reporting mode - if nonzero, the UI will spit out some status information
+//  every so often.
+int ui_report_mode = 0;
+int ui_report_clock = 0;
 
 /** Finds the requested command in our list of commands.
   * Returns the corresponding item if found, NULL otherwise.
@@ -67,6 +75,16 @@ ui_cmd_item * ui_parse_command(char * cmdstr)
 
 void ui_event()
 {
+  // Report if in reporting mode
+  if (ui_report_mode)
+  {
+    if (++ui_report_clock >= UI_REPORT_INTERVAL)
+    {
+      ui_do_report();
+      ui_report_clock = 0;
+    }
+  }
+
   // Check wthether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return;
@@ -83,6 +101,13 @@ void ui_event()
     // Call function
     (*(cmd->func))(ui_command_string); 
   }
+}
+
+void ui_do_report()
+{
+  // The lazy way - call other status-related functions from the UI
+  ui_statled("stat_led");
+  ui_getaccel("get_accel");
 }
 
 void ui_help(char * cmdstr)
@@ -169,6 +194,8 @@ void ui_statled(char * cmdstr)
 void ui_status(char * cmdstr)
 {
   armprintf ("LED status: %s\n", STATUS_STRING(!ledctl_geterr()));
+  armprintf ("Accelerometer status: %s\n", "N/A");
+  armprintf ("Coffee consumption: 0.266 cup / hr\n");
   armprintf("\n");
 }
 
@@ -259,6 +286,26 @@ void ui_getdot (char * cmdstr)
       break;
   }
 
+}
+
+void ui_getaccel (char * cmdstr)
+{
+  // Report on the three axes & status
+  int i; 
+  unsigned char status = accel_get_status();
+
+  armprintf ("Accelerometer status and outputs: %d ", status);
+  for (i = 0; i < ACCEL_NUM_AXES; i++)
+    armprintf (" %d", accel_get_output(i));
+  armprintf ("\n");
+}
+
+void ui_report (char * cmdstr)
+{
+  // Toggle reporting mode
+  ui_report_mode ^= 0x1;
+  if (!ui_report_mode)
+    ui_report_clock = 0;
 }
 
 void ui_mode (char * cmdstr)

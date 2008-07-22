@@ -20,12 +20,12 @@
 #include "lib_ui.h"
 
 #include "lib_spi.h"
+#include "lib_accel.h"
 
 int main()
 {
   struct spi_packet testdata;
   unsigned int send, receive;
-  volatile int i;
   
   testdata.device_id = 8;
   testdata.num_words = 1;
@@ -47,6 +47,9 @@ int main()
   //  event clock
   ledctl_inittimer();
   armprintf("Initialized timer.\n");
+  accel_init();
+  armprintf ("Initialized accelerometer.\n");
+
   // Repeatedly loop for events
   while (1)
   {

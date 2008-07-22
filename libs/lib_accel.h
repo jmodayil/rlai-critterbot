@@ -74,6 +74,7 @@
 #define ACCEL_CTRL2_IEN       (1 << 3)
 #define ACCEL_CTRL2_DRDY      (1 << 2)
 
+// Don't remove BLE or I will come and get you!
 #define ACCEL_CTRL2_SETTINGS          (ACCEL_CTRL2_FULLSCALE | \
                                        ACCEL_CTRL2_BDU | \
                                        ACCEL_CTRL2_BLE | \
