@@ -30,13 +30,13 @@ LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
 THUMB = -marm
 
 # Lib files to compile
-CSRC = lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c
+CSRC = lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c
 COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.s
 AOBJ = $(ASRC:.s=.o)
 
 # Test targets
-TESTBINS = $(BINDIR)/lib_ui_test.bin
+TESTBINS = $(BINDIR)/lib_ui_test.bin $(BINDIR)/main_test.bin
 
 # Builds libraries (but nothing else)
 all: all_libs

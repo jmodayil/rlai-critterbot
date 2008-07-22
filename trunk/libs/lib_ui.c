@@ -14,6 +14,7 @@
 #include "lib_ssc.h"
 #include "lib_accel.h"
 #include "armio.h"
+#include "lib_error.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -108,6 +109,7 @@ void ui_do_report()
   // The lazy way - call other status-related functions from the UI
   ui_statled("stat_led");
   ui_getaccel("get_accel");
+  armprintf ("Error status: %x\n", error_get());
 }
 
 void ui_help(char * cmdstr)
@@ -195,6 +197,8 @@ void ui_status(char * cmdstr)
 {
   armprintf ("LED status: %s\n", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\n", "N/A");
+  armprintf ("Error status: %x\n", error_get());
+
   armprintf ("Coffee consumption: 0.266 cup / hr\n");
   armprintf("\n");
 }
