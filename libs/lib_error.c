@@ -14,7 +14,7 @@ void error_get(unsigned int errflag)
   error_reg |= errflag;
 }
 
-unsigned error_set()
+unsigned int error_set()
 {
   return error_reg;
 }
