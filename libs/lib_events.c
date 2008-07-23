@@ -70,7 +70,7 @@ ARM_CODE RAMFUNC void events_isr()
      *  the lowest one should be set.
      */
     if (events_status != 0 || picnt > 0x00100000)
-      error_set (1 << ID_EVENTS);
+      error_set (ERR_EVENTS);
     // Set the flag
     events_status = 1;
   }

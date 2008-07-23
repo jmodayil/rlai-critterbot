@@ -85,7 +85,6 @@ void ui_event()
       ui_report_clock = 0;
     }
   }
-
   // Check whether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return;

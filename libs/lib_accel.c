@@ -57,7 +57,7 @@ void accel_init()
   val = accel_read_reg_block(ACCEL_REG_WHOAMI);
   if (val != ACCEL_WHOAMI_VALUE)
   {
-    error_set (1 << ID_ACCEL);
+    error_set (ERR_ACCEL);
     armprintf ("This accelerometer is a spy!\n");
     armprintf ("Got WHOAMI: %x\n", val);
     // Disable  accelerometer?
@@ -101,7 +101,7 @@ void accel_write_reg (unsigned int address, unsigned int data)
 {
   if (accel_spi_packet.finished == 0)
   {
-    error_set(1 << ID_ACCEL);
+    error_set(ERR_ACCEL);
     return;
   }
 
@@ -125,7 +125,7 @@ void accel_write (unsigned int address, unsigned int count)
 {
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {
-    error_set(1 << ID_ACCEL);
+    error_set(ERR_ACCEL);
     return;
   }
 
@@ -156,7 +156,7 @@ void accel_read_reg (unsigned int address)
 {
   if (accel_spi_packet.finished == 0)
   {
-    error_set(1 << ID_ACCEL);
+    error_set(ERR_ACCEL);
     return;
   }
 
@@ -181,7 +181,7 @@ void accel_read (unsigned int address, unsigned int count)
 {
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {
-    error_set(1 << ID_ACCEL);
+    error_set(ERR_ACCEL);
     return;
   }
 

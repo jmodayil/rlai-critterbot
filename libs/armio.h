@@ -22,14 +22,14 @@
 #define EOF -1
 #endif
 
+#define SER_BAUD_RATE 115200 
 #define MCK 47923200
 #define SER_BRGR (MCK / 16 / SER_BAUD_RATE)
 
 #define SERIAL_A_PINS (AT91C_PA5_RXD0 | AT91C_PA6_TXD0)
 #define SERIAL_B_PINS 0
 
-#define SER_BAUD_RATE 230400
-#define SER_TX_BUF_SIZE 1024
+#define SER_TX_BUF_SIZE 1024 
 #define SER_RX_BUF_SIZE 1024
 
 char ser_tx_buf[SER_TX_BUF_SIZE];
@@ -86,13 +86,13 @@ int armsscanf(char*, char*, ...);
 void armitoa(int, char*, int, int );
 int armatoi(char*, int*);
 void strrev(char*);
-__inline int getvalue(char);
+int getvalue(char);
 
 /*
  * Interrupt routine for serial port.
  * Must be run in RAM.
  */ 
-RAMFUNC void ser_isr(void);
+ARM_CODE RAMFUNC void ser_isr(void);
 
 /*
  * Initialize the serail port for character stream input/output
