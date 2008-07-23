@@ -11,7 +11,7 @@
 #define LIB_UI_H
 
 // How frequently to report status in reporting mode, in 100th of a second
-#define UI_REPORT_INTERVAL 200
+#define UI_REPORT_INTERVAL 10
 
 typedef void (*ui_function) (char * cmdstr);
 

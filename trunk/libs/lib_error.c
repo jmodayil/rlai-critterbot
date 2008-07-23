@@ -7,15 +7,27 @@
  *  Error-reporting driver.
  */
 
-unsigned int error_reg;
+#include "lib_error.h"
 
-void error_get(unsigned int errflag)
+void error_set(unsigned int errflag)
 {
   error_reg |= errflag;
 }
 
-unsigned int error_set()
+void error_clear(unsigned int errflag)
+{
+  error_reg &= ~errflag;
+}
+
+unsigned int error_get()
 {
   return error_reg;
 }
 
+void error_disp(void) {
+  int i;
+
+  for(i = 0; i <= ERR_MAXERR; i++)
+    if(error_reg & (1 << i))
+      ledctl_setcolor(i, 1023, 0, 0);
+}

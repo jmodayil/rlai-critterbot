@@ -21,4 +21,7 @@
 #define LEDCTL_PIN_XERR 25
 #define LEDCTL_PIN_MODE 15
 
+// Function to initialized on-chip settings on power-up
+void chip_init(void);
+
 #endif /* ARM_CONFIG_H */

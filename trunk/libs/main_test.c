@@ -17,22 +17,24 @@
 #include "lib_accel.h"
 #include "lib_ui.h"
 #include "lib_events.h"
+#include "lib_error.h"
 #include "armio.h"
 
 int main()
 {
+  
   // serial port should be initialized asap for debugging purposes
   init_serial_port_stdio();
   
   // SPI has no dependencies
-  spi_init();
+  //spi_init();
   // SSC has no dependencies
   ssc_init();
   
   // Ledctl must be initialized after SSC
   ledctl_init();
   // Accel must be initialized after SPI
-  accel_init();
+  //accel_init();
 
   // Events has no dependencies
   events_init();
@@ -42,9 +44,9 @@ int main()
   {
     if (events_has_event())
     {
+      error_disp();
       ledctl_event();
-      accel_event();
-
+      //accel_event();
       // Try to keep ui_event last to avoid modifying other stuff
       ui_event();
     }

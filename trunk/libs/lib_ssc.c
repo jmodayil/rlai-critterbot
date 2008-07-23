@@ -87,8 +87,7 @@ void ssc_init() {
                           AT91C_ID_SSC,
                           SSC_INTERRUPT_PRIORITY,
                           AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
-                          ssc_isr);
-  ssc->SSC_IER = AT91C_SSC_ENDTX | AT91C_SSC_ENDRX;
+                          (void*)ssc_isr);
   AT91F_AIC_EnableIt ( AT91C_BASE_AIC, AT91C_ID_SSC );
   // Enable SSC
   ssc->SSC_CR = AT91C_SSC_RXEN | AT91C_SSC_TXEN;
@@ -123,6 +122,7 @@ void ssc_send_packet( struct ssc_packet *packet ) {
       ssc->SSC_RCR = ssc_data_tail->num_words;
       ssc->SSC_CR = AT91C_SSC_RXEN;
       ssc->SSC_PTCR = AT91C_PDC_RXTEN;
+      ssc->SSC_IER = AT91C_SSC_ENDRX;
     }
     else
     {
@@ -133,8 +133,8 @@ void ssc_send_packet( struct ssc_packet *packet ) {
     }
     ssc->SSC_TCR = ssc_data_tail->num_words;
     ssc->SSC_PTCR = AT91C_PDC_TXTEN;
+    ssc->SSC_IER = AT91C_SSC_ENDTX;
   }
-  
 }
 
 
@@ -162,6 +162,10 @@ ARM_CODE RAMFUNC void ssc_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
+  if(ssc->SSC_SR & AT91C_SSC_ENDTX) 
+    ssc->SSC_IDR = AT91C_SSC_ENDTX;
+  if(ssc->SSC_SR & AT91C_SSC_ENDRX)
+    ssc->SSC_IDR = AT91C_SSC_ENDRX;
   if( ssc->SSC_SR & ( AT91C_SSC_ENDRX | AT91C_SSC_ENDTX ) ) {
     // Disable PDC transfers just to be safe
     ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
@@ -183,6 +187,7 @@ ARM_CODE RAMFUNC void ssc_isr() {
         ssc->SSC_RCR = ssc_data_tail->num_words;
         ssc->SSC_PTCR = AT91C_PDC_RXTEN;
         ssc->SSC_CR = AT91C_SSC_RXEN;
+        ssc->SSC_IER = AT91C_SSC_ENDRX;
         // We can enable the RXT now as it relies on the TX clock
       }
       else
@@ -193,6 +198,7 @@ ARM_CODE RAMFUNC void ssc_isr() {
       }
       ssc->SSC_TCR = ssc_data_tail->num_words;
       ssc->SSC_PTCR = AT91C_PDC_TXTEN;
+      ssc->SSC_IER = AT91C_SSC_ENDTX;
     }
     // We're done for now!
     else {

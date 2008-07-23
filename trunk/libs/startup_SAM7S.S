@@ -24,7 +24,7 @@
 // mt: this file should not be used with the Configuration Wizard
 // since a lot of changes have been done for the WinARM/gcc example
 /* 
-//*** <<< Use Configuration Wizard in Context Menu >>> ***
+// *** <<< Use Configuration Wizard in Context Menu >>> ***
 */
 
 

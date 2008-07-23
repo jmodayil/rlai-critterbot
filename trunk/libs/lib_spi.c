@@ -32,8 +32,8 @@ void spi_init() {
   AT91F_AIC_ConfigureIt( AT91C_BASE_AIC, 
                          AT91C_ID_SPI,
                          SPI_INTERRUPT_PRIORITY,
-                         AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
-                         spi_isr );
+                         AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL,
+                         (void*)spi_isr );
   AT91F_AIC_EnableIt( AT91C_BASE_AIC, AT91C_ID_SPI );
   
   /*  SPI Mode Register
@@ -54,9 +54,6 @@ void spi_init() {
   spi->SPI_CSR[2] = SPI_CSR2_SETTINGS;
   spi->SPI_CSR[3] = SPI_CSR3_SETTINGS;
   
-  // Enable interrupts 
-  spi->SPI_IER = AT91C_US_ENDRX | AT91C_US_ENDTX;
-  
   // Enable SPI
   spi->SPI_CR = AT91C_SPI_SPIEN;
 }
@@ -70,7 +67,7 @@ void spi_send_packet( struct spi_packet *packet ) {
   AT91PS_SPI spi = AT91C_BASE_SPI;
   int i;
   unsigned int pcs = packet->device_id << 16;
-
+  
   /* Add Peripheral ID to each word in packet
    *
    * This has a minor implication to clients, in that the data they
@@ -103,6 +100,7 @@ void spi_send_packet( struct spi_packet *packet ) {
     {
       spi->SPI_RCR = spi_data_tail->num_words;
       spi->SPI_PTCR = AT91C_PDC_RXTEN;
+      spi->SPI_IER = AT91C_SPI_ENDRX;
     }
     else
     {
@@ -113,6 +111,7 @@ void spi_send_packet( struct spi_packet *packet ) {
     }
     spi->SPI_TCR = spi_data_tail->num_words;
     spi->SPI_PTCR = AT91C_PDC_TXTEN;
+    spi->SPI_IER = AT91C_SPI_ENDTX;
   }
   
 }
@@ -128,16 +127,21 @@ ARM_CODE RAMFUNC void spi_isr() {
   
   AT91PS_SPI spi = AT91C_BASE_SPI;
   
+  if(spi_data_tail == NULL)
+    return;
+  
   /* Check if both ENDRX and ENDTX flags are set
    * 
    * The transmission isn't done until both are set, as ENDTX will occur
    * at the beginning of the final packet, ENDRX won't occur until after
-   * the end of the final packet.
+   * the end of the final packet.  Ignore further END
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if(spi_data_tail == NULL)
-    return;
+  if(spi->SPI_SR & AT91C_SPI_ENDTX)
+    spi->SPI_IDR = AT91C_SPI_ENDTX; 
+  if(spi->SPI_SR & AT91C_SPI_ENDRX)
+    spi->SPI_IDR = AT91C_SPI_ENDRX; 
   if( spi->SPI_SR & ( AT91C_SPI_ENDRX | AT91C_SPI_ENDTX ) ) {
     // Disable PDC transfers just to be safe
     spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
@@ -158,12 +162,14 @@ ARM_CODE RAMFUNC void spi_isr() {
       {
         spi->SPI_RCR = spi_data_tail->num_words;
         spi->SPI_PTCR = AT91C_PDC_RXTEN;
+        spi->SPI_IER = AT91C_SPI_ENDRX;
       }
       else // Leave the RX disabled
         spi->SPI_RCR = 0;
 
       spi->SPI_TCR = spi_data_tail->num_words;
       spi->SPI_PTCR = AT91C_PDC_TXTEN;
+      spi->SPI_IER = AT91C_SPI_ENDTX;
     }
     // We're done for now!
     else {

@@ -5,7 +5,8 @@
  *
  */
 
-#include "./armio.h"
+#include "armio.h"
+#include "lib_error.h"
 
 int armsscanf(char *source, char *format, ...) {
 
@@ -112,7 +113,7 @@ int armatoi(char str[], int *val) {
   return sign == 1 ? i : i + 1;
 }
 
-__inline int getvalue(char digit) {
+int getvalue(char digit) {
 
   if(digit >= '0' && digit <= '9')
     return digit - '0';
@@ -231,11 +232,16 @@ void strrev(char *str) {
 
 void armputchar(char val) {
   
-  if(ser_tx_head == ser_tx_buf + SER_TX_BUF_SIZE) 
+  if(ser_tx_head >= ser_tx_buf + SER_TX_BUF_SIZE) { 
+    error_set(ERR_TXOVERFLOW);
     return;
+  }
+  error_clear(ERR_TXOVERFLOW);
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS;
   *ser_tx_head++ = val;
   AT91C_BASE_US0->US_TCR++;
-
+  AT91C_BASE_US0->US_IER = AT91C_US_ENDTX;
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN;
   
 }
 
@@ -261,38 +267,44 @@ int armreadline(char *read_to, int max_size) {
   
   buf_end = ser_rx_buf + SER_RX_BUF_SIZE;
   cur_ptr = (char*)AT91C_BASE_US0->US_RPR;
-  
-  if(cur_ptr == ser_rx_head)
+  if(cur_ptr == ser_rx_head){
     return EOF;
+  }
   while(*read_loc != '\n') {
-    if(read_loc == cur_ptr)
+    if(read_loc >= cur_ptr) {
       return EOF;
-    if(++read_loc == buf_end)
+    }
+    if(++read_loc >= buf_end)
       read_loc = ser_rx_buf;
   }
   for(size = 0; ser_rx_head != read_loc; size++) {
-    if(size == max_size)
+    if(size >= max_size){
       return EOF;
+    }
     *read_to++ = *ser_rx_head++;
-    if(ser_rx_head == buf_end)
+    if(ser_rx_head >= buf_end)
       ser_rx_head = ser_rx_buf;
   }
   *read_to = '\0';
-  if(++read_loc == buf_end)
+  if(++read_loc >= buf_end)
     read_loc = ser_rx_buf;
   return size;
 }
 
-RAMFUNC void ser_isr(void) {
+ARM_CODE RAMFUNC void ser_isr(void) {
 
   unsigned int status = AT91C_BASE_US0->US_CSR;
 
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS | AT91C_PDC_RXTDIS;
   if(status & AT91C_US_ENDRX) {
     AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
     AT91C_BASE_US0->US_RNPR = (unsigned int)ser_rx_buf;
   }
-  if(status & AT91C_US_TXBUFE) 
+  if(status & AT91C_US_ENDTX) { 
     AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
+    AT91C_BASE_US0->US_IDR = AT91C_US_ENDTX;
+  }
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN | AT91C_PDC_RXTEN;
   return;
 }
 
@@ -301,14 +313,14 @@ void init_serial_port_stdio(void) {
   AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US0);
   AT91F_PIO_CfgPeriph(AT91C_BASE_PIOA, SERIAL_A_PINS, SERIAL_B_PINS);
   AT91C_BASE_US0->US_MR = (AT91C_US_CHRL_8_BITS | AT91C_US_PAR_NONE);
-  AT91C_BASE_US0->US_BRGR = 13; //SER_BRGR;
+  AT91C_BASE_US0->US_BRGR = SER_BRGR;
   AT91C_BASE_US0->US_CR = (AT91C_US_RXEN | AT91C_US_TXEN | AT91C_US_RSTSTA );
   AT91F_AIC_ConfigureIt(AT91C_BASE_AIC,
                         AT91C_ID_US0,
                         AT91C_AIC_PRIOR_LOWEST,
-                        AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE,
+                        AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL,
                         (void*)ser_isr );
-  AT91C_BASE_US0->US_IER = AT91C_US_ENDRX | AT91C_US_TXBUFE;
+  AT91C_BASE_US0->US_IER = AT91C_US_ENDRX;
   
   AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
 
@@ -319,10 +331,9 @@ void init_serial_port_stdio(void) {
   AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
 
   AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
-  AT91C_BASE_US0->US_TNPR = (unsigned int)ser_tx_buf;
   
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
-  
+ 
   armprintf("rpr: %p\n", AT91C_BASE_US0->US_RPR);
   
   // Disable Amplifier
