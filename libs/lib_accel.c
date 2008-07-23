@@ -177,7 +177,7 @@ void accel_read_reg (unsigned int address)
   * accel_data_ready() to determine whether the requested data has been
   * received.
   */
-void accel_read (unsigned int address, unsigned count)
+void accel_read (unsigned int address, unsigned int count)
 {
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {

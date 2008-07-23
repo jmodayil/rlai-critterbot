@@ -16,6 +16,7 @@
 
 #include "lib_error.h"
 #include "lib_events.h"
+#include "armio.h"
 
 volatile unsigned int events_status;
 
@@ -34,39 +35,41 @@ void events_init()
 {
   AT91PS_AIC pAic = AT91C_BASE_AIC;
 
-  // This will be replaced by the PIT
+  // Enable the PIT interrupt to trigger on an interrupt
+  //  Note! We are configuring the system interrupt here; if something else
+  //  needs it we will have to deal with this separately.
+  AT91F_AIC_ConfigureIt(pAic, AT91C_ID_SYS, PIT_INTERRUPT_LEVEL,
+  AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL, (void*)events_isr);
+  AT91F_AIC_EnableIt (pAic, AT91C_ID_SYS);
 
-  // Enable power to the PIO (for sending BLANK/XLAT) and to the TC0
-  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_PIOA );
-  AT91F_PMC_EnablePeriphClock ( AT91C_BASE_PMC, 1 << AT91C_ID_TC0 );
-  
-  // Configure TC0 to run at 100Hz
-  AT91C_BASE_TC0->TC_CMR = (AT91C_TC_CLKS_TIMER_DIV5_CLOCK | 
-                            AT91C_TC_WAVE | AT91C_TC_WAVESEL_UP_AUTO);
-  AT91C_BASE_TC0->TC_RC = TC_TIMER_DIV5_100HZ_RC;
-
-  // Enable the TC0 interrupt to trigger on RC compare
-  AT91F_AIC_ConfigureIt(pAic, AT91C_ID_TC0, TC_INTERRUPT_LEVEL,
-  AT91C_AIC_SRCTYPE_INT_POSITIVE_EDGE, (void*)events_isr);
-  AT91F_TC_InterruptEnable(AT91C_BASE_TC0, AT91C_TC_CPCS);
-  AT91F_AIC_EnableIt (pAic, AT91C_ID_TC0);
-
-  // Start the timer - do we need the software trigger?
-  AT91C_BASE_TC0->TC_CCR =  ( AT91C_TC_CLKEN | AT91C_TC_SWTRG);
-  
   events_status = 0;
+  
+  // Enable the PIT interrupt and the PIT itself, as well as setting the
+  //  counter max value. We run at a 100Hz. 
+  AT91C_BASE_PITC->PITC_PIMR = 
+    (EVENTS_PIV_VALUE & AT91C_PITC_PIV) |
+    AT91C_PITC_PITIEN | AT91C_PITC_PITEN;
+      
   armprintf("Initialized event timer.\n");
 }
 
 ARM_CODE RAMFUNC void events_isr()
 {
-  AT91PS_TC pTC = AT91C_BASE_TC0;
+  AT91PS_PITC pitc = AT91C_BASE_PITC;
 
-  unsigned int status = pTC->TC_SR;
-  if(status & AT91C_TC_CPCS) {
-  
-    // Test for overrun
-    if (events_status)
+  unsigned int status = pitc->PITC_PISR;
+  unsigned int picnt;
+
+  if(status & AT91C_PITC_PITS) {
+    // Clear the interrupt status by reading the PIVR register
+    picnt = pitc->PITC_PIVR;
+
+    /* Test for overrun: either an event was not processed or for some
+     *  obscure reason, the PIT counted twice (in this case, PICNT > 1).
+     * The 12 MSB of the PITC_PIVR register are the ones of interest; only
+     *  the lowest one should be set.
+     */
+    if (events_status != 0 || picnt > 0x00100000)
       error_set (1 << ID_EVENTS);
     // Set the flag
     events_status = 1;
