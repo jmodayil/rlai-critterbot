@@ -13,12 +13,10 @@
 
 #include "compiler.h"
 
-// @@@ This is all going to be removed when the PIT is used
-// Rename!
-#define TC_INTERRUPT_LEVEL 5
-// Number of clock cycles in 1/100th of a second when using a T/C with
-//  clock MCK/1024
-#define TC_TIMER_DIV5_100HZ_RC 468
+#define PIT_INTERRUPT_LEVEL  5
+// Number of clock cycles (at 3MHz) - 1 before the PIT triggers an interrupt
+// We want a 100Hz timer, so we set this to 29999.
+#define EVENTS_PIV_VALUE     29999
 
 /** Returns true whether we should call the *_event functions.
   * This will clear the 'has_event' flag.
