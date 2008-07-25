@@ -33,8 +33,9 @@ ARM_CODE RAMFUNC spur_isr() {
 int main()
 {
  
-  unsigned int g_x, g_y;
-  unsigned int g_dir, g_mag; 
+  int g_x, g_y;
+  int g_dir, g_mag;
+  float ang;
   // serial port should be initialized asap for debugging purposes
   init_serial_port_stdio();
   
@@ -66,9 +67,10 @@ int main()
 
       g_mag = 4 * (unsigned int)sqrtf(g_x*g_x + g_y*g_y);
       if(g_mag > 4095)
-        g_mag = 2095; 
+        g_mag = 4095; 
       
-      g_dir = (unsigned int)((3.1415927 + atan2f(-g_x, -g_y)) * 180 / 3.1415927);      
+      g_dir = (int)((atan2(-g_y, g_x) / 3.1415927) * (float)180);      
+      armprintf("%d \n", g_dir);
       if(leddrive_state != STARTUP) {
         leddrive_angle(&g_dir, &g_mag);
       }

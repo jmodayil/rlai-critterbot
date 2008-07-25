@@ -1,3 +1,4 @@
+#include "lib_ledctl.h"
 
 #ifndef LIB_LEDDRIVE_H
 #define LIB_LEDDRIVE_H
@@ -40,7 +41,7 @@ void pulse(struct rgbled *light,unsigned char r,unsigned char g,unsigned char b,
 /*
 takes angle and chooses a corresponding led and displays rgb color on that led. angle values will wrap around
 */
-void anglelight(unsigned int angle, unsigned char r,unsigned char g,unsigned char b);
+void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b);
 /*
 displays the battery lvl 0-100
 */

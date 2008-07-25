@@ -5,10 +5,10 @@ OBJCOPY = arm-elf-objcopy
 # Directories
 LDDIR=ldscripts
 BINDIR=bin
-GCC_LIB_DIR=~/Desktop/gnuarm-4.0.2/lib/gcc/arm-elf/4.0.2/
-STDC_LIB_DIR=~/Desktop/gnuarm-4.0.2/arm-elf/lib/
+GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
+STDC_LIB_DIR=/opt/local/arm-elf/lib
 
-LIBS=$(GCC_LIB_DIR)/libgcc.a $(STDC_LIB_DIR)/libc.a
+LIBS=$(STDC_LIB_DIR)/libm.a $(STDC_LIB_DIR)/libc.a $(GCC_LIB_DIR)/libgcc.a
 
 # Uncomment to produce a memory map
 # PRODUCE_MEMORY_MAP=-Wl,-Map=memory.map
@@ -25,12 +25,12 @@ CFLAGS = -Winline -O3 -ffunction-sections -fdata-sections
 DEBUGFLAGS = -Wall
 
 # Linker flags
-LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
+LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD) 
 
 THUMB = -marm
 
 # Lib files to compile
-CSRC = lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c
+CSRC = lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c
 COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.s
 AOBJ = $(ASRC:.s=.o)
@@ -54,10 +54,10 @@ all_libs: $(AOBJ) $(COBJ)
 
 # Test binaries
 $(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
-	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) $(notdir $(addsuffix .o, $(basename $@))) --output $(addsuffix .elf, $(basename $@))
+	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) -L$(GCC_LIB_DIR) -L$(STDC_LIB_DIR) $(LDFLAGS) $(COBJ) $(AOBJ) $(notdir $(addsuffix .o, $(basename $@))) $(LIBS) --output $(addsuffix .elf, $(basename $@))
 #	@echo $@ $(basename $@)
 	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
-#	$(LD) -T$(LDDIR)/lib_ui_test.ld $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
+#	$(LD) -T$(LDDIR)/lib_ui_test.ld -L$(STDC_LIB_DIR) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
 #	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
 	@echo
 	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
