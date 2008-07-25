@@ -76,10 +76,13 @@ void spi_send_packet( struct spi_packet *packet ) {
    * obvious repurcussions for our application, however it is something
    * to keep in mind.
    */
-  for( i = 0; i < packet->num_words; i++ ) 
+  for( i = 0; i < packet->num_words; i++ ) {
     *( packet->data_to_write + i ) |= pcs;
+  }
   // Add LASTXFER bit to last word in packet
   *(packet->data_to_write + packet->num_words - 1) |= 0x01000000;
+  
+  spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
   
   // This is the last packet in the list.
   packet->next_packet = NULL;
@@ -94,10 +97,13 @@ void spi_send_packet( struct spi_packet *packet ) {
   else {
     spi_data_tail = spi_data_head = packet;
     spi->SPI_TPR = (unsigned int) spi_data_tail->data_to_write;
-    spi->SPI_RPR = (unsigned int) spi_data_tail->read_data;
+    spi->SPI_TCR = spi_data_tail->num_words;
+    spi->SPI_PTCR = AT91C_PDC_TXTEN;
+    spi->SPI_IER = AT91C_SPI_ENDTX;
     // If read_data is NULL, we're ignoring received data
     if( spi_data_tail->read_data != NULL )
     {
+      spi->SPI_RPR = (unsigned int) spi_data_tail->read_data;
       spi->SPI_RCR = spi_data_tail->num_words;
       spi->SPI_PTCR = AT91C_PDC_RXTEN;
       spi->SPI_IER = AT91C_SPI_ENDRX;
@@ -105,13 +111,7 @@ void spi_send_packet( struct spi_packet *packet ) {
     else
     {
       spi->SPI_RCR = 0;
-      // If SPI_RCR is 0 and we have a NULL buffer, we should disable
-      //  receiving
-      spi->SPI_PTCR = AT91C_PDC_RXTDIS;
     }
-    spi->SPI_TCR = spi_data_tail->num_words;
-    spi->SPI_PTCR = AT91C_PDC_TXTEN;
-    spi->SPI_IER = AT91C_SPI_ENDTX;
   }
   
 }
@@ -126,9 +126,14 @@ void spi_send_packet( struct spi_packet *packet ) {
 ARM_CODE RAMFUNC void spi_isr() {
   
   AT91PS_SPI spi = AT91C_BASE_SPI;
+  unsigned int old_reg;
   
   if(spi_data_tail == NULL)
     return;
+    
+  // Disable PDC transfers just to be safe
+  old_reg = spi->SPI_PTSR;
+  spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
   
   /* Check if both ENDRX and ENDTX flags are set
    * 
@@ -138,13 +143,11 @@ ARM_CODE RAMFUNC void spi_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if(spi->SPI_SR & AT91C_SPI_ENDTX)
+  if(spi->SPI_SR & AT91C_SPI_ENDTX) 
     spi->SPI_IDR = AT91C_SPI_ENDTX; 
-  if(spi->SPI_SR & AT91C_SPI_ENDRX)
+  if(spi->SPI_SR & AT91C_SPI_ENDRX) 
     spi->SPI_IDR = AT91C_SPI_ENDRX; 
-  if( spi->SPI_SR & ( AT91C_SPI_ENDRX | AT91C_SPI_ENDTX ) ) {
-    // Disable PDC transfers just to be safe
-    spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+  if((spi->SPI_SR & AT91C_SPI_ENDRX) && (spi->SPI_SR & AT91C_SPI_ENDTX)) {
     // Let the packet's client know we're done
     spi_data_tail->finished++;
     /* If there is another packet in the list, prep it and start transfer
@@ -156,10 +159,13 @@ ARM_CODE RAMFUNC void spi_isr() {
     if( spi_data_tail->next_packet != NULL ) {
       spi_data_tail = spi_data_tail->next_packet;
       spi->SPI_TPR = (unsigned int)spi_data_tail->data_to_write;
-      spi->SPI_RPR = (unsigned int)spi_data_tail->read_data;
+      spi->SPI_TCR = spi_data_tail->num_words;
+      spi->SPI_PTCR = AT91C_PDC_TXTEN;
+      spi->SPI_IER = AT91C_SPI_ENDTX;
       // If read_data is NULL, we're ignoring received data
       if( spi_data_tail->read_data != NULL )
       {
+        spi->SPI_RPR = (unsigned int)spi_data_tail->read_data;
         spi->SPI_RCR = spi_data_tail->num_words;
         spi->SPI_PTCR = AT91C_PDC_RXTEN;
         spi->SPI_IER = AT91C_SPI_ENDRX;
@@ -167,15 +173,14 @@ ARM_CODE RAMFUNC void spi_isr() {
       else // Leave the RX disabled
         spi->SPI_RCR = 0;
 
-      spi->SPI_TCR = spi_data_tail->num_words;
-      spi->SPI_PTCR = AT91C_PDC_TXTEN;
-      spi->SPI_IER = AT91C_SPI_ENDTX;
     }
     // We're done for now!
     else {
       spi_data_head = NULL;
       spi_data_tail = NULL;
     }
+  } else {
+    spi->SPI_PTCR = old_reg;
   }
 }
 

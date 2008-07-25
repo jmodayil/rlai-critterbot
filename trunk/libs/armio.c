@@ -236,13 +236,19 @@ void armputchar(char val) {
     error_set(ERR_TXOVERFLOW);
     return;
   }
-  error_clear(ERR_TXOVERFLOW);
+  asm volatile("mrs r0, cpsr\n\t"
+      "orr r0, r0, #0x80\n\t"
+      "msr cpsr_c, r0"
+      : : : "r0" );
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS;
   *ser_tx_head++ = val;
   AT91C_BASE_US0->US_TCR++;
   AT91C_BASE_US0->US_IER = AT91C_US_ENDTX;
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN;
-  
+  asm volatile("mrs r0, cpsr\n\t"
+      "bic r0, r0, #0x80\n\t"
+      "msr cpsr_c, r0"
+      : : : "r0" );
 }
 
 int armgetchar(void) {
@@ -294,6 +300,7 @@ int armreadline(char *read_to, int max_size) {
 ARM_CODE RAMFUNC void ser_isr(void) {
 
   unsigned int status = AT91C_BASE_US0->US_CSR;
+  //AT91C_BASE_US0->US_IDR = AT91C_US_ENDTX;
 
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS | AT91C_PDC_RXTDIS;
   if(status & AT91C_US_ENDRX) {
@@ -304,7 +311,9 @@ ARM_CODE RAMFUNC void ser_isr(void) {
     AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
     AT91C_BASE_US0->US_IDR = AT91C_US_ENDTX;
   }
-  AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN | AT91C_PDC_RXTEN;
+  //else
+    //AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN;
+  AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN;
   return;
 }
 

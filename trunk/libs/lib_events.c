@@ -18,14 +18,27 @@
 #include "lib_events.h"
 #include "armio.h"
 
+extern unsigned int seq;
+
 volatile unsigned int events_status;
 
 unsigned int events_has_event()
 {
-  unsigned int result = events_status;
+  unsigned int result;
 
+  //AT91C_BASE_PITC->PITC_PIMR &= ~AT91C_PITC_PITIEN;  
+  //AT91F_AIC_DisableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
+  // 
+  // result = events_status;
   // Clear and return the status bit
-  events_status = 0;
+  // events_status = 0;
+  asm volatile("mov r2,#0\n\t"
+               "swp %0, r2, [%1]"
+               : "=&r" (result)
+               : "r" (&events_status) 
+               : "r2" );
+  //AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
+
   return result;
 }
 
@@ -69,9 +82,12 @@ ARM_CODE RAMFUNC void events_isr()
      * The 12 MSB of the PITC_PIVR register are the ones of interest; only
      *  the lowest one should be set.
      */
-    if (events_status != 0 || picnt > 0x00100000)
+    if (events_status != 0)
       error_set (ERR_EVENTS);
+    if (picnt >= 0x00200000)
+      error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;
+    seq++;
   }
 }

@@ -13,10 +13,11 @@
 #define LIB_ERROR_H
 
 // @@@ move to armconfig.h
-#define ERR_LEDCTL      1<<0
-#define ERR_ACCEL       1<<1
-#define ERR_EVENTS      1<<2
-#define ERR_TXOVERFLOW  1<<3
+#define ERR_LEDCTL      (1<<0)
+#define ERR_ACCEL       (1<<1)
+#define ERR_EVENTS      (1<<2)
+#define ERR_TXOVERFLOW  (1<<3)
+#define ERR_EVENTSLOW   (1<<4)
 #define ERR_MAXERR      15
 
 unsigned int error_reg;

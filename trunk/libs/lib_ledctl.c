@@ -92,8 +92,8 @@ void ledctl_event ( void )
   switch (ledctl_state)
   {
     case GRAYSCALE:
-      ledctl_senddata_all();
       AT91F_PIO_ClearOutput (AT91C_BASE_PIOA, 1 << LEDCTL_PIN_BLANK);
+      ledctl_senddata_all();
       break;
     case FIRST_GRAYSCALE:
       // Set up the SSC to send 12 bits words, leaving the rest of the mode
@@ -310,11 +310,12 @@ void ledctl_dc( void ) {
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE ); 
 
   // Send the DC data
+  armprintf("sending data");
   ledctl_senddata_dc();
-
+  armprintf("...");
   // Wait for the data to have been sent
   while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
-
+  armprintf("done.\n");
   // We need to XLAT to get the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
