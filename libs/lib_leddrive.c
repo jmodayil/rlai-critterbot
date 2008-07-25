@@ -54,7 +54,7 @@ void pulse(struct rgbled *light,unsigned char r,unsigned char g,unsigned char b,
 		a=0;
 }
 
-void anglelight(unsigned int angle, unsigned char r,unsigned char g,unsigned char b){
+void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b){
 	unsigned int light;
 	while (angle>359)
 		angle-=360;
