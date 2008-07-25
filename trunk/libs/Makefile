@@ -5,8 +5,8 @@ OBJCOPY = arm-elf-objcopy
 # Directories
 LDDIR=ldscripts
 BINDIR=bin
-GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
-STDC_LIB_DIR=/opt/local/arm-elf/lib/
+GCC_LIB_DIR=~/Desktop/gnuarm-4.0.2/lib/gcc/arm-elf/4.0.2/
+STDC_LIB_DIR=~/Desktop/gnuarm-4.0.2/arm-elf/lib/
 
 LIBS=$(GCC_LIB_DIR)/libgcc.a $(STDC_LIB_DIR)/libc.a
 

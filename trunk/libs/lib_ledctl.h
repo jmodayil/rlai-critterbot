@@ -72,7 +72,7 @@ void ledctl_setmode(enum ledctl_state_type mode);
 /** Interface to the LED controller driver
   *  Set an LED value
   *
-  *  device must be in range 0-3
+  *  device must be in range 0-2
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
@@ -81,7 +81,7 @@ void ledctl_setvalue(int device, int led, int value);
 /** Interface to the LED controller driver
   *  Retrieve a LED value from the driver arrays 
   *
-  *  device must be in range 0-3
+  *  device must be in range 0-2
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
@@ -90,7 +90,7 @@ int ledctl_getvalue(int device, int led);
 /** Interface to the LED controller driver
   *  Returns the status of a LED, as per the LED controller
   *
-  *  device must be in range 0-3
+  *  device must be in range 0-2
   *  led must be in range 0-15
   *  value must be in the range 0-4095
   */
