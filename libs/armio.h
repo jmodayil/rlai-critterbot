@@ -22,7 +22,7 @@
 #define EOF -1
 #endif
 
-#define SER_BAUD_RATE 115200 
+#define SER_BAUD_RATE 230400 
 #define MCK 47923200
 #define SER_BRGR (MCK / 16 / SER_BAUD_RATE)
 
@@ -34,8 +34,8 @@
 
 char ser_tx_buf[SER_TX_BUF_SIZE];
 char ser_rx_buf[SER_RX_BUF_SIZE];
-char *ser_rx_head, *ser_rx_tail;
-char *ser_tx_head, *ser_tx_tail;
+volatile char *ser_rx_head, *ser_rx_tail;
+volatile char *ser_tx_head, *ser_tx_tail;
 char *read_loc;
 /*
  * outputs a character to the serial port

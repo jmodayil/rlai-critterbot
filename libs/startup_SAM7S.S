@@ -258,6 +258,7 @@ Vectors:        LDR     PC,Reset_Addr
                 B       IRQ_Handler_Entry
 //                LDR     PC,FIQ_Addr
                 LDR     PC,[PC,#-0xF20]        /* Vector From AIC_FVR */
+                
 
 Reset_Addr:     .word   Reset_Handler
 Undef_Addr:     .word   Undef_Handler
@@ -295,6 +296,8 @@ IRQ_Handler_Entry:
             ldr         r14, =AT91C_BASE_AIC
 	    ldr         r0 , [r14, #AIC_IVR]
 	    str         r14, [r14, #AIC_IVR]
+      CMP   r0, #0
+      beq   Die_Ungracefully
 
 // Enable Interrupt and Switch in Supervisor Mode
            msr         CPSR_c, #ARM_MODE_SVC

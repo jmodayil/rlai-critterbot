@@ -28,7 +28,7 @@ struct spi_packet accel_spi_packet;
 void accel_init()
 {
   unsigned int val;
-
+  volatile int i;
   // Configure the SPI packet
   accel_spi_packet.finished = 1;
   accel_spi_packet.device_id = ACCEL_SPI_DEVICE_ID;
@@ -49,7 +49,8 @@ void accel_init()
 
   // CTRL1 settings
   accel_write_reg_block(ACCEL_REG_CTRL1, ACCEL_CTRL1_SETTINGS);
-
+  for(i=0;i<50000;i++);
+  
   // CTRL2 settings
   accel_write_reg_block(ACCEL_REG_CTRL2, ACCEL_CTRL2_SETTINGS);
 
@@ -72,7 +73,10 @@ void accel_event()
   //  last event
   // The first byte read is the status register
   accel_status = accel_rxdata[1];
- 
+
+  //for(i = 0; i < 8; i++)
+  // armprintf("%b ", accel_rxdata[i]);
+  //armputchar('\n'); 
   for (i = 0; i < ACCEL_NUM_AXES; i++)
   {
     // The accelerometer data is split into a low part (accel_rxdata[2])

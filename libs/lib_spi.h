@@ -130,7 +130,7 @@ typedef struct spi_packet {
 } * spi_packet_p;
 
 // SPI list pointers
-struct spi_packet *spi_data_head, *spi_data_tail;
+volatile struct spi_packet *spi_data_head, *spi_data_tail;
 
 /*
  *  Initialize the SPI unit

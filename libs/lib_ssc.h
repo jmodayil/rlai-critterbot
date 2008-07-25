@@ -60,7 +60,7 @@ typedef struct ssc_packet {
 // SSC list pointers
 // MGB: If this causes duplicate definition errors, make it extern and
 //  define it in lib_ssc. For now, the compiler seems to be happy with it.
-struct ssc_packet *ssc_data_head, *ssc_data_tail;
+volatile struct ssc_packet *ssc_data_head, *ssc_data_tail;
 
 /*
  *  Initialize the SPI unit

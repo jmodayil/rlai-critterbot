@@ -115,10 +115,13 @@ void ssc_send_packet( struct ssc_packet *packet ) {
   else {
     ssc_data_tail = ssc_data_head = packet;
     ssc->SSC_TPR = (AT91_REG)ssc_data_tail->data_to_write;
-    ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
+    ssc->SSC_TCR = ssc_data_tail->num_words;
+    ssc->SSC_PTCR = AT91C_PDC_TXTEN;
+    ssc->SSC_IER = AT91C_SSC_ENDTX;
     // If read_data is NULL, we're ignoring received data
     if( ssc_data_tail->read_data != NULL )
     {
+      ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
       ssc->SSC_RCR = ssc_data_tail->num_words;
       ssc->SSC_CR = AT91C_SSC_RXEN;
       ssc->SSC_PTCR = AT91C_PDC_RXTEN;
@@ -129,11 +132,7 @@ void ssc_send_packet( struct ssc_packet *packet ) {
       ssc->SSC_RCR = 0;
       // Disable RX if not reading anything
       ssc->SSC_CR = AT91C_SSC_RXDIS;
-      ssc->SSC_PTCR = AT91C_PDC_RXTDIS;
     }
-    ssc->SSC_TCR = ssc_data_tail->num_words;
-    ssc->SSC_PTCR = AT91C_PDC_TXTEN;
-    ssc->SSC_IER = AT91C_SSC_ENDTX;
   }
 }
 
@@ -149,11 +148,16 @@ void ssc_send_packet( struct ssc_packet *packet ) {
 ARM_CODE RAMFUNC void ssc_isr() {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
+  unsigned int old_reg;
   
-
   // This is temporary hack.
   if(ssc_data_tail == NULL)
     return;
+  
+  // Disable PDC transfers just to be safe
+  old_reg = ssc->SSC_PTSR;
+  ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+  
   /* Check if both ENDRX and ENDTX flags are set
    * 
    * The transmission isn't done until both are set, as ENDTX will occur
@@ -167,8 +171,6 @@ ARM_CODE RAMFUNC void ssc_isr() {
   if(ssc->SSC_SR & AT91C_SSC_ENDRX)
     ssc->SSC_IDR = AT91C_SSC_ENDRX;
   if( ssc->SSC_SR & ( AT91C_SSC_ENDRX | AT91C_SSC_ENDTX ) ) {
-    // Disable PDC transfers just to be safe
-    ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
     // Let the packet's client know we're done
     ssc_data_tail->finished++;
     /* If there is another packet in the list, prep it and start transfer
@@ -180,10 +182,13 @@ ARM_CODE RAMFUNC void ssc_isr() {
     if( ssc_data_tail->next_packet != NULL ) {
       ssc_data_tail = ssc_data_tail->next_packet;
       ssc->SSC_TPR = (AT91_REG)ssc_data_tail->data_to_write;
-      ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
+      ssc->SSC_TCR = ssc_data_tail->num_words;
+      ssc->SSC_PTCR = AT91C_PDC_TXTEN;
+      ssc->SSC_IER = AT91C_SSC_ENDTX;
       // If read_data is NULL, we're ignoring received data
       if( ssc_data_tail->read_data != NULL )
       {
+        ssc->SSC_RPR = (AT91_REG)ssc_data_tail->read_data;
         ssc->SSC_RCR = ssc_data_tail->num_words;
         ssc->SSC_PTCR = AT91C_PDC_RXTEN;
         ssc->SSC_CR = AT91C_SSC_RXEN;
@@ -196,14 +201,13 @@ ARM_CODE RAMFUNC void ssc_isr() {
         ssc->SSC_RCR = 0;
         ssc->SSC_CR = AT91C_SSC_RXDIS;
       }
-      ssc->SSC_TCR = ssc_data_tail->num_words;
-      ssc->SSC_PTCR = AT91C_PDC_TXTEN;
-      ssc->SSC_IER = AT91C_SSC_ENDTX;
     }
     // We're done for now!
     else {
       ssc_data_head = NULL;
       ssc_data_tail = NULL;
     }
+  } else {
+    ssc->SSC_PTCR = old_reg;
   }
 }
