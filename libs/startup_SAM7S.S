@@ -493,27 +493,6 @@ LoopZI:         CMP     R1, R2
 #endif /* VECTORS_IN_RAM */
 
 
-/*
-   Call C++ constructors (for objects in "global scope")
-   added by Martin Thomas based on a Anglia Design 
-   example-application for STR7 ARM
-*/
-
-			LDR 	r0, =__ctors_start__
-			LDR 	r1, =__ctors_end__
-ctor_loop:
-			CMP 	r0, r1
-			BEQ 	ctor_end
-			LDR 	r2, [r0], #4   /* this ctor's address */
-			STMFD 	sp!, {r0-r1}   /* save loop counters  */
-			MOV 	lr, pc         /* set return address  */
-//			MOV 	pc, r2
-			BX      r2             /* call ctor */
-			LDMFD 	sp!, {r0-r1}   /* restore loop counters */
-			B 		ctor_loop
-ctor_end:
-
-       
 // Enter the C code
 				mov   r0,#0            // no arguments (argc = 0)
 				mov   r1,r0

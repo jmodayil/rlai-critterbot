@@ -40,6 +40,8 @@ void ui_mode (char * cmdstr);
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
 
+// Not to be called by the user
+void ui_bootloader (char * cmdstr);
 /** Main User Interface function.
   * Should be called at regular intervals.
   *
