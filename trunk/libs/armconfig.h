@@ -21,6 +21,19 @@
 #define LEDCTL_PIN_XERR 25
 #define LEDCTL_PIN_MODE 15
 
+/** Bootloader flags */
+/* Only one of these should be #defined
+ * If using BOOT_LOAD_TO_RAM_AND_COPY, the code will be stored in RAM when
+ * read from the serial port, then copied to flash. It is safer (partial
+ * data transfers will fail), but cannot accodomate code bigger than 40k,
+ * most likely.
+ *
+ * BOOT_LOAD_TO_FLASH will copy mostly directly to flash.
+ *
+ */
+#define BOOT_LOAD_TO_RAM_AND_COPY
+// #define BOOT_LOAD_TO_FLASH
+
 // Function to initialized on-chip settings on power-up
 void chip_init(void);
 

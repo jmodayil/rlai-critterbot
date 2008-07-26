@@ -37,7 +37,7 @@
 MEMORY
 {
   CODE (rx) : ORIGIN = 0x00100000, LENGTH = 0x00010000
-  DATA (rw) : ORIGIN = 0x00200000, LENGTH = 0x00004000
+  DATA (rw) : ORIGIN = 0x00200000, LENGTH = 0x0000C000
 }
 
 
@@ -117,6 +117,7 @@ SECTIONS
     __bss_start__ = . ;
     *(.bss)
     *(COMMON)
+    KEEP(*(.bootcopy))
   } >DATA
   . = ALIGN(4);
   __bss_end__ = . ;

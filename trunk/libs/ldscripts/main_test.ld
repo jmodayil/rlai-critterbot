@@ -37,7 +37,7 @@
 MEMORY
 {
   CODE (rx) : ORIGIN = 0x00100000, LENGTH = 0x00010000
-  DATA (rw) : ORIGIN = 0x00200000, LENGTH = 0x00004000
+  DATA (rw) : ORIGIN = 0x00200000, LENGTH = 0x0000D000
 }
 
 
@@ -63,26 +63,6 @@ SECTIONS
 
   . = ALIGN(4);
   
-  
-	/* .ctors .dtors are used for c++ constructors/destructors */
-	/* added by mthomas, based on an Anglia-Designs example for STR7 */
-	
-	.ctors :
-	{
-		PROVIDE(__ctors_start__ = .);
-		KEEP(*(SORT(.ctors.*)))
-		KEEP(*(.ctors))
-		PROVIDE(__ctors_end__ = .);
-	} >CODE
-
-	.dtors :
-	{
-		PROVIDE(__dtors_start__ = .); 
-		KEEP(*(SORT(.dtors.*)))
-		KEEP(*(.dtors))
-		PROVIDE(__dtors_end__ = .);
-	} >CODE
-
   /* .rodata section which is used for read-only data (constants) */
 
   .rodata :
@@ -117,6 +97,8 @@ SECTIONS
     __bss_start__ = . ;
     *(.bss)
     *(COMMON)
+    /* Bootloader scratch buffer */
+    KEEP(*(.bootcopy))
   } >DATA
   . = ALIGN(4);
   __bss_end__ = . ;

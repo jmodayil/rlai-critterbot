@@ -15,6 +15,7 @@
 #include "lib_accel.h"
 #include "armio.h"
 #include "lib_error.h"
+#include "lib_boot.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -46,6 +47,7 @@ ui_cmd_item ui_commands[] = {
   {"report", ui_report, "report"},
   {"mode", ui_mode, "mode <led [gs|dc]>"},
   {"test", ui_test, "test [ramfunc|sanity]"},
+  {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"fortune", ui_fortune, "fortune"}
 };
 
@@ -333,6 +335,59 @@ void ui_mode (char * cmdstr)
   }
   else
     armprintf ("Valid modes are: led.\n");
+}
+
+
+void ui_bootloader(char * cmdstr)
+{
+  int data_size;
+
+  // As 'status' report, tell the user if the bootloader core is not in RAM
+  if (((char *)boot_core) < AT91C_ISRAM)
+  {
+    armprintf ("boot_core not in RAM\n");
+    error_set (ERR_BOOT);
+    return;
+  }
+  
+  // Get a new line, if NULL or wrong password error message
+  if (armreadline(ui_cmdname, sizeof(ui_cmdname)) == EOF)
+  {
+    armprintf ("This command is for bootloader purposes. "
+      "Insert disk #127 to continue (or refer to the manual).\n");
+    return;
+  }
+  
+  // Test for password, parse data size
+  if (strncmp(cmdstr, BOOT_PASSWORD, sizeof(ui_cmdname)) != 0)
+  {
+    armprintf ("Wrong password.\n");
+    error_set (ERR_BOOT);
+    return;
+  }
+
+  // From this point on, there are no guarantees to receive meaningful data
+  //  back. We read the data size in newline-terminated ASCII but then switch
+  //  to reading binary.
+  if (armreadline(ui_cmdname, sizeof(ui_cmdname)) == EOF)
+  {
+    error_set(ERR_BOOT);
+    return;
+  }
+
+  armatoi(ui_cmdname, &data_size);
+  // Unlikely data size or too big; we could make 0 a threshold (e.g. <= 500)
+  if (data_size <= 0 || data_size >= BOOT_MAX_CODE_SIZE)
+  {
+    error_set(ERR_BOOT);
+    return;
+  }
+
+  // Call the no-return function
+  boot_core(data_size);
+
+  // if we do return from it set the error flag
+  error_set(ERR_BOOT);
 }
 
 RAMFUNC void ui_test_ramfunc(char * cmdstr)

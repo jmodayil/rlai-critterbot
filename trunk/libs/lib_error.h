@@ -18,6 +18,7 @@
 #define ERR_EVENTS      (1<<2)
 #define ERR_TXOVERFLOW  (1<<3)
 #define ERR_EVENTSLOW   (1<<4)
+#define ERR_BOOT        (1<<5)
 #define ERR_MAXERR      15
 
 unsigned int error_reg;
