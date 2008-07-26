@@ -1,6 +1,22 @@
 
 #include "lib_flash.h"
 
+/*
+ * We shouldn't be locking things, so we _shouldn't_ need to unlock them
+ */
+int flash_clear_lock_bits( void ) {
+  return 1;
+}
+
+/*
+ * Writes the data from the page buffer to the selected flash page.
+ * Blocking while write occurs.
+ * 
+ * returns:
+ *  0 on success
+ *  1 if page is out of range
+ *  the value of the flash status register if the write fails, >1
+ */
 int flash_erase_write_page( unsigned int page ) {
   
   AT91_REG mc = AT91C_BASE_MC;
@@ -21,5 +37,3 @@ int flash_erase_write_page( unsigned int page ) {
   
 }
 
-FLASH_FMCN
-AT91C_IFLASH_PAGE_SIZE
