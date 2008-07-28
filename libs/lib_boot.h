@@ -16,7 +16,7 @@
 
 #ifdef BOOT_LOAD_TO_RAM_AND_COPY
 // This definition MUST match the linker script's BOOTRAM size!
-#define BOOT_MAX_CODE_SIZE  0x8000
+#define BOOT_MAX_CODE_SIZE  0xA000
 #define BOOT_BUFFER         (extern unsigned char * boot_data)
 #elif BOOT_LOAD_TO_FLASH
 #define BOOT_MAX_CODE_SIZE AT91C_IFLASH_SIZE
@@ -32,7 +32,7 @@
 // How long to wait before giving up on transfer, in 100Hz (event-driven)
 #define BOOT_RECEIVE_TIMEOUT  100
 
-#define BOOT_PASSWORD "rumplestiltskin"
+#define BOOT_PASSWORD "cookie"
 
 /**
   * Two possible flags can be set here, AT91C_RSTC_PROCRST and 

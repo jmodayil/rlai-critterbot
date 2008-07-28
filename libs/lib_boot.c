@@ -68,13 +68,13 @@ void boot_verify()
   // Set LED's blue channel if verified, green otherwise
   if (num_diff_bytes == 0)
   {
-    armprintf ("Binary verified.\n");
+    armprintf ("Binary verified.\r");
     for (i = 0; i < LEDCTL_NUM_LEDS; i++)
       ledctl_setvalue(BLUE_CONTROLLER, i, 512);
   }
   else
   {
-    armprintf ("Binaries differ in %u (%u) bytes.\n", num_diff_bytes, 
+    armprintf ("Binaries differ in %u (%u) bytes.\r", num_diff_bytes, 
       boot_data_size);
     for (i = 0; i < LEDCTL_NUM_LEDS; i++)
       ledctl_setvalue(GREEN_CONTROLLER, i, 512);
@@ -97,9 +97,14 @@ void boot_event()
   {
     // Copy to flash! this will never return (or shouldn't)
     if (boot_data_head == boot_data_size)
+    {
       // @@@ replace with boot_core once ready
+      armprintf ("Begin verify.\r");
       boot_verify();
+      armprintf ("End verify.\r");
+    }
     
+    armprintf ("Timeout!\r");
     // If done receiving... (or returned from boot_core??)
     error_set(ERR_BOOT);
     boot_abort_receive();
@@ -129,6 +134,9 @@ void boot_event()
   while (val != EOF);
 }
 
+// @@@ take me out
+extern int run_ui;
+
 /**
   * Begins the reception
   */
@@ -139,6 +147,7 @@ void boot_begin_receive(int data_size)
   boot_data_size = data_size;
   boot_timeout_counter = 0;
 
+  run_ui = 0;
   // @@@ disable UI
 }
 
@@ -148,6 +157,7 @@ void boot_begin_receive(int data_size)
 void boot_abort_receive()
 {
   boot_receiving = 0;
+  run_ui = 1;
   // @@@ enable UI
 }
 

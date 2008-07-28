@@ -30,6 +30,8 @@ ARM_CODE RAMFUNC spur_isr() {
   while(1);
 }
 
+int run_ui = 1;
+
 int main()
 {
  
@@ -81,7 +83,9 @@ int main()
       ledctl_event();
       accel_event();
       // Try to keep ui_event last to avoid modifying other stuff
-      ui_event();
+      if (run_ui)
+        ui_event();
+      boot_event();
       //armprintf(":%d\n", seq);
     }
   }
