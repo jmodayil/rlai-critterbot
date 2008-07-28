@@ -25,6 +25,8 @@
 #error No bootloader mode set.
 #endif
 
+#define BOOT_COPY_DESTINATION AT91C_IFLASH
+
 #define BOOT_COPY_SECTION   __attribute__ ((section (".bootcopy")))
 
 // How long to wait before giving up on transfer, in 100Hz (event-driven)

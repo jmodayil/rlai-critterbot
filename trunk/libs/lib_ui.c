@@ -48,6 +48,7 @@ ui_cmd_item ui_commands[] = {
   {"mode", ui_mode, "mode <led [gs|dc]>"},
   {"test", ui_test, "test [ramfunc|sanity]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
+  {"reset", ui_reset, "reset"},
   {"fortune", ui_fortune, "fortune"}
 };
 
@@ -384,10 +385,28 @@ void ui_bootloader(char * cmdstr)
   }
 
   // Call the no-return function
+  // @@@ fix
   boot_core(data_size);
 
   // if we do return from it set the error flag
   error_set(ERR_BOOT);
+}
+
+void ui_reset(char * cmdstr)
+{
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+  {
+    armprintf ("Usage: reset %s\n", UI_RESET_PASSWORD);
+    return;
+  }
+ 
+  if (strncmp(ui_strarg, UI_RESET_PASSWORD, sizeof(ui_strarg)) != 0)
+  {
+    armprintf ("Wrong password (try %s).\n", UI_RESET_PASSWORD);
+    return;
+  }
+
+  boot_reset_arm();
 }
 
 RAMFUNC void ui_test_ramfunc(char * cmdstr)

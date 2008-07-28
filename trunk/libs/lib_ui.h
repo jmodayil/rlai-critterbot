@@ -13,6 +13,8 @@
 // How frequently to report status in reporting mode, in 100th of a second
 #define UI_REPORT_INTERVAL 10
 
+#define UI_RESET_PASSWORD  "now"
+
 typedef void (*ui_function) (char * cmdstr);
 
 /** Commands available in the user interface. */
@@ -42,6 +44,8 @@ void ui_setall (char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);
+void ui_reset (char * cmdstr);
+
 /** Main User Interface function.
   * Should be called at regular intervals.
   *
