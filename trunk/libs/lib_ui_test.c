@@ -22,6 +22,8 @@
 #include "lib_spi.h"
 #include "lib_accel.h"
 
+int run_ui = 1;
+
 int main()
 {
   struct spi_packet testdata;

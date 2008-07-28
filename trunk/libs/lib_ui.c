@@ -341,7 +341,7 @@ void ui_mode (char * cmdstr)
 
 void ui_bootloader(char * cmdstr)
 {
-  int data_size;
+  unsigned int data_size;
 
   // As 'status' report, tell the user if the bootloader core is not in RAM
   if (((char *)boot_core) < AT91C_ISRAM)
@@ -350,9 +350,8 @@ void ui_bootloader(char * cmdstr)
     error_set (ERR_BOOT);
     return;
   }
-  
-  // Get a new line, if NULL or wrong password error message
-  if (armreadline(ui_cmdname, sizeof(ui_cmdname)) == EOF)
+
+  if (armsscanf(cmdstr, "%s %s %d", ui_cmdname, ui_strarg, &data_size) < 3)
   {
     armprintf ("This command is for bootloader purposes. "
       "Insert disk #127 to continue (or refer to the manual).\n");
@@ -360,36 +359,23 @@ void ui_bootloader(char * cmdstr)
   }
   
   // Test for password, parse data size
-  if (strncmp(cmdstr, BOOT_PASSWORD, sizeof(ui_cmdname)) != 0)
+  if (strncmp(ui_strarg, BOOT_PASSWORD, sizeof(ui_strarg)) != 0)
   {
     armprintf ("Wrong password.\n");
     error_set (ERR_BOOT);
     return;
   }
 
-  // From this point on, there are no guarantees to receive meaningful data
-  //  back. We read the data size in newline-terminated ASCII but then switch
-  //  to reading binary.
-  if (armreadline(ui_cmdname, sizeof(ui_cmdname)) == EOF)
-  {
-    error_set(ERR_BOOT);
-    return;
-  }
-
-  armatoi(ui_cmdname, &data_size);
   // Unlikely data size or too big; we could make 0 a threshold (e.g. <= 500)
   if (data_size <= 0 || data_size >= BOOT_MAX_CODE_SIZE)
   {
+    armprintf ("Data size is wrong: %d\n", data_size);
     error_set(ERR_BOOT);
     return;
   }
 
   // Call the no-return function
-  // @@@ fix
-  boot_core(data_size);
-
-  // if we do return from it set the error flag
-  error_set(ERR_BOOT);
+  boot_begin_receive(data_size);
 }
 
 void ui_reset(char * cmdstr)
