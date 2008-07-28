@@ -22,14 +22,17 @@ unsigned int boot_timeout_counter;
 /** DO NOT CALL THIS FUNCTION */
 ARM_CODE RAMFUNC void boot_core()
 {
-  // Disable ALL interrupts
-  // @@@ use Mike's code instead
-  AT91C_BASE_AIC->AIC_IDCR = ~0x0;
+  // Disable interrupts
+  asm volatile("mrs r0, cpsr\n\t"
+      "orr r0, r0, #0x80\n\t"
+      "msr cpsr_c, r0"
+      : : : "r0" );
   // @@@ Disable motors, etc
   // @@@ Enable watchdog - don't take too long; reset watchdog while copying
   // Switch to supervisor mode?
   // Copy to flash in 256 bytes blocks
-  // Reset
+  // Reset - without re-enabling interrupts!
+  boot_reset_arm();
 }
 
 void boot_reset_arm()
@@ -43,10 +46,40 @@ void boot_reset_arm()
 
 void boot_verify()
 {
-  // Compares the code
-  // Set LED's blue channel if verified, green otherwise?
+  unsigned int num_diff_bytes = 0;
+  unsigned int num_data_words = boot_data_size / 4;
+  unsigned int num_data_tail = boot_data_size % 4;
+  unsigned int * source = (unsigned int*)(boot_data);
+  unsigned int * dest = (unsigned int*)(BOOT_COPY_DESTINATION);
+  int i;
   
-  // we can also printf the number of different bytes
+  // Compares the code; assumes binary is word-aligned
+  for (i = 0; i < num_data_words; i++)
+    if (*source++ != *dest++)
+      num_diff_bytes += 4;
+ 
+  // Now compare the tail
+  for (i = 0; i < num_data_tail; i++)
+  {
+    if (*(((unsigned char *)source)+i) != *(((unsigned char *)dest)+i))
+      num_diff_bytes++;
+  }
+  
+  // Set LED's blue channel if verified, green otherwise
+  if (num_diff_bytes == 0)
+  {
+    armprintf ("Binary verified.\n");
+    for (i = 0; i < LEDCTL_NUM_LEDS; i++)
+      ledctl_setvalue(BLUE_CONTROLLER, i, 512);
+  }
+  else
+  {
+    armprintf ("Binaries differ in %u (%u) bytes.\n", num_diff_bytes, 
+      boot_data_size);
+    for (i = 0; i < LEDCTL_NUM_LEDS; i++)
+      ledctl_setvalue(GREEN_CONTROLLER, i, 512);
+  }
+  
   boot_abort_receive();
 }
 
