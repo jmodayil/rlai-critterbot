@@ -41,7 +41,7 @@
   * The second resets the peripherals; documentation suggests it only needs
   * to be used for debugging purposes.
   */
-#define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_KEY)
+#define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | AT91C_RSTC_KEY)
 
 /** Do NOT call this function. Let the machine do the job. This function
   * copies the code to the flash and resets. */
