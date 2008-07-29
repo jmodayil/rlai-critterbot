@@ -44,6 +44,11 @@ char *read_loc;
 void armputchar(char);
 
 /*
+ * manually outputs a character to the serial port
+ */ 
+void __armputchar(char);
+
+/*
  * gets a character from the serial port
  * 
  * returns the character or EOF if buffer is empty

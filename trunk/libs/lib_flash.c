@@ -27,7 +27,7 @@ int flash_erase_write_page( unsigned int page ) {
   
   mc->MC_FMR = FLASH_FMCN << 16;
   while(!(mc->MC_FSR & AT91C_MC_FRDY));
-  mc->MC_FMR = AT91C_MC_FCMD_START_PROG | 
+  mc->MC_FCR = AT91C_MC_FCMD_START_PROG | 
     ( page << 8 ) | FLASH_KEY;
   do{
     fsr = mc->MC_FSR;
@@ -35,7 +35,7 @@ int flash_erase_write_page( unsigned int page ) {
       return fsr;
   }while(!(fsr & AT91C_MC_FRDY));
  
-  return AT91C_MC_FRDY;
+  return 0;
 }
 
 int flash_write_data (int * dst, int * src, unsigned int len)

@@ -230,6 +230,11 @@ void strrev(char *str) {
 	
 }
 
+void __armputchar(char val) {
+  AT91C_BASE_US0->US_THR = val;
+  while(!(AT91C_BASE_US0->US_CSR & 0x02));
+}
+
 void armputchar(char val) {
   
   if(ser_tx_head >= ser_tx_buf + SER_TX_BUF_SIZE) { 
