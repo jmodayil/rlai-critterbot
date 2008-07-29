@@ -155,6 +155,32 @@ void clearled(void){
 	memset(LED, 0x00, sizeof(LED));
 }
 
+
+void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int grad, unsigned int cval){
+	switch(grad){
+	case BLACKWHITE:
+		*r=cval>>4;
+		*g=*b=*r;
+		break;
+	case STOPLIGHT:
+		if (cval<2048){
+		*r=cval>>3;
+		*g=255;
+		}
+		if (cval>=2048){
+		*r=255;
+		*g=(255-((cval-2048)>>3));
+		}
+		*b=0;
+		break;
+	case BLUERED:
+		*r=cval>>4;
+		*b=255-*r;
+		*g=0;
+		break;
+}
+
+
 void startup(void){
 		static unsigned int a,i;
 		a++;
@@ -221,7 +247,7 @@ void startup(void){
 void leddrive_event(void) {
 	unsigned static char old_leddrive_anglecval, old_leddrive_angledeg;
   unsigned static char old_leddrive_gradcval1,old_leddrive_gradcval2;
-	unsigned int r,b,r2,b2;
+	unsigned char r,g,b,r2,g2,b2;
 	
 	switch (leddrive_state){
 	case STARTUP:
@@ -235,9 +261,8 @@ void leddrive_event(void) {
 		if(old_leddrive_anglecval == *leddrive_anglecval && old_leddrive_angledeg == *leddrive_angledeg)
 			break;
     clearled();
-		r=(*leddrive_anglecval)>>4;
-		b=255-r;
-		anglelight(*leddrive_angledeg,r,0,b);
+    cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_anglecval);
+		anglelight(*leddrive_angledeg,r,g,b);
 		old_leddrive_anglecval = *leddrive_anglecval;
 		old_leddrive_angledeg = *leddrive_angledeg;
 		break;
@@ -248,11 +273,9 @@ void leddrive_event(void) {
 		if(old_leddrive_gradcval1 == *leddrive_gradcval1 && old_leddrive_gradcval2 == *leddrive_gradcval2)
 			break;
 		clearled();
-		r=(*leddrive_gradcval1)>>4;
-		b=255-r;
-		r2=(*leddrive_gradcval2)>>4;
-		b2=255-r2;
-		gradient(r,0,b,r2,0,b2);
+		cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
+		cvalselect(&r2,&g2,&b2,leddrive_grad2,*leddrive_gradcval2);
+		gradient(r,g,b,r2,g2,b2);
 		old_leddrive_gradcval1 = *leddrive_gradcval1;
 		old_leddrive_gradcval2 = *leddrive_gradcval2;
 		break;
@@ -271,10 +294,11 @@ void leddrive_batstatus(void){
 	leddrive_state = BATSTATUS;
 }
 
-void leddrive_angle(unsigned int *deg,unsigned int *cval){
+void leddrive_angle(unsigned int *deg,unsigned int *cval, unsigned int grad){
 	leddrive_state= ANGLE;
 	leddrive_angledeg = deg;
 	leddrive_anglecval = cval;
+	leddrive_grad1=grad
 }
 
 void leddrive_rotate(int *rot){
@@ -290,11 +314,13 @@ void leddrive_stop(void){
 	leddrive_state=STOP;
 }
 
-void leddrive_gradient(unsigned int *cval1,unsigned int *cval2){
+void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2){
 	clearled();
 	leddrive_state=GRADIENT;
 	leddrive_gradcval1=cval1;
 	leddrive_gradcval2=cval2;
+	leddrive_grad1=grad1;
+	leddrive_grad2=grad2;
 }
 
 void leddrive_startup(int ver){
