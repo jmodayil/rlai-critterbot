@@ -100,8 +100,7 @@
 // </e>
 */
         .equ    EFC_SETUP,      1
-        .equ    EFC_FMR_Val,    0x00480000
-
+        .equ    EFC_FMR_Val,    0x00480100
 
 // Watchdog Timer (WDT) definitions
         .equ    WDT_BASE,       0xFFFFFD40  /* WDT Base Address */
@@ -244,14 +243,10 @@ FIQ_HandlerR:    B       FIQ_HandlerR
 			.section .vectrom, "ax"
 
 Vectors:        LDR     PC,Reset_Addr         
-//                LDR     PC,Undef_Addr
-//                LDR     PC,SWI_Addr
-//                LDR     PC,PAbt_Addr
-//                LDR     PC,DAbt_Addr
-                B       Die_Ungracefully
-                B       Die_Ungracefully
-                B       Die_Ungracefully
-                B       Die_Ungracefully
+                LDR     PC,Undef_Addr
+                LDR     PC,SWI_Addr
+                LDR     PC,PAbt_Addr
+                LDR     PC,DAbt_Addr
                 NOP                            /* Reserved Vector */
 //                LDR     PC,IRQ_Addr
 //                LDR     PC,[PC,#-0xF20]        /* Vector From AIC_IVR */
@@ -268,10 +263,18 @@ DAbt_Addr:      .word   DAbt_Handler
                 .word   0                      /* Reserved Address */
 FIQ_Addr:       .word   FIQ_Handler
 
-Undef_Handler:  B       Undef_Handler
-SWI_Handler:    B       SWI_Handler
-PAbt_Handler:   B       PAbt_Handler
-DAbt_Handler:   B       DAbt_Handler
+Undef_Handler:
+                mov     r0,#0 
+                B       Exception_Handler 
+SWI_Handler:    
+                mov     r0,#1
+                B       Exception_Handler
+PAbt_Handler:   
+                mov     r0,#2
+                B       Exception_Handler
+DAbt_Handler:   
+                mov     r0,#3
+                B       Exception_Handler
 FIQ_Handler:    B       FIQ_Handler
 
 // Taken from Cstartup.S
@@ -297,7 +300,7 @@ IRQ_Handler_Entry:
 	    ldr         r0 , [r14, #AIC_IVR]
 	    str         r14, [r14, #AIC_IVR]
       CMP   r0, #0
-      beq   Die_Ungracefully
+      beq   Bad_Vector_IRQ
 
 // Enable Interrupt and Switch in Supervisor Mode
            msr         CPSR_c, #ARM_MODE_SVC
@@ -328,24 +331,33 @@ IRQ_Handler_Entry:
 
 // Restore adjusted  LR_irq from IRQ stack directly in the PC
             ldmia       sp!, {pc}^
-
+Bad_Vector_IRQ:
+            mov r0, #4
+            b   Exception_Handler
 
 // Exception handler for bad memory accesses and software interrupts, which
 //  are otherwise infinite loops
 // This puts data on the serial port repeatedly
-Die_Ungracefully:
-// Put a character (0x3F, ?)
+Exception_Handler:
+// Put a character (0x40) then another
+    mov         r1,  r0
     ldr         r14, =AT91C_BASE_US0
 	  ldr         r0 , =64
     str         r0, [r14, #US_THR]
 
 // Wait for the character to have been sent 
 Send_Wait:       
-    LDR     R0, [R14, #US_CSR]
-    ANDS    R0, R0, #0x2
-    BEQ     Send_Wait
+    LDR         R0, [R14, #US_CSR]
+    ANDS        R0, R0, #0x2
+    BEQ         Send_Wait
 
-    B     Send_Wait
+// Send a second character, depending on what exception we got
+    ldr         r14, =AT91C_BASE_US0
+	  add         r0, r1, #65
+    str         r0, [r14, #US_THR]
+
+Wait_Forever:
+    B     Wait_Forever
 
 // Startup Code must be linked first at Address at which it expects to run.
 
