@@ -1,4 +1,4 @@
-/*
+*
  *  main.c
  *  
  *
@@ -26,8 +26,7 @@
 unsigned int seq;
 
 ARM_CODE RAMFUNC spur_isr() {
-  AT91C_BASE_US0->US_THR = 0x3F;
-  while(1);
+  error_set(ERR_SPURINT);
 }
 
 int run_ui = 1;
@@ -38,6 +37,7 @@ int main()
   int g_x, g_y;
   int g_dir, g_mag;
   float ang;
+  
   // serial port should be initialized asap for debugging purposes
   init_serial_port_stdio();
   
@@ -62,6 +62,7 @@ int main()
   {
     if (events_has_event())
     {
+      // events_do();
       // Temporary LED / accelerometer test.
 
       g_x = accel_get_output(0);

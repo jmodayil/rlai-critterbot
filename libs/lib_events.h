@@ -12,11 +12,36 @@
 #define LIB_EVENTS_H
 
 #include "compiler.h"
+#include "armconfig.h"
 
 #define PIT_INTERRUPT_LEVEL  5
+#define EVENTS_HZ 100
 // Number of clock cycles (at 3MHz) - 1 before the PIT triggers an interrupt
 // We want a 100Hz timer, so we set this to 29999.
-#define EVENTS_PIV_VALUE     29999
+#define EVENTS_PIV_VALUE     (MCK / 16 / EVENTS_HZ)
+
+#define EVENT_ID_UART 0
+#define EVENT_ID_SSC 1 
+#define EVENT_ID_SPI 2
+#define EVENT_ID_LEDDRIVE 3
+#define EVENT_ID_LEDCTL 4
+#define EVENT_ID_ACCEL 5
+#define EVENT_ID_UI 6
+#define EVENT_MAX -1
+
+unsigned int init_flags;
+unsigned int event_flags;
+
+/*
+ * 'OS' task descripter.
+ */
+struct event{
+  int (*init_func)();
+  int (*event_func)();
+  unsigned int event_count;
+};
+
+struct event events[EVENT_MAX];
 
 /** Returns true whether we should call the *_event functions.
   * This will clear the 'has_event' flag.
