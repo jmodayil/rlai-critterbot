@@ -9,6 +9,7 @@
 #include "compiler.h"
 #include "lib_boot.h"
 #include "lib_error.h"
+#include "lib_flash.h"
 #include "armio.h"
 
 #include "lib_ledctl.h"
@@ -22,6 +23,15 @@ unsigned int boot_timeout_counter;
 /** DO NOT CALL THIS FUNCTION */
 ARM_CODE RAMFUNC void boot_core()
 {
+  unsigned int num_pages;
+  unsigned int tail_page_size;
+  unsigned int i;
+
+  unsigned char * source;
+  unsigned char * dest;
+
+  int errflag = 0;
+
   // Disable interrupts
   asm volatile("mrs r0, cpsr\n\t"
       "orr r0, r0, #0x80\n\t"
@@ -30,9 +40,54 @@ ARM_CODE RAMFUNC void boot_core()
   // @@@ Disable motors, etc
   // @@@ Enable watchdog - don't take too long; reset watchdog while copying
   // Switch to supervisor mode?
-  // Copy to flash in 256 bytes blocks
+  num_pages = boot_data_size / AT91C_IFLASH_PAGE_SIZE;
+  tail_page_size = boot_data_size % AT91C_IFLASH_PAGE_SIZE;
+
+  // The data size should be a multiple of 4! Pad the end with zeros
+  tail_page_size += 4 - (tail_page_size & (sizeof(int)-1));
+  
+  source = (unsigned char*)BOOT_BUFFER;
+  dest = (unsigned char*)BOOT_COPY_DESTINATION;
+
+  // Copy all pages except possibly the last one
+  for (i = 0; i < num_pages; i++)
+  {
+    // Write a full page (length is in words)
+    if (!flash_write_data((int *) dest, (int *)source, 
+      AT91C_IFLASH_PAGE_SIZE / 4))
+      errflag = 1;
+    if (flash_erase_write_page (i) != AT91C_MC_FRDY)  
+      errflag = 1;
+
+    if (errflag) break;
+
+    dest += AT91C_IFLASH_PAGE_SIZE;
+    source += AT91C_IFLASH_PAGE_SIZE;
+  }
+
+  // Write the last page, if necessary
+  if (tail_page_size > 0)
+  {
+    // We know tail_page_size % 4 == 0 because we set it to be so above
+    if (!flash_write_data((int *) dest, (int *)source,
+      tail_page_size / 4))
+      errflag = 1;
+    if (flash_erase_write_page(i) != AT91C_MC_FRDY)
+      errflag = 1;
+
+    dest += tail_page_size;
+    source += tail_page_size;
+  }
+  
   // Reset - without re-enabling interrupts!
-  boot_reset_arm();
+  if (!errflag)
+    boot_reset_arm();
+  else
+  {
+    // Write to the serial port and die (should be English pound sign)
+    AT91C_BASE_US0->US_THR = 163;
+    while (1) ;
+  }
 }
 
 void boot_reset_arm()

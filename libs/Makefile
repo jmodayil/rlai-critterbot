@@ -30,7 +30,7 @@ LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
 THUMB = -marm
 
 # Lib files to compile
-CSRC = lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c
+CSRC = lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c
 COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.s
 AOBJ = $(ASRC:.s=.o)
@@ -61,6 +61,8 @@ $(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
 #	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
 	@echo
 	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
+# Generate the bootloader file
+	@echo "bootloader cookie" `ls -l $@ | awk '{print $$5}'` | tr "\n" "\r" | cat - $@ >$(addsuffix .boot, $(basename $@))
 
 $(COBJ): %.o : %.c
 	@echo $<

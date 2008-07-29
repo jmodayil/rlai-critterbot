@@ -19,21 +19,39 @@ int flash_clear_lock_bits( void ) {
  */
 int flash_erase_write_page( unsigned int page ) {
   
-  AT91_REG mc = AT91C_BASE_MC;
+  AT91PS_MC mc = AT91C_BASE_MC;
   unsigned int fsr;
   
-  if(0 > new_page || AT91C_IFLASH_NB_OF_PAGES <= new_page)
-    return 1;
+  if(0 > page || AT91C_IFLASH_NB_OF_PAGES <= page)
+    return AT91C_MC_PROGE;
   
-  mc->AT91C_MC_FMR = FLASH_FMCN << 16;
-  while(!(mc->AT91C_MC_FSR & AT91C_MC_FRDY));
-  mc->AT91C_MC_FCR = AT91C_MC_FCMD_START_PROG | 
-    ( page << 8 ) | AT91C_MC_KEY;
+  mc->MC_FMR = FLASH_FMCN << 16;
+  while(!(mc->MC_FSR & AT91C_MC_FRDY));
+  mc->MC_FMR = AT91C_MC_FCMD_START_PROG | 
+    ( page << 8 ) | FLASH_KEY;
   do{
-    fsr = mc->AT91C_MC_FSR;
+    fsr = mc->MC_FSR;
     if((fsr & AT91C_MC_LOCKE) | (fsr & AT91C_MC_PROGE))
       return fsr;
   }while(!(fsr & AT91C_MC_FRDY));
-  
+ 
+  return AT91C_MC_FRDY;
 }
 
+int flash_write_data (int * dst, int * src, unsigned int len)
+{
+  int i;
+
+  // Some internal checks; len must be 1..FLASH_PAGE_WORD_SIZE
+  if (len < 1 || len > FLASH_PAGE_WORD_SIZE)
+    return 0;
+
+  if ((char*) dst < AT91C_IFLASH || 
+    (char*) (dst + len) > (AT91C_IFLASH + AT91C_IFLASH_SIZE))
+      return 0;
+
+  for (i = 0; i < len; i++)
+    *dst++ = *src++;
+
+  return 1;
+}
