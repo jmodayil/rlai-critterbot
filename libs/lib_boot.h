@@ -75,6 +75,6 @@ void boot_abort_receive();
   * This resets the ARM. You might want to call it from somewhere else,
   * but expect harsh consequences (e.g., a reboot).
   */
-void boot_reset_arm();
+ARM_CODE RAMFUNC void boot_reset_arm();
 
 #endif /* LIB_BOOT_H */

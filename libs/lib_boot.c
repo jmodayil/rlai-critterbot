@@ -32,6 +32,9 @@ ARM_CODE RAMFUNC void boot_core()
 
   int errflag = 0;
 
+  //remove
+  int tmp = 0;
+
   // Disable interrupts
   asm volatile("mrs r0, cpsr\n\t"
       "orr r0, r0, #0x80\n\t"
@@ -49,31 +52,46 @@ ARM_CODE RAMFUNC void boot_core()
   source = (unsigned char*)BOOT_BUFFER;
   dest = (unsigned char*)BOOT_COPY_DESTINATION;
 
+  __armputchar('>');
   // Copy all pages except possibly the last one
   for (i = 0; i < num_pages; i++)
   {
     // Write a full page (length is in words)
     if (!flash_write_data((int *) dest, (int *)source, 
-      AT91C_IFLASH_PAGE_SIZE / 4))
+      AT91C_IFLASH_PAGE_SIZE / 4)) {
+      __armputchar('a');
       errflag = 1;
-    if (flash_erase_write_page (i) != AT91C_MC_FRDY)  
+    }
+    if ((tmp = flash_erase_write_page (i)) != 0) {
+      if(tmp & AT91C_MC_LOCKE)  
+        __armputchar('b');
+      if(tmp & AT91C_MC_PROGE)
+        __armputchar('c');
+      if(tmp & 1)
+        __armputchar('d');  
       errflag = 1;
+    }
 
     if (errflag) break;
 
     dest += AT91C_IFLASH_PAGE_SIZE;
     source += AT91C_IFLASH_PAGE_SIZE;
+    __armputchar('-');
   }
 
   // Write the last page, if necessary
-  if (tail_page_size > 0)
+  if (!errflag && tail_page_size > 0)
   {
     // We know tail_page_size % 4 == 0 because we set it to be so above
     if (!flash_write_data((int *) dest, (int *)source,
-      tail_page_size / 4))
+      tail_page_size / 4)) {
       errflag = 1;
-    if (flash_erase_write_page(i) != AT91C_MC_FRDY)
+      __armputchar('e');
+    }
+    if (flash_erase_write_page(i) != 0) {
+      __armputchar('f');
       errflag = 1;
+    }
 
     dest += tail_page_size;
     source += tail_page_size;
@@ -85,21 +103,20 @@ ARM_CODE RAMFUNC void boot_core()
   else
   {
     // Write to the serial port and die (should be English pound sign)
-    AT91C_BASE_US0->US_THR = 163;
+    
+    __armputchar('!');
     while (1) ;
   }
 }
 
-void boot_reset_arm()
+ARM_CODE RAMFUNC void boot_reset_arm()
 {
   // Tell the reset controller to reset
   AT91C_BASE_RSTC->RSTC_RCR = BOOT_RESET_SETTINGS;
   
   
   // Wait for software reset to happen
-  while (!(AT91C_BASE_RSTC->RSTC_RSR & AT91C_RSTC_RSTTYP_SOFTWARE))
-    armprintf(".")
-    ;
+  while (!(AT91C_BASE_RSTC->RSTC_RSR & AT91C_RSTC_RSTTYP_SOFTWARE));
 }
 
 void boot_verify()
@@ -158,7 +175,7 @@ void boot_event()
     {
       // @@@ replace with boot_core once ready
       armprintf ("Begin verify.\r");
-      boot_verify();
+      boot_core();
       armprintf ("End verify.\r");
     }
     else if (boot_data_head > boot_data_size) {
