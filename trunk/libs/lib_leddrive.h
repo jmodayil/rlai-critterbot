@@ -10,13 +10,17 @@ struct rgbled {
 	unsigned char b;
 }LED[16];
 //States of leddrive_event()
-enum led_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+//possible gradients for cval
+enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED};
 
 unsigned int leddrive_state;
 
 //varibles for external functions.
 int *leddrive_rot;
 int leddrive_startver;
+unsigned int leddrive_grad1;
+unsigned int leddrive_grad2;
 unsigned int leddrive_batlvl;//
 unsigned int *leddrive_angledeg;
 unsigned int *leddrive_anglecval;
@@ -61,6 +65,8 @@ void startup(void);
 
 void clearled(void);
 
+//takes cval and a gradient to use to provide RGB values.
+void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int grad, unsigned int cval);
 
 //external functions, State changers
 /*
@@ -68,11 +74,14 @@ All change leddrive_event's state accordingly.
 */
 void leddrive_startup(int ver);
 void leddrive_batstatus(void);
-void leddrive_angle(unsigned int *deg,unsigned int *cval);
+void leddrive_angle(unsigned int *deg,unsigned int *cval,unsigned int grad);
 void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
-void leddrive_gradient(unsigned int *cval1,unsigned int *cval2);
+void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
+
+
+
 /*
 cval ,for now, is 0-4095, 0 being blue 4095 being red, with numbers between a liner gradient between the two.
 */

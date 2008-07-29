@@ -9,46 +9,84 @@
 
 #define C 0.3925
 
+//RGB LED array of structures
 struct rgbled {
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
 }LED[16];
+//States of leddrive_event()
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+//possible gradients for cval
+enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED};
 
-enum led_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+unsigned int leddrive_state;
 
-unsigned int led_state;
-int *led_rot;
-int led_startver;
-unsigned int led_batlvl;
-unsigned int *led_angledeg;
-unsigned int *led_anglecval;
-unsigned int *led_gradcval1;
-unsigned int *led_gradcval2;
+//varibles for external functions.
+int *leddrive_rot;
+int leddrive_startver;
+unsigned int leddrive_grad1;
+unsigned int leddrive_grad2;
+unsigned int leddrive_batlvl;//
+unsigned int *leddrive_angledeg;
+unsigned int *leddrive_anglecval;
+unsigned int *leddrive_gradcval1;
+unsigned int *leddrive_gradcval2;
 
 
-void fadein(unsigned char *,unsigned char,unsigned char);
-void fadeout(unsigned char *,unsigned char,unsigned char);
-void fadeto(struct rgbled *,unsigned char,unsigned char,unsigned char,unsigned char);
-void pulse(struct rgbled *,unsigned char,unsigned char,unsigned char,unsigned char,unsigned int);
-void anglelight(unsigned int, unsigned char, unsigned char, unsigned char);
-void battlvl(unsigned int);
-void gradient(unsigned char,unsigned char,unsigned char,unsigned char,unsigned char,unsigned char);
-void rotate(int);
+//internal functions
+/*
+*light points to a single r,g,or b value 0-255 and increase/decreases untill ending.
+*/
+void fadein(unsigned char *light,unsigned char incr,unsigned char ending);
+void fadeout(unsigned char *light,unsigned char incr,unsigned char ending);
+/*
+*fades the led to the rgb values at a rate of incr.
+*/
+void fadeto(struct rgbled *light, unsigned char r,unsigned char g,unsigned char b,unsigned char incr);
+/*
+pulses led from black to rgb values fading in at a rate of incr takeing lenght cycles before fading back to black
+*/
+void pulse(struct rgbled *light,unsigned char r,unsigned char g,unsigned char b,unsigned char incr,unsigned int length);
+/*
+takes angle and chooses a corresponding led and displays rgb color on that led. angle values will wrap around
+*/
+void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b);
+/*
+displays the battery lvl 0-100
+*/
+void battlvl(unsigned int lvl);
+/*
+takes 2 rgb values and makes a gradient from one to the other.
+*/
+void gradient(unsigned char r1,unsigned char g1,unsigned char b1,unsigned char r2,unsigned char g2,unsigned char b2);
+/*
+rotates all led's. positive number clockwise and visvera. Rot is the number of cycles to wait before rotating again.
+*/
+void rotate(int rot);
+/*
+startup sequence using varible leddrive_startver to pick which sequence to use
+*/
 void startup(void);
+
 void clearled(void);
 
+//takes cval and a gradient to use to provide RGB values.
+void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int grad, unsigned int cval);
 
-void led_ctrl(void);
+//external functions, State changers
+/*
+All change leddrive_event's state accordingly.
+*/
+void leddrive_startup(int ver);
+void leddrive_batstatus(void);
+void leddrive_angle(unsigned int *deg,unsigned int *cval,unsigned int grad);
+void leddrive_rotate(int *rot);
+void leddrive_clear(void);//blanks led's
+void leddrive_stop(void);//keeps current color states on led's
+void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
+void leddrive_event(void);//MAIN EVEN CONTROLLER
 
-
-void led_startup(int);
-void led_batstatus(void);
-void led_angle(unsigned int *,unsigned int *);
-void led_rotate(int *);
-void led_clear(void);
-void led_stop(void);
-void led_gradient(unsigned int *,unsigned int *);
 
 float tof(unsigned char);
 
@@ -79,11 +117,16 @@ void loop(void) {
 	sltime.tv_usec = 10000;
 	
 	// YOUR CODE GOES HERE
-	//led_ctrl();
-	static int a;
-	a++;
-	pulse(&LED[0],255,128,0,5,100);
 
+	leddrive_event();
+	static int a,b,c;
+	a++;
+	b+=4;
+	c=200;
+	if (b>4090)
+		b=0;
+	if (a==2)
+		leddrive_gradient(&c,&b,REDBLUE,STOPLIGHT);
 	
 	// END YOUR CODE
 	
@@ -94,8 +137,9 @@ void loop(void) {
 
 void init(void)
 {	 
-		led_state = STARTUP;
-		led_startver = 1;
+	leddrive_state = STARTUP;
+	leddrive_startver = 2;
+	clearled();
 
 		glClearColor(0.0, 0.0, 0.0, 0.0);
 		glColor3f(1.0, 1.0, 1.0);
@@ -176,7 +220,7 @@ b=b/255;
 return b;
 }
 
-//custom functions
+
 void fadein(unsigned char *light,unsigned char incr,unsigned char ending){
 	if ((*light + incr) >= ending)
 		*light = ending;
@@ -216,7 +260,7 @@ void pulse(struct rgbled *light,unsigned char r,unsigned char g,unsigned char b,
 		a=0;
 }
 
-void anglelight(unsigned int angle, unsigned char r,unsigned char g,unsigned char b){
+void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b){
 	unsigned int light;
 	while (angle>359)
 		angle-=360;
@@ -317,14 +361,41 @@ void clearled(void){
 	memset(LED, 0x00, sizeof(LED));
 }
 
+
+void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int grad, unsigned int cval){
+	switch(grad){
+	case BLACKWHITE:
+		*r=cval>>4;
+		*g=*b=*r;
+		break;
+	case STOPLIGHT:
+		if (cval<2048){
+		*r=cval>>3;
+		*g=255;
+		}
+		if (cval>=2048){
+		*r=255;
+		*g=(255-((cval-2048)>>3));
+		}
+		*b=0;
+		break;
+	case REDBLUE:
+		*r=cval>>4;
+		*b=255-*r;
+		*g=0;
+		break;
+	}
+}
+
+
 void startup(void){
 		static unsigned int a,i;
 		a++;
-	switch(led_startver){
+	switch(leddrive_startver){
 	case 1:
 	default:
 		a=0;
-		led_startver = -1;
+		leddrive_startver = -1;
 	case -1:
 		if (a<148){
 			for (i=0;i<=15;++i)
@@ -348,11 +419,11 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if (a>1250)		
-			led_batstatus();
+			leddrive_batstatus();
 		break;
 	case 2:
 		a=0;
-		led_startver = -2;
+		leddrive_startver = -2;
 	case -2:
 		if (a<10)
 			gradient(14,90,33,0,0,100);
@@ -369,58 +440,55 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if(a>920)
-			led_batstatus();
+			leddrive_batstatus();
 		break;
 	case 3:
 		a=0;
-		led_startver=-3;
+		leddrive_startver=-3;
 	case -3:
-		//3rd here
+		//3rd startup sequence here
 		break;
 	}	
 }
-
-void led_ctrl(void) {
-	unsigned static char old_led_anglecval, old_led_angledeg;
-  unsigned static char old_led_gradcval1,old_led_gradcval2;
-	unsigned int r,b,r2,b2;
+// MAIN EVENT CONTROLLER
+void leddrive_event(void) {
+	unsigned static char old_leddrive_anglecval, old_leddrive_angledeg;
+  unsigned static char old_leddrive_gradcval1,old_leddrive_gradcval2;
+	unsigned char r,g,b,r2,g2,b2;
 	
-	switch (led_state){
+	switch (leddrive_state){
 	case STARTUP:
 		startup();
 		break;
 	case BATSTATUS:
 		clearled();
-		battlvl(led_batlvl);//global var.
+		battlvl(leddrive_batlvl);//
 		break;
 	case ANGLE:
-		if(old_led_anglecval == *led_anglecval && old_led_angledeg == *led_angledeg)
+		if(old_leddrive_anglecval == *leddrive_anglecval && old_leddrive_angledeg == *leddrive_angledeg)
 			break;
     clearled();
-		r=(*led_anglecval)>>4;
-		b=255-r;
-		anglelight(*led_angledeg,r,0,b);
-		old_led_anglecval = *led_anglecval;
-		old_led_angledeg = *led_angledeg;
+    cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_anglecval);
+		anglelight(*leddrive_angledeg,r,g,b);
+		old_leddrive_anglecval = *leddrive_anglecval;
+		old_leddrive_angledeg = *leddrive_angledeg;
 		break;
 	case ROTATE:
-		rotate(*led_rot);
+		rotate(*leddrive_rot);
 		break;
 	case GRADIENT:
-		if(old_led_gradcval1 == *led_gradcval1 && old_led_gradcval2 == *led_gradcval2)
+		if(old_leddrive_gradcval1 == *leddrive_gradcval1 && old_leddrive_gradcval2 == *leddrive_gradcval2)
 			break;
 		clearled();
-		r=(*led_gradcval1)>>4;
-		b=255-r;
-		r2=(*led_gradcval2)>>4;
-		b2=255-r2;
-		gradient(r,0,b,r2,0,b2);
-		old_led_gradcval1 = *led_gradcval1;
-		old_led_gradcval2 = *led_gradcval2;
+		cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
+		cvalselect(&r2,&g2,&b2,leddrive_grad2,*leddrive_gradcval2);
+		gradient(r,g,b,r2,g2,b2);
+		old_leddrive_gradcval1 = *leddrive_gradcval1;
+		old_leddrive_gradcval2 = *leddrive_gradcval2;
 		break;
   case CLEAR:	
     clearled();
-    led_stop();
+    leddrive_stop();
     break;
   case STOP:
   	break;
@@ -428,38 +496,41 @@ void led_ctrl(void) {
 }
 
 //external
-void led_batstatus(void){
-	led_state = BATSTATUS;
+void leddrive_batstatus(void){
+	leddrive_state = BATSTATUS;
 }
 
-void led_angle(unsigned int *deg,unsigned int *cval){
-	led_state= ANGLE;
-	led_angledeg = deg;
-	led_anglecval = cval;
+void leddrive_angle(unsigned int *deg,unsigned int *cval, unsigned int grad){
+	leddrive_state= ANGLE;
+	leddrive_angledeg = deg;
+	leddrive_anglecval = cval;
+	leddrive_grad1=grad;
 }
 
-void led_rotate(int *rot){
-	led_state=ROTATE;
-	led_rot = rot;
+void leddrive_rotate(int *rot){
+	leddrive_state=ROTATE;
+	leddrive_rot = rot;
 }
 
-void led_clear(void){
-	led_state=CLEAR;
+void leddrive_clear(void){
+	leddrive_state=CLEAR;
 }
 
-void led_stop(void){
-	led_state=STOP;
+void leddrive_stop(void){
+	leddrive_state=STOP;
 }
 
-void led_gradient(unsigned int *cval1,unsigned int *cval2){
+void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2){
 	clearled();
-	led_state=GRADIENT;
-	led_gradcval1=cval1;
-	led_gradcval2=cval2;
+	leddrive_state=GRADIENT;
+	leddrive_gradcval1=cval1;
+	leddrive_gradcval2=cval2;
+	leddrive_grad1=grad1;
+	leddrive_grad2=grad2;
 }
 
-void led_startup(int ver){
+void leddrive_startup(int ver){
 	clearled();
-	led_state=STARTUP;
-	led_startver = ver;
+	leddrive_state=STARTUP;
+	leddrive_startver = ver;
 }
