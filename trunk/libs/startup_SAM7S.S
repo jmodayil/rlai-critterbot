@@ -100,7 +100,7 @@
 // </e>
 */
         .equ    EFC_SETUP,      1
-        .equ    EFC_FMR_Val,    0x00320100
+        .equ    EFC_FMR_Val,    0x00480000
 
 
 // Watchdog Timer (WDT) definitions
@@ -336,7 +336,7 @@ IRQ_Handler_Entry:
 Die_Ungracefully:
 // Put a character (0x3F, ?)
     ldr         r14, =AT91C_BASE_US0
-	  ldr         r0 , =234
+	  ldr         r0 , =64
     str         r0, [r14, #US_THR]
 
 // Wait for the character to have been sent 
