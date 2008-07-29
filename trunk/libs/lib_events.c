@@ -47,7 +47,8 @@ unsigned int events_has_event()
 void events_init()
 {
   AT91PS_AIC pAic = AT91C_BASE_AIC;
-
+  int i;
+  
   // Enable the PIT interrupt to trigger on an interrupt
   //  Note! We are configuring the system interrupt here; if something else
   //  needs it we will have to deal with this separately.
@@ -64,6 +65,34 @@ void events_init()
     AT91C_PITC_PITIEN | AT91C_PITC_PITEN;
       
   armprintf("Initialized event timer.\n");
+
+  // Initialized any functions with inits.
+  for(i = 0; i <= EVENT_MAX; i++) {
+    if((init_flags & (1 << i)) && events[i].init_func != NULL) 
+      if(events[i].init_func()) {
+        armprintf("Failed to init EVENT_ID %d\n", i);
+        event_flags &= ~(1 << i);
+      } else
+        armprintf("Initialized EVENT_ID %d\n", i);
+  }
+}
+
+void events_do()
+{
+  int i, ret_val;
+
+  for(i = 0; i <= EVENT_MAX; i++) {
+    if((event_flags & (1 << i)) && events[i].event_func != NULL) {
+      // If an event returns < 0, we will stop it
+      // If an event returns > 0, we should do something
+      ret_val = events[i].event_func();
+      if(ret_val < 0)
+        event_flags &= ~(1 << i);
+      if(ret_val > 0)
+        return;
+      events[i].event_count++;
+    }
+  }
 }
 
 ARM_CODE RAMFUNC void events_isr()
@@ -82,9 +111,7 @@ ARM_CODE RAMFUNC void events_isr()
      * The 12 MSB of the PITC_PIVR register are the ones of interest; only
      *  the lowest one should be set.
      */
-    if (events_status != 0)
-      error_set (ERR_EVENTS);
-    if (picnt >= 0x00200000)
+    if (events_status != 0 || picnt >= 0x00200000)
       error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;
