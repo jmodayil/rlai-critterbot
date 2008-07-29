@@ -127,7 +127,7 @@ void ledctl_senddata_all()
 {
   int i;
 
-  for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
+  for(i = 0; i < 1; i++) //LEDCTL_NUM_CONTROLLERS; i++)
   {
     // @@@ Error detection: if finished != 0 for some packet, be unhappy
     // This also will require starting with finished = 1
@@ -241,10 +241,10 @@ void ledctl_setmode(enum ledctl_state_type mode)
     case FIRST_DOT_CORRECTION:
       ledctl_state = FIRST_DOT_CORRECTION;
       break;
-      default:
-        // Raise some sort of error flag?
-        armprintf ("Invalid mode in ledctl_setmode\n");
-        break;
+    default:
+      // Raise some sort of error flag?
+      armprintf ("Invalid mode in ledctl_setmode\n");
+      break;
   }
 }
 
@@ -338,10 +338,10 @@ void ledctl_init_packets()
   // Initalize the packets for both data and dot correction
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
-    ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS;
+    ledctl_ssc_packet[i].num_words = LEDCTL_NUM_LEDS * 3;
     ledctl_ssc_packet[i].data_to_write = ledctl_txdata[i];
     // We reverse the buffers for reading, as the data comes back backwards
-    ledctl_ssc_packet[i].read_data = ledctl_rxdata[LEDCTL_NUM_CONTROLLERS-1-i];
+    ledctl_ssc_packet[i].read_data = ledctl_rxdata[i];//LEDCTL_NUM_CONTROLLERS-1-i];
     ledctl_ssc_packet_dc[i].num_words = LEDCTL_NUM_LEDS;
     ledctl_ssc_packet_dc[i].data_to_write = (unsigned short*)ledctl_dc_data[i];
     ledctl_ssc_packet_dc[i].read_data = (unsigned short*)ledctl_dc_rxdata[i];

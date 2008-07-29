@@ -68,7 +68,7 @@ void events_init()
 
   // Initialized any functions with inits.
   for(i = 0; i <= EVENT_MAX; i++) {
-    if((init_flags & (1 << i)) && events[i].init_func != NULL) 
+    if((init_flags & (1 << i)) && (events[i].init_func != NULL)) 
       if(events[i].init_func()) {
         armprintf("Failed to init EVENT_ID %d\n", i);
         event_flags &= ~(1 << i);

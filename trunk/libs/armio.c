@@ -259,7 +259,11 @@ int armgetchar(void) {
     return EOF;
   if(read_loc == ser_rx_head)
     read_loc++;
+  if(read_loc >= ser_rx_buf + SER_RX_BUF_SIZE)
+    read_loc = ser_rx_buf;
   gotchar = *ser_rx_head++;
+  if(ser_rx_head >= ser_rx_buf +SER_RX_BUF_SIZE)
+    ser_rx_head = ser_rx_buf;
   return gotchar;
 }
 
@@ -276,14 +280,14 @@ int armreadline(char *read_to, int max_size) {
   if(cur_ptr == ser_rx_head){
     return EOF;
   }
-  while(*read_loc != '\n') {
+  while(*read_loc != '\r') {
     if(read_loc >= cur_ptr) {
       return EOF;
     }
     if(++read_loc >= buf_end)
       read_loc = ser_rx_buf;
   }
-  for(size = 0; ser_rx_head != read_loc; size++) {
+  for(size = 0; ser_rx_head < read_loc; size++) {
     if(size >= max_size){
       return EOF;
     }
@@ -294,6 +298,8 @@ int armreadline(char *read_to, int max_size) {
   *read_to = '\0';
   if(++read_loc >= buf_end)
     read_loc = ser_rx_buf;
+  if(++ser_rx_head >= buf_end)
+    ser_rx_head = ser_rx_buf;
   return size;
 }
 
