@@ -39,8 +39,11 @@ void boot_reset_arm()
 {
   // Tell the reset controller to reset
   AT91C_BASE_RSTC->RSTC_RCR = BOOT_RESET_SETTINGS;
+  
+  
   // Wait for software reset to happen
   while (!(AT91C_BASE_RSTC->RSTC_RSR & AT91C_RSTC_RSTTYP_SOFTWARE))
+    armprintf(".")
     ;
 }
 
@@ -89,12 +92,12 @@ void boot_verify()
 void boot_event()
 {
   int val;
-
   if (!boot_receiving) return;
 
   boot_timeout_counter++;
   if (boot_timeout_counter >= BOOT_RECEIVE_TIMEOUT)
   {
+    armprintf("\r");
     // Copy to flash! this will never return (or shouldn't)
     if (boot_data_head == boot_data_size)
     {
@@ -103,10 +106,13 @@ void boot_event()
       boot_verify();
       armprintf ("End verify.\r");
     }
-    
-    armprintf ("Timeout!\r");
-    // If done receiving... (or returned from boot_core??)
-    error_set(ERR_BOOT);
+    else if (boot_data_head > boot_data_size) {
+     armprintf ("Got %d bytes too much data!\r", boot_data_head - boot_data_size);
+    } else {
+      armprintf ("Timeout!\r");
+      // If done receiving... (or returned from boot_core??)
+      error_set(ERR_BOOT);
+    }
     boot_abort_receive();
   }
 
@@ -115,20 +121,22 @@ void boot_event()
   if (val == EOF) return;
   // Reset the timeout counter
   boot_timeout_counter = 0;
-
   do
   {
+    if(boot_data_head % 1024 == 0)
+      armputchar('.');
     // Hmm, more data than necessary!
     if (boot_data_head >= boot_data_size || 
       boot_data_head == BOOT_MAX_CODE_SIZE)
       {
         error_set(ERR_BOOT);
-        boot_abort_receive();
-        return;
+        //boot_abort_receive();
+        //return;
+        boot_data_head++;
       }
-    // Store byte in buffer
-    boot_data[boot_data_head++] = (unsigned char)val;
-    // Read next byte
+    else {// Store byte in buffer
+      boot_data[boot_data_head++] = (unsigned char)val;
+    }// Read next byte
     val = armgetchar();
   }
   while (val != EOF);

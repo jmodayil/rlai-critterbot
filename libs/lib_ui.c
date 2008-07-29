@@ -96,7 +96,7 @@ void ui_event()
   // Not found, write error message
   if (cmd == NULL)
   {
-    armprintf ("Invalid command: %s\n", ui_command_string);
+    armprintf ("Invalid command: *%s*\n", ui_command_string);
     return;
   }
   else

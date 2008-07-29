@@ -1,4 +1,4 @@
-*
+/*
  *  main.c
  *  
  *
@@ -12,7 +12,7 @@
 
 #include "compiler.h"
 #include "armconfig.h"
-
+#include "lib_boot.h"
 #include "lib_spi.h"
 #include "lib_ssc.h"
 #include "lib_ledctl.h"
@@ -25,23 +25,27 @@
 
 unsigned int seq;
 
-ARM_CODE RAMFUNC spur_isr() {
+ARM_CODE RAMFUNC void spur_isr() {
   error_set(ERR_SPURINT);
 }
 
 int run_ui = 1;
+extern unsigned char boot_data[];
 
 int main()
 {
- 
+  unsigned char *mem;
+  volatile int i;
+  unsigned int start, end;
   int g_x, g_y;
   int g_dir, g_mag;
   float ang;
   
   // serial port should be initialized asap for debugging purposes
+  
   init_serial_port_stdio();
   
-  AT91C_BASE_AIC->AIC_SPU = (void*) spur_isr;
+  AT91C_BASE_AIC->AIC_SPU = (unsigned int)spur_isr;
   // SPI has no dependencies
   spi_init();
   // SSC has no dependencies
@@ -56,8 +60,10 @@ int main()
   // Events has no dependencies
   events_init();
 
-  armprintf("Entering while loop...\n");
+  armprintf("Entering while loop...\r");
   seq = 0;
+  g_x = 1000;
+  g_y = 1000;
   while (1)
   {
     if (events_has_event())
@@ -66,20 +72,22 @@ int main()
       // Temporary LED / accelerometer test.
 
       g_x = accel_get_output(0);
-      g_y = accel_get_output(1);
-
+      g_y = accel_get_output(1); 
+      //armprintf("%d, %d", g_x, g_y); 
+      //start = *AT91C_PITC_PIIR;
       g_mag = 4 * (unsigned int)sqrtf(g_x*g_x + g_y*g_y);
       if(g_mag > 4095)
         g_mag = 4095; 
       
-      g_dir = (int)((atan2(-g_y, g_x) / 3.1415927) * (float)180);      
-      armprintf("%d \n", g_dir);
+      g_dir = (int)((atan2(-g_y, g_x) / 3.1415927) * (float)180);
+      //end = *AT91C_PITC_PIIR;
+      //armprintf(" : %d\r\r", end - start);      
       if(leddrive_state != STARTUP) {
-        leddrive_angle(&g_dir, &g_mag);
+        leddrive_angle(&g_dir, &g_mag, BLACKWHITE);
       }
 
       // END LED test.
-      error_disp();
+      //error_disp();
       leddrive_event();
       ledctl_event();
       accel_event();

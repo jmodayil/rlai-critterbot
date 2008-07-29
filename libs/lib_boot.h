@@ -34,6 +34,8 @@
 
 #define BOOT_PASSWORD "cookie"
 
+#define RESET_KEY (0xA5000000)
+
 /**
   * Two possible flags can be set here, AT91C_RSTC_PROCRST and 
   * AT91C_RSTC_PERRST. The first one resets the processor and the watchdog
@@ -41,7 +43,7 @@
   * The second resets the peripherals; documentation suggests it only needs
   * to be used for debugging purposes.
   */
-#define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | AT91C_RSTC_KEY)
+#define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | RESET_KEY)
 
 /** Do NOT call this function. Let the machine do the job. This function
   * copies the code to the flash and resets. */

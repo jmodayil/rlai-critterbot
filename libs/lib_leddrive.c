@@ -178,6 +178,7 @@ void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int 
 		*b=255-*r;
 		*g=0;
 		break;
+  }
 }
 
 
@@ -298,7 +299,7 @@ void leddrive_angle(unsigned int *deg,unsigned int *cval, unsigned int grad){
 	leddrive_state= ANGLE;
 	leddrive_angledeg = deg;
 	leddrive_anglecval = cval;
-	leddrive_grad1=grad
+	leddrive_grad1=grad;
 }
 
 void leddrive_rotate(int *rot){

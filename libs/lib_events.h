@@ -27,7 +27,7 @@
 #define EVENT_ID_LEDCTL 4
 #define EVENT_ID_ACCEL 5
 #define EVENT_ID_UI 6
-#define EVENT_MAX -1
+#define EVENT_MAX 6
 
 unsigned int init_flags;
 unsigned int event_flags;
@@ -41,7 +41,7 @@ struct event{
   unsigned int event_count;
 };
 
-struct event events[EVENT_MAX];
+struct event events[EVENT_MAX+1];
 
 /** Returns true whether we should call the *_event functions.
   * This will clear the 'has_event' flag.
