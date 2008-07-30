@@ -68,12 +68,14 @@ void events_init()
 
   // Initialized any functions with inits.
   for(i = 0; i <= EVENT_MAX; i++) {
-    if((init_flags & (1 << i)) && (events[i].init_func != NULL)) 
+    if((init_flags & (1 << i)) && (events[i].init_func != NULL))
+    {
       if(events[i].init_func()) {
         armprintf("Failed to init EVENT_ID %d\n", i);
         event_flags &= ~(1 << i);
       } else
         armprintf("Initialized EVENT_ID %d\n", i);
+    }
   }
 }
 
@@ -111,7 +113,9 @@ ARM_CODE RAMFUNC void events_isr()
      * The 12 MSB of the PITC_PIVR register are the ones of interest; only
      *  the lowest one should be set.
      */
-    if (events_status != 0 || picnt >= 0x00200000)
+    if (events_status != 0)
+      error_set (ERR_EVENTS);
+    else if (picnt >= 0x00200000)
       error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;

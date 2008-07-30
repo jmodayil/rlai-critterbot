@@ -248,10 +248,7 @@ Vectors:        LDR     PC,Reset_Addr
                 LDR     PC,PAbt_Addr
                 LDR     PC,DAbt_Addr
                 NOP                            /* Reserved Vector */
-//                LDR     PC,IRQ_Addr
-//                LDR     PC,[PC,#-0xF20]        /* Vector From AIC_IVR */
                 B       IRQ_Handler_Entry
-//                LDR     PC,FIQ_Addr
                 LDR     PC,[PC,#-0xF20]        /* Vector From AIC_FVR */
                 
 
@@ -266,9 +263,6 @@ FIQ_Addr:       .word   FIQ_Handler
 Undef_Handler:
                 mov     r0,#0 
                 B       Exception_Handler 
-SWI_Handler:    
-                mov     r0,#1
-                B       Exception_Handler
 PAbt_Handler:   
                 mov     r0,#2
                 B       Exception_Handler
@@ -276,6 +270,49 @@ DAbt_Handler:
                 mov     r0,#3
                 B       Exception_Handler
 FIQ_Handler:    B       FIQ_Handler
+
+// Must be in ARM
+SWI_Handler:
+// The SWI instruction causes us to arrive here in Supervisor mode, with 
+//  CPSR saved in SPSR_svc and the return address in r14_svc (lr_svc)
+// Save r0, r1 onto the stack, as well as lr
+                stmfd       sp!, {r0-r1, lr}
+
+// Load the instruction that we called to get here
+                ldr         r0, [lr, #-4]
+
+                mrs         r1, cpsr
+// Clear the opcode from it by anding it with the complement of 0xFF000000
+                ands        r0, r0, #0x00FFFFFF
+// As a bonus, if any of the non-opcode bits are set the EQ condition is false
+//  after the ands.
+                beq         SWI_Handler_Enable_Int
+
+SWI_Handler_Disable_Int:
+// We use orr to add the interrupt disable bit to CPSR iff r0 AND 0x00FFFFFF
+//  was non-zero
+                orr         r1, r1, #I_Bit
+// Store the new CPSR
+                msr         cpsr_c, r1
+
+// Read the CPSR again; is it correctly set?
+                mrs         r1, cpsr
+                tst         r1, #I_Bit
+// If I_Bit is not present in the CPSR, retry
+                beq         SWI_Handler_Disable_Int
+                b           SWI_Handler_End
+
+SWI_Handler_Enable_Int:
+// Clear the I_Bit in the CPSR
+                bic         r1, r1, #I_Bit
+                msr         cpsr_c, r1
+
+SWI_Handler_End:
+// Restore r0, r1 and leave the function by restoring lr into pc
+// Note that the little ^ indicates that we should also restore SPSR into
+//  CSPR. Crazy instructions!
+                ldmia       sp!, {r0-r1, pc}^
+
 
 // Taken from Cstartup.S
 
