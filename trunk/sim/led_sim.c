@@ -7,7 +7,14 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+
 #define C 0.3925
+
+//variables for ball sim event.
+unsigned int ledball_angle;
+unsigned int ledball_cval;
+//ball sim controller
+void ledball_crtl(void);
 
 //RGB LED array of structures
 struct rgbled {
@@ -16,7 +23,7 @@ struct rgbled {
 	unsigned char b;
 }LED[16];
 //States of leddrive_event()
-enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED};
 
@@ -86,7 +93,7 @@ void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
 void leddrive_event(void);//MAIN EVEN CONTROLLER
-
+void leddrive_ball(void);
 
 float tof(unsigned char);
 
@@ -119,15 +126,10 @@ void loop(void) {
 	// YOUR CODE GOES HERE
 
 	leddrive_event();
-	static int a,b,c;
+	static int a;
 	a++;
-	b+=4;
-	c=200;
-	if (b>4090)
-		b=0;
-	if (a==2)
-		leddrive_gradient(&c,&b,REDBLUE,STOPLIGHT);
-	
+	if (a==1)
+	leddrive_ball();
 	// END YOUR CODE
 	
 	display();
@@ -379,7 +381,7 @@ void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int 
 		}
 		*b=0;
 		break;
-	case REDBLUE:
+	case BLUERED:
 		*r=cval>>4;
 		*b=255-*r;
 		*g=0;
@@ -464,6 +466,11 @@ void leddrive_event(void) {
 		clearled();
 		battlvl(leddrive_batlvl);//
 		break;
+	case BALL:
+  	ledball_crtl();	
+  	leddrive_angledeg=&ledball_angle;
+    leddrive_anglecval=&ledball_cval;
+    leddrive_grad1=BLUERED;
 	case ANGLE:
 		if(old_leddrive_anglecval == *leddrive_anglecval && old_leddrive_angledeg == *leddrive_angledeg)
 			break;
@@ -534,3 +541,60 @@ void leddrive_startup(int ver){
 	leddrive_state=STARTUP;
 	leddrive_startver = ver;
 }
+
+void leddrive_ball(void){
+	clearled();
+	leddrive_state=BALL;
+}
+
+/* 
+*
+*LED Ball Simulator
+*
+*/
+
+unsigned int ledball_angle;
+unsigned int ledball_cval;
+
+#define T 0.01// time constant
+#define PI 3.141592654
+
+const float meu=.05;
+const float radius=.07;
+
+int ledball_gx;
+int ledball_gy;
+
+float anglef;
+float veloballd=1000;
+float accelballm;
+float accelballd;
+float fricaccel;
+float conv;
+float accely,accelx;
+
+void ledball_crtl(void){
+
+conv = 2*PI*radius/360;
+if (veloballd >0)
+fricaccel=meu*-9;
+else if (veloballd <0)
+fricaccel=meu*9;
+else
+fricaccel=0;
+
+accely=(ledball_gy*0.01)*(cosf(anglef*PI/180));
+accelx=-(ledball_gx*0.01)*(sinf(anglef*PI/180));
+
+accelballm=(fricaccel + accely + accelx);
+accelballd=accelballm/conv;
+veloballd= veloballd +(accelballd*T);
+anglef=anglef+(veloballd*T);
+
+ledball_cval=((unsigned int)sqrtf(ledball_gx*ledball_gx + ledball_gy*ledball_gy))<<2;
+if (ledball_cval >4095)
+ledball_cval=4095;
+ledball_angle = anglef;
+}
+
+
