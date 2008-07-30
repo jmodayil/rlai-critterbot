@@ -15,7 +15,7 @@
 
 // Number of master clock cycles in 1.5uS, rounded up
 #define FLASH_FMCN (MCK / 666667 + 1)
-#define FLASH_KEY  (0xA5 << 24)
+#define FLASH_KEY  (0xA5000000)
 #define FLASH_PAGE_WORD_SIZE (AT91C_IFLASH_PAGE_SIZE / 4)
 
 /*

@@ -18,6 +18,7 @@ PRODUCE_MEMORY_MAP_LD=-Map=memory.map
 
 # Compiler flags
 COMMONFLAGS = -c -mcpu=arm7tdmi
+ASSONLYFLAGS = -S -mcpu=arm7tdmi
 AFLAGS = -x assembler-with-cpp
 CFLAGS = -Winline -O3 -ffunction-sections -fdata-sections
 # Set DEBUGFLAGS to empty for normal compilation
@@ -31,12 +32,14 @@ THUMB = -marm
 
 # Lib files to compile
 CSRC = lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c
+CASS = $(CSRC:.c=.aS)
 COBJ = $(CSRC:.c=.o)
-ASRC = startup_SAM7S.s
-AOBJ = $(ASRC:.s=.o)
+ASRC = startup_SAM7S.S lib_critical.S
+AOBJ = $(ASRC:.S=.o)
 
 # Test targets
-TESTBINS = $(BINDIR)/lib_ui_test.bin $(BINDIR)/main_test.bin
+# Removed targets: $(BINDIR)/lib_ui_test.bin
+TESTBINS = $(BINDIR)/main_test.bin
 
 # Builds libraries (but nothing else)
 all: all_libs
@@ -68,10 +71,14 @@ $(COBJ): %.o : %.c
 	@echo $<
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
 
+$(CASS): %.aS : %.c
+	@echo $<
+	$(CC) $(ASSONLYFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
+
 $(notdir $(TESTBINS:.bin=.o)): %.o : %.c
 	@echo $<
 	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
 
-$(AOBJ): %.o : %.s
+$(AOBJ): %.o : %.S
 	arm-elf-gcc $(COMMONFLAGS) $(AFLAGS) $(THUMB) $(INCLUDES) $(DEBUGFLAGS) -Wall $< -o $@
 

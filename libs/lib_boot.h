@@ -19,7 +19,7 @@
 #define BOOT_MAX_CODE_SIZE  0xA000
 // @@@ fixme
 #define BOOT_BUFFER         (boot_data)
-#elif BOOT_LOAD_TO_FLASH
+#elif defined(BOOT_LOAD_TO_FLASH)
 #define BOOT_MAX_CODE_SIZE AT91C_IFLASH_SIZE
 #define BOOT_BUFFER        (AT91C_IFLASH + AT91C_IFLASH_SIZE/2)
 #else

@@ -16,6 +16,7 @@
 #include "armio.h"
 #include "lib_error.h"
 #include "lib_boot.h"
+#include "lib_critical.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -46,7 +47,7 @@ ui_cmd_item ui_commands[] = {
   {"status", ui_status, "status"},
   {"report", ui_report, "report"},
   {"mode", ui_mode, "mode <led [gs|dc]>"},
-  {"test", ui_test, "test [ramfunc|sanity]"},
+  {"test", ui_test, "test [ramfunc|int]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
   {"fortune", ui_fortune, "fortune"}
@@ -401,6 +402,38 @@ RAMFUNC void ui_test_ramfunc(char * cmdstr)
   armprintf ("\n");
 }
 
+/** This tests the interrupt disable as follows:
+  * Disable the interrupt processor line
+  * Wait for the PIT to count over two event cycles
+  * Re-enable the interrupt procesor line
+  *
+  * To use this, make sure that EVENTSLOW has not yet occured. The routine
+  *  will block for about 20ms (2 cycles) to allow the PIT to count at least
+  *  two cycles. After the test routine completes, you should return to
+  *  normal functioning; if not, then re-enabling the interrupts failed
+  *  (at that point nothing will work).
+  */
+void ui_test_int(char * cmdstr)
+{
+  unsigned int err_status = error_get();
+  // We should use __armprintf here because the PDC interrupts will become 
+  //  disabled
+  armprintf ("Disabling interrupts: we will cause an EVENTSLOW error\r");
+  armprintf ("Current error status: %x\r", err_status);
+  if (err_status & ERR_EVENTSLOW)
+    armprintf ("ERR_EVENTSLOW already set; test is meaningless\r");
+
+  crit_disable_int();
+  while (AT91C_BASE_PITC->PITC_PIIR < 0x00200000) ;
+  crit_enable_int();
+
+  err_status = error_get();
+  if (err_status & ERR_EVENTSLOW)
+    armprintf ("Event slow reported - interrupts were disabled.\r");
+  else
+    armprintf ("Interrupts were most likely NOT disabled.\r");
+}
+
 /** Tests something, specified by the first argument. E.g.
   * test ramfunc
   */
@@ -417,8 +450,11 @@ void ui_test (char * cmdstr)
     armprintf ("Test RAM function at address %x\n", (int)ui_test_ramfunc);
     ui_test_ramfunc(cmdstr);
   }
-  else if (strncmp (ui_strarg, "sanity", sizeof(ui_strarg)) == 0)
-    armprintf ("You rolled a 6. Sanity check failed.\n");
+  else if (strncmp (ui_strarg, "int", sizeof(ui_strarg)) == 0)
+  {
+    armprintf ("Testing interrupts.\r");
+    ui_test_int(cmdstr);
+  }
   else
     armprintf ("Invalid argument.\n");
 }
