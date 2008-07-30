@@ -10,11 +10,18 @@ struct rgbled {
 	unsigned char b;
 }LED[16];
 //States of leddrive_event()
-enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP};
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED};
 
 unsigned int leddrive_state;
+
+//variables for ball simulation event
+unsigned int ledball_angle;
+unsigned int ledball_cval;
+//ledball simulator controller
+void ledball_crtl(void);
+
 
 //varibles for external functions.
 int *leddrive_rot;
@@ -79,11 +86,10 @@ void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
-
-
+void leddrive_ball(void);
 
 /*
-cval ,for now, is 0-4095, 0 being blue 4095 being red, with numbers between a liner gradient between the two.
+cval is 0-4095, leddrive_grad1/2 decide what cval will represent.
 */
 
 void leddrive_event(void);//MAIN EVEN CONTROLLER

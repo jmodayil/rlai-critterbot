@@ -1,6 +1,9 @@
 
 #include <string.h>
 #include "lib_leddrive.h"
+#include "lib_ledball.c"
+#include "lib_accel.h"
+#include <math.h>
 
 void leddrive_init(void)
 {	 
@@ -155,7 +158,6 @@ void clearled(void){
 	memset(LED, 0x00, sizeof(LED));
 }
 
-
 void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int grad, unsigned int cval){
 	switch(grad){
 	case BLACKWHITE:
@@ -258,6 +260,11 @@ void leddrive_event(void) {
 		clearled();
 		battlvl(leddrive_batlvl);//
 		break;
+	case BALL:
+  	ledball_crtl();	
+  	leddrive_angledeg=&ledball_angle;
+    leddrive_anglecval=&ledball_cval;
+    leddrive_grad1=BLUERED;
 	case ANGLE:
 		if(old_leddrive_anglecval == *leddrive_anglecval && old_leddrive_angledeg == *leddrive_angledeg)
 			break;
@@ -328,4 +335,63 @@ void leddrive_startup(int ver){
 	clearled();
 	leddrive_state=STARTUP;
 	leddrive_startver = ver;
+}
+void leddrive_ball(void){
+	clearled();
+	leddrive_state=BALL;
+}
+
+
+
+
+
+/* 
+*
+*LED Ball Simulator
+*
+*/
+
+
+
+#define T 0.01// time constant
+#define PI 3.141592654
+
+const float meu=.05;
+const float radius=.07;
+
+int ledball_gx;
+int ledball_gy;
+
+float anglef;
+float veloballd=500;
+float accelballm;
+float accelballd;
+float fricaccel;
+float conv;
+float accely,accelx;
+
+void ledball_crtl(void){
+ledball_gx = accel_get_output(0);
+ledball_gy = accel_get_output(1);
+
+conv = 2*PI*radius/360;
+if (veloballd >0)
+fricaccel=meu*-9;
+else if (veloballd <0)
+fricaccel=meu*9;
+else
+fricaccel=0;
+
+accely=(ledball_gy*0.009)*(cosf(anglef*PI/180));
+accelx=-(ledball_gx*0.009)*(sinf(anglef*PI/180));
+
+accelballm=(fricaccel + accely + accelx);
+accelballd=accelballm/conv;
+veloballd= veloballd +(accelballd*T);
+anglef=anglef+(veloballd*T);
+
+ledball_cval=((unsigned int)sqrtf(ledball_gx*ledball_gx + ledball_gy*ledball_gy))<<2;
+if (ledball_cval >4095)
+ledball_cval=4095;
+ledball_angle = anglef;
 }
