@@ -35,7 +35,17 @@ crit_enable_int:
   swi   0x000000
   bx    lr
 
-  .section  .fastrun.crit_get_mutex,"ax",%progbits
+  .section  .fastrun.crit_test_mutex,"ax",%progbits
+  .align	4
+	.global	crit_test_mutex
+	.type	crit_test_mutex, %function
+// r0 holds a pointer to a semaphore
+crit_test_mutex:
+  // Simply read the mutex and return it 
+  ldr   r0, [r0]
+   bx   lr
+
+.section  .fastrun.crit_get_mutex,"ax",%progbits
   .align	4
 	.global	crit_get_mutex
 	.type	crit_get_mutex, %function
@@ -53,4 +63,18 @@ mutex_test_and_set:
   bne   mutex_test_and_set
 
 // Now that we have successfully set the mutex, return
+   bx   lr
+  
+  .section  .fastrun.crit_release_mutex,"ax",%progbits
+  .align	4
+	.global	crit_release_mutex
+	.type	crit_release_mutex, %function
+// r0 holds a pointer to a semaphore
+release_get_mutex:
+  mov   r2, #0
+
+// Release the mutex by setting it to 0
+  str   r2, [r0, #0] 
+
+// Return
    bx   lr
