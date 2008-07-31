@@ -102,6 +102,8 @@ void ssc_send_packet( struct ssc_packet *packet ) {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
 
+  ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+  
   // This is the last packet in the list.
   packet->next_packet = NULL;
   // If this isn't also the first packet in the list, add it to 
@@ -109,6 +111,7 @@ void ssc_send_packet( struct ssc_packet *packet ) {
   if( ssc_data_head != NULL ) {
     ssc_data_head->next_packet = packet;
     ssc_data_head = packet;
+    ssc->SSC_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
   }
   // If this is the first packet in the list, set up the PDC and
   // start the transfer
@@ -117,7 +120,7 @@ void ssc_send_packet( struct ssc_packet *packet ) {
     ssc->SSC_TPR = (AT91_REG)ssc_data_tail->data_to_write;
     ssc->SSC_TCR = ssc_data_tail->num_words;
     ssc->SSC_PTCR = AT91C_PDC_TXTEN;
-    ssc->SSC_IER = AT91C_SSC_ENDTX;
+    ssc->SSC_IER = AT91C_SSC_TXBUFE;
     // If read_data is NULL, we're ignoring received data
     if( ssc_data_tail->read_data != NULL )
     {
@@ -125,11 +128,10 @@ void ssc_send_packet( struct ssc_packet *packet ) {
       ssc->SSC_RCR = ssc_data_tail->num_words;
       ssc->SSC_CR = AT91C_SSC_RXEN;
       ssc->SSC_PTCR = AT91C_PDC_RXTEN;
-      ssc->SSC_IER = AT91C_SSC_ENDRX;
+      ssc->SSC_IER = AT91C_SSC_RXBUFF;
     }
     else
     {
-      ssc->SSC_RCR = 0;
       // Disable RX if not reading anything
       ssc->SSC_CR = AT91C_SSC_RXDIS;
     }
@@ -150,13 +152,6 @@ ARM_CODE RAMFUNC void ssc_isr() {
   AT91PS_SSC ssc = AT91C_BASE_SSC;
   unsigned int old_reg;
   
-  // This is temporary hack.
-  if(ssc_data_tail == NULL)
-    return;
-  
-  // Disable PDC transfers just to be safe
-  old_reg = ssc->SSC_PTSR;
-  ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
   
   /* Check if both ENDRX and ENDTX flags are set
    * 
@@ -166,11 +161,20 @@ ARM_CODE RAMFUNC void ssc_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if(ssc->SSC_SR & AT91C_SSC_ENDTX) 
-    ssc->SSC_IDR = AT91C_SSC_ENDTX;
-  if(ssc->SSC_SR & AT91C_SSC_ENDRX)
-    ssc->SSC_IDR = AT91C_SSC_ENDRX;
-  if( ssc->SSC_SR & ( AT91C_SSC_ENDRX | AT91C_SSC_ENDTX ) ) {
+  if(ssc->SSC_SR & AT91C_SSC_TXBUFE) 
+    ssc->SSC_IDR = AT91C_SSC_TXBUFE;
+  if(ssc->SSC_SR & AT91C_SSC_RXBUFF)
+    ssc->SSC_IDR = AT91C_SSC_RXBUFF;
+  
+  // This is temporary hack.
+  if(ssc_data_tail == NULL)
+    return;
+  
+  // Disable PDC transfers just to be safe
+  old_reg = ssc->SSC_PTSR;
+  ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+  
+  if( ssc->SSC_SR & ( AT91C_SSC_RXBUFF | AT91C_SSC_TXBUFE ) ) {
     // Let the packet's client know we're done
     ssc_data_tail->finished++;
     /* If there is another packet in the list, prep it and start transfer
@@ -184,7 +188,7 @@ ARM_CODE RAMFUNC void ssc_isr() {
       ssc->SSC_TPR = (AT91_REG)ssc_data_tail->data_to_write;
       ssc->SSC_TCR = ssc_data_tail->num_words;
       ssc->SSC_PTCR = AT91C_PDC_TXTEN;
-      ssc->SSC_IER = AT91C_SSC_ENDTX;
+      ssc->SSC_IER = AT91C_SSC_TXBUFE;
       // If read_data is NULL, we're ignoring received data
       if( ssc_data_tail->read_data != NULL )
       {
@@ -192,13 +196,12 @@ ARM_CODE RAMFUNC void ssc_isr() {
         ssc->SSC_RCR = ssc_data_tail->num_words;
         ssc->SSC_PTCR = AT91C_PDC_RXTEN;
         ssc->SSC_CR = AT91C_SSC_RXEN;
-        ssc->SSC_IER = AT91C_SSC_ENDRX;
+        ssc->SSC_IER = AT91C_SSC_RXBUFF;
         // We can enable the RXT now as it relies on the TX clock
       }
       else
       {
         // Leave the SSC disabled
-        ssc->SSC_RCR = 0;
         ssc->SSC_CR = AT91C_SSC_RXDIS;
       }
     }
@@ -207,7 +210,8 @@ ARM_CODE RAMFUNC void ssc_isr() {
       ssc_data_head = NULL;
       ssc_data_tail = NULL;
     }
-  } else {
+  } 
+  else {
     ssc->SSC_PTCR = old_reg;
   }
 }

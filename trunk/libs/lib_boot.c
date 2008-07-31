@@ -11,8 +11,9 @@
 #include "lib_error.h"
 #include "lib_flash.h"
 #include "armio.h"
-
+#include "lib_critical.h"
 #include "lib_ledctl.h"
+#include "lib_events.h"
 
 BOOT_COPY_SECTION unsigned char boot_data[BOOT_MAX_CODE_SIZE];
 unsigned int boot_data_head;
@@ -36,10 +37,7 @@ ARM_CODE RAMFUNC void boot_core()
   int tmp = 0;
 
   // Disable interrupts
-  asm volatile("mrs r0, cpsr\n\t"
-      "orr r0, r0, #0x80\n\t"
-      "msr cpsr_c, r0"
-      : : : "r0" );
+  crit_disable_int();
   // @@@ Disable motors, etc
   // @@@ Enable watchdog - don't take too long; reset watchdog while copying
   // Switch to supervisor mode?
@@ -52,23 +50,17 @@ ARM_CODE RAMFUNC void boot_core()
   source = (unsigned char*)BOOT_BUFFER;
   dest = (unsigned char*)BOOT_COPY_DESTINATION;
 
-  __armputchar('>');
+  //__armprintf("\r\rFLASHING BOOT IMAGE!!!\r\r");
+  
   // Copy all pages except possibly the last one
   for (i = 0; i < num_pages; i++)
   {
     // Write a full page (length is in words)
     if (!flash_write_data((int *) dest, (int *)source, 
       AT91C_IFLASH_PAGE_SIZE / 4)) {
-      __armputchar('a');
       errflag = 1;
     }
     if ((tmp = flash_erase_write_page (i)) != 0) {
-      if(tmp & AT91C_MC_LOCKE)  
-        __armputchar('b');
-      if(tmp & AT91C_MC_PROGE)
-        __armputchar('c');
-      if(tmp & 1)
-        __armputchar('d');  
       errflag = 1;
     }
 
@@ -76,7 +68,6 @@ ARM_CODE RAMFUNC void boot_core()
 
     dest += AT91C_IFLASH_PAGE_SIZE;
     source += AT91C_IFLASH_PAGE_SIZE;
-    __armputchar('-');
   }
 
   // Write the last page, if necessary
@@ -86,10 +77,8 @@ ARM_CODE RAMFUNC void boot_core()
     if (!flash_write_data((int *) dest, (int *)source,
       tail_page_size / 4)) {
       errflag = 1;
-      __armputchar('e');
     }
     if (flash_erase_write_page(i) != 0) {
-      __armputchar('f');
       errflag = 1;
     }
 
@@ -104,8 +93,20 @@ ARM_CODE RAMFUNC void boot_core()
   {
     // Write to the serial port and die (should be English pound sign)
     
-    __armputchar('!');
-    while (1) ;
+    __armputchar('F');
+    __armputchar('L');
+    __armputchar('A');
+    __armputchar('S');
+    __armputchar('H');
+    __armputchar(' ');
+    __armputchar('F');
+    __armputchar('A');
+    __armputchar('I');
+    __armputchar('L');
+    __armputchar('E');
+    __armputchar('D');
+    __armputchar('\r');
+    while (1);
   }
 }
 
@@ -174,9 +175,7 @@ void boot_event()
     if (boot_data_head == boot_data_size)
     {
       // @@@ replace with boot_core once ready
-      armprintf ("Begin verify.\r");
-      boot_core();
-      armprintf ("End verify.\r");
+      boot_verify();
     }
     else if (boot_data_head > boot_data_size) {
      armprintf ("Got %d bytes too much data!\r", boot_data_head - boot_data_size);
@@ -214,9 +213,6 @@ void boot_event()
   while (val != EOF);
 }
 
-// @@@ take me out
-extern int run_ui;
-
 /**
   * Begins the reception
   */
@@ -227,7 +223,8 @@ void boot_begin_receive(int data_size)
   boot_data_size = data_size;
   boot_timeout_counter = 0;
 
-  run_ui = 0;
+  event_stop(EVENT_ID_UI);
+  // run_ui = 0;
   // @@@ disable UI
 }
 
@@ -237,7 +234,8 @@ void boot_begin_receive(int data_size)
 void boot_abort_receive()
 {
   boot_receiving = 0;
-  run_ui = 1;
+  event_start(EVENT_ID_UI);
+  // run_ui = 1;
   // @@@ enable UI
 }
 

@@ -49,6 +49,11 @@ struct event events[EVENT_MAX+1];
   */
 unsigned int events_has_event();
 
+void event_stop(unsigned int);
+void event_start(unsigned int);
+
+void events_do();
+
 /** Initializes the event timer.
   */
 void events_init();

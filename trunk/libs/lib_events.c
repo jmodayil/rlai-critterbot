@@ -18,8 +18,6 @@
 #include "lib_events.h"
 #include "armio.h"
 
-extern unsigned int seq;
-
 volatile unsigned int events_status;
 
 unsigned int events_has_event()
@@ -79,6 +77,22 @@ void events_init()
   }
 }
 
+void event_stop(unsigned int id) {
+
+  if(id > EVENT_MAX)
+    return;
+  
+  event_flags &= ~(1 << id);
+}
+
+void event_start(unsigned int id) {
+  
+  if(id > EVENT_MAX)
+    return;
+  
+  event_flags |= 1 << id;
+}
+
 void events_do()
 {
   int i, ret_val;
@@ -119,6 +133,5 @@ ARM_CODE RAMFUNC void events_isr()
       error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;
-    seq++;
   }
 }

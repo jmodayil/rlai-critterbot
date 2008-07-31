@@ -1,7 +1,6 @@
 
 #include <string.h>
 #include "lib_leddrive.h"
-#include "lib_ledball.c"
 #include "lib_accel.h"
 #include <math.h>
 
