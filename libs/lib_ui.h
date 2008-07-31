@@ -38,6 +38,7 @@ void ui_getaccel (char * cmdstr);
 void ui_status (char * cmdstr);
 void ui_report (char * cmdstr);
 void ui_mode (char * cmdstr);
+void ui_pid (char * cmdstr);
 
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);

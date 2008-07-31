@@ -17,6 +17,7 @@
 #include "lib_error.h"
 #include "lib_boot.h"
 #include "lib_critical.h"
+#include "lib_events.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -50,7 +51,8 @@ ui_cmd_item ui_commands[] = {
   {"test", ui_test, "test [ramfunc|int]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
-  {"fortune", ui_fortune, "fortune"}
+  {"fortune", ui_fortune, "fortune"},
+  {"pid", ui_pid, "pid [start|stop|stat] #"}
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -97,7 +99,7 @@ void ui_event()
   // Not found, write error message
   if (cmd == NULL)
   {
-    armprintf ("Invalid command: *%s*\n", ui_command_string);
+    armprintf ("Invalid command: \"%s\"\r", ui_command_string);
     return;
   }
   else
@@ -112,20 +114,20 @@ void ui_do_report()
   // The lazy way - call other status-related functions from the UI
   ui_statled("stat_led");
   ui_getaccel("get_accel");
-  armprintf ("Error status: %x\n", error_get());
+  armprintf ("Error status: %x\r", error_get());
 }
 
 void ui_help(char * cmdstr)
 {
   int idx;
   
-  armprintf ("List of commands and usage: \n");
+  armprintf ("List of commands and usage: \r");
 
   for (idx = 0; idx < ui_ncommands; idx++)
-    armprintf ("%s - %s\n", ui_commands[idx].name, 
+    armprintf ("%s - %s\r", ui_commands[idx].name, 
       ui_commands[idx].description);
   
-  armprintf ("\nNote! Commands and arguments are case-sensitive.\n");
+  armprintf ("\rNote! Commands and arguments are case-sensitive.\r");
 }
 
 void ui_setled(char * cmdstr)
@@ -137,7 +139,7 @@ void ui_setled(char * cmdstr)
   if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
     &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
   {
-    armprintf ("Invalid number of arguments to set_led.\n");
+    armprintf ("Invalid number of arguments to set_led.\r");
     return;
   }
 
@@ -147,8 +149,8 @@ void ui_setled(char * cmdstr)
       ledColors[1] >= LEDCTL_MAX_VALUE ||
       ledColors[2] >= LEDCTL_MAX_VALUE)
   {
-    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
-    armprintf ("Colors must be in range 0..%d\n", LEDCTL_MAX_VALUE);
+    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
+    armprintf ("Colors must be in range 0..%d\r", LEDCTL_MAX_VALUE);
     return;
   }
 
@@ -165,20 +167,20 @@ void ui_getled (char * cmdstr)
 
   if (armsscanf (cmdstr, "%s %d", ui_cmdname, &ledNum) < 2)
   {
-    armprintf ("Invalid number of arguments to get_led.\n");
+    armprintf ("Invalid number of arguments to get_led.\r");
     return;
   }
 
   if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
   {
-    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
     return;
   }
   
   for (color = 0; color < 3; color++)
     ledColors[color] = ledctl_getcolor(ledNum, color);
 
-  armprintf ("LED %d: %d,%d,%d\n", ledNum, 
+  armprintf ("LED %d: %d,%d,%d\r", ledNum, 
     ledColors[0], ledColors[1], ledColors[2]);
 }
 
@@ -186,24 +188,24 @@ void ui_statled(char * cmdstr)
 {
   int i;
 
-  armprintf ("XERR status: %d\n", ledctl_geterr());
+  armprintf ("XERR status: %d\r", ledctl_geterr());
   for (i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
-    armprintf ("LOD %d status: %x\n", i, ledctl_getLOD(i));
-  armprintf ("TEF status: %x\n", ledctl_getTEF());
+    armprintf ("LOD %d status: %x\r", i, ledctl_getLOD(i));
+  armprintf ("TEF status: %x\r", ledctl_getTEF());
 
   armprintf ("If LOD or TEF != 0 and XERR is on or vice-versa, "
-    "report to MGB.\n");
-  armprintf ("\n");
+    "report to MGB.\r");
+  armprintf ("\r");
 }
 
 void ui_status(char * cmdstr)
 {
-  armprintf ("LED status: %s\n", STATUS_STRING(!ledctl_geterr()));
-  armprintf ("Accelerometer status: %s\n", "N/A");
-  armprintf ("Error status: %x\n", error_get());
+  armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
+  armprintf ("Accelerometer status: %s\r", "N/A");
+  armprintf ("Error status: %x\r", error_get());
 
-  armprintf ("Coffee consumption: 0.266 cup / hr\n");
-  armprintf("\n");
+  armprintf ("Coffee consumption: 0.266 cup / hr\r");
+  armprintf("\r");
 }
 
 void ui_clearall(char * cmdstr)
@@ -221,7 +223,7 @@ void ui_setall(char * cmdstr)
 
   if (armsscanf (cmdstr, "%s %d", ui_cmdname, &colValue) < 2)
   {
-    armprintf ("Invalid number of arguments to setall.\n");
+    armprintf ("Invalid number of arguments to setall.\r");
     return;
   }
 
@@ -239,7 +241,7 @@ void ui_setdot(char * cmdstr)
   if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
     &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
   {
-    armprintf ("Invalid number of arguments to set_dot.\n");
+    armprintf ("Invalid number of arguments to set_dot.\r");
     return;
   }
 
@@ -249,8 +251,8 @@ void ui_setdot(char * cmdstr)
       ledColors[1] >= LEDCTL_DC_MAX_VALUE ||
       ledColors[2] >= LEDCTL_DC_MAX_VALUE)
   {
-    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
-    armprintf ("Colors must be in range 0..%d\n", LEDCTL_MAX_VALUE);
+    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
+    armprintf ("Colors must be in range 0..%d\r", LEDCTL_MAX_VALUE);
     return;
   }
 
@@ -260,7 +262,7 @@ void ui_setdot(char * cmdstr)
   // Re-apply dot-correction right away
   armprintf ("Applying dot correction...");
   // ledctl_dc();
-  armprintf ("Not yet! Use mode led dc.\n");
+  armprintf ("Not yet! Use mode led dc.\r");
 }
 
 /** Returns the DC of a given led (0-15) */
@@ -277,7 +279,7 @@ void ui_getdot (char * cmdstr)
     ledNum = 0;
   else if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
   {
-    armprintf ("LED must be in range 0..%d\n", LEDCTL_NUM_LEDS);
+    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
     return;
   }
 
@@ -285,7 +287,7 @@ void ui_getdot (char * cmdstr)
   {
     for (color = 0; color < 3; color++)
       ledColors[color] = ledctl_getdc(ledNum, color);
-    armprintf ("LED %d dot correction: %d,%d,%d\n", ledNum, 
+    armprintf ("LED %d dot correction: %d,%d,%d\r", ledNum, 
       ledColors[0], ledColors[1], ledColors[2]);
     if (numArgs == 1)
       ledNum++;
@@ -304,7 +306,7 @@ void ui_getaccel (char * cmdstr)
   armprintf ("Accelerometer status and outputs: %d ", status);
   for (i = 0; i < ACCEL_NUM_AXES; i++)
     armprintf (" %d", accel_get_output(i));
-  armprintf ("\n");
+  armprintf ("\r");
 }
 
 void ui_report (char * cmdstr)
@@ -321,7 +323,7 @@ void ui_mode (char * cmdstr)
 
   if (armsscanf(cmdstr, "%s %s %s", ui_cmdname, ui_strarg, modestr) < 3)
   {
-    armprintf ("Invalid argument(s) to ui_mode.\n");
+    armprintf ("Invalid argument(s) to ui_mode.\r");
     return;
   }
 
@@ -333,10 +335,10 @@ void ui_mode (char * cmdstr)
     else if (strncmp(modestr, "dc", sizeof(modestr)) == 0)
       ledctl_setmode(FIRST_DOT_CORRECTION);
     else
-      armprintf ("Valid LED modes are: gs, dc.\n");
+      armprintf ("Valid LED modes are: gs, dc.\r");
   }
   else
-    armprintf ("Valid modes are: led.\n");
+    armprintf ("Valid modes are: led.\r");
 }
 
 
@@ -344,25 +346,34 @@ void ui_bootloader(char * cmdstr)
 {
   unsigned int data_size;
 
-  // As 'status' report, tell the user if the bootloader core is not in RAM
+  /* As 'status' report, tell the user if the bootloader core is not in RAM
   if (((char *)boot_core) < AT91C_ISRAM)
   {
-    armprintf ("boot_core not in RAM\n");
+    armprintf ("boot_core not in RAM\r");
     error_set (ERR_BOOT);
     return;
-  }
+  }*/
 
+  // DON'T REMOVE THIS
+  // Prevents a very fringe case that could accidently re-flash chip
+  *ui_strarg = '\0';
+  
   if (armsscanf(cmdstr, "%s %s %d", ui_cmdname, ui_strarg, &data_size) < 3)
   {
+    // BE CAREFUL CHANGING THIS CODE - FLASHES CHIP
+    if(strncmp(ui_strarg, "program", sizeof(ui_strarg)) == 0) {
+      if(boot_data_size > 0)
+        boot_core();
+    }
     armprintf ("This command is for bootloader purposes. "
-      "Insert disk #127 to continue (or refer to the manual).\n");
+      "Insert disk #127 to continue (or refer to the manual).\r");
     return;
   }
   
   // Test for password, parse data size
   if (strncmp(ui_strarg, BOOT_PASSWORD, sizeof(ui_strarg)) != 0)
   {
-    armprintf ("Wrong password.\n");
+    armprintf ("Wrong password.\r");
     error_set (ERR_BOOT);
     return;
   }
@@ -370,7 +381,7 @@ void ui_bootloader(char * cmdstr)
   // Unlikely data size or too big; we could make 0 a threshold (e.g. <= 500)
   if (data_size <= 0 || data_size >= BOOT_MAX_CODE_SIZE)
   {
-    armprintf ("Data size is wrong: %d\n", data_size);
+    armprintf ("Data size is wrong: %d\r", data_size);
     error_set(ERR_BOOT);
     return;
   }
@@ -383,13 +394,13 @@ void ui_reset(char * cmdstr)
 {
   if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
   {
-    armprintf ("Usage: reset %s\n", UI_RESET_PASSWORD);
+    armprintf ("Usage: reset %s\r", UI_RESET_PASSWORD);
     return;
   }
  
   if (strncmp(ui_strarg, UI_RESET_PASSWORD, sizeof(ui_strarg)) != 0)
   {
-    armprintf ("Wrong password (try %s).\n", UI_RESET_PASSWORD);
+    armprintf ("Wrong password (try %s).\r", UI_RESET_PASSWORD);
     return;
   }
 
@@ -399,7 +410,7 @@ void ui_reset(char * cmdstr)
 RAMFUNC void ui_test_ramfunc(char * cmdstr)
 {
   armprintf (cmdstr);
-  armprintf ("\n");
+  armprintf ("\r");
 }
 
 /** This tests the interrupt disable as follows:
@@ -441,13 +452,13 @@ void ui_test (char * cmdstr)
 {
   if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
   {
-    armprintf ("Test what?\n");
+    armprintf ("Test what?\r");
     return;
   }
 
   if (strncmp (ui_strarg, "ramfunc", sizeof(ui_strarg)) == 0)
   {
-    armprintf ("Test RAM function at address %x\n", (int)ui_test_ramfunc);
+    armprintf ("Test RAM function at address %x\r", (int)ui_test_ramfunc);
     ui_test_ramfunc(cmdstr);
   }
   else if (strncmp (ui_strarg, "int", sizeof(ui_strarg)) == 0)
@@ -456,7 +467,36 @@ void ui_test (char * cmdstr)
     ui_test_int(cmdstr);
   }
   else
-    armprintf ("Invalid argument.\n");
+    armprintf ("Invalid argument.\r");
+}
+
+void ui_pid ( char * cmdstr)
+{
+  unsigned int pid;
+  
+  if (armsscanf(cmdstr, "%s %s %u", ui_cmdname, ui_strarg, &pid) < 2)
+  {
+    if (strncmp (ui_strarg, "stat", sizeof(ui_strarg)) == 0)
+      armprintf ("pid status: %x", event_flags);
+    else
+      armprintf ("pid [start|stop|stat] #\r");
+    return;
+  } 
+
+  if (strncmp (ui_strarg, "start", sizeof(ui_strarg)) == 0)
+  {
+    event_start(pid);
+    return;
+  }
+
+  if (strncmp (ui_strarg, "stop", sizeof(ui_strarg)) == 0)
+  {
+    event_stop(pid);
+    return;
+  }
+
+  armprintf ("pid [start|stop|stat] #\r");
+  
 }
 
 static int fortune_idx = 0;
@@ -465,7 +505,7 @@ char * fortunes[] = {
   "It usually takes more than three weeks to prepare a good impromptu speech. (Mark Twain)",
   "Qui vole un oeuf vole un boeuf",
   "Father, I want to kill you. Mother, I want to oooo-doo-dii",
-  "You should be working",
+  "Is it in RAM?",
   "Has it been powered on?",
   "Have you compiled?",
   "Have you reprogrammed the chip?",
@@ -496,6 +536,6 @@ void ui_fortune(char * cmdstr)
   r = (AT91C_BASE_TC0->TC_CV % num_fortunes);
 
   armprintf (fortunes[r]);
-  armprintf ("\n");
+  armprintf ("\r");
 }
 

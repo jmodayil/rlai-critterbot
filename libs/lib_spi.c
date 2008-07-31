@@ -11,6 +11,7 @@
 #include "AT91SAM7S256.h"
 #include "lib_AT91SAM7S256.h"
 #include "lib_spi.h"
+#include "lib_critical.h"
 #include <stdio.h>
 
 /*
@@ -91,6 +92,7 @@ void spi_send_packet( struct spi_packet *packet ) {
   if( spi_data_head != NULL ) {
     spi_data_head->next_packet = packet;
     spi_data_head = packet;
+    spi->SPI_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
   }
   // If this is the first packet in the list, set up the PDC and
   // start the transfer
@@ -99,18 +101,14 @@ void spi_send_packet( struct spi_packet *packet ) {
     spi->SPI_TPR = (unsigned int) spi_data_tail->data_to_write;
     spi->SPI_TCR = spi_data_tail->num_words;
     spi->SPI_PTCR = AT91C_PDC_TXTEN;
-    spi->SPI_IER = AT91C_SPI_ENDTX;
+    spi->SPI_IER = AT91C_SPI_TXBUFE;
     // If read_data is NULL, we're ignoring received data
     if( spi_data_tail->read_data != NULL )
     {
       spi->SPI_RPR = (unsigned int) spi_data_tail->read_data;
       spi->SPI_RCR = spi_data_tail->num_words;
       spi->SPI_PTCR = AT91C_PDC_RXTEN;
-      spi->SPI_IER = AT91C_SPI_ENDRX;
-    }
-    else
-    {
-      spi->SPI_RCR = 0;
+      spi->SPI_IER = AT91C_SPI_RXBUFF;
     }
   }
   
@@ -128,13 +126,6 @@ ARM_CODE RAMFUNC void spi_isr() {
   AT91PS_SPI spi = AT91C_BASE_SPI;
   unsigned int old_reg;
   
-  if(spi_data_tail == NULL)
-    return;
-    
-  // Disable PDC transfers just to be safe
-  old_reg = spi->SPI_PTSR;
-  spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
-  
   /* Check if both ENDRX and ENDTX flags are set
    * 
    * The transmission isn't done until both are set, as ENDTX will occur
@@ -143,11 +134,19 @@ ARM_CODE RAMFUNC void spi_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if(spi->SPI_SR & AT91C_SPI_ENDTX) 
-    spi->SPI_IDR = AT91C_SPI_ENDTX; 
-  if(spi->SPI_SR & AT91C_SPI_ENDRX) 
-    spi->SPI_IDR = AT91C_SPI_ENDRX; 
-  if((spi->SPI_SR & AT91C_SPI_ENDRX) && (spi->SPI_SR & AT91C_SPI_ENDTX)) {
+  if(spi->SPI_SR & AT91C_SPI_TXBUFE) 
+    spi->SPI_IDR = AT91C_SPI_TXBUFE; 
+  if(spi->SPI_SR & AT91C_SPI_RXBUFF) 
+    spi->SPI_IDR = AT91C_SPI_RXBUFF; 
+  
+  if(spi_data_tail == NULL)
+    return;
+  
+  // Disable PDC transfers just to be safe
+  old_reg = spi->SPI_PTSR;
+  spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
+  
+  if((spi->SPI_SR & AT91C_SPI_RXBUFF) && (spi->SPI_SR & AT91C_SPI_TXBUFE)) {
     // Let the packet's client know we're done
     spi_data_tail->finished++;
     /* If there is another packet in the list, prep it and start transfer
@@ -161,25 +160,23 @@ ARM_CODE RAMFUNC void spi_isr() {
       spi->SPI_TPR = (unsigned int)spi_data_tail->data_to_write;
       spi->SPI_TCR = spi_data_tail->num_words;
       spi->SPI_PTCR = AT91C_PDC_TXTEN;
-      spi->SPI_IER = AT91C_SPI_ENDTX;
+      spi->SPI_IER = AT91C_SPI_TXBUFE;
       // If read_data is NULL, we're ignoring received data
       if( spi_data_tail->read_data != NULL )
       {
         spi->SPI_RPR = (unsigned int)spi_data_tail->read_data;
         spi->SPI_RCR = spi_data_tail->num_words;
         spi->SPI_PTCR = AT91C_PDC_RXTEN;
-        spi->SPI_IER = AT91C_SPI_ENDRX;
+        spi->SPI_IER = AT91C_SPI_RXBUFF;
       }
-      else // Leave the RX disabled
-        spi->SPI_RCR = 0;
-
     }
     // We're done for now!
     else {
       spi_data_head = NULL;
       spi_data_tail = NULL;
     }
-  } else {
+  } 
+  else {
     spi->SPI_PTCR = old_reg;
   }
 }

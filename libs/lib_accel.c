@@ -114,6 +114,12 @@ void accel_write_reg (unsigned int address, unsigned int data)
     (unsigned char)((address & ACCEL_SPI_ADDR) | ACCEL_SPI_WRITE);
   accel_txdata[1] = (unsigned char)(data & 0xFF);
 
+  if(accel_spi_packet.finished != 1) {
+    error_set(ERR_SPI_OVERFLOW);
+    error_set(ERR_ACCEL);
+    return;
+  }
+  
   accel_spi_packet.finished = 0;
   // Two words, address + flags & data
   accel_spi_packet.num_words = 2;
@@ -129,6 +135,7 @@ void accel_write (unsigned int address, unsigned int count)
 {
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {
+    error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
     return;
   }
@@ -160,6 +167,7 @@ void accel_read_reg (unsigned int address)
 {
   if (accel_spi_packet.finished == 0)
   {
+    error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
     return;
   }
@@ -185,6 +193,7 @@ void accel_read (unsigned int address, unsigned int count)
 {
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {
+    error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
     return;
   }

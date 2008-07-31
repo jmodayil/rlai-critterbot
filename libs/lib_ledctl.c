@@ -27,6 +27,8 @@
 #include "lib_ssc.h"
 #include "lib_AT91SAM7S256.h"
 #include "armio.h"
+#include "lib_error.h"
+
 // #include <lib_dbguconsole.c>
 
 // SPI polarity is 0 (from the diagram of the SCLK in led datasheet)
@@ -129,8 +131,12 @@ void ledctl_senddata_all()
 
   for(i = 0; i < 1; i++) //LEDCTL_NUM_CONTROLLERS; i++)
   {
-    // @@@ Error detection: if finished != 0 for some packet, be unhappy
-    // This also will require starting with finished = 1
+    if(ledctl_ssc_packet[i].finished != 1) {
+      error_set(ERR_SSC_OVERFLOW);
+      error_set(ERR_LEDCTL);
+      return;
+    }
+    
     ledctl_ssc_packet[i].finished = 0;
     ssc_send_packet(&ledctl_ssc_packet[i]);
   }
@@ -142,8 +148,11 @@ void ledctl_senddata_dc()
 
   for(i = 0; i < LEDCTL_NUM_CONTROLLERS; i++)
   {
-    // @@@ Error detection: if finished != 0 for some packet, be unhappy
-    // This also will require starting with finished = 1
+    if(ledctl_ssc_packet[i].finished != 1) {
+      error_set(ERR_SSC_OVERFLOW);
+      error_set(ERR_LEDCTL);
+    }
+    
     ledctl_ssc_packet_dc[i].finished = 0;
     ssc_send_packet(&ledctl_ssc_packet_dc[i]);
   }

@@ -46,6 +46,12 @@
   */
 #define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | RESET_KEY)
 
+extern unsigned char boot_data[];
+extern unsigned int boot_data_head;
+extern unsigned int boot_data_size;
+extern volatile unsigned int boot_receiving;
+extern unsigned int boot_timeout_counter;
+
 /** Do NOT call this function. Let the machine do the job. This function
   * copies the code to the flash and resets. */
 ARM_CODE RAMFUNC void boot_core();
