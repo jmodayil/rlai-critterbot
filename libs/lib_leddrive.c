@@ -4,11 +4,18 @@
 #include "lib_accel.h"
 #include <math.h>
 
-void leddrive_init(void)
+event_s leddrive_event_s = {
+  leddrive_init,
+  leddrive_event,
+  0
+};
+
+int leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
 	leddrive_startver = 2;
 	clearled();
+  return 0;
 }
 
 void leddrive_write(void){
@@ -214,7 +221,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if (a>1250)		
-			leddrive_batstatus();
+			leddrive_ball();
 		break;
 	case 2:
 		a=0;
@@ -235,7 +242,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if(a>920)
-			leddrive_batstatus();
+			leddrive_ball();
 		break;
 	case 3:
 		a=0;
@@ -246,7 +253,7 @@ void startup(void){
 	}	
 }
 // MAIN EVENT CONTROLLER
-void leddrive_event(void) {
+int leddrive_event(void) {
 	static int old_leddrive_angledeg;
   unsigned static int old_leddrive_gradcval1,old_leddrive_gradcval2,old_leddrive_anglecval;
 	unsigned char r,g,b,r2,g2,b2;
@@ -294,6 +301,7 @@ void leddrive_event(void) {
   	break;
 	}
 	leddrive_write();//sends LED[] values to the leds
+  return 0;
 }
 
 //external
@@ -355,7 +363,7 @@ void leddrive_ball(void){
 #define T 0.01// time constant
 #define PI 3.141592654
 
-int meu= 4;
+int meu= 20;
 
 int ledball_gx;
 int ledball_gy;
@@ -379,8 +387,8 @@ void ledball_crtl(void){
 	else
 		fricaccel=0;
 
-	accely=(ledball_gy)*(cosf((angle/1000)*PI/180))*500;
-	accelx=(ledball_gx)*(sinf((angle/1000)*PI/180))*500;
+	accely=-(ledball_gy)*(cosf((ledball_angle)*PI/180))*9000;
+	accelx=-(ledball_gx)*(sinf((ledball_angle)*PI/180))*9000;
 	
 	accelrot=((meu*velobot)>>3);
 	if ((abs(velobot)-abs(veloball))<2)

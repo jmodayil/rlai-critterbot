@@ -13,6 +13,12 @@
 
 #include "armio.h"
 
+event_s accel_event_s = {
+ accel_init,
+ accel_event,
+ 0
+};
+
 unsigned int accel_txdata[ACCEL_BUFFER_SIZE];
 unsigned int accel_rxdata[ACCEL_BUFFER_SIZE];
 
@@ -25,7 +31,7 @@ struct spi_packet accel_spi_packet;
 /**
   * Initialization routine for the accelerometer driver.
   */
-void accel_init()
+int accel_init()
 {
   unsigned int val;
   volatile int i;
@@ -61,12 +67,12 @@ void accel_init()
     error_set (ERR_ACCEL);
     armprintf ("This accelerometer is a spy!\n");
     armprintf ("Got WHOAMI: %x\n", val);
-    // Disable  accelerometer?
+    return 1;
   }
-
+  return 0;
 }
 
-void accel_event()
+int accel_event()
 {
   int i;
   // Load accel_output and accel_status with the values requested during the
@@ -88,6 +94,7 @@ void accel_event()
   
   // Request status + out values for next event
   accel_read (ACCEL_REG_OUT, 7);
+  return 0;
 }
 
 void accel_write_reg_block (unsigned int address, unsigned int data)

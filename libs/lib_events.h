@@ -26,22 +26,41 @@
 #define EVENT_ID_LEDDRIVE 3
 #define EVENT_ID_LEDCTL 4
 #define EVENT_ID_ACCEL 5
-#define EVENT_ID_UI 6
-#define EVENT_MAX 6
+#define EVENT_ID_BOOT 6
+#define EVENT_ID_ERROR 7
+#define EVENT_ID_UI 8
+#define EVENT_MAX 8
+
 
 unsigned int init_flags;
 unsigned int event_flags;
 
+#define EVENTS_INITS ( \
+    1 << EVENT_ID_UART | \
+    1 << EVENT_ID_SSC | \
+    1 << EVENT_ID_SPI | \
+    1 << EVENT_ID_LEDDRIVE | \
+    1 << EVENT_ID_LEDCTL | \
+    1 << EVENT_ID_ACCEL \
+    )
+
+#define EVENTS_DEFAULTS ( \
+    1 << EVENT_ID_LEDDRIVE | \
+    1 << EVENT_ID_LEDCTL | \
+    1 << EVENT_ID_ACCEL | \
+    1 << EVENT_ID_UI \
+    )
+
 /*
  * 'OS' task descripter.
  */
-struct event{
+typedef struct event{
   int (*init_func)();
   int (*event_func)();
   unsigned int event_count;
-};
+}event_s;
 
-struct event events[EVENT_MAX+1];
+event_s *events[EVENT_MAX+1];
 
 /** Returns true whether we should call the *_event functions.
   * This will clear the 'has_event' flag.

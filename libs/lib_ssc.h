@@ -12,6 +12,7 @@
 #define LIB_SSC_H
 #include "compiler.h"
 #include "AT91SAM7S256.h"
+#include "lib_events.h"
 
 #define SSC_INTERRUPT_PRIORITY 1
 
@@ -65,7 +66,7 @@ volatile struct ssc_packet *ssc_data_head, *ssc_data_tail;
 /*
  *  Initialize the SPI unit
  */
-void ssc_init();
+int ssc_init();
 
 /*
  *  Add a new packet to the SPI queue

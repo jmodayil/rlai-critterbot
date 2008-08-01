@@ -9,6 +9,7 @@
 
 #include "AT91SAM7S256.h"
 #include "compiler.h"
+#include "lib_events.h"
 
 #ifndef LIB_SPI_H
 #define LIB_SPI_H
@@ -135,7 +136,7 @@ volatile struct spi_packet *spi_data_head, *spi_data_tail;
 /*
  *  Initialize the SPI unit
  */
-void spi_init();
+int spi_init();
 
 /*
  *  Add a new packet to the SPI queue

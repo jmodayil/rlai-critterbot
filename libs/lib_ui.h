@@ -10,8 +10,10 @@
 #ifndef LIB_UI_H
 #define LIB_UI_H
 
+#include "lib_events.h"
+
 // How frequently to report status in reporting mode, in 100th of a second
-#define UI_REPORT_INTERVAL 10
+#define UI_REPORT_INTERVAL 200
 
 #define UI_RESET_PASSWORD  "now"
 
@@ -39,7 +41,7 @@ void ui_status (char * cmdstr);
 void ui_report (char * cmdstr);
 void ui_mode (char * cmdstr);
 void ui_pid (char * cmdstr);
-
+void ui_error (char * cmdstr);
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
 
@@ -52,7 +54,7 @@ void ui_reset (char * cmdstr);
   *
   * Does a non-blocking check for input, which it immediately processes.
   */
-void ui_event();
+int ui_event();
 
 /** Reports general status and information on the serial port.
   * Don't rely on this function to produce structured output.

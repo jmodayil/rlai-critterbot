@@ -15,6 +15,12 @@
 #include "lib_ledctl.h"
 #include "lib_events.h"
 
+event_s boot_event_s = {
+  NULL,
+  boot_event,
+  0
+};
+
 BOOT_COPY_SECTION unsigned char boot_data[BOOT_MAX_CODE_SIZE];
 unsigned int boot_data_head;
 unsigned int boot_data_size;
@@ -64,6 +70,9 @@ ARM_CODE RAMFUNC void boot_core()
       errflag = 1;
     }
 
+    if( i % 80 == 0)
+      __armputchar('\r');
+    __armputchar('.');
     if (errflag) break;
 
     dest += AT91C_IFLASH_PAGE_SIZE;
@@ -92,7 +101,8 @@ ARM_CODE RAMFUNC void boot_core()
   else
   {
     // Write to the serial port and die (should be English pound sign)
-    
+   
+    __armputchar('\r'); 
     __armputchar('F');
     __armputchar('L');
     __armputchar('A');
@@ -162,10 +172,10 @@ void boot_verify()
 /**
   * Event handler for the bootloader driver.
   */
-void boot_event()
+int boot_event()
 {
   int val;
-  if (!boot_receiving) return;
+  if (!boot_receiving) return 1;
 
   boot_timeout_counter++;
   if (boot_timeout_counter >= BOOT_RECEIVE_TIMEOUT)
@@ -189,13 +199,11 @@ void boot_event()
 
   // Get at least one character
   val = armgetchar();
-  if (val == EOF) return;
+  if (val == EOF) return 1;
   // Reset the timeout counter
   boot_timeout_counter = 0;
   do
   {
-    if(boot_data_head % 1024 == 0)
-      armputchar('.');
     // Hmm, more data than necessary!
     if (boot_data_head >= boot_data_size || 
       boot_data_head == BOOT_MAX_CODE_SIZE)
@@ -211,6 +219,7 @@ void boot_event()
     val = armgetchar();
   }
   while (val != EOF);
+  return 0;
 }
 
 /**

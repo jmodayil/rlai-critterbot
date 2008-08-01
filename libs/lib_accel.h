@@ -12,7 +12,7 @@
 #define LIB_ACCEL_H
 
 #include "lib_spi.h"
-
+#include "lib_events.h"
 // Maximum number of registers that can be read/written at once. The 
 //  actual number is one less than the buffer size, as we need to write
 //  the address and flags in the first byte.
@@ -93,12 +93,12 @@
 /**
   * Initialization routine for the accelerometer driver.
   */
-void accel_init();
+int accel_init();
 
 /**
   * Event function called by the 100Hz timer.
   */
-void accel_event();
+int accel_event();
 
 /** Writes to a single register, specified by the address. 
   * THIS ROUTINE BLOCKS

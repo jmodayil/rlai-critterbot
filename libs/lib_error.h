@@ -7,10 +7,13 @@
  *  Error-reporting driver.
  */
 
-#include "lib_ledctl.h"
 
 #ifndef LIB_ERROR_H
 #define LIB_ERROR_H
+
+#include "lib_ledctl.h"
+#include "lib_events.h"
+#include <stdio.h>
 
 // @@@ move to armconfig.h
 #define ERR_LEDCTL        (1<<0)
@@ -22,7 +25,7 @@
 #define ERR_SPURINT       (1<<6)
 #define ERR_SSC_OVERFLOW  (1<<7)
 #define ERR_SPI_OVERFLOW  (1<<8)
-#define ERR_MAXERR      15
+#define ERR_MAXERR      8
 
 
 unsigned int error_reg;
@@ -34,6 +37,6 @@ void error_clear(unsigned int errflag);
 
 unsigned int error_get ();
 
-void error_disp(void);
+int error_event(void);
 
 #endif /* LIB_ERROR_H */

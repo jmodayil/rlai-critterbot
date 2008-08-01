@@ -13,12 +13,18 @@
 #include "lib_AT91SAM7S256.h"
 #include "lib_ssc.h"
 #include <stdio.h>
-
 #include "armio.h"
+
+event_s ssc_event_s = {
+  ssc_init,
+  NULL,
+  0
+};
+
 /*
  *  Initialize the SSC unit
  */
-void ssc_init() {
+int ssc_init() {
   
   AT91PS_SSC ssc = AT91C_BASE_SSC;
 
@@ -91,6 +97,7 @@ void ssc_init() {
   AT91F_AIC_EnableIt ( AT91C_BASE_AIC, AT91C_ID_SSC );
   // Enable SSC
   ssc->SSC_CR = AT91C_SSC_RXEN | AT91C_SSC_TXEN;
+  return 0;
 }
 
 
@@ -161,20 +168,16 @@ ARM_CODE RAMFUNC void ssc_isr() {
    *
    * CHECK THAT FLAGS ARE CLEARED WHEN WRITING TO PDC COUNTER REGISTERS
    */
-  if(ssc->SSC_SR & AT91C_SSC_TXBUFE) 
-    ssc->SSC_IDR = AT91C_SSC_TXBUFE;
-  if(ssc->SSC_SR & AT91C_SSC_RXBUFF)
-    ssc->SSC_IDR = AT91C_SSC_RXBUFF;
-  
-  // This is temporary hack.
-  if(ssc_data_tail == NULL)
-    return;
+  if(ssc->SSC_SR & AT91C_SSC_ENDTX) 
+    ssc->SSC_IDR = AT91C_SSC_ENDTX;
+  if(ssc->SSC_SR & AT91C_SSC_ENDRX)
+    ssc->SSC_IDR = AT91C_SSC_ENDRX;
   
   // Disable PDC transfers just to be safe
   old_reg = ssc->SSC_PTSR;
   ssc->SSC_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;
   
-  if( ssc->SSC_SR & ( AT91C_SSC_RXBUFF | AT91C_SSC_TXBUFE ) ) {
+  if( ssc->SSC_SR & ( AT91C_SSC_ENDRX | AT91C_SSC_ENDTX ) ) {
     // Let the packet's client know we're done
     ssc_data_tail->finished++;
     /* If there is another packet in the list, prep it and start transfer

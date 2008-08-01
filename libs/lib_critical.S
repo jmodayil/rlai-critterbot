@@ -18,6 +18,7 @@ events_has_event:
   swp r0, r2, [r3]
 	bx	lr
 */
+  .arm
   .section	.fastrun.crit_disable_int,"ax",%progbits
 	.align	4
   .global crit_disable_int

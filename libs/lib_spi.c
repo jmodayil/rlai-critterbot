@@ -14,10 +14,16 @@
 #include "lib_critical.h"
 #include <stdio.h>
 
+event_s spi_event_s = {
+  spi_init,
+  NULL,
+  0
+};
+
 /*
  *  Initialize the SPI unit
  */
-void spi_init() {
+int spi_init() {
   
   AT91PS_SPI spi = AT91C_BASE_SPI;
 
@@ -57,6 +63,7 @@ void spi_init() {
   
   // Enable SPI
   spi->SPI_CR = AT91C_SPI_SPIEN;
+  return 0;
 }
 
 

@@ -18,6 +18,18 @@
 #include "lib_events.h"
 #include "armio.h"
 
+
+extern event_s serial_event_s;
+extern event_s ssc_event_s;
+extern event_s spi_event_s;
+extern event_s leddrive_event_s;
+extern event_s ledctl_event_s;
+extern event_s accel_event_s;
+extern event_s boot_event_s;
+extern event_s error_event_s;
+extern event_s ui_event_s;
+
+
 volatile unsigned int events_status;
 
 unsigned int events_has_event()
@@ -56,25 +68,34 @@ void events_init()
 
   events_status = 0;
   
+  events[0] = &serial_event_s;
+  events[1] = &ssc_event_s;
+  events[2] = &spi_event_s;
+  events[3] = &leddrive_event_s;
+  events[4] = &ledctl_event_s;
+  events[5] = &accel_event_s;
+  events[6] = &boot_event_s;
+  events[7] = &error_event_s;
+  events[8] = &ui_event_s;
+  
+  init_flags = EVENTS_INITS;
+  event_flags = EVENTS_DEFAULTS;
+  // Initialized any functions with inits.
+  for(i = 0; i <= EVENT_MAX; i++) {
+    if((init_flags & (1 << i)) && ((*events[i]).init_func != NULL))
+    {
+      if((*events[i]).init_func()) {
+        armprintf("Failed to init EVENT_ID %d\r", i);
+        event_flags &= ~(1 << i);
+      } else
+        armprintf("Initialized EVENT_ID %d\r", i);
+    }
+  }
   // Enable the PIT interrupt and the PIT itself, as well as setting the
   //  counter max value. We run at a 100Hz. 
   AT91C_BASE_PITC->PITC_PIMR = 
     (EVENTS_PIV_VALUE & AT91C_PITC_PIV) |
     AT91C_PITC_PITIEN | AT91C_PITC_PITEN;
-      
-  armprintf("Initialized event timer.\n");
-
-  // Initialized any functions with inits.
-  for(i = 0; i <= EVENT_MAX; i++) {
-    if((init_flags & (1 << i)) && (events[i].init_func != NULL))
-    {
-      if(events[i].init_func()) {
-        armprintf("Failed to init EVENT_ID %d\n", i);
-        event_flags &= ~(1 << i);
-      } else
-        armprintf("Initialized EVENT_ID %d\n", i);
-    }
-  }
 }
 
 void event_stop(unsigned int id) {
@@ -98,15 +119,15 @@ void events_do()
   int i, ret_val;
 
   for(i = 0; i <= EVENT_MAX; i++) {
-    if((event_flags & (1 << i)) && events[i].event_func != NULL) {
+    if((event_flags & (1 << i)) && (*events[i]).event_func != NULL) {
       // If an event returns < 0, we will stop it
       // If an event returns > 0, we should do something
-      ret_val = events[i].event_func();
-      if(ret_val < 0)
-        event_flags &= ~(1 << i);
-      if(ret_val > 0)
-        return;
-      events[i].event_count++;
+      ret_val = (*events[i]).event_func();
+      //if(ret_val < 0)
+      //  event_flags &= ~(1 << i);
+      //if(ret_val > 0)
+      //  return;
+      (*events[i]).event_count++;
     }
   }
 }

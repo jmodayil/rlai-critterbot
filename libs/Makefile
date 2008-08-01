@@ -20,7 +20,7 @@ PRODUCE_MEMORY_MAP_LD=-Map=memory.map
 COMMONFLAGS = -c -mcpu=arm7tdmi
 ASSONLYFLAGS = -S -mcpu=arm7tdmi
 AFLAGS = -x assembler-with-cpp
-CFLAGS = -Winline -O3 -ffunction-sections -fdata-sections
+CFLAGS = -Winline -O2 -ffunction-sections -fdata-sections
 # Set DEBUGFLAGS to empty for normal compilation
 # DEBUGFLAGS =
 DEBUGFLAGS = -Wall

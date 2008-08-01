@@ -10,6 +10,9 @@
 #ifndef LIB_LEDCTL_H
 #define LIB_LEDCTL_H
 
+#include "lib_events.h"
+#include "lib_error.h"
+
 // Defines which LED controller deals which each color channel
 #define BLUE_CONTROLLER  0
 #define GREEN_CONTROLLER 1
@@ -40,7 +43,7 @@ enum ledctl_state_type {
 
 
 // The 100Hz event function for the LED driver
-void ledctl_event();
+int ledctl_event();
 
 // Send all data
 void ledctl_senddata_all(); 
@@ -57,7 +60,7 @@ void ledctl_dc( void );
   * before the SPI or the 100Hz timer are started, to avoid
   * damaging the LEDs.
   */
-void ledctl_init ();
+int ledctl_init ();
 /** Will be made obsolete - runs the 100Hz timer. */
 void ledctl_inittimer ();
 

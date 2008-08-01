@@ -22,6 +22,12 @@
 // Included for EOF, NULL
 #include <stdio.h>
 
+event_s ui_event_s = {
+  NULL,
+  ui_event,
+  0
+};
+
 #define STATUS_STRING(a) ( (a)? "OK" : "FAIL" )
 
 /* Structure used to hold command name + function pairs */
@@ -52,7 +58,8 @@ ui_cmd_item ui_commands[] = {
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
   {"fortune", ui_fortune, "fortune"},
-  {"pid", ui_pid, "pid [start|stop|stat] #"}
+  {"pid", ui_pid, "pid [start|stop|stat] #"},
+  {"error", ui_error, "error [clear]"}
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -80,7 +87,7 @@ ui_cmd_item * ui_parse_command(char * cmdstr)
   return NULL;
 }
 
-void ui_event()
+int ui_event()
 {
   // Report if in reporting mode
   if (ui_report_mode)
@@ -93,20 +100,22 @@ void ui_event()
   }
   // Check whether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
-    return;
+    return 0;
+  armputchar('\r');
   // Parse command, return false if not found
   ui_cmd_item * cmd = ui_parse_command(ui_command_string);
   // Not found, write error message
   if (cmd == NULL)
   {
     armprintf ("Invalid command: \"%s\"\r", ui_command_string);
-    return;
   }
   else
   {
     // Call function
     (*(cmd->func))(ui_command_string); 
   }
+  armprintf("critterprompt> ");
+  return 0;
 }
 
 void ui_do_report()
@@ -386,7 +395,7 @@ void ui_bootloader(char * cmdstr)
     return;
   }
 
-  // Call the no-return function
+  event_start(EVENT_ID_BOOT);
   boot_begin_receive(data_size);
 }
 
@@ -437,7 +446,7 @@ void ui_test_int(char * cmdstr)
   crit_disable_int();
   while (AT91C_BASE_PITC->PITC_PIIR < 0x00200000) ;
   crit_enable_int();
-
+  
   err_status = error_get();
   if (err_status & ERR_EVENTSLOW)
     armprintf ("Event slow reported - interrupts were disabled.\r");
@@ -470,16 +479,33 @@ void ui_test (char * cmdstr)
     armprintf ("Invalid argument.\r");
 }
 
+void ui_error ( char * cmdstr) 
+{
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+    armprintf ("error [clear]\r");
+
+  if (strncmp (ui_strarg, "clear", sizeof(ui_strarg)) == 0){
+    error_clear(0xFFFFFFFF);
+    armprintf ("Error flags cleared.\r");
+    return;
+  }
+
+      
+}
+
 void ui_pid ( char * cmdstr)
 {
-  unsigned int pid;
+  unsigned int pid, i;
   
-  if (armsscanf(cmdstr, "%s %s %u", ui_cmdname, ui_strarg, &pid) < 2)
+  if (armsscanf(cmdstr, "%s %s %u", ui_cmdname, ui_strarg, &pid) < 3)
   {
-    if (strncmp (ui_strarg, "stat", sizeof(ui_strarg)) == 0)
-      armprintf ("pid status: %x", event_flags);
-    else
-      armprintf ("pid [start|stop|stat] #\r");
+    if (strncmp (ui_strarg, "stat", sizeof(ui_strarg)) == 0){
+      for(i = 0; i <= EVENT_MAX; i++)
+        armprintf ("pid %d status: %s\r", pid,
+          (event_flags & (1<<pid)) ? "OK" : "STOPPED");
+      return;
+    }
+    armprintf ("pid [start|stop|stat] #\r");
     return;
   } 
 
@@ -495,6 +521,11 @@ void ui_pid ( char * cmdstr)
     return;
   }
 
+  if (strncmp (ui_strarg, "stat", sizeof(ui_strarg)) == 0){
+    armprintf ("pid %d status: %s", pid,
+      (event_flags & (1<<pid)) ? "OK" : "STOPPED");
+    return;
+  }
   armprintf ("pid [start|stop|stat] #\r");
   
 }
