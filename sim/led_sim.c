@@ -580,7 +580,7 @@ void ledball_crtl(void){
 	accely=(ledball_gy)*(cosf((angle/1000)*PI/180))*500;
 	accelx=(ledball_gx)*(sinf((angle/1000)*PI/180))*500;
 	
-	accelrot=((meu*velobotd)>>3);
+	accelrot=((meu*velobot)>>3);
 	if ((abs(velobot)-abs(veloball))<2)
 	accelrot=0;
 
