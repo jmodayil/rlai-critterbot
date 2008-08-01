@@ -29,7 +29,7 @@ int leddrive_startver;
 unsigned int leddrive_grad1;
 unsigned int leddrive_grad2;
 unsigned int leddrive_batlvl;//
-unsigned int *leddrive_angledeg;
+int *leddrive_angledeg;
 unsigned int *leddrive_anglecval;
 unsigned int *leddrive_gradcval1;
 unsigned int *leddrive_gradcval2;
@@ -81,7 +81,7 @@ All change leddrive_event's state accordingly.
 */
 void leddrive_startup(int ver);
 void leddrive_batstatus(void);
-void leddrive_angle(unsigned int *deg,unsigned int *cval,unsigned int grad);
+void leddrive_angle(int *deg,unsigned int *cval,unsigned int grad);
 void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's

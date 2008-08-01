@@ -35,7 +35,7 @@ int leddrive_startver;
 unsigned int leddrive_grad1;
 unsigned int leddrive_grad2;
 unsigned int leddrive_batlvl;//
-unsigned int *leddrive_angledeg;
+int *leddrive_angledeg;
 unsigned int *leddrive_anglecval;
 unsigned int *leddrive_gradcval1;
 unsigned int *leddrive_gradcval2;
@@ -87,7 +87,7 @@ All change leddrive_event's state accordingly.
 */
 void leddrive_startup(int ver);
 void leddrive_batstatus(void);
-void leddrive_angle(unsigned int *deg,unsigned int *cval,unsigned int grad);
+void leddrive_angle(int *deg,unsigned int *cval,unsigned int grad);
 void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
@@ -454,8 +454,8 @@ void startup(void){
 }
 // MAIN EVENT CONTROLLER
 void leddrive_event(void) {
-	unsigned static char old_leddrive_anglecval, old_leddrive_angledeg;
-  unsigned static char old_leddrive_gradcval1,old_leddrive_gradcval2;
+	static int old_leddrive_angledeg;
+  unsigned static int old_leddrive_gradcval1,old_leddrive_gradcval2,old_leddrive_anglecval;
 	unsigned char r,g,b,r2,g2,b2;
 	
 	switch (leddrive_state){
@@ -507,7 +507,7 @@ void leddrive_batstatus(void){
 	leddrive_state = BATSTATUS;
 }
 
-void leddrive_angle(unsigned int *deg,unsigned int *cval, unsigned int grad){
+void leddrive_angle(int *deg,unsigned int *cval, unsigned int grad){
 	leddrive_state= ANGLE;
 	leddrive_angledeg = deg;
 	leddrive_anglecval = cval;
@@ -553,48 +553,49 @@ void leddrive_ball(void){
 *
 */
 
-unsigned int ledball_angle;
-unsigned int ledball_cval;
 
 #define T 0.01// time constant
 #define PI 3.141592654
 
-const float meu=.05;
-const float radius=.07;
+int meu= 4;
 
 int ledball_gx;
 int ledball_gy;
+int velobot;
 
-float anglef;
-float veloballd=1000;
-float accelballm;
-float accelballd;
-float fricaccel;
-float conv;
-float accely,accelx;
+int angle;
+int veloball;
+int accelball;
+int fricaccel;
+int accely,accelx,accelrot;
 
 void ledball_crtl(void){
+	if (veloball >0)
+		fricaccel=-meu*9000;
+	else if (veloball<0)
+		fricaccel=meu*9000;
+	else
+		fricaccel=0;
 
-conv = 2*PI*radius/360;
-if (veloballd >0)
-fricaccel=meu*-9;
-else if (veloballd <0)
-fricaccel=meu*9;
-else
-fricaccel=0;
+	accely=(ledball_gy)*(cosf((angle/1000)*PI/180))*500;
+	accelx=(ledball_gx)*(sinf((angle/1000)*PI/180))*500;
+	
+	accelrot=((meu*velobotd)>>3);
+	if ((abs(velobot)-abs(veloball))<2)
+	accelrot=0;
 
-accely=(ledball_gy*0.01)*(cosf(anglef*PI/180));
-accelx=-(ledball_gx*0.01)*(sinf(anglef*PI/180));
-
-accelballm=(fricaccel + accely + accelx);
-accelballd=accelballm/conv;
-veloballd= veloballd +(accelballd*T);
-anglef=anglef+(veloballd*T);
-
-ledball_cval=((unsigned int)sqrtf(ledball_gx*ledball_gx + ledball_gy*ledball_gy))<<2;
-if (ledball_cval >4095)
-ledball_cval=4095;
-ledball_angle = anglef;
+	accelball=(fricaccel + accely + accelx +accelrot);
+	veloball= veloball +(accelball*T);
+	angle=angle+((veloball-velobot)*T);
+	
+	ledball_cval=((unsigned int)sqrtf(ledball_gx*ledball_gx + ledball_gy*ledball_gy))<<2;
+	if (ledball_cval >4095)
+		ledball_cval=4095;
+		
+	if (angle>359000)
+		angle-=360000;
+	if (angle<0)
+	  angle+=360000;	
+	ledball_angle = angle/1000;		
 }
-
 
