@@ -37,4 +37,7 @@
 // Function to initialized on-chip settings on power-up
 void chip_init(void);
 
+extern void crit_enable_int();
+extern void crit_disable_int();
+
 #endif /* ARM_CONFIG_H */

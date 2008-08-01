@@ -13,6 +13,8 @@
 #include <stdarg.h>
 #include "AT91SAM7S256.h"
 #include "lib_AT91SAM7S256.h"
+#include "armconfig.h"
+#include "lib_events.h"
 
 #define MAX_INT_PRINT_SIZE 32
 #define SIGNED 1
@@ -46,7 +48,7 @@ void armputchar(char);
 /*
  * manually outputs a character to the serial port
  */ 
-void __armputchar(char);
+ARM_CODE RAMFUNC void __armputchar(char);
 
 /*
  * gets a character from the serial port
@@ -79,6 +81,11 @@ int armgetline(char*, int);
 void armprintf(char*, ...);
 
 /*
+ * Blocking, no-isr, no-pdc implementation
+ */
+void __armprintf(char*, ...);
+
+/*
  * scans data from a string according to a formatted string
  * char* is the string to read from
  * char* is the format string, supporting options in armprintf
@@ -103,7 +110,7 @@ ARM_CODE RAMFUNC void ser_isr(void);
 /*
  * Initialize the serail port for character stream input/output
  */
-void init_serial_port_stdio(void);
+int init_serial_port_stdio(void);
 
 /*
  * Send a character out the serial port

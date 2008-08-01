@@ -77,11 +77,11 @@
 */
         .equ    Top_Stack,      0x00210000
         .equ    UND_Stack_Size, 0x00000004
-        .equ    SVC_Stack_Size, 0x00000100
+        .equ    SVC_Stack_Size, 0x00000400
         .equ    ABT_Stack_Size, 0x00000004
         .equ    FIQ_Stack_Size, 0x00000004
         .equ    IRQ_Stack_Size, 0x00000100
-        .equ    USR_Stack_Size, 0x00000400
+        .equ    USR_Stack_Size, 0x00000100
 
 
 // Embedded Flash Controller (EFC) definitions
@@ -267,7 +267,8 @@ PAbt_Handler:
                 mov     r0,#2
                 B       Exception_Handler
 DAbt_Handler:   
-                mov     r0,#3
+                mov     r0,lr
+                B       C_DAbt_Handler
                 B       Exception_Handler
 FIQ_Handler:    B       FIQ_Handler
 
@@ -281,7 +282,7 @@ SWI_Handler:
 // Load the instruction that we called to get here
                 ldr         r0, [lr, #-4]
 
-                mrs         r1, cpsr
+                mrs         r1, spsr
 // Clear the opcode from it by anding it with the complement of 0xFF000000
                 ands        r0, r0, #0x00FFFFFF
 // As a bonus, if any of the non-opcode bits are set the EQ condition is false
@@ -293,10 +294,10 @@ SWI_Handler_Disable_Int:
 //  was non-zero
                 orr         r1, r1, #I_Bit
 // Store the new CPSR
-                msr         cpsr_c, r1
+                msr         spsr_c, r1
 
 // Read the CPSR again; is it correctly set?
-                mrs         r1, cpsr
+                mrs         r1, spsr
                 tst         r1, #I_Bit
 // If I_Bit is not present in the CPSR, retry
                 beq         SWI_Handler_Disable_Int
@@ -305,7 +306,7 @@ SWI_Handler_Disable_Int:
 SWI_Handler_Enable_Int:
 // Clear the I_Bit in the CPSR
                 bic         r1, r1, #I_Bit
-                msr         cpsr_c, r1
+                msr         spsr_c, r1
 
 SWI_Handler_End:
 // Restore r0, r1 and leave the function by restoring lr into pc
@@ -372,6 +373,8 @@ Bad_Vector_IRQ:
             mov r0, #4
             b   Exception_Handler
 
+
+
 // Exception handler for bad memory accesses and software interrupts, which
 //  are otherwise infinite loops
 // This puts data on the serial port repeatedly
@@ -392,7 +395,7 @@ Send_Wait:
     ldr         r14, =AT91C_BASE_US0
 	  add         r0, r1, #65
     str         r0, [r14, #US_THR]
-
+    
 Wait_Forever:
     B     Wait_Forever
 

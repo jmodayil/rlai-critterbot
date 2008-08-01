@@ -15,7 +15,7 @@
 
 // Number of master clock cycles in 1.5uS, rounded up
 #define FLASH_FMCN (MCK / 666667 + 1)
-#define FLASH_KEY  (0xA5000000)
+#define FLASH_KEY  (0x5A000000)
 #define FLASH_PAGE_WORD_SIZE (AT91C_IFLASH_PAGE_SIZE / 4)
 
 /*
@@ -32,7 +32,7 @@ int flash_clear_lock_bits( void );
  *  1 if the page is out of range
  *  the value of the flash status register if the write fails, >1
  */
-int flash_erase_write_page( unsigned int );
+ARM_CODE RAMFUNC int flash_erase_write_page( unsigned int );
 
 /*
  *  Writes to the flash, reading from src and copying to dst.
@@ -42,7 +42,7 @@ int flash_erase_write_page( unsigned int );
  *
  *  Returns 0 on error, 1 otherwise.
  */
-int flash_write_data (int * dst, int * src, unsigned int len);
+ARM_CODE RAMFUNC int flash_write_data (int * dst, int * src, unsigned int len);
 
 #endif
 

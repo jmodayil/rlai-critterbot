@@ -8,6 +8,12 @@
 #include "armio.h"
 #include "lib_error.h"
 
+event_s serial_event_s = {
+  init_serial_port_stdio,
+  NULL,
+  0
+};
+
 int armsscanf(char *source, char *format, ...) {
 
   va_list ap;
@@ -122,6 +128,73 @@ int getvalue(char digit) {
   return -1;
 }
 
+void __armprintf(char *format, ...) {
+	
+	va_list ap;
+	char buf[MAX_INT_PRINT_SIZE];
+	char *p, *sval;
+	int ival;
+	unsigned int uival;
+
+	va_start(ap, format);
+	for(p = format; *p; p++) {
+		if(*p != '%') {
+			__armputchar(*p);
+			continue;
+		}
+		switch(*++p) {
+			case 'u':
+				uival = va_arg(ap, unsigned int);
+				armitoa(uival, buf, 10, UNSIGNED);
+				for(sval = buf; *sval; sval++)
+					__armputchar(*sval);
+				break;
+			case 'd':
+				ival = va_arg(ap, int);
+				armitoa(ival, buf, 10, SIGNED);
+				for(sval = buf; *sval; sval++)
+					__armputchar(*sval);
+				break;
+			case 'p':
+			case 'x':
+			case 'X':
+				uival = va_arg(ap, unsigned int);
+				armitoa(uival, buf, 16, UNSIGNED);
+				for(sval = buf; *sval; sval++)
+					__armputchar(*sval);
+				break;
+			case 'o':
+				uival = va_arg(ap, unsigned int);
+				armitoa(uival, buf, 8, UNSIGNED);
+				for(sval = buf; *sval; sval++)
+					__armputchar(*sval);
+				break;
+			case 'b':
+			case 'B':
+				uival = va_arg(ap, unsigned int);
+				armitoa(uival, buf, 2, UNSIGNED);
+				for(sval = buf; *sval; sval++)
+					__armputchar(*sval);
+				break;
+			case 'c':
+        // MGB: Added sval = buf, seems like this would fail otherwise
+        sval = buf;
+				*sval = (char)va_arg(ap, int);
+				__armputchar(*sval);
+				break;
+			case 's':
+				for(sval = va_arg(ap, char *); *sval; sval++)
+					__armputchar(*sval);
+				break;
+      case '\0':
+        return;
+			default:
+				__armputchar(*p);
+				break;
+		}
+	}
+}	
+
 void armprintf(char *format, ...) {
 	
 	va_list ap;
@@ -230,7 +303,7 @@ void strrev(char *str) {
 	
 }
 
-void __armputchar(char val) {
+ARM_CODE RAMFUNC void __armputchar(char val) {
   AT91C_BASE_US0->US_THR = val;
   while(!(AT91C_BASE_US0->US_CSR & 0x02));
 }
@@ -241,19 +314,13 @@ void armputchar(char val) {
     error_set(ERR_TXOVERFLOW);
     return;
   }
-  asm volatile("mrs r0, cpsr\n\t"
-      "orr r0, r0, #0x80\n\t"
-      "msr cpsr_c, r0"
-      : : : "r0" );
+  crit_disable_int();
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS;
   *ser_tx_head++ = val;
   AT91C_BASE_US0->US_TCR++;
   AT91C_BASE_US0->US_IER = AT91C_US_ENDTX;
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN;
-  asm volatile("mrs r0, cpsr\n\t"
-      "bic r0, r0, #0x80\n\t"
-      "msr cpsr_c, r0"
-      : : : "r0" );
+  crit_enable_int();
 }
 
 int armgetchar(void) {
@@ -328,7 +395,7 @@ ARM_CODE RAMFUNC void ser_isr(void) {
   return;
 }
 
-void init_serial_port_stdio(void) {
+int init_serial_port_stdio(void) {
   
   AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US0);
   AT91F_PIO_CfgPeriph(AT91C_BASE_PIOA, SERIAL_A_PINS, SERIAL_B_PINS);
@@ -345,7 +412,8 @@ void init_serial_port_stdio(void) {
   AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
 
   AT91C_BASE_US0->US_RPR = (unsigned int)ser_rx_buf;
-  read_loc = ser_rx_head = ser_rx_buf;
+  read_loc = ser_rx_buf;
+  ser_rx_head = ser_rx_buf;
   AT91C_BASE_US0->US_RCR = SER_RX_BUF_SIZE;
   AT91C_BASE_US0->US_RNPR = (unsigned int)ser_rx_buf;
   AT91C_BASE_US0->US_RNCR = SER_RX_BUF_SIZE;
@@ -354,10 +422,11 @@ void init_serial_port_stdio(void) {
   
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
  
-  armprintf("rpr: %p\n", AT91C_BASE_US0->US_RPR);
+  armprintf("rpr: %p\r", AT91C_BASE_US0->US_RPR);
   
   // Disable Amplifier
   AT91C_BASE_PIOA->PIO_PER = 1 << 8;
   AT91C_BASE_PIOA->PIO_OER = 1 << 8;
   AT91C_BASE_PIOA->PIO_SODR = 1 << 8;
+  return 0;
 }

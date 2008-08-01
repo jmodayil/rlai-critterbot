@@ -1,7 +1,10 @@
-#include "lib_ledctl.h"
 
 #ifndef LIB_LEDDRIVE_H
 #define LIB_LEDDRIVE_H
+
+#include "lib_ledctl.h"
+#include "lib_events.h"
+#include <stdlib.h>
 
 //RGB LED array of structures
 struct rgbled {
@@ -92,8 +95,8 @@ void leddrive_ball(void);
 cval is 0-4095, leddrive_grad1/2 decide what cval will represent.
 */
 
-void leddrive_event(void);//MAIN EVEN CONTROLLER
-void leddrive_init(void);
+int leddrive_event(void);//MAIN EVEN CONTROLLER
+int leddrive_init(void);
 void leddrive_write(void);//sends LED[] values to the leds
 
 #endif /* LIB_LEDDRIVE_H */
