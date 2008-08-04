@@ -4,18 +4,14 @@
 #include "lib_accel.h"
 #include <math.h>
 
-event_s leddrive_event_s = {
-  leddrive_init,
-  leddrive_event,
-  0
-};
-
-int leddrive_init(void)
+void leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
 	leddrive_startver = 2;
+	int i,j;
+	for(i=0,j=5000;i<=3;i++)
+		(ANGLEINFO[i].cval)=&j;
 	clearled();
-  return 0;
 }
 
 void leddrive_write(void){
@@ -77,6 +73,57 @@ void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b){
 	LED[light].g=g;
 	LED[light].b=b;
 }
+
+
+void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b){
+	unsigned int light;
+	while (angle>359)
+		angle-=360;
+	while (angle<0)
+	  angle+=360;
+	angle=360-angle;
+	light = (23*angle+253)>>9;
+	if (light>=3)
+		light-=3;
+	else 
+		light+=13;
+	int i;
+	for (i=3;i>=0;--i){
+		if ((((r-64*i)<0)?0:(r-64*i)+LED[light].r)>255)
+			LED[light].r=255;
+		else 
+			LED[light].r+=((r-64*i)<0)?0:(r-64*i);
+		if ((((g-64*i)<0)?0:(g-64*i)+LED[light].g)>255)
+			LED[light].g=255;
+		else 
+			LED[light].g+=((g-64*i)<0)?0:(g-64*i);
+		if ((((b-64*i)<0)?0:(b-64*i)+LED[light].b)>255)
+			LED[light].b=255;
+		else 
+			LED[light].b+=((b-64*i)<0)?0:(b-64*i);
+		light++;
+		if (light>15)
+			light=0;
+	}
+	for (i=1;i<=3;++i){
+		if ((((r-64*i)<0)?0:(r-64*i)+LED[light].r)>255)
+			LED[light].r=255;
+		else 
+			LED[light].r+=((r-64*i)<0)?0:(r-64*i);
+		if ((((g-64*i)<0)?0:(g-64*i)+LED[light].g)>255)
+			LED[light].g=255;
+		else 
+			LED[light].g+=((g-64*i)<0)?0:(g-64*i);
+		if ((((b-64*i)<0)?0:(b-64*i)+LED[light].b)>255)
+			LED[light].b=255;
+		else 
+			LED[light].b+=((b-64*i)<0)?0:(b-64*i);
+		light++;
+		if (light>15)
+			light=0;
+	}
+}
+
 
 void battlvl(unsigned int lvl){
 	unsigned int light,i;
@@ -186,6 +233,18 @@ void cvalselect(unsigned char *r,unsigned char *g,unsigned char *b,unsigned int 
 		*b=255-*r;
 		*g=0;
 		break;
+	case RED:
+		*b=*g=0;
+		*r=cval>>4;
+		break;
+	case GREEN:
+		*g=cval>>4;
+		*r=*b=0;
+		break;
+	case BLUE:
+		*r=*g=0;
+		*b=cval>>4;
+		break;	
   }
 }
 
@@ -221,7 +280,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if (a>1250)		
-			leddrive_ball();
+			leddrive_batstatus();
 		break;
 	case 2:
 		a=0;
@@ -242,7 +301,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if(a>920)
-			leddrive_ball();
+			leddrive_batstatus();
 		break;
 	case 3:
 		a=0;
@@ -253,10 +312,10 @@ void startup(void){
 	}	
 }
 // MAIN EVENT CONTROLLER
-int leddrive_event(void) {
-	static int old_leddrive_angledeg;
-  unsigned static int old_leddrive_gradcval1,old_leddrive_gradcval2,old_leddrive_anglecval;
-	unsigned char r,g,b,r2,g2,b2;
+void leddrive_event(void) {
+  unsigned static int old_leddrive_gradcval1,old_leddrive_gradcval2;
+	unsigned char r,g,b,r1,g1,b1;
+	int i;
 	
 	switch (leddrive_state){
 	case STARTUP:
@@ -268,17 +327,18 @@ int leddrive_event(void) {
 		break;
 	case BALL:
   	ledball_crtl();	
-  	leddrive_angledeg=&ledball_angle;
-    leddrive_anglecval=&ledball_cval;
-    leddrive_grad1=BLUERED;
+  	ANGLEINFO[0].deg=&ledball_angle;
+    ANGLEINFO[0].cval=&ledball_cval;
+    ANGLEINFO[0].grad=BLUERED;
+    *(ANGLEINFO[1].cval)=*(ANGLEINFO[2].cval)=*(ANGLEINFO[3].cval)=5000;
 	case ANGLE:
-		if(old_leddrive_anglecval == *leddrive_anglecval && old_leddrive_angledeg == *leddrive_angledeg)
-			break;
-    clearled();
-    cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_anglecval);
-		anglelight(*leddrive_angledeg,r,g,b);
-		old_leddrive_anglecval = *leddrive_anglecval;
-		old_leddrive_angledeg = *leddrive_angledeg;
+		clearled();
+		for(i=0;i<=3;i++){
+			if (*(ANGLEINFO[i].cval)<4096){
+				cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
+				anglelight(*(ANGLEINFO[i].deg),r,g,b);
+			}
+		}	
 		break;
 	case ROTATE:
 		rotate(*leddrive_rot);
@@ -288,10 +348,19 @@ int leddrive_event(void) {
 			break;
 		clearled();
 		cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
-		cvalselect(&r2,&g2,&b2,leddrive_grad2,*leddrive_gradcval2);
-		gradient(r,g,b,r2,g2,b2);
+		cvalselect(&r1,&g1,&b1,leddrive_grad2,*leddrive_gradcval2);
+		gradient(r,g,b,r1,g1,b1);
 		old_leddrive_gradcval1 = *leddrive_gradcval1;
 		old_leddrive_gradcval2 = *leddrive_gradcval2;
+		break;
+	case FADEANGLE:
+		clearled();
+		for(i=0;i<=3;i++){
+			if (*(ANGLEINFO[i].cval)<4096){
+				cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
+				fadeangle(*(ANGLEINFO[i].deg),r,g,b);
+			}
+		}
 		break;
   case CLEAR:	
     clearled();
@@ -301,7 +370,6 @@ int leddrive_event(void) {
   	break;
 	}
 	leddrive_write();//sends LED[] values to the leds
-  return 0;
 }
 
 //external
@@ -309,11 +377,18 @@ void leddrive_batstatus(void){
 	leddrive_state = BATSTATUS;
 }
 
-void leddrive_angle(int *deg,unsigned int *cval, unsigned int grad){
+void leddrive_angle(unsigned int id,unsigned int grad,unsigned int *cval,int *deg){
 	leddrive_state= ANGLE;
-	leddrive_angledeg = deg;
-	leddrive_anglecval = cval;
-	leddrive_grad1=grad;
+	ANGLEINFO[id].grad=grad;
+	ANGLEINFO[id].deg=deg;
+	ANGLEINFO[id].cval=cval;
+}
+
+void leddrive_fadeangle(unsigned int id,unsigned int grad,unsigned int *cval,int *deg){
+	leddrive_state=FADEANGLE;
+	ANGLEINFO[id].grad=grad;
+	ANGLEINFO[id].deg=deg;
+	ANGLEINFO[id].cval=cval;
 }
 
 void leddrive_rotate(int *rot){
@@ -360,9 +435,6 @@ void leddrive_ball(void){
 
 
 
-#define T 0.01// time constant
-#define PI 3.141592654
-
 int meu= 20;
 
 int ledball_gx;
@@ -392,7 +464,7 @@ void ledball_crtl(void){
 	
 	accelrot=((meu*velobot)>>3);
 	if ((abs(velobot)-abs(veloball))<2)
-	accelrot=0;
+		accelrot=0;
 
 	accelball=(fricaccel + accely + accelx +accelrot);
 	veloball= veloball +(accelball*T);
@@ -406,6 +478,6 @@ void ledball_crtl(void){
 		angle-=360000;
 	if (angle<0)
 	  angle+=360000;	
-	ledball_angle = angle/1000;		
+	ledball_angle = angle/1000;	     
 }
 
