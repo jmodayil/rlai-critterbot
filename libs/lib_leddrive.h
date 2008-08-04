@@ -12,10 +12,17 @@ struct rgbled {
 	unsigned char g;
 	unsigned char b;
 }LED[16];
+//angle tracking info
+struct angleinfo {
+	unsigned int grad;
+	unsigned int *cval;//a cval that is >4096 is the trigger to not display the angle
+	int *deg;
+}ANGLEINFO[4];
+
 //States of leddrive_event()
 enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL};
 //possible gradients for cval
-enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED};
+enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED,RED,GREEN,BLUE};
 
 unsigned int leddrive_state;
 
@@ -29,11 +36,9 @@ void ledball_crtl(void);
 //varibles for external functions.
 int *leddrive_rot;
 int leddrive_startver;
+unsigned int leddrive_batlvl;//
 unsigned int leddrive_grad1;
 unsigned int leddrive_grad2;
-unsigned int leddrive_batlvl;//
-int *leddrive_angledeg;
-unsigned int *leddrive_anglecval;
 unsigned int *leddrive_gradcval1;
 unsigned int *leddrive_gradcval2;
 
@@ -54,8 +59,10 @@ pulses led from black to rgb values fading in at a rate of incr takeing lenght c
 void pulse(struct rgbled *light,unsigned char r,unsigned char g,unsigned char b,unsigned char incr,unsigned int length);
 /*
 takes angle and chooses a corresponding led and displays rgb color on that led. angle values will wrap around
+fade angle rgb values are displayed on neigbouring leds with diminished strenght, and blends with other colors.
 */
 void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b);
+void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b);
 /*
 displays the battery lvl 0-100
 */
@@ -84,7 +91,8 @@ All change leddrive_event's state accordingly.
 */
 void leddrive_startup(int ver);
 void leddrive_batstatus(void);
-void leddrive_angle(int *deg,unsigned int *cval,unsigned int grad);
+void leddrive_angle(unsigned int id,unsigned int grad,unsigned int *cval,int *deg);
+void leddrive_fadeangle(unsigned int id,unsigned int grad,unsigned int *cval,int *deg);
 void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
