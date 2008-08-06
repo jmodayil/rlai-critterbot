@@ -2,7 +2,6 @@
 #include <string.h>
 #include "lib_leddrive.h"
 #include "lib_accel.h"
-#include <math.h>
 
 void leddrive_init(void)
 {	 
@@ -530,8 +529,9 @@ void ledball_crtl(void){
 	else
 		fricaccel=0;
 
-	accely=-(ledball_gy)*(cosf((ledball_angle)*PI/180))*9000;
-	accelx=-(ledball_gx)*(sinf((ledball_angle)*PI/180))*9000;
+	accely=-(ledball_gy)*(cos_lookup[ledball_angle]);
+	accelx=-(ledball_gx)*(sin_lookup[ledball_angle]);
+
 	
 	accelrot=((meu*velobot)>>3);
 	if ((abs(velobot)-abs(veloball))<2)
@@ -541,9 +541,7 @@ void ledball_crtl(void){
 	veloball= veloball +(accelball*T);
 	angle=angle+((veloball-velobot)*T);
 	
-	ledball_cval=((unsigned int)sqrtf(ledball_gx*ledball_gx + ledball_gy*ledball_gy))<<2;
-	if (ledball_cval >4095)
-		ledball_cval=4095;
+	ledball_cval=4095;//color of ball, can change to be variable
 		
 	if (angle>359000)
 		angle-=360000;
