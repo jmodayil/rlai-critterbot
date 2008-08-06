@@ -315,7 +315,8 @@ void startup(void){
 void leddrive_event(void) {
   unsigned static int old_leddrive_gradcval1,old_leddrive_gradcval2;
 	unsigned char r,g,b,r1,g1,b1;
-	int i;
+	int i,j;
+	static int a;
 	
 	switch (leddrive_state){
 	case STARTUP:
@@ -361,7 +362,62 @@ void leddrive_event(void) {
 				fadeangle(*(ANGLEINFO[i].deg),r,g,b);
 			}
 		}
+		break;	
+	case ERROR:
+		a++;
+		if (a==1){
+			for(i=0;i<=15;i++){
+				LED[i].r=255;					
+				LED[i].g=128;
+			}
+		}
+		if (a==15){
+			for(i=0;i<=15;i++)
+				LED[i].g=0;
+		}
+		if (a==30)
+			a=0;
 		break;
+	case EMERG:
+		a++;
+		if (a==1){
+		for(i=0;i<=15;i+=2)
+			LED[i].r=255;
+		for(j=1;j<=15;j+=2)
+			LED[j].b=255;
+		}
+		rotate(25);
+		break;
+	case BUSY:
+		a++;
+		LED[(a>>3)].g=80+(a);
+		if ((a>>3)>15){
+		a=0;
+		clearled();
+		}
+		break;
+	case COLORDIS:
+			rotate(15);
+			a++;
+			if (a==1){
+				clearled();
+				gradient(255,0,0,0,0,0);
+			}	
+			if (a>50 && a<600)
+				fadein(&LED[0].g,5,255);
+			if (a>600 && a<1200)
+				fadein(&LED[0].b,5,255);
+			if (a>900 && a<1200)
+				fadeout(&LED[0].r,5,0);
+			if (a>1200)
+				fadeout(&LED[0].g,5,0);
+			if (a>1500)
+				fadein(&LED[0].r,5,255);
+			if (a>2000)
+				fadeout(&LED[0].b,7,0);
+			if (a==2400)
+				a=0;
+		break;	
   case CLEAR:	
     clearled();
     leddrive_stop();
@@ -422,7 +478,22 @@ void leddrive_ball(void){
 	clearled();
 	leddrive_state=BALL;
 }
-
+void leddrive_error(void){
+	clearled();
+	leddrive_state=ERROR;
+}
+void leddrive_emergency(void){
+	clearled();
+	leddrive_state=EMERG;
+}
+void leddrive_colordisplay(void){
+	clearled();
+	leddrive_state=COLORDIS;
+}
+void leddrive_busy(void){
+	clearled();
+	leddrive_state=BUSY;
+}
 
 
 
