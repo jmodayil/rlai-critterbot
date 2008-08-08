@@ -253,7 +253,6 @@ void startup(void){
 		a++;
 	switch(leddrive_startver){
 	case 1:
-	default:
 		a=0;
 		leddrive_startver = -1;
 	case -1:
@@ -302,11 +301,65 @@ void startup(void){
 		if(a>920)
 			leddrive_batstatus();
 		break;
-	case 3:
+	case 3://Special U of A colours startup.
+	default:
 		a=0;
+		i=0;
 		leddrive_startver=-3;
 	case -3:
-		//3rd startup sequence here
+		if (a==1){
+			LED[0].r=255;
+			LED[0].g=204;
+		}
+		if (a<=80)
+			rotate(5);
+		if (a>110 && a<= 190)
+			rotate(-5);
+		if (a>210 && a<= 290)
+			rotate(5);
+		if (a==210){
+			LED[8].g=102;
+			LED[8].b=51;
+		}
+		if (a==230){
+			LED[0].r=LED[8].r=124;
+			LED[0].g=LED[8].g=150;
+			LED[0].b=LED[8].b=23;
+		}
+		if (a>310 && a<= 390)
+			rotate(-5);
+		if (a==460)
+			gradient(255,204,0,0,102,51);
+		if (a>=500&& a<800){
+			i++;
+			switch (i){
+			case 1:
+				gradient(255,204,0,0,102,51);
+				break;
+			case 31:
+				gradient(0,102,51,255,204,0);	
+				break;
+			case 60:
+				i=0;
+				break;
+			}
+		}
+		if (a>=800&&a<960){
+			for (i=0;i<=15;i+=2)
+				fadeto(&LED[i],255,204,0,3);
+			for (i=1;i<=15;i+=2)
+				fadeto(&LED[i],0,102,51,3);	
+			}
+		if(a>=960&&a<1280){
+			rotate(20);
+			fadeto(&LED[0],0,0,0,3);
+		}
+		if(a>=1280&& a<1600){
+			rotate(-20);
+			fadeto(&LED[0],0,0,0,10);
+		}
+		if(a>= 1650)
+			leddrive_batstatus();
 		break;
 	}	
 }
@@ -481,7 +534,7 @@ void leddrive_error(void){
 	clearled();
 	leddrive_state=ERROR;
 }
-void leddrive_emergency(void){
+void leddrive_emerg(void){
 	clearled();
 	leddrive_state=EMERG;
 }

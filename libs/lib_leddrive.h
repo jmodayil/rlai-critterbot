@@ -104,7 +104,7 @@ void leddrive_stop(void);//keeps current color states on led's
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
 void leddrive_ball(void);
 void leddrive_error(void);
-void leddrive_emergency(void);
+void leddrive_emerg(void);
 void leddrive_colordisplay(void);
 void leddrive_busy(void);
 /*
