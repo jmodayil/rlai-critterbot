@@ -31,8 +31,7 @@ LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
 THUMB = -marm
 
 # Lib files to compile
-CSRC = lib_motor.c lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c lib_adcspi.c
-CASS = $(CSRC:.c=.aS)
+CSRC = lib_except.c lib_motor.c lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c lib_adcspi.c
 COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.S lib_critical.S
 AOBJ = $(ASRC:.S=.o)
@@ -49,6 +48,7 @@ tests: $(TESTBINS)
 
 clean:
 	rm -f *.o
+	rm -f *.aS
 	rm -f $(BINDIR)/*
 
 # For now, we compile everything using gcc because inline functions are dup'ed

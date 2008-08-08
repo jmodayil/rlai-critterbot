@@ -23,25 +23,11 @@
 #include "lib_leddrive.h"
 #include "armio.h"
 
-ARM_CODE RAMFUNC void C_DAbt_Handler(unsigned int cal_loc) {
-  
-  __armprintf("Calling Address: %p\r", cal_loc);
-  __armprintf("ASR: %x\r", *AT91C_MC_ASR);
-  __armprintf("AASR: %p\r", *AT91C_MC_AASR);
-  while(1);
-}
-
-ARM_CODE RAMFUNC void spur_isr() {
-  __armputchar('?');
-  error_set(ERR_SPURINT);
-}
-
 int main()
 {
   // serial port should be initialized asap for debugging purposes
   //init_serial_port_stdio();
   
-  AT91C_BASE_AIC->AIC_SPU = (unsigned int)spur_isr;
   // SPI has no dependencies
   //spi_init();
   // SSC has no dependencies

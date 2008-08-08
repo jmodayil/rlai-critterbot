@@ -14,6 +14,7 @@
 #include "lib_critical.h"
 #include "lib_ledctl.h"
 #include "lib_events.h"
+#include "crctable.h"
 
 event_s boot_event_s = {
   NULL,
@@ -47,6 +48,8 @@ ARM_CODE RAMFUNC void boot_core()
   // @@@ Disable motors, etc
   // @@@ Enable watchdog - don't take too long; reset watchdog while copying
   // Switch to supervisor mode?
+  // We don't need the CRC in flash
+  boot_data_size -= 2;
   num_pages = boot_data_size / AT91C_IFLASH_PAGE_SIZE;
   tail_page_size = boot_data_size % AT91C_IFLASH_PAGE_SIZE;
 
@@ -100,8 +103,6 @@ ARM_CODE RAMFUNC void boot_core()
     boot_reset_arm();
   else
   {
-    // Write to the serial port and die (should be English pound sign)
-   
     __armputchar('\r'); 
     __armputchar('F');
     __armputchar('L');
@@ -132,42 +133,30 @@ ARM_CODE RAMFUNC void boot_reset_arm()
 
 void boot_verify()
 {
-  unsigned int num_diff_bytes = 0;
-  unsigned int num_data_words = boot_data_size / 4;
-  unsigned int num_data_tail = boot_data_size % 4;
-  unsigned int * source = (unsigned int*)(boot_data);
-  unsigned int * dest = (unsigned int*)(BOOT_COPY_DESTINATION);
-  int i;
   
-  // Compares the code; assumes binary is word-aligned
-  for (i = 0; i < num_data_words; i++)
-    if (*source++ != *dest++)
-      num_diff_bytes += 4;
- 
-  // Now compare the tail
-  for (i = 0; i < num_data_tail; i++)
-  {
-    if (*(((unsigned char *)source)+i) != *(((unsigned char *)dest)+i))
-      num_diff_bytes++;
-  }
-  
-  // Set LED's blue channel if verified, green otherwise
-  if (num_diff_bytes == 0)
-  {
-    armprintf ("Binary verified.\r");
-    for (i = 0; i < LEDCTL_NUM_LEDS; i++)
-      ledctl_setvalue(BLUE_CONTROLLER, i, 512);
-  }
+  unsigned short my_crc, file_crc;
+
+  my_crc = get_crc( boot_data, boot_data_size - 2);
+  file_crc = boot_data[boot_data_size - 2] << 8;
+  file_crc += boot_data[boot_data_size - 1];
+  if(my_crc == file_crc)
+    armprintf("CRC Check OK.  Ready to flash.\r");
   else
-  {
-    armprintf ("Binaries differ in %u (%u) bytes.\r", num_diff_bytes, 
-      boot_data_size);
-    for (i = 0; i < LEDCTL_NUM_LEDS; i++)
-      ledctl_setvalue(GREEN_CONTROLLER, i, 512);
-  }
-  
-  boot_abort_receive();
+    armprintf("CRC Check FAILED.  Re-send file.\r");
+
+  boot_end_receive();
 }
+
+unsigned short get_crc( unsigned char *data, int len ) {
+
+ unsigned short reg;
+
+ reg = 0;
+ while(len--)
+   reg = (reg<<8) ^ crctable[(reg >> 8) ^ *data++];
+ return reg;
+}
+
 
 /**
   * Event handler for the bootloader driver.
@@ -194,7 +183,7 @@ int boot_event()
       // If done receiving... (or returned from boot_core??)
       error_set(ERR_BOOT);
     }
-    boot_abort_receive();
+    boot_end_receive();
   }
 
   // Get at least one character
@@ -209,7 +198,7 @@ int boot_event()
       boot_data_head == BOOT_MAX_CODE_SIZE)
       {
         error_set(ERR_BOOT);
-        //boot_abort_receive();
+        //boot_end_receive();
         //return;
         boot_data_head++;
       }
@@ -240,7 +229,7 @@ void boot_begin_receive(int data_size)
 /**
   * Mayday! Abort the reception of new code
   */
-void boot_abort_receive()
+void boot_end_receive()
 {
   boot_receiving = 0;
   event_start(EVENT_ID_UI);

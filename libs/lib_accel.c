@@ -65,8 +65,8 @@ int accel_init()
   if (val != ACCEL_WHOAMI_VALUE)
   {
     error_set (ERR_ACCEL);
-    armprintf ("This accelerometer is a spy!\n");
-    armprintf ("Got WHOAMI: %x\n", val);
+    armprintf ("This accelerometer is a spy!\r");
+    armprintf ("Got WHOAMI: %x\r", val);
     return 1;
   }
   return 0;
@@ -82,7 +82,7 @@ int accel_event()
 
   //for(i = 0; i < 8; i++)
   // armprintf("%b ", accel_rxdata[i]);
-  //armputchar('\n'); 
+  //armputchar('\r'); 
   for (i = 0; i < ACCEL_NUM_AXES; i++)
   {
     // The accelerometer data is split into a low part (accel_rxdata[2])

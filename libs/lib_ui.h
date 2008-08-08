@@ -11,6 +11,7 @@
 #define LIB_UI_H
 
 #include "lib_events.h"
+#include "lib_motor.h"
 
 // How frequently to report status in reporting mode, in 100th of a second
 #define UI_REPORT_INTERVAL 200
@@ -46,6 +47,7 @@ void ui_pid (char * cmdstr);
 void ui_error (char * cmdstr);
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
+void ui_motor ( char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);

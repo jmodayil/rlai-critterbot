@@ -13,7 +13,7 @@
 
 #include "AT91SAM7S256.h"
 #include "lib_AT91SAM7S256.h"
-
+#include "lib_except.h"
 #include "lib_error.h"
 #include "lib_events.h"
 #include "armio.h"
@@ -131,6 +131,7 @@ void events_do()
       (*events[i]).event_count++;
     }
   }
+  ping_watchdog();
 }
 
 ARM_CODE RAMFUNC void events_isr()

@@ -119,8 +119,8 @@
 // </e>
 */
         .equ    WDT_SETUP,      1
-        .equ    WDT_MR_Val,     0x00008000
-
+//        .equ    WDT_MR_Val,     0x00008000
+        .equ    WDT_MR_Val,     0x32FE2300
 
 // Power Mangement Controller (PMC) definitions
         .equ    PMC_BASE,       0xFFFFFC00  /* PMC Base Address */
@@ -261,15 +261,15 @@ DAbt_Addr:      .word   DAbt_Handler
 FIQ_Addr:       .word   FIQ_Handler
 
 Undef_Handler:
-                mov     r0,#0 
-                B       Exception_Handler 
+                mov     r0,lr 
+                B       C_Undef_Handler 
 PAbt_Handler:   
-                mov     r0,#2
-                B       Exception_Handler
+                mov     r0,lr
+                B       C_PAbt_Handler
 DAbt_Handler:   
                 mov     r0,lr
                 B       C_DAbt_Handler
-                B       Exception_Handler
+
 FIQ_Handler:    B       FIQ_Handler
 
 // Must be in ARM
@@ -544,6 +544,11 @@ LoopZI:         CMP     R1, R2
 				STR     R1, [R0, #MC_RCR]   // Remap
 #endif /* VECTORS_IN_RAM */
 
+// Define spurious interrupt function
+       
+        ldr   r0, =spur_isr
+        mvn   r1, #3840
+        str   r0, [r1, #53]
 
 // Enter the C code
 				mov   r0,#0            // no arguments (argc = 0)
