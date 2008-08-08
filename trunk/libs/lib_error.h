@@ -25,6 +25,7 @@
 #define ERR_SPURINT       (1<<6)
 #define ERR_SSC_OVERFLOW  (1<<7)
 #define ERR_SPI_OVERFLOW  (1<<8)
+#define ERR_ADC_SPI       (1<<9)
 #define ERR_MAXERR      8
 
 
