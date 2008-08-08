@@ -18,6 +18,7 @@
 #include "lib_boot.h"
 #include "lib_critical.h"
 #include "lib_events.h"
+#include "lib_adcspi.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -51,6 +52,8 @@ ui_cmd_item ui_commands[] = {
   {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
   {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
   {"get_accel", ui_getaccel, "get_accel"},
+  {"get_adcspi", ui_getadcspi, "get_adcspi"},
+  {"toggle_adcspi", ui_toggle_adcspi, "toggle_adcspi"},
   {"status", ui_status, "status"},
   {"report", ui_report, "report"},
   {"mode", ui_mode, "mode <led [gs|dc]>"},
@@ -123,6 +126,7 @@ void ui_do_report()
   // The lazy way - call other status-related functions from the UI
   ui_statled("stat_led");
   ui_getaccel("get_accel");
+  ui_getadcspi("get_adcspi");
   armprintf ("Error status: %x\r", error_get());
 }
 
@@ -316,6 +320,57 @@ void ui_getaccel (char * cmdstr)
   for (i = 0; i < ACCEL_NUM_AXES; i++)
     armprintf (" %d", accel_get_output(i));
   armprintf ("\r");
+}
+
+void ui_getadcspi (char * cmdstr)
+{
+  int i;
+  int sel;
+
+  armprintf ("Off-board ADC outputs: \r");
+  // Print out one output if requested, otherwise all
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, &i) >= 2)
+  {
+    sel = adcspi_is_selected(i);
+
+    armprintf ("%d: %d%s", i, 
+      sel? adcspi_get_output(i):0,
+      sel? "#":""); 
+    armprintf ("\r");
+  }
+  else
+  {
+    for (i = 0; i < ADCSPI_NUM_OUTPUTS; )
+    {
+      sel = adcspi_is_selected(i);
+
+      armprintf ("%d: %d%s", i, 
+        sel? adcspi_get_output(i):0,
+        sel? "#":""); 
+
+      armprintf ("\t");
+      // If i % 4 == 0 AND i != 0, print newline
+      if (i & 0x4)
+        armprintf ("\r");
+      i++;
+    }
+  }
+}
+
+void ui_adcspi_toggle(char * cmdstr)
+{
+  int index;
+  
+  if (armsscanf(cmdstr, "%s %d", ui_cmdname, &index) < 2)
+  {
+    armprintf ("Invalid argument to adcspi_toggle.\r");
+    return;
+  }
+
+  if (adcspi_is_selected(index))
+    adcspi_deselect(index);
+  else
+    adcspi_select(index);
 }
 
 void ui_report (char * cmdstr)

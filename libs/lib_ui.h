@@ -37,6 +37,8 @@ void ui_test (char * cmdstr);
 void ui_setdot (char * cmdstr);
 void ui_getdot (char * cmdstr);
 void ui_getaccel (char * cmdstr);
+void ui_getadcspi (char * cmdstr);
+void ui_toggle_adcspi (char * cmdstr);
 void ui_status (char * cmdstr);
 void ui_report (char * cmdstr);
 void ui_mode (char * cmdstr);
