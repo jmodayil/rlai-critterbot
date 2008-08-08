@@ -14,6 +14,8 @@ struct spi_packet motor_packet;
 
 int motor_init() {
 
+  motor_tx_data = 0;
+  
   motor_packet.device_id = 9;
   motor_packet.num_words = 1;
   motor_packet.data_to_write = &motor_tx_data;
@@ -32,3 +34,13 @@ int motor_event() {
   return 0; 
 }
 
+void motor_set_speed(int motor, int speed) {
+
+  if(motor < 0 || motor > MOTOR_NUM_MOTORS)
+    return;
+
+  if(speed < -MOTOR_MAX_SPEED || speed > MOTOR_MAX_SPEED)
+    return;
+
+  motor_tx_data = speed & 0xFF;
+}

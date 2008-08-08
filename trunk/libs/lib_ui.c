@@ -62,7 +62,8 @@ ui_cmd_item ui_commands[] = {
   {"reset", ui_reset, "reset"},
   {"fortune", ui_fortune, "fortune"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
-  {"error", ui_error, "error [clear]"}
+  {"error", ui_error, "error [clear]"},
+  {"motor", ui_motor, "motor [motor #] [speed #]"}
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -357,7 +358,7 @@ void ui_getadcspi (char * cmdstr)
   }
 }
 
-void ui_adcspi_toggle(char * cmdstr)
+void ui_toggle_adcspi(char * cmdstr)
 {
   int index;
   
@@ -536,16 +537,32 @@ void ui_test (char * cmdstr)
 
 void ui_error ( char * cmdstr) 
 {
-  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2){
     armprintf ("error [clear]\r");
+    return;
+  }
 
   if (strncmp (ui_strarg, "clear", sizeof(ui_strarg)) == 0){
     error_clear(0xFFFFFFFF);
     armprintf ("Error flags cleared.\r");
     return;
   }
+}
 
-      
+void ui_motor ( char * cmdstr)
+{
+  int motor, speed;
+
+  motor = 0;
+  speed = 0;
+  
+  if (armsscanf(cmdstr, "%s %d %d", ui_cmdname, &motor, &speed) < 3)
+  {
+    armprintf ("Too few arguments");
+    return;
+  }
+
+  motor_set_speed(motor, speed);
 }
 
 void ui_pid ( char * cmdstr)
@@ -556,8 +573,8 @@ void ui_pid ( char * cmdstr)
   {
     if (strncmp (ui_strarg, "stat", sizeof(ui_strarg)) == 0){
       for(i = 0; i <= EVENT_MAX; i++)
-        armprintf ("pid %d status: %s\r", pid,
-          (event_flags & (1<<pid)) ? "OK" : "STOPPED");
+        armprintf ("pid %d status: %s\r", i,
+          (event_flags & (1<<i)) ? "OK" : "STOPPED");
       return;
     }
     armprintf ("pid [start|stop|stat] #\r");

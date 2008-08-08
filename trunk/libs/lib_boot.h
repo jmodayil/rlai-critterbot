@@ -16,7 +16,7 @@
 
 #ifdef BOOT_LOAD_TO_RAM_AND_COPY
 // This definition MUST match the linker script's BOOTRAM size!
-#define BOOT_MAX_CODE_SIZE  0xB000
+#define BOOT_MAX_CODE_SIZE  0xA000
 // @@@ fixme
 #define BOOT_BUFFER         (boot_data)
 #elif defined(BOOT_LOAD_TO_FLASH)
@@ -62,6 +62,11 @@ ARM_CODE RAMFUNC void boot_core();
   */
 void boot_verify();
 
+/*
+ * CRC-16 function
+ */ 
+unsigned short get_crc( unsigned char *data, int len ); 
+
 /**
   * Event handler for the bootloader driver.
   */
@@ -75,7 +80,7 @@ void boot_begin_receive(int data_size);
 /**
   * Mayday! Abort the reception of new code
   */
-void boot_abort_receive();
+void boot_end_receive();
 
 /**
   * This resets the ARM. You might want to call it from somewhere else,
