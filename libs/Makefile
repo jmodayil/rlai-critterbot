@@ -5,7 +5,7 @@ OBJCOPY = arm-elf-objcopy
 # Directories
 LDDIR=ldscripts
 BINDIR=bin
-GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.2.0
+GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
 STDC_LIB_DIR=/opt/local/arm-elf/lib
 
 LIBS=$(STDC_LIB_DIR)/libm.a $(STDC_LIB_DIR)/libc.a $(GCC_LIB_DIR)/libgcc.a
@@ -31,7 +31,7 @@ LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD)
 THUMB = -marm
 
 # Lib files to compile
-CSRC = lib_except.c lib_motor.c lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c lib_adcspi.c
+CSRC = lib_except.c lib_motor.c lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c lib_adcspi.c lib_adc.c
 COBJ = $(CSRC:.c=.o)
 ASRC = startup_SAM7S.S lib_critical.S
 AOBJ = $(ASRC:.S=.o)
