@@ -50,16 +50,16 @@
 // delay = 32 * value / MCK; min=0, max=255
 #define SPI_CS4_7_DELAY_BETWEEN_TRANSFERS 0
 // delay = value / MCK; min=0, max=255
-#define SPI_CS4_7_DELAY_BEFORE_CLOCK 0
+#define SPI_CS4_7_DELAY_BEFORE_CLOCK 1
 // rate = MCK / value; min=1, max=255
-#define SPI_CS4_7_BAUD_RATE 1
+#define SPI_CS4_7_BAUD_RATE 32
 // bits = 8 + value; min=0, max=8
-#define SPI_CS4_7_WORD_SIZE 0x0
+#define SPI_CS4_7_WORD_SIZE 0x8
 // bit 0: Clock polarity, 0 clock starts low, 1 clock starts high
 // bit 1: Clock phase, 0 leading edge change, 1 leading edge capture
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
-#define SPI_CS4_7_FLAGS 0x0
+#define SPI_CS4_7_FLAGS 0x03
 #define SPI_CSR1_SETTINGS ( SPI_CS4_7_DELAY_BETWEEN_TRANSFERS<<24 | \
                               SPI_CS4_7_DELAY_BEFORE_CLOCK<<16 | \
                               SPI_CS4_7_BAUD_RATE<<8 | \

@@ -19,6 +19,7 @@
 #include "lib_critical.h"
 #include "lib_events.h"
 #include "lib_adcspi.h"
+#include "lib_adc.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -124,10 +125,13 @@ int ui_event()
 
 void ui_do_report()
 {
+  int i;
   // The lazy way - call other status-related functions from the UI
   ui_statled("stat_led");
   ui_getaccel("get_accel");
   ui_getadcspi("get_adcspi");
+  for(i = 4; i < 8; i++)
+    armprintf("ADC Channel %d: %d\r", i, adc_output[i]);
   armprintf ("Error status: %x\r", error_get());
 }
 
@@ -349,10 +353,7 @@ void ui_getadcspi (char * cmdstr)
         sel? adcspi_get_output(i):0,
         sel? "#":""); 
 
-      armprintf ("\t");
-      // If i % 4 == 0 AND i != 0, print newline
-      if (i & 0x4)
-        armprintf ("\r");
+      armprintf ("\r");
       i++;
     }
   }

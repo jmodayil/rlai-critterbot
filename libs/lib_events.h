@@ -29,8 +29,10 @@
 #define EVENT_ID_BOOT 6
 #define EVENT_ID_ERROR 7
 #define EVENT_ID_MOTOR 8
-#define EVENT_ID_UI 9
-#define EVENT_MAX 9
+#define EVENT_ID_ADC 9
+#define EVENT_ID_ADCSPI 10
+#define EVENT_ID_UI 11
+#define EVENT_MAX 11
 
 
 unsigned int init_flags;
@@ -42,6 +44,8 @@ unsigned int event_flags;
     1 << EVENT_ID_SPI | \
     1 << EVENT_ID_LEDDRIVE | \
     1 << EVENT_ID_MOTOR | \
+    1 << EVENT_ID_ADCSPI | \
+    1 << EVENT_ID_ADC | \
     1 << EVENT_ID_LEDCTL | \
     1 << EVENT_ID_ACCEL \
     )
@@ -49,7 +53,6 @@ unsigned int event_flags;
 #define EVENTS_DEFAULTS ( \
     1 << EVENT_ID_LEDDRIVE | \
     1 << EVENT_ID_LEDCTL | \
-    1 << EVENT_ID_MOTOR | \
     1 << EVENT_ID_ACCEL | \
     1 << EVENT_ID_UI \
     )
