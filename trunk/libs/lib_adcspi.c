@@ -12,10 +12,15 @@
 #include "lib_error.h"
 #include "lib_adcspi.h"
 
-// Dummy variable that we discard read data into
-unsigned int adcspi_dummy_rx;
+event_s adcspi_event_s = {
+  adcspi_init,
+  adcspi_event,
+  0
+};
+
 // Dummy data that we send to read in data; bit 15 must be 0 (READ)
 unsigned int adcspi_dummy_tx;
+unsigned int adcspi_dummy_rx;
 
 // Buffer containing the actual output values from the ADC
 unsigned int adcspi_output[ADCSPI_NUM_OUTPUTS];
@@ -39,7 +44,7 @@ struct spi_packet adcspi_shadow_packet;
 // This flag tells us whether new inputs were selected since the last event
 int adcspi_new_selection;
 
-void adcspi_init()
+int adcspi_init()
 {
   int i;
  
@@ -66,31 +71,29 @@ void adcspi_init()
   adcspi_control_packet.read_data = &adcspi_dummy_rx;
   adcspi_control_packet.finished = 0;
 
-  adcspi_control_packet.device_id = ADCSPI_DEVICE_ID;
-  adcspi_control_packet.num_words = 1;
-  adcspi_control_packet.data_to_write = &adcspi_shadow_reg;
-  adcspi_control_packet.read_data = &adcspi_dummy_rx;
-  adcspi_control_packet.finished = 1;
+  adcspi_shadow_packet.device_id = ADCSPI_DEVICE_ID;
+  adcspi_shadow_packet.num_words = 1;
+  adcspi_shadow_packet.data_to_write = &adcspi_shadow_reg;
+  adcspi_shadow_packet.read_data = &adcspi_dummy_rx;
+  adcspi_shadow_packet.finished = 1;
 
   // Power up the chip! We do so by sending all ones (the line should be
   //  tied high, but this is harder to achieve)
   adcspi_control_reg = 0xFFFF;
-  adcspi_control_packet.finished = 0;
-  // @@@ replace by spi_send_packet_block?
-  spi_send_packet(&adcspi_control_packet);
-  while (!adcspi_control_packet.finished)
-    ;
+  adcspi_shadow_reg = 0xFFFC;
   
   adcspi_control_packet.finished = 0;
+  // @@@ replace by spi_send_packet_block?
   spi_send_packet(&adcspi_control_packet);
   while (!adcspi_control_packet.finished)
     ;
 
   // Send the initial input selection
   adcspi_send_select();
+  return 0;
 }
 
-void adcspi_event()
+int adcspi_event()
 {
   // Send the new input selection, if there is one
   if (adcspi_new_selection)
@@ -105,6 +108,7 @@ void adcspi_event()
 
   // Request new data in
   adcspi_read_data();
+  return 0;
 }
 
 
@@ -134,8 +138,8 @@ int adcspi_is_selected(int input)
 void adcspi_send_select()
 {
   // Send the control packet, then the shadow packet
-  adcspi_control_reg = ADCSPI_CONTROL_FLAGS | ADCSPI_WRITE | 
-    ADCSPI_SELECT_SHADOW;
+  adcspi_control_reg = (ADCSPI_CONTROL_FLAGS | ADCSPI_WRITE | 
+    ADCSPI_SELECT_SHADOW) << 4;
 
   spi_send_packet(&adcspi_control_packet);
   // Shadow packet contains bit-mapped inputs to be converted
@@ -153,10 +157,9 @@ void adcspi_read_data()
   while (n >= 0)
   {
     index = ADCSPI_NUM_OUTPUTS-1-n;
-
     adcspi_read_packets[index].finished = 0;
     // If the MSB is set, read the corr. packet
-    if (bitmap & 0x8000)
+    if (bitmap & 0x8000) 
       spi_send_packet(&adcspi_read_packets[index]);
     bitmap = bitmap << 1;
     n--;
@@ -171,7 +174,7 @@ int adcspi_get_output(int index)
   // In particular, the result will be undefined if 'index' is not selected
   //  or if this is the first event cycle after selecting 'index'
   // @@@ handle this - but can't simply check for finished == 0
-  return adcspi_output[index] & 0xFFF;
+  return (adcspi_output[index] & 0x1FFF) >> 1;
 }
 
 void adcspi_test_addresses()

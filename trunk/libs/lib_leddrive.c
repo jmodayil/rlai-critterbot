@@ -108,7 +108,7 @@ int sin_lookup[360] = {
 int leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
-	leddrive_startver = 2;
+	leddrive_startver = 3;
 	int i,j;
 	for(i=0,j=5000;i<=3;i++)
 		*(ANGLEINFO[i].cval)=j;
@@ -382,7 +382,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if (a>1250)		
-			leddrive_batstatus();
+			leddrive_ball();
 		break;
 	case 2:
 		a=0;
@@ -403,7 +403,7 @@ void startup(void){
 				fadeto(&LED[i],0,0,0,2);
 		}
 		if(a>920)
-			leddrive_batstatus();
+			leddrive_ball();
 		break;
 	case 3://Special U of A colours startup.
 	default:
@@ -463,7 +463,7 @@ void startup(void){
 			fadeto(&LED[0],0,0,0,10);
 		}
 		if(a>= 1650)
-			leddrive_batstatus();
+			leddrive_ball();
 		break;
 	}	
 }

@@ -32,16 +32,17 @@
 #define ADCSPI_CONSECUTIVE      (ADCSPI_SHADOW_BIT | ADCSPI_SEQ_BIT)
 
 #define ADCSPI_CONTROL_FLAGS    (ADCSPI_STRAIGHT_CODING |\
-                                 ADCSPI_PM_NORMAL)
+                                 ADCSPI_PM_NORMAL |\
+                                 ADCSPI_HALF_RANGE)
 
 #define ADCSPI_NUM_OUTPUTS      16
-#define ADCSPI_DEVICE_ID        4
+#define ADCSPI_DEVICE_ID        7
 
 /** Initialization routine for the off-chip ADC */
-void adcspi_init();
+int adcspi_init();
 
 /** Event routine */
-void adcspi_event();
+int adcspi_event();
 
 /** Selects a set of inputs that should be converted. The inputs are numbered
   *  from 0 to 15.

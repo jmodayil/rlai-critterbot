@@ -29,6 +29,8 @@ extern event_s boot_event_s;
 extern event_s error_event_s;
 extern event_s ui_event_s;
 extern event_s motor_event_s;
+extern event_s adc_event_s;
+extern event_s adcspi_event_s;
 
 volatile unsigned int events_status;
 
@@ -77,7 +79,9 @@ void events_init()
   events[6] = &boot_event_s;
   events[7] = &error_event_s;
   events[8] = &motor_event_s;
-  events[9] = &ui_event_s;
+  events[9] = &adc_event_s;
+  events[10] = &adcspi_event_s;
+  events[11] = &ui_event_s;
   
   init_flags = EVENTS_INITS;
   event_flags = EVENTS_DEFAULTS;
