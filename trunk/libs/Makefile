@@ -50,6 +50,7 @@ clean:
 	rm -f *.o
 	rm -f *.aS
 	rm -f $(BINDIR)/*
+	rm -f memory.map
 
 # For now, we compile everything using gcc because inline functions are dup'ed
 all_libs: $(AOBJ) $(COBJ)
