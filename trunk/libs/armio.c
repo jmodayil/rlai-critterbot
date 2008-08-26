@@ -353,7 +353,7 @@ int armreadline(char *read_to, int max_size) {
     return EOF;
   }
   while(*read_loc != '\r') {
-    if(read_loc >= cur_ptr) {
+    if(read_loc == cur_ptr) {
       return EOF;
     }
     if(++read_loc >= buf_end)
