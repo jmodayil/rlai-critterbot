@@ -352,10 +352,17 @@ int armreadline(char *read_to, int max_size) {
   if(cur_ptr == ser_rx_head){
     return EOF;
   }
-  while(*read_loc != '\r') {
-    if(read_loc == cur_ptr) {
+  // MGB 27/08/08 - rewrote logic
+  //  We MUST test for read_loc == cur_ptr BEFORE *read_loc == '\r'
+  // We leave this loop iff we reach cur_ptr or a CR, one of which must happen
+  //  unless US_RPR has been corrupted
+  while(1)
+  {
+    if(read_loc == cur_ptr)
       return EOF;
-    }
+    else if (*read_loc == '\r')
+      break;
+    // If not done, go on to the next character
     if(++read_loc >= buf_end)
       read_loc = ser_rx_buf;
   }
