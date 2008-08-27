@@ -359,8 +359,9 @@ int armreadline(char *read_to, int max_size) {
     if(++read_loc >= buf_end)
       read_loc = ser_rx_buf;
   }
-  for(size = 0; ser_rx_head < read_loc; size++) {
-    if(size >= max_size){
+  for(size = 0; ser_rx_head != read_loc; size++) {
+    if(size >= max_size - 1)
+    {
       return EOF;
     }
     *read_to++ = *ser_rx_head++;
