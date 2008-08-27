@@ -85,8 +85,34 @@ void events_init()
   
   init_flags = EVENTS_INITS;
   event_flags = EVENTS_DEFAULTS;
+ 
+  // Initialize the console first.
+  (*events[0]).init_func();
+  
+  armprintf("\r\r\r------------CritterBOOT-------------\r\r");
+  armprintf("Last reset was a ");
+  switch( get_reset_code() ) {
+  case 0:
+    armprintf("power-up");
+    break;
+  case 2:
+    armprintf("watchdog");
+    break;
+  case 3:
+    armprintf("software");
+    break;
+  case 4:
+    armprintf("external");
+    break;
+  case 5:
+    armprintf("brownout");
+    break;
+  default:
+    armprintf("undefined");
+  }
+  armprintf(" reset.\r");
   // Initialized any functions with inits.
-  for(i = 0; i <= EVENT_MAX; i++) {
+  for(i = 1; i <= EVENT_MAX; i++) {
     if((init_flags & (1 << i)) && ((*events[i]).init_func != NULL))
     {
       if((*events[i]).init_func()) {
@@ -101,6 +127,8 @@ void events_init()
   AT91C_BASE_PITC->PITC_PIMR = 
     (EVENTS_PIV_VALUE & AT91C_PITC_PIV) |
     AT91C_PITC_PITIEN | AT91C_PITC_PITEN;
+  // Enable user reset 
+  *AT91C_RSTC_RMR = 0xA5000101;
 }
 
 void event_stop(unsigned int id) {
@@ -123,6 +151,7 @@ void events_do()
 {
   int i, ret_val;
 
+  ping_watchdog();
   for(i = 0; i <= EVENT_MAX; i++) {
     if((event_flags & (1 << i)) && (*events[i]).event_func != NULL) {
       // If an event returns < 0, we will stop it
@@ -135,7 +164,6 @@ void events_do()
       (*events[i]).event_count++;
     }
   }
-  ping_watchdog();
 }
 
 ARM_CODE RAMFUNC void events_isr()

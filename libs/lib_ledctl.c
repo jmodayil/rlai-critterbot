@@ -322,12 +322,9 @@ void ledctl_dc( void ) {
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE ); 
 
   // Send the DC data
-  armprintf("sending data");
   ledctl_senddata_dc();
-  armprintf("...");
   // Wait for the data to have been sent
   while(!(ledctl_ssc_packet_dc[LEDCTL_NUM_CONTROLLERS-1].finished));
-  armprintf("done.\r");
   // We need to XLAT to get the DC data in
   AT91F_PIO_SetOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
   AT91F_PIO_ClearOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XLAT);
@@ -388,7 +385,6 @@ void ledctl_init_gsclock()
 
 int ledctl_init( void )
 {
-  armprintf ("LEDCTL init packets\r");
 
   ledctl_init_packets();
   
@@ -401,15 +397,11 @@ int ledctl_init( void )
   AT91F_PIO_CfgPullup( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_XERR );
   AT91F_PIO_CfgOutput ( AT91C_BASE_PIOA, 1 << LEDCTL_PIN_MODE );
  
-  armprintf ("LEDCTL dot correction\r");
-
   // Run dot-correction initially; it will set the state to FIRST_GRAYSCALE,
   //  allowing us to begin clock grayscale data. BLANK is also left high 
   //  and will be de-asserted only in two 100Hz cycles.
   ledctl_dc(); 
   
-  armprintf ("LEDCTL send data\r");
-
   // Initialize the grayscale clock
   ledctl_init_gsclock();
   return 0;

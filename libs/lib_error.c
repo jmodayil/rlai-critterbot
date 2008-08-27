@@ -9,6 +9,8 @@
 
 #include "lib_error.h"
 
+unsigned int error_reg;
+
 event_s error_event_s = {
   NULL,
   error_event,

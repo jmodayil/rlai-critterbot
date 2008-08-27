@@ -103,7 +103,7 @@ int adcspi_event()
   }
   else
     // Test for error in addresses (only if no new data was selected)
-    adcspi_test_addresses();
+   // adcspi_test_addresses();
 
 
   // Request new data in
@@ -174,7 +174,7 @@ int adcspi_get_output(int index)
   // In particular, the result will be undefined if 'index' is not selected
   //  or if this is the first event cycle after selecting 'index'
   // @@@ handle this - but can't simply check for finished == 0
-  return (adcspi_output[index] & 0x1FFF) >> 1;
+  return (adcspi_output[index] & 0x1FFF) >> 3;
 }
 
 void adcspi_test_addresses()
