@@ -88,4 +88,14 @@ void boot_end_receive();
   */
 ARM_CODE RAMFUNC void boot_reset_arm();
 
+
+/*
+ * Returns the cause of the last chip reset.
+ * 0: Power-up Reset
+ * 1: Watchdog Fault
+ * 2: Software Reset
+ * 3: External NRST
+ * 4: Brownout Reset
+ */
+int get_reset_code();
 #endif /* LIB_BOOT_H */

@@ -15,6 +15,7 @@
 #include "lib_ledctl.h"
 #include "lib_events.h"
 #include "crctable.h"
+#include "AT91SAM7S256.h"
 
 event_s boot_event_s = {
   NULL,
@@ -27,6 +28,7 @@ unsigned int boot_data_head;
 unsigned int boot_data_size;
 volatile unsigned int boot_receiving = 0;
 unsigned int boot_timeout_counter;
+int crc_was_good;
 
 /** DO NOT CALL THIS FUNCTION */
 ARM_CODE RAMFUNC void boot_core()
@@ -43,6 +45,10 @@ ARM_CODE RAMFUNC void boot_core()
   //remove
   int tmp = 0;
 
+  if(0 ==  crc_was_good) {
+    armprintf("No valid boot image to flash!\r");
+    return;
+  }
   // Disable interrupts
   crit_disable_int();
   // @@@ Disable motors, etc
@@ -139,12 +145,14 @@ void boot_verify()
   my_crc = get_crc( boot_data, boot_data_size - 2);
   file_crc = boot_data[boot_data_size - 2] << 8;
   file_crc += boot_data[boot_data_size - 1];
-  if(my_crc == file_crc)
+  if(my_crc == file_crc) {
     armprintf("CRC Check OK.  Ready to flash.\r");
-  else
+    crc_was_good = 1; 
+  }
+  else {
     armprintf("CRC Check FAILED.  Re-send file.\r");
-
-  boot_end_receive();
+    crc_was_good = 0;
+  }
 }
 
 unsigned short get_crc( unsigned char *data, int len ) {
@@ -184,6 +192,7 @@ int boot_event()
       error_set(ERR_BOOT);
     }
     boot_end_receive();
+    return 0;
   }
 
   // Get at least one character
@@ -218,9 +227,9 @@ void boot_begin_receive(int data_size)
 {
   boot_receiving = 1;
   boot_data_head = 0;
-  boot_data_size = data_size;
+  boot_data_size = data_size + 2;
   boot_timeout_counter = 0;
-
+  crc_was_good = 0;
   event_stop(EVENT_ID_UI);
   // run_ui = 0;
   // @@@ disable UI
@@ -232,9 +241,13 @@ void boot_begin_receive(int data_size)
 void boot_end_receive()
 {
   boot_receiving = 0;
+  event_stop(EVENT_ID_BOOT);
   event_start(EVENT_ID_UI);
-  // run_ui = 1;
-  // @@@ enable UI
+}
+
+int get_reset_code()
+{
+  return (AT91C_BASE_RSTC->RSTC_RSR & AT91C_RSTC_RSTTYP) >> 8;
 }
 
 

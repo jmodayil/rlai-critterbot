@@ -7,30 +7,38 @@ event_s motor_event_s = {
   0
 };
 
-unsigned int motor_tx_data;
-unsigned int motor_rx_data;
+unsigned int motor_tx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
+unsigned int motor_rx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
 
-struct spi_packet motor_packet; 
+struct spi_packet motor_packet[MOTOR_NUM_MOTORS]; 
 
 int motor_init() {
 
-  motor_tx_data = 0;
-  
-  motor_packet.device_id = 9;
-  motor_packet.num_words = 1;
-  motor_packet.data_to_write = &motor_tx_data;
-  motor_packet.read_data = &motor_rx_data;
-  motor_packet.finished = 1;
+  int i;
+
+  for(i = 0; i < MOTOR_NUM_BYTES; i++) {
+    motor_packet[i].device_id = 9 + i;
+    motor_packet[i].num_words = MOTOR_NUM_BYTES;
+    motor_packet[i].data_to_write = &motor_tx_data[i][0];
+    motor_packet[i].read_data = &motor_rx_data[i][0];
+    motor_packet[i].finished = 1;
+  }
   return 0;  
 }
 
 int motor_event() {
   
-  spi_send_packet(&motor_packet);
-
-  if(motor_event_s.event_count % 100 == 0)
-    armprintf("Motor packet = %u\r", (unsigned char)motor_rx_data);
+  int i;
   
+  for(i = 0; i < MOTOR_NUM_MOTORS; i++)
+    spi_send_packet(&motor_packet[i]);
+  
+  if(motor_event_s.event_count % 100 == 0) {
+    for(i = 0; i < 3; i++)
+      armprintf("Motor %d: %d %d %d\r", i, motor_rx_data[i][0] & 0xFF,
+         motor_rx_data[i][1] & 0xFF, motor_rx_data[i][2] & 0xFF); 
+    armprintf("\r");
+  }
   return 0; 
 }
 
@@ -42,5 +50,5 @@ void motor_set_speed(int motor, int speed) {
   if(speed < -MOTOR_MAX_SPEED || speed > MOTOR_MAX_SPEED)
     return;
 
-  motor_tx_data = speed & 0xFF;
+  motor_tx_data[motor][0] = speed & 0xFF;
 }

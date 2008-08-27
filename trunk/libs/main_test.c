@@ -40,6 +40,7 @@ int main()
 
   //leddrive_init();
   // Events has no dependencies
+
   events_init();
 
   armprintf("critterprompt> ");

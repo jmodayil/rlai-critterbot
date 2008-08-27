@@ -24,8 +24,8 @@
 #define EOF -1
 #endif
 
-#define SER_BAUD_RATE 230400 
-//#define SER_BAUD_RATE 115200
+//#define SER_BAUD_RATE 230400 
+#define SER_BAUD_RATE 115200
 #define MCK 47923200
 #define SER_BRGR (MCK / 16 / SER_BAUD_RATE)
 
