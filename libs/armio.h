@@ -58,16 +58,6 @@ ARM_CODE RAMFUNC void __armputchar(char);
 int armgetchar();
 
 /*
- * gets a new \n terminated line from the serial port
- * char* is the buffer to copy data to
- * int is the size of the buffer
- * 
- * returns the number of characters read, or EOF if there
- * is no full line in the receive buffer
- */
-int armgetline(char*, int);
-
-/*
  * prints a formatted string to the serial port
  * format string % supports:
  * d = signed decimal integer
