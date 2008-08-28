@@ -2,6 +2,8 @@
 #define Manager_H
 
 #include "Component.h"
+#include "CritterControlDrop.h"
+#include "JoystickDrop.h"
 
 /**
  * @todo: comment me
