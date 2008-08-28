@@ -19,33 +19,22 @@ int Manager::loadConfig(ComponentConfig *config) {
 	// file once we have some things that need to be configured
   
 
-	//config comes from the parent
-	if(this->config == *config) {
-
-  }
-  //config is new
-  else {
-    this->config = *config;
-  }
-
   return 1; 
 }
 
 int Manager::init(USeconds &wokeAt) {
+	joystickInput = lake->readyReading("JoystickDrop");
+	controlOutput = lake->readyWriting("ControlDrop");
   return 1; 
-	
-	joystickInput = lake->readyReading(JoystickDrop);
-	controlOutput = lake->readyWriting(ControlDrop);
-
 }
 
 int Manager::think(USeconds &wokeAt) {
-	ControlDrop* drop;
+	CritterControlDrop* drop;
 	// read in the Joystick Control Drop
 	// translate the joystick controls into robot commands
 	// write the robot commands to the drop
 	
-	drop = ((ControlDrop*)lake->startWriteHead(controlOutput));
+	drop = ((CritterControlDrop*)lake->startWriteHead(controlOutput));
 
 	lake ->doneWriteHead(controlOutput);
 	thinks++;
