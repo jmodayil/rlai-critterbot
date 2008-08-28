@@ -331,6 +331,7 @@ void ui_getadcspi (char * cmdstr)
 {
   int i;
   int sel;
+  int one_sel;
 
   armprintf ("Off-board ADC outputs: \r");
   // Print out one output if requested, otherwise all
@@ -338,24 +339,31 @@ void ui_getadcspi (char * cmdstr)
   {
     sel = adcspi_is_selected(i);
 
-    armprintf ("%d: %d%s", i, 
-      sel? adcspi_get_output(i):0,
-      sel? "#":""); 
-    armprintf ("\r");
+    if (sel)
+      armprintf ("%d: %d\r", i, adcspi_get_output(i));
+    else
+      armprintf ("%d: N/S\r", i);
   }
   else
   {
-    for (i = 0; i < ADCSPI_NUM_OUTPUTS; )
+    one_sel = 0;
+
+    // Loop throuh all outputs (64 of them) and print their value
+    for (i = 0; i < ADCSPI_NUM_OUTPUTS; i++)
     {
       sel = adcspi_is_selected(i);
 
-      armprintf ("%d: %d%s", i, 
-        sel? adcspi_get_output(i):0,
-        sel? "#":""); 
-
-      armprintf ("\r");
-      i++;
+      if (sel)
+      {
+        armprintf ("%d (%d): %d\r", i, adcspi_get_address(i), 
+          adcspi_get_output(i));
+        one_sel |= 1;
+      }
     }
+
+    // If no selected outputs, print out 'No selected outputs'
+    if (!one_sel)
+      armprintf ("No selected outputs.\r");
   }
 }
 
