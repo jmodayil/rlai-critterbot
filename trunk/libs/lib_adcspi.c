@@ -212,8 +212,8 @@ int adcspi_get_output(int index)
   // In particular, the result will be undefined if 'index' is not selected
   //  or if this is the first event cycle after selecting 'index'
   // @@@ handle this - but can't simply check for finished == 0
-  // @@@ this seems highly wrong
-  return (adcspi_output[index] & 0xFFF);
+  // shift by 1 for issues reading first bit, by 2 for noise
+  return (adcspi_output[index] & 0x1FFF) >> 3;
 }
 
 int adcspi_get_address(int index)
