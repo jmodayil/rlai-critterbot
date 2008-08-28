@@ -19,7 +19,7 @@ event_s adcspi_event_s = {
 };
 
 // Dummy data that we send to read in data; bit 15 must be 0 (READ)
-unsigned int adcspi_dummy_tx;
+unsigned int adcspi_dummy_tx[ADCSPI_NUM_DEVICES];
 // Dummy variable that receives unused data when transmitting (e.g. the control
 //  register)
 unsigned int adcspi_dummy_rx;
@@ -52,21 +52,22 @@ int adcspi_init()
   int i, j, output_idx;
   struct spi_packet * packet;
 
-  // Set up the dummy packet we send to read data
-  adcspi_dummy_tx = ADCSPI_READ;
   // Set up the read registers
   
   output_idx = 0;
 
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
   {
+    // Set up the dummy packet we send to read data
+    adcspi_dummy_tx[i] = ADCSPI_READ;
+    
     for (j = 0; j < ADCSPI_OUTPUTS_PER_DEVICE; j++)
     {
       packet = &adcspi_read_packets[i][j];
 
       packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
       packet->num_words = 1;
-      packet->data_to_write = &adcspi_dummy_tx;
+      packet->data_to_write = &adcspi_dummy_tx[i];
       packet->read_data = &adcspi_output[output_idx++];
       packet->finished = 0;
     }
@@ -120,12 +121,9 @@ int adcspi_event()
   // Send the new input selection, if there is one
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
   {
-    if (adcspi_new_selection[i])
-    {
-      adcspi_send_select(i);
-      adcspi_new_selection[i] = 0;
-    }
-    else ;
+    // Select regardless of new selection, for sync'ing purposes
+    adcspi_send_select(i);
+    adcspi_new_selection[i] = 0;
   }
       // Test for error in addresses (only if no new data was selected)
     // adcspi_test_addresses();
