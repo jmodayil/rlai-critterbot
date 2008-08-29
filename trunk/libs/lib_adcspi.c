@@ -34,13 +34,11 @@ unsigned int adcspi_shadow_reg[ADCSPI_NUM_DEVICES];
 // Packet to send to the control register
 unsigned int adcspi_control_reg[ADCSPI_NUM_DEVICES];
 
-// There are two ways of doing this; either by requesting a variable-sized
-//  packet or by sending a number of packets. The former requires us to shift
-//  the data after reading it, as well as have a 64 ints buffer of dummy 
-//  data to send. Hence I favor the 64 SPI packets, despite the slight 
-//  additional memory overhead.
-struct spi_packet 
-  adcspi_read_packets[ADCSPI_NUM_DEVICES][ADCSPI_OUTPUTS_PER_DEVICE];
+// We use one packet per device. The disadvantage of doing this is that we
+//  must request all data (16 bytes). Requesting variable length data (by
+//  setting num_words < 16 and selecting outputs with the shadow register)
+//  would require shifting data around after receiving it using the SPI.
+struct spi_packet adcspi_read_packets[ADCSPI_NUM_DEVICES];
 struct spi_packet adcspi_control_packet[ADCSPI_NUM_DEVICES];
 struct spi_packet adcspi_shadow_packet[ADCSPI_NUM_DEVICES];
 
@@ -49,33 +47,25 @@ int adcspi_new_selection[ADCSPI_NUM_DEVICES];
 
 int adcspi_init()
 {
-  int i, j, output_idx;
+  int i;
   struct spi_packet * packet;
 
   // Set up the read registers
   
-  output_idx = 0;
-
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
   {
     // Set up the dummy packet we send to read data
     adcspi_dummy_tx[i] = ADCSPI_READ;
     
-    for (j = 0; j < ADCSPI_OUTPUTS_PER_DEVICE; j++)
-    {
-      packet = &adcspi_read_packets[i][j];
+    packet = &adcspi_read_packets[i];
 
-      packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
-      packet->num_words = 1;
-      packet->data_to_write = &adcspi_dummy_tx[i];
-      packet->read_data = &adcspi_output[output_idx++];
-      packet->finished = 0;
-    }
-  }
-
-  // Set up each off-board ADC's packets and power-up the chip itself
-  for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
-  {
+    packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
+    packet->num_words = ADCSPI_OUTPUTS_PER_DEVICE;
+    packet->data_to_write = &adcspi_dummy_tx[i];
+    packet->read_data = &adcspi_output[i * ADCSPI_OUTPUTS_PER_DEVICE];
+    packet->finished = 0;
+  
+    // Set up each off-board ADC's packets and power-up the chip itself
     packet = &adcspi_control_packet[i];
 
     packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
@@ -107,6 +97,7 @@ int adcspi_init()
       ;
   
     // Send the initial input selection
+    // This MUST be 0xFFFF using the current code
     adcspi_shadow_reg[i] = ADCSPI_DEFAULT_INPUTS;
     adcspi_send_select(i);
   }
@@ -187,19 +178,11 @@ void adcspi_send_select(int device)
 /** Sends packets to read in data from the ADC (only for selected inputs) */
 void adcspi_read_data(int device)
 {
-  int bitmap = adcspi_shadow_reg[device];
-  // Bit 15 corresponds to input 0 and vice-versa
-  int index = 0;
+  adcspi_read_packets[device].finished = 0;
 
-  while (index < ADCSPI_OUTPUTS_PER_DEVICE)
-  {
-    adcspi_read_packets[device][index].finished = 0;
-    // If the MSB is set, read the corr. packet
-    if (bitmap & 0x8000) 
-      spi_send_packet(&adcspi_read_packets[device][index]);
-    bitmap = bitmap << 1;
-    index++;
-  }
+  // @@@ error-checking: if !finished, throw error
+  // We request all data (16 packets)
+  spi_send_packet(&adcspi_read_packets[device]);
 }
 
 int adcspi_get_output(int index)

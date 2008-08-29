@@ -49,9 +49,9 @@
 #define ADCSPI_NUM_OUTPUTS      (ADCSPI_OUTPUTS_PER_DEVICE * \
                                  ADCSPI_NUM_DEVICES)
 
-// Default inputs when the off-board ADCs are started (currently a single
-//  setting for all four devices)
-#define ADCSPI_DEFAULT_INPUTS   0xFFFC
+// Requested inputs. This must be 0xFFFF, as the code is optimized to read
+//  from all sources, all the time.
+#define ADCSPI_DEFAULT_INPUTS   0xFFFF
 
 // Off-board ADC packet to be sent for powering up (line should be tied high)
 #define ADCSPI_CTRLREG_POWER_UP 0xFFFF
