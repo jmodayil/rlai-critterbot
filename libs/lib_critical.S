@@ -71,7 +71,7 @@ mutex_test_and_set:
 	.global	crit_release_mutex
 	.type	crit_release_mutex, %function
 // r0 holds a pointer to a semaphore
-release_get_mutex:
+crit_release_mutex:
   mov   r2, #0
 
 // Release the mutex by setting it to 0

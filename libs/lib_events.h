@@ -59,11 +59,19 @@ unsigned int event_flags;
 
 /*
  * 'OS' task descripter.
+ * init_func    - function called to initialize task
+ * event_func   - function called at a frequency of EVENTS_HZ (event handler
+ *                for the task)
+ * event_count  - number of times a particular event_func has been called
+                  since powering up the ARM
+ * first_init   - non-zero if the task's initialization has not been performed
+ *                since power-up
  */
 typedef struct event{
   int (*init_func)();
   int (*event_func)();
   unsigned int event_count;
+  int first_init;
 }event_s;
 
 event_s *events[EVENT_MAX+1];
@@ -76,6 +84,9 @@ unsigned int events_has_event();
 
 void event_stop(unsigned int);
 void event_start(unsigned int);
+/** Initializes a particular driver. Returns nonzero or the init. function
+  * error code (also nonzero) on failure. */
+int event_init(unsigned int);
 
 void events_do();
 

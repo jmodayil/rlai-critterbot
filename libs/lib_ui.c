@@ -57,7 +57,7 @@ ui_cmd_item ui_commands[] = {
   {"toggle_adcspi", ui_toggle_adcspi, "toggle_adcspi"},
   {"status", ui_status, "status"},
   {"report", ui_report, "report"},
-  {"mode", ui_mode, "mode <led [gs|dc]>"},
+  {"mode", ui_mode, "mode <led [gs|dc]> - broken"},
   {"test", ui_test, "test [ramfunc|int]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
@@ -596,6 +596,11 @@ void ui_pid ( char * cmdstr)
     return;
   }
 
+  if (strncmp (ui_strarg, "init", sizeof(ui_strarg)) == 0)
+  {
+    event_init(pid);
+    return;
+  }
   if (strncmp (ui_strarg, "stop", sizeof(ui_strarg)) == 0)
   {
     event_stop(pid);
