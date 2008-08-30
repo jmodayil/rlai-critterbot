@@ -12,6 +12,8 @@ unsigned int motor_rx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
 
 struct spi_packet motor_packet[MOTOR_NUM_MOTORS]; 
 
+volatile int motor_test;
+
 int motor_init() {
 
   int i;
@@ -34,11 +36,11 @@ int motor_event() {
     spi_send_packet(&motor_packet[i]);
   
   if(motor_event_s.event_count % 100 == 0) {
-    for(i = 0; i < 3; i++)
+    for(i = 0; i < 1; i++)
       armprintf("Motor %d: %d %d %d\r", i, motor_rx_data[i][0] & 0xFF,
          motor_rx_data[i][1] & 0xFF, motor_rx_data[i][2] & 0xFF); 
     armprintf("\r");
-  }
+    }
   return 0; 
 }
 
