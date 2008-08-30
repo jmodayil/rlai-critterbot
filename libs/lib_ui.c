@@ -41,6 +41,8 @@ typedef struct {
 
 extern struct ssc_packet ledctl_ssc_packet[];
 
+extern volatile int motor_test;
+
 ui_cmd_item ui_commands[] = {
   { "help", ui_help, "Do you need help?"}, // help
   { "set_led", ui_setled, "set_led <led #> <red> <green> <blue>"}, 
@@ -572,6 +574,7 @@ void ui_motor ( char * cmdstr)
   }
 
   motor_set_speed(motor, speed);
+  motor_test = 0;
 }
 
 void ui_pid ( char * cmdstr)
