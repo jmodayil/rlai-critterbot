@@ -10,7 +10,7 @@
 #ifndef LIB_CRITICAL_H
 #define LIB_CRITICAL_H
 
-typedef unsigned int crit_sem;
+typedef volatile unsigned int crit_sem;
 
 /** Enable interrupts (after disabling them) */
 void crit_enable_int();

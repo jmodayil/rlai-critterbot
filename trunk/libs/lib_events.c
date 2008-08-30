@@ -16,6 +16,8 @@
 #include "lib_except.h"
 #include "lib_error.h"
 #include "lib_events.h"
+#include "lib_boot.h"
+#include "lib_critical.h"
 #include "armio.h"
 
 
@@ -32,7 +34,10 @@ extern event_s motor_event_s;
 extern event_s adc_event_s;
 extern event_s adcspi_event_s;
 
+// Whether a new event cycle is ready to be processed
 volatile unsigned int events_status;
+// Semapore related to events_status
+crit_sem events_status_sem;
 
 unsigned int events_has_event()
 {
@@ -44,15 +49,35 @@ unsigned int events_has_event()
   // result = events_status;
   // Clear and return the status bit
   // events_status = 0;
-  asm volatile("mov r2,#0\n\t"
+/*  asm volatile("mov r2,#0\n\t"
                "swp %0, r2, [%1]"
                : "=&r" (result)
                : "r" (&events_status) 
-               : "r2" );
+               : "r2" ); */
   //AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
 
+  // MGB: New code using semaphores (actually not as good as just using SWP,
+  //  but doesn't require inline assembly)
+  crit_get_mutex(&events_status_sem);
+  result = events_status;
+  events_status = 0;
+  crit_release_mutex(&events_status_sem);
+  
   return result;
 }
+
+char * events_reset_names[] = {
+  "power-up",
+  "undefined",
+  "watchdog",
+  "software",
+  "external",
+  "brownout" };
+
+int num_events_reset_names = 
+  sizeof(events_reset_names) / sizeof(*events_reset_names);
+
+char * events_undefined_reset_name = "undefined";
 
 /** Initializes the event timer.
   */
@@ -60,7 +85,8 @@ void events_init()
 {
   AT91PS_AIC pAic = AT91C_BASE_AIC;
   int i;
-  
+  int reset_code;
+
   // Enable the PIT interrupt to trigger on an interrupt
   //  Note! We are configuring the system interrupt here; if something else
   //  needs it we will have to deal with this separately.
@@ -82,41 +108,34 @@ void events_init()
   events[9] = &adc_event_s;
   events[10] = &adcspi_event_s;
   events[11] = &ui_event_s;
-  
+ 
+  for (i = 0; i <= EVENT_MAX; i++)
+    events[i]->first_init = 1;
+
   init_flags = EVENTS_INITS;
   event_flags = EVENTS_DEFAULTS;
  
   // Initialize the console first.
-  (*events[0]).init_func();
+  event_init(0);
   
   armprintf("\r\r\r------------CritterBOOT-------------\r\r");
   armprintf("Last reset was a ");
-  switch( get_reset_code() ) {
-  case 0:
-    armprintf("power-up");
-    break;
-  case 2:
-    armprintf("watchdog");
-    break;
-  case 3:
-    armprintf("software");
-    break;
-  case 4:
-    armprintf("external");
-    break;
-  case 5:
-    armprintf("brownout");
-    break;
-  default:
-    armprintf("undefined");
-  }
+
+  reset_code = get_reset_code();
+
+  if (reset_code >= 0 && reset_code < num_events_reset_names)
+    armprintf(events_reset_names[reset_code]);
+  else
+    armprintf(events_undefined_reset_name);
+
   armprintf(" reset.\r");
   // Initialized any functions with inits.
   for(i = 1; i <= EVENT_MAX; i++) {
-    if((init_flags & (1 << i)) && ((*events[i]).init_func != NULL))
+    if((init_flags & (1 << i)) && (events[i]->init_func != NULL))
     {
-      if((*events[i]).init_func()) {
+      if (event_init(i)) {
         armprintf("Failed to init EVENT_ID %d\r", i);
+        // Stop this task, as it failed to init
         event_flags &= ~(1 << i);
       } else
         armprintf("Initialized EVENT_ID %d\r", i);
@@ -132,7 +151,6 @@ void events_init()
 }
 
 void event_stop(unsigned int id) {
-
   if(id > EVENT_MAX)
     return;
   
@@ -140,12 +158,46 @@ void event_stop(unsigned int id) {
 }
 
 void event_start(unsigned int id) {
-  
   if(id > EVENT_MAX)
     return;
+ 
+  if (events[id]->first_init)
+  {
+    if (event_init(id))
+    {
+      armprintf("Failed to init EVENT_ID %d\r", id);
+      // In this case, do not actually start the event
+      return;
+    }
+  }
   
   event_flags |= 1 << id;
 }
+
+int event_init(unsigned int id) {
+  int result;
+
+  if (id > EVENT_MAX)
+    return 1;
+
+  if (events[id]->init_func == NULL)
+  {
+    // Flag the event as having being initialized if there is no init function
+    events[id]->first_init = 0;
+    return 1;
+  }
+  
+  result = events[id]->init_func();
+  // If initialization was successful, label this task as having being
+  // initialized
+  if (result)
+    events[id]->first_init = 1;
+  else
+    events[id]->first_init = 0;
+  
+  return result;
+}
+
 
 void events_do()
 {
@@ -182,11 +234,13 @@ ARM_CODE RAMFUNC void events_isr()
      * The 12 MSB of the PITC_PIVR register are the ones of interest; only
      *  the lowest one should be set.
      */
+    crit_get_mutex(&events_status_sem);
     if (events_status != 0)
       error_set (ERR_EVENTS);
     else if (picnt >= 0x00200000)
       error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;
+    crit_release_mutex(&events_status_sem);
   }
 }
