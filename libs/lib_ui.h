@@ -65,4 +65,12 @@ int ui_event();
   */
 void ui_do_report();
 
+/** Generates a 'random' number. Don't count on it too much (ie with 
+  *   probability 1 it is biased, inconsistent, etc...) but it will probably 
+  *   look random to you provided you sample it at uniformly random intervals.
+  *   There's no free lunch. Generates numbers between 0 and EVENTS_PIV_VALUE-1.
+  * Returns the current counter value of the PIT.
+  */
+int ui_random();
+
 #endif /* LIB_UI_H */

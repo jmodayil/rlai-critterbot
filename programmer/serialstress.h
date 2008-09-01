@@ -1,0 +1,34 @@
+#ifndef SERIAL_STRESS_H
+#define SERIAL_STRESS_H
+
+#define STRESS_TYPE_TX    0
+#define STRESS_TYPE_RXTX  1
+
+// Maximum length of data to be sent in stress test 0 (transmit only)
+#define STRESS_MAX_LEN_TX 128
+#define STRESS_TX_MUL     9887
+#define STRESS_TX_MOD     257
+
+#define ARM_BUFFER_SIZE   2048
+
+/** Function that tests only the transmitting part of the ARM OS (provided
+  *  basically receiving capabilities are in place to receive the initial
+  *  request for the test). */
+int stress_tx(int port);
+/** Function that tests first receiving, then transmitting, in the ARM OS.
+  *  This is done by requesting that the UI send back the same string that we
+  *  send it. */ 
+int stress_rxtx(int port);
+
+// For testing purposes, write and read are redefined
+#define write(a,b,c) (test_write(a,b,c))
+void test_write(int port, void * data, int ct);
+#define read(a,b,c) (test_read(a,b,c))
+int test_read(int port, void * data, int ct);
+
+void test_command();
+
+void test_send_tx();
+
+#endif
+
