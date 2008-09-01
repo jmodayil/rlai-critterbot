@@ -60,7 +60,7 @@ ui_cmd_item ui_commands[] = {
   {"status", ui_status, "status"},
   {"report", ui_report, "report"},
   {"mode", ui_mode, "mode <led [gs|dc]> - broken"},
-  {"test", ui_test, "test [ramfunc|int]"},
+  {"test", ui_test, "test [ramfunc|int|stress]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
   {"fortune", ui_fortune, "fortune"},
@@ -521,6 +521,61 @@ void ui_test_int(char * cmdstr)
     armprintf ("Interrupts were most likely NOT disabled.\r");
 }
 
+void ui_test_stress(char * cmdstr)
+{
+  int stress_type;
+  unsigned int data_length;
+  unsigned int i;
+  unsigned int root;
+
+  if (armsscanf(cmdstr, "%s %s %d %u", ui_cmdname, ui_strarg, &stress_type) < 3)
+  {
+    armprintf ("Usage: test stress <type> <argument>\r");
+    return;
+  }
+  root = 1;
+
+  switch (stress_type)
+  {
+    case 0: 
+      // random (pre-defined) chars; stress program should compare the 
+      //  received sequence, which it can reproduce
+      if (armsscanf(cmdstr, "%s %s %d %u", ui_cmdname, ui_strarg, 
+        &stress_type, &data_length) < 4)
+      {
+        data_length = 0;
+      }
+      
+      for (i = 0; i < data_length; i++)
+      {
+        // Root \in 1..256
+        armputchar((char)(root % 96 + 31));
+        // Not quite random - in particular, Z_257 is a field and the powers of
+        //  9887 must be of order 256 in it.
+        root = (root * 9887) % 257;
+      }
+    break;
+    case 1:
+      // Receiver (ARM) prints out a sequence sent by the stress program 
+      // Because the data to be re-transmitted does not necessarily fit in
+      //  the cmdstr buffer, it is actually divided into lines, which we will
+      //  successively read
+      if (armsscanf(cmdstr, "%s %s %d %u", ui_cmdname, ui_strarg, 
+        &stress_type, &data_length) < 4)
+      {
+        data_length = 0;
+      }
+
+      for (i = 0; i < data_length; i++)
+      {
+        // @@@ This will block for too long and needs to be rewritten
+        while (armreadline(ui_command_string, 
+          sizeof(ui_command_string)) == EOF) ;
+        armprintf (ui_command_string);
+      }
+  }
+}
+
 /** Tests something, specified by the first argument. E.g.
   * test ramfunc
   */
@@ -541,6 +596,10 @@ void ui_test (char * cmdstr)
   {
     armprintf ("Testing interrupts.\r");
     ui_test_int(cmdstr);
+  }
+  else if (strncmp (ui_strarg, "stress", sizeof(ui_strarg)) == 0)
+  {
+    ui_test_stress(cmdstr);
   }
   else
     armprintf ("Invalid argument.\r");
@@ -653,9 +712,13 @@ void ui_fortune(char * cmdstr)
   }
 
   // Random-number generate from TC0
-  r = (AT91C_BASE_TC0->TC_CV % num_fortunes);
+  r = ui_random() % num_fortunes;
 
   armprintf (fortunes[r]);
   armprintf ("\r");
 }
 
+int ui_random()
+{
+  return (AT91C_BASE_TC0->TC_CV);
+}
