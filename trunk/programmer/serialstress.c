@@ -12,6 +12,8 @@
 #define DEVICE "/dev/ttyS0"
 
 int ser_port;
+int flag_echo_recv = 0;
+int flag_test_noise = 0;
 
 struct termios oldterm;
 
@@ -51,7 +53,7 @@ int send_string(int port, char * str)
 
   // Walk the whole string, chunking out each character in turn with a 50us
   //  pause
-  fprintf (stderr, "SS %s\n", ptr);
+  //fprintf (stderr, "SS %s\n", ptr);
   while (*ptr != 0)
   {
     write(port, ptr, 1);
@@ -75,12 +77,64 @@ void send_int(int port, int data)
   send_string(port, command_str);
 }
 
+int read_b(int port, char * data)
+{
+  int time = 0;
+  int result;
+
+  while ( (result = read(port, data, 1)) == -1 )
+  {
+    usleep(USLEEP_STEP);
+    time += USLEEP_STEP;
+
+    // On time out (1s), return -1
+    if (time >= STEPS_IN_SECOND)
+      return -1;
+  }
+
+  if (flag_echo_recv)
+    fprintf (stdout, "%c", *data);
+
+  // If success, return the result from read() 
+  return result;
+}
+
+void flush_received(int port)
+{
+  unsigned char * dummy;
+
+  while (read(port, &dummy, 1) != -1)
+    usleep(50);
+}
+
+void print_help()
+{
+  fprintf (stdout, "Usage: stress [options]\n\n");
+  fprintf (stdout, "-e\t\techo received data\n");
+  fprintf (stdout, "-n\t\ttest noise (only when testing locally)\n");
+}
+
 main(int argc, char *argv[]) {
+  srandom(time(NULL));
 
-  char *file_name;
+  // Parse arguments
+  while (argc > 1)
+  {
+    if (strcmp(argv[1], "-e") == 0)
+      flag_echo_recv = 1;
+    else if (strcmp(argv[1], "-n") == 0)
+      flag_test_noise = 1;
+    else
+    {
+      fprintf (stderr, "Unknown argument: %s\n", argv[1]);
+      print_help();
+      return -1;
+    }
 
-  file_name = argv[1];
- 
+    argc--;
+    argv++;
+  }
+  
   #if 0
   printf("Opening serial port.\n");
   if (0 > (ser_port = open(DEVICE, O_RDWR | O_NOCTTY | O_NDELAY))) {
@@ -88,11 +142,14 @@ main(int argc, char *argv[]) {
     return -1;
   }
   printf("Serial port open with file descriptor %d.\n", ser_port);
-  //fcntl(port, F_SETFL, O_NONBLOCK);
+  fcntl(port, F_SETFL, O_NONBLOCK);
   
   printf("Initializing serial port.\n");
   initport(ser_port);
   #endif
+
+  // Flush received data to avoid false alarms
+  flush_received(ser_port);
 
   // Run a bunch of tests; abort if one fails (returns non-zero)
   if (stress_tx(ser_port))
@@ -113,8 +170,9 @@ int stress_tx(int port)
   int data_len;
   int i;
   unsigned int root;
-  unsigned char recv;
+  char recv;
   unsigned int bad_char_count;
+  int read_result;
 
   // Request a test of type 0 with length 'data_len'
   for (data_len = 1; data_len <= STRESS_MAX_LEN_TX; data_len *= 2)
@@ -129,11 +187,14 @@ int stress_tx(int port)
     for (i = 0; i < data_len; i++)
     {
       // receive char
-      // @@@ die after 1s?
-      while ( (read(port, &recv, 1)) != 1 )
-        ;
+      read_result = read_b(port, &recv);
+
+      // Abort on time out or EOF (which is unexpected)
+      if (read_result == -1 || read_result == 0)
+        break;
+
       // compare with what it should be
-      if (recv != (unsigned char)(root % 96 + 31))
+      if (recv != (unsigned char)(root % 97 + 31))
         bad_char_count++;
 
       // Compute the next character that we should receive
@@ -144,6 +205,16 @@ int stress_tx(int port)
     {
       fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
       return bad_char_count;
+    }
+    else if (read_result == -1)
+    {
+      fprintf (stdout, "timed out while waiting for data.\n");
+      return 1;
+    }
+    else if (read_result == 0)
+    {
+      fprintf (stdout, "unexpected EOF.\n");
+      return 1;
     }
     else
       fprintf (stdout, "OK.\n");
@@ -189,7 +260,7 @@ int test_read(int port, void * data, int ct)
 
   for (i = 0; i < ct; i++)
   {
-    if (tx_ptr == tx_head) return EOF;
+    if (tx_ptr == tx_head) return -1;
 
     *dptr = *tx_head;
     dptr++; tx_head++;
@@ -207,7 +278,7 @@ void test_command()
   unsigned int length;
 
   *str_end = 0;
-  fprintf (stderr, "Received '%s'\n", rx_buffer);
+  //fprintf (stderr, "Received '%s'\n", rx_buffer);
   *str_end = '\r';
 
   // Parse it!
@@ -229,15 +300,37 @@ void test_send_tx(int length)
 {
   int root = 1;
   int i;
+  char c;
+  long r;
 
   for (i = 0; i < length; i++)
   {
     // Write one more char
-    *tx_ptr = (char)(root % 96 + 31);
-    if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
-      tx_ptr = tx_buffer;
-
-    root = (root * 9887) % 257;
+    c = (char)(root % 97 + 31);
+    if (flag_test_noise)
+    {
+      r = (long)((random() * 100.0) / (RAND_MAX + 1.0));
+      if (r == 0) // Delete character
+        c = 0;
+      else if (r == 1) // Add an extra character
+      {
+        *tx_ptr = '!';
+        if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
+          tx_ptr = tx_buffer;
+        // We ALSO add the c char
+      }
+      else if (r < 5) // Replace a character
+        c = (int)((random() * 97.0) / (RAND_MAX + 1.0)) + 31;
+    } 
+    
+    if (c > 0)
+    {
+      *tx_ptr = c;
+      if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
+        tx_ptr = tx_buffer;
+    }
+    
+    root = (root * STRESS_TX_MUL) % STRESS_TX_MOD;
   }
 }
 
