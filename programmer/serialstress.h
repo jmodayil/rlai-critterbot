@@ -9,7 +9,10 @@
 #define STRESS_TX_MUL     9887
 #define STRESS_TX_MOD     257
 
-#define ARM_BUFFER_SIZE   2048
+// These are defined somewhere else; better code would #include the proper
+//  driver header files
+#define ARM_BUFFER_SIZE   1024
+#define UI_CMD_BUFFER_SIZE 256
 
 // Default sleeping time, in us. Should be a divisor of 1 million.
 #define USLEEP_STEP       50

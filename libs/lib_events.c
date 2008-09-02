@@ -49,19 +49,19 @@ unsigned int events_has_event()
   // result = events_status;
   // Clear and return the status bit
   // events_status = 0;
-/*  asm volatile("mov r2,#0\n\t"
+  asm volatile("mov r2,#0\n\t"
                "swp %0, r2, [%1]"
                : "=&r" (result)
                : "r" (&events_status) 
-               : "r2" ); */
+               : "r2" ); 
   //AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
 
   // MGB: New code using semaphores (actually not as good as just using SWP,
   //  but doesn't require inline assembly)
-  crit_get_mutex(&events_status_sem);
+/*  crit_get_mutex(&events_status_sem);
   result = events_status;
   events_status = 0;
-  crit_release_mutex(&events_status_sem);
+  crit_release_mutex(&events_status_sem); */
   
   return result;
 }
@@ -109,6 +109,7 @@ void events_init()
   events[10] = &adcspi_event_s;
   events[11] = &ui_event_s;
  
+  // Set the first init for everyone
   for (i = 0; i <= EVENT_MAX; i++)
     events[i]->first_init = 1;
 
@@ -234,13 +235,11 @@ ARM_CODE RAMFUNC void events_isr()
      * The 12 MSB of the PITC_PIVR register are the ones of interest; only
      *  the lowest one should be set.
      */
-    crit_get_mutex(&events_status_sem);
     if (events_status != 0)
       error_set (ERR_EVENTS);
     else if (picnt >= 0x00200000)
       error_set (ERR_EVENTSLOW);
     // Set the flag
     events_status = 1;
-    crit_release_mutex(&events_status_sem);
   }
 }
