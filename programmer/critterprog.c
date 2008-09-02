@@ -46,6 +46,12 @@ main(int argc, char *argv[]) {
   unsigned char dat;
   unsigned short crc;
   char *file_name;
+ 
+  if (argc < 2)
+  {
+    printf ("Specify file to be uploaded.\n");
+    return -1;
+  }
   
   file_name = argv[1];
  
