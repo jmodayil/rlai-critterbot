@@ -19,6 +19,7 @@
 #define UI_RESET_PASSWORD  "now"
 
 typedef void (*ui_function) (char * cmdstr);
+typedef int (*ui_io_handler_fn) ();
 
 /** Commands available in the user interface. */
 
@@ -53,6 +54,8 @@ void ui_motor ( char * cmdstr);
 void ui_bootloader (char * cmdstr);
 void ui_reset (char * cmdstr);
 
+int ui_init();
+
 /** Main User Interface function.
   * Should be called at regular intervals.
   *
@@ -72,5 +75,21 @@ void ui_do_report();
   * Returns the current counter value of the PIT.
   */
 int ui_random();
+
+/** Sets an alternate IO handler in the UI. If such a handler is in place,
+  *  the UI will not parse data until the handler is cleared using 
+  *  ui_clear_handler(). This is useful for tasks that temporarily want to
+  *  seize control of the serial IO, e.g. when doing a stress test of the
+  *  system. 
+  * Returns non-zero in case of success, or zero if a (different) handler is 
+  *  already in place.
+  */
+int ui_set_handler(ui_io_handler_fn handler);
+
+/** Clears the IO handler in the UI. See ui_set_handler().
+  *  The same handler that was set should be passed again; the UI will silently
+  *  fail to remove the existing handler if different from the argument.
+  */
+void ui_clear_handler(ui_io_handler_fn handler);
 
 #endif /* LIB_UI_H */

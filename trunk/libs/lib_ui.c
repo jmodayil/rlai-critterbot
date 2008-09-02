@@ -25,7 +25,7 @@
 #include <stdio.h>
 
 event_s ui_event_s = {
-  NULL,
+  ui_init,
   ui_event,
   0
 };
@@ -75,6 +75,8 @@ char ui_command_string[256];
 char ui_cmdname[64];
 char ui_strarg[64];
 
+volatile ui_io_handler_fn ui_io_handler;
+
 // Reporting mode - if nonzero, the UI will spit out some status information
 //  every so often.
 volatile int ui_report_mode = 0;
@@ -94,8 +96,42 @@ ui_cmd_item * ui_parse_command(char * cmdstr)
   return NULL;
 }
 
+int ui_set_handler(ui_io_handler_fn handler)
+{
+  if (ui_io_handler != NULL) 
+    return 0;
+  else
+  {
+    ui_io_handler = handler;
+    return 1;
+  }
+}
+
+void ui_clear_handler(ui_io_handler_fn handler)
+{
+  // The case when handler == NULL is still quite fine
+  if (ui_io_handler == handler)
+    ui_io_handler = handler;
+}
+
+int ui_init()
+{
+  // This is not strictly necessary if the UI is only initialized once
+  //  However, if we want to re-initialize the UI, we should clear these flags
+  ui_io_handler = NULL;
+  ui_report_mode = 0;
+  ui_report_clock = 0;
+
+  return 0;
+}
+
 int ui_event()
 {
+  // If some task has requested to be in charge of the serial IO, the UI
+  //  will completely stop its operation until the ui_io_handler is cleared.
+  if (ui_io_handler != NULL)
+    return ui_io_handler();
+  
   // Report if in reporting mode
   if (ui_report_mode)
   {
@@ -105,6 +141,7 @@ int ui_event()
       ui_report_clock = 0;
     }
   }
+
   // Check whether we have new data
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
     return 0;
@@ -521,6 +558,41 @@ void ui_test_int(char * cmdstr)
     armprintf ("Interrupts were most likely NOT disabled.\r");
 }
 
+// Some dummy variables we might need for testing the serial IO
+int ui_stress_data[4];
+
+#define UI_STRESS_HANDLER1_TIMEOUT    EVENTS_HZ
+
+/** Stress test #1, serial IO handler 
+  * Prints out everything that is received until n lines have been read,
+  *  where n is ui_stress_data[0]. */
+int ui_stress_handler1()
+{
+  // Read a full line
+  if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
+  {
+    if (--ui_stress_data[1] <= 0)
+    {
+      armprintf ("UI stress handler 1 timeout!\n");
+      error_set(ERR_SELF_TEST);
+      ui_clear_handler(ui_stress_handler1);
+      return 1;
+    }
+    return 0;
+  }
+
+  // Reset the timeout counter
+  ui_stress_data[1] = UI_STRESS_HANDLER1_TIMEOUT;
+
+  armprintf (ui_command_string);
+
+  // If we have received n lines, return the control to the UI
+  if (--ui_stress_data[0] <= 0)
+    ui_clear_handler(ui_stress_handler1);
+  
+  return 0;
+}
+
 void ui_test_stress(char * cmdstr)
 {
   int stress_type;
@@ -566,13 +638,15 @@ void ui_test_stress(char * cmdstr)
         data_length = 0;
       }
 
-      for (i = 0; i < data_length; i++)
-      {
-        // @@@ This will block for too long and needs to be rewritten
-        while (armreadline(ui_command_string, 
-          sizeof(ui_command_string)) == EOF) ;
-        armprintf (ui_command_string);
-      }
+      // We will set up an alternate IO handler to avoid blocking
+      if (data_length > 0)
+        ui_set_handler(ui_stress_handler1);
+
+      // Set up the IO handler to wait for data_length lines and time out
+      //  after one second
+      ui_stress_data[0] = data_length;
+      ui_stress_data[1] = UI_STRESS_HANDLER1_TIMEOUT;
+
   }
 }
 
