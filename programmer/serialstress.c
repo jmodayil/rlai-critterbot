@@ -18,6 +18,8 @@ int flag_test_noise = 0;
 int test_rxtx_num_packets = 0;
 int test_printf_num_packets = 0;
 
+int packet_interval = -1;
+
 struct termios oldterm;
 
 void initport(int port) {
@@ -135,7 +137,7 @@ void flush_received(int port)
 
 void print_help()
 {
-  fprintf (stdout, "Usage: stress [options]\n\n");
+  fprintf (stdout, "Usage: stress [options] [packet_interval]\n\n");
   fprintf (stdout, "-e\t\techo received data\n");
   fprintf (stdout, "-n\t\ttest noise (only when testing locally)\n");
 }
@@ -146,16 +148,26 @@ main(int argc, char *argv[]) {
   // Parse arguments
   while (argc > 1)
   {
-    if (strcmp(argv[1], "-e") == 0)
-      flag_echo_recv = 1;
-    else if (strcmp(argv[1], "-n") == 0)
-      flag_test_noise = 1;
-    else
+    // If it starts with -, it's an option flag
+    if (argv[1][0] == '-')
     {
-      fprintf (stderr, "Unknown argument: %s\n", argv[1]);
-      print_help();
-      return -1;
+      if (strcmp(argv[1], "-e") == 0)
+        flag_echo_recv = 1;
+      else if (strcmp(argv[1], "-n") == 0)
+        flag_test_noise = 1;
+      else
+      {
+        fprintf (stderr, "Unknown argument: %s\n", argv[1]);
+        print_help();
+        return -1;
+      }
     }
+    // Otherwise, parse it as the packet interval
+    if (packet_interval == -1)
+    {
+      packet_interval = atoi(argv[1]);
+      if(packet_interval < 0)
+        packet_interval = 0;
 
     argc--;
     argv++;
@@ -164,7 +176,7 @@ main(int argc, char *argv[]) {
   #if 0
   printf("Opening serial port.\n");
   if (0 > (ser_port = open(DEVICE, O_RDWR | O_NOCTTY | O_NDELAY))) {
-    printf("Could not open serial port.\n");
+    :sprintf("Could not open serial port.\n");
     return -1;
   }
   printf("Serial port open with file descriptor %d.\n", ser_port);
