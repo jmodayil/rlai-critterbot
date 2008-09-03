@@ -3,6 +3,7 @@
 
 #define STRESS_TYPE_TX    0
 #define STRESS_TYPE_RXTX  1
+#define STRESS_TYPE_PRINTF 2
 
 // Maximum length of data to be sent in stress test 0 (transmit only)
 #define STRESS_MAX_LEN_TX 128
@@ -26,11 +27,20 @@ void flush_received();
 /** Function that tests only the transmitting part of the ARM OS (provided
   *  basically receiving capabilities are in place to receive the initial
   *  request for the test). */
-int stress_tx(int port);
+int stress_tx(int port, int data_len);
 /** Function that tests first receiving, then transmitting, in the ARM OS.
   *  This is done by requesting that the UI send back the same string that we
   *  send it. */ 
 int stress_rxtx(int port, int num_packets, int packet_len);
+/** Functions that tests the ARM's armprintf rountine. This is done by
+  *  constructing a string with a variable (up to 16?) number of %d in the
+  *  printf.
+  */
+int stress_printf(int port, int num_lines, int args_per_line);
+
+/** Formats the printf test string */
+void generate_printf_string(char * dest, char * src);
+
 
 /** Attempts to read a single character and waits up to one second before 
   * giving up. It then returns -1. Otherwise, returns 0 on EOF and nonzero
@@ -50,7 +60,9 @@ void test_ARM_putchar(char c);
 void test_command();
 void test_send_tx(int length);
 void test_rxtx(int num_packets);
+void test_printf(int num_packets);
 void test_rxtx_data();
+void test_printf_data();
 
 #endif
 
