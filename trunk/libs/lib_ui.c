@@ -565,7 +565,8 @@ int ui_stress_data[4];
 
 /** Stress test #1, serial IO handler 
   * Prints out everything that is received until n lines have been read,
-  *  where n is ui_stress_data[0]. */
+  *  where n is ui_stress_data[0]. Same handler for stress tests of type 1
+  *  and 2. ui_stress_data[2] contains the stress test type. */
 int ui_stress_handler1()
 {
   // Read a full line
@@ -584,7 +585,18 @@ int ui_stress_handler1()
   // Reset the timeout counter
   ui_stress_data[1] = UI_STRESS_HANDLER1_TIMEOUT;
 
-  armprintf (ui_command_string);
+  switch (ui_stress_data[2])
+  {
+    case 1: // RXTX test
+      armprintf (ui_command_string);
+      break;
+    case 2: // printf test
+      armprintf (ui_command_string, 
+        0x1, 0x4, 0x10, 0x40, 0x100, 0x400, 0x1000, 0x4000,
+        0x10000, 0x40000, 0x100000, 0x400000,
+        0x1000000, 0x4000000, 0x10000000, 0x40000000);
+      break;
+  }
 
   // If we have received n lines, return the control to the UI
   if (--ui_stress_data[0] <= 0)
@@ -625,7 +637,8 @@ void ui_test_stress(char * cmdstr)
         // Not quite random, but this is a group of order 256.
         root = (root * 7) % 257;
       }
-    break;
+      break;
+    
     case 1:
       // Receiver (ARM) prints out a sequence sent by the stress program 
       // Because the data to be re-transmitted does not necessarily fit in
@@ -645,7 +658,28 @@ void ui_test_stress(char * cmdstr)
       //  after one second
       ui_stress_data[0] = data_length;
       ui_stress_data[1] = UI_STRESS_HANDLER1_TIMEOUT;
+      ui_stress_data[2] = stress_type;
+      break;
+    
+    case 2: // PRINTF test
+      // Stress program sends a formatting string, which is formatted by 
+      //  the ARM with predefined integers. The ARM then sends it back.
+      if (armsscanf(cmdstr, "%s %s %d %u", ui_cmdname, ui_strarg, 
+        &stress_type, &data_length) < 4)
+      {
+        data_length = 0;
+      }
 
+      // We will set up an alternate IO handler to avoid blocking
+      if (data_length > 0)
+        ui_set_handler(ui_stress_handler1);
+
+      // Set up the IO handler to wait for data_length lines and time out
+      //  after one second
+      ui_stress_data[0] = data_length;
+      ui_stress_data[1] = UI_STRESS_HANDLER1_TIMEOUT;
+      ui_stress_data[2] = stress_type;
+      break;
   }
 }
 
