@@ -6,8 +6,10 @@
 
 // Maximum length of data to be sent in stress test 0 (transmit only)
 #define STRESS_MAX_LEN_TX 128
-#define STRESS_TX_MUL     9887
+#define STRESS_TX_MUL     7
 #define STRESS_TX_MOD     257
+#define STRESS_RXTX_MUL   10
+#define STRESS_RXTX_MOD   257
 
 // These are defined somewhere else; better code would #include the proper
 //  driver header files
@@ -28,7 +30,7 @@ int stress_tx(int port);
 /** Function that tests first receiving, then transmitting, in the ARM OS.
   *  This is done by requesting that the UI send back the same string that we
   *  send it. */ 
-int stress_rxtx(int port);
+int stress_rxtx(int port, int num_packets, int packet_len);
 
 /** Attempts to read a single character and waits up to one second before 
   * giving up. It then returns -1. Otherwise, returns 0 on EOF and nonzero
@@ -41,9 +43,14 @@ void test_write(int port, void * data, int ct);
 #define read(a,b,c) (test_read(a,b,c))
 int test_read(int port, void * data, int ct);
 
-void test_command();
+/** Emulates the ARM writing a character to the serial stream */
+void test_ARM_putchar(char c);
 
-void test_send_tx();
+/** These methods emulate the response of the ARM to various tests */
+void test_command();
+void test_send_tx(int length);
+void test_rxtx(int num_packets);
+void test_rxtx_data();
 
 #endif
 

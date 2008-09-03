@@ -622,9 +622,8 @@ void ui_test_stress(char * cmdstr)
       {
         // Root \in 1..256
         armputchar((char)(root % 96 + 31));
-        // Not quite random - in particular, Z_257 is a field and the powers of
-        //  9887 must be of order 256 in it.
-        root = (root * 9887) % 257;
+        // Not quite random, but this is a group of order 256.
+        root = (root * 7) % 257;
       }
     break;
     case 1:

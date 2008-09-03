@@ -15,6 +15,8 @@ int ser_port;
 int flag_echo_recv = 0;
 int flag_test_noise = 0;
 
+int test_rxtx_num_packets = 0;
+
 struct termios oldterm;
 
 void initport(int port) {
@@ -27,7 +29,7 @@ void initport(int port) {
   options.c_cflag |= (CS8 | CLOCAL | CREAD);
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
   options.c_iflag &= (INPCK | IXON | IXOFF);
-  options.c_iflag |= IGNPAR | OCRNL;;
+  options.c_iflag |= IGNPAR | OCRNL;
   options.c_oflag &= ~OPOST; 
   options.c_cc[VTIME] = 0;
   options.c_cc[VMIN] = 1;
@@ -152,12 +154,17 @@ main(int argc, char *argv[]) {
   flush_received(ser_port);
 
   // Run a bunch of tests; abort if one fails (returns non-zero)
-  if (stress_tx(ser_port))
+  if (0 && stress_tx(ser_port))
   {
     printf ("Transmit-only failed on ARM.\n");
     return;
   }
- 
+  else if (stress_rxtx(ser_port, 8, 10))
+  {
+    printf ("Receive and transmit failed on ARM.\n");
+    return;
+  }
+  
   #if 0
   closeport(ser_port);
   close(ser_port);
@@ -223,7 +230,78 @@ int stress_tx(int port)
   return 0;
 }
 
+int stress_rxtx(int port, int num_packets, int packet_len)
+{
+  int i, j;
+  char recv;
+  unsigned int bad_char_count;
+  int read_result;
+  int root, this_root;
 
+  fprintf (stdout, "RXTX test, %d packets of length %d... ", 
+    num_packets, packet_len);
+  send_header(port, STRESS_TYPE_RXTX);
+  send_int (port, num_packets);
+  send_string (port, "\r");
+
+  root = 1;
+  bad_char_count = 0;
+
+  for (j = 0; j < num_packets; j++)
+  {
+    // First write the string
+    this_root = root;
+    for (i = 0; i < packet_len; i++)
+    {
+      recv = (unsigned char)(root % 97 + 31);
+      write(port, &recv, 1);
+      root = (root * STRESS_RXTX_MUL) % STRESS_RXTX_MOD;
+    }
+
+    // Terminate this string with a \r
+    recv = '\r';
+    write(port, &recv, 1);
+
+    // Now receive the string back and compare char-by-char
+    root = this_root;
+    for (i = 0; i < packet_len; i++)
+    {
+      // receive char
+      read_result = read_b(port, &recv);
+
+      // Abort on time out or EOF (which is unexpected)
+      if (read_result == -1 || read_result == 0)
+        break;
+
+      // compare with what it should be
+      if (recv != (unsigned char)(root % 97 + 31))
+        bad_char_count++;
+
+      // Compute the next character that we should receive
+      root = (root * STRESS_RXTX_MUL) % STRESS_RXTX_MOD;
+    }
+
+    if (bad_char_count > 0)
+    {
+      fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
+      return bad_char_count;
+    }
+    else if (read_result == -1)
+    {
+      fprintf (stdout, "timed out while waiting for data.\n");
+      return 1;
+    }
+    else if (read_result == 0)
+    {
+      fprintf (stdout, "unexpected EOF.\n");
+      return 1;
+    }
+    else
+      fprintf (stdout, "OK.\n");
+  }
+
+  return 0;
+}
 
 char rx_buffer[ARM_BUFFER_SIZE];
 char * rx_ptr = rx_buffer;
@@ -278,9 +356,16 @@ void test_command()
   unsigned int length;
 
   *str_end = 0;
-  //fprintf (stderr, "Received '%s'\n", rx_buffer);
-  *str_end = '\r';
+  fprintf (stdout, "Received '%s'\n", rx_buffer);
+  *str_end = '\r'; 
 
+  // Emulate the serial IO handler for the RXTX test
+  if (test_rxtx_num_packets)
+  {
+    test_rxtx_data();
+    return;
+  }
+  
   // Parse it!
   sscanf (rx_buffer, "%s %s %d %u", tmp_str, tmp_str, &type, &length);
 
@@ -290,10 +375,42 @@ void test_command()
       // Generate the data to be sent
       test_send_tx(length);
       break;
+    case STRESS_TYPE_RXTX:
+      test_rxtx(length);
+      break;
     default:
       fprintf (stdout, "ARM emulator received invalid command: %d\n", type);
       break;
   }
+}
+
+void test_ARM_putchar(char c)
+{
+  *tx_ptr = c;
+  if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
+    tx_ptr = tx_buffer;
+}
+
+void test_ARM_nputchar(char c)
+{
+  int r;
+
+  if (flag_test_noise)
+  {
+    r = (long)((random() * 100.0) / (RAND_MAX + 1.0));
+    if (r == 0) // Delete character
+    c = 0;
+    else if (r == 1) // Add an extra character
+    {
+      test_ARM_putchar('!');
+      // We ALSO add the c char
+    }
+    else if (r < 5) // Replace a character
+      c = (int)((random() * 97.0) / (RAND_MAX + 1.0)) + 31;
+  } 
+  
+  if (c > 0)
+    test_ARM_putchar(c);
 }
 
 void test_send_tx(int length)
@@ -301,36 +418,32 @@ void test_send_tx(int length)
   int root = 1;
   int i;
   char c;
-  long r;
 
   for (i = 0; i < length; i++)
   {
     // Write one more char
     c = (char)(root % 97 + 31);
-    if (flag_test_noise)
-    {
-      r = (long)((random() * 100.0) / (RAND_MAX + 1.0));
-      if (r == 0) // Delete character
-        c = 0;
-      else if (r == 1) // Add an extra character
-      {
-        *tx_ptr = '!';
-        if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
-          tx_ptr = tx_buffer;
-        // We ALSO add the c char
-      }
-      else if (r < 5) // Replace a character
-        c = (int)((random() * 97.0) / (RAND_MAX + 1.0)) + 31;
-    } 
-    
-    if (c > 0)
-    {
-      *tx_ptr = c;
-      if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
-        tx_ptr = tx_buffer;
-    }
+    test_ARM_nputchar(c);
     
     root = (root * STRESS_TX_MUL) % STRESS_TX_MOD;
   }
 }
 
+void test_rxtx(int num_packets)
+{
+  // Simply set the number of packets to receive. If this number is > 0,
+  //  then rather than interpreting new lines as commands we will interpret
+  //  them as data for the rxtx stress test.
+  test_rxtx_num_packets = num_packets;
+}
+
+void test_rxtx_data()
+{
+  char * pch;
+
+  // Echo all characters received in the buffer, to and excluding \r
+  for (pch = rx_buffer; *pch && *pch != '\r'; pch++)
+    test_ARM_nputchar(*pch);
+
+  test_rxtx_num_packets--;
+}
