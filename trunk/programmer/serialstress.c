@@ -16,6 +16,7 @@ int flag_echo_recv = 0;
 int flag_test_noise = 0;
 
 int test_rxtx_num_packets = 0;
+int test_printf_num_packets = 0;
 
 struct termios oldterm;
 
@@ -59,12 +60,35 @@ int send_string(int port, char * str)
   while (*ptr != 0)
   {
     write(port, ptr, 1);
-    usleep(50);
+    usleep(USLEEP_STEP);
     ptr++;
     ct++;
   }
 
   return ct;
+}
+
+/** Receive a string of fixed length
+  * Returns -1 on timeout and 0 on EOF, otherwise > 0.
+  */
+int receive_string(int port, char * dst, int data_len)
+{
+  int read_result;
+  char recv;
+  char * pch;
+  int i;
+
+  for (pch = dst, i = 0; i < data_len; i++, pch++)
+  {
+    // receive char
+    read_result = read_b(port, pch);
+
+    // Abort on time out or EOF (which is unexpected)
+    if (read_result == -1 || read_result == 0)
+      break;
+  }
+  
+  return read_result;
 }
 
 void send_header(int port, int type) 
@@ -106,7 +130,7 @@ void flush_received(int port)
   unsigned char * dummy;
 
   while (read(port, &dummy, 1) != -1)
-    usleep(50);
+    usleep(USLEEP_STEP);
 }
 
 void print_help()
@@ -154,17 +178,22 @@ main(int argc, char *argv[]) {
   flush_received(ser_port);
 
   // Run a bunch of tests; abort if one fails (returns non-zero)
-  if (0 && stress_tx(ser_port))
+  if (stress_tx(ser_port, ARM_BUFFER_SIZE/2))
   {
     printf ("Transmit-only failed on ARM.\n");
     return;
   }
-  else if (stress_rxtx(ser_port, 8, 10))
+  else if (stress_rxtx(ser_port, 50, 100))
   {
     printf ("Receive and transmit failed on ARM.\n");
     return;
   }
-  
+  else if (stress_printf(ser_port, 50, 8))
+  {
+    printf ("Printf test failed on ARM.\n");
+    return;
+  }
+
   #if 0
   closeport(ser_port);
   close(ser_port);
@@ -172,60 +201,56 @@ main(int argc, char *argv[]) {
   return 0;
 }
 
-int stress_tx(int port)
+char recv_buffer[ARM_BUFFER_SIZE*2];
+
+int stress_tx(int port, int data_len)
 {
-  int data_len;
   int i;
   unsigned int root;
   char recv;
   unsigned int bad_char_count;
   int read_result;
 
-  // Request a test of type 0 with length 'data_len'
-  for (data_len = 1; data_len <= STRESS_MAX_LEN_TX; data_len *= 2)
+ // Request a test of type 0 with length 'data_len'
+  fprintf (stdout, "TX test, data length %d... ", data_len);
+  send_header(port, STRESS_TYPE_TX);
+  send_int (port, data_len);
+  send_string (port, "\r");
+
+  // Read in a string from the ARM
+  read_result = receive_string (port, recv_buffer, data_len);
+
+  if (read_result == -1)
   {
-    fprintf (stdout, "TX test, data length %d... ", data_len);
-    send_header(port, STRESS_TYPE_TX);
-    send_int (port, data_len);
-    send_string (port, "\r");
-
-    root = 1;
-    bad_char_count = 0;
-    for (i = 0; i < data_len; i++)
-    {
-      // receive char
-      read_result = read_b(port, &recv);
-
-      // Abort on time out or EOF (which is unexpected)
-      if (read_result == -1 || read_result == 0)
-        break;
-
-      // compare with what it should be
-      if (recv != (unsigned char)(root % 97 + 31))
-        bad_char_count++;
-
-      // Compute the next character that we should receive
-      root = (root * STRESS_TX_MUL) % STRESS_TX_MOD;
-    }
-
-    if (bad_char_count > 0)
-    {
-      fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
-      return bad_char_count;
-    }
-    else if (read_result == -1)
-    {
-      fprintf (stdout, "timed out while waiting for data.\n");
-      return 1;
-    }
-    else if (read_result == 0)
-    {
-      fprintf (stdout, "unexpected EOF.\n");
-      return 1;
-    }
-    else
-      fprintf (stdout, "OK.\n");
+    fprintf (stdout, "timed out while waiting for data.\n");
+    return 1;
   }
+  else if (read_result == 0)
+  {
+    fprintf (stdout, "unexpected EOF.\n");
+    return 1;
+  }
+  
+  // If the string was succesfully read, compare it with what it should be
+  root = 1;
+  bad_char_count = 0;
+
+  for (i = 0; i < data_len; i++)
+  {
+    if (recv_buffer[i] != (unsigned char)(root % 97 + 31))
+      bad_char_count++;
+
+    // Compute the next character that we should receive
+    root = (root * STRESS_TX_MUL) % STRESS_TX_MOD;
+  }
+
+  if (bad_char_count > 0)
+  {
+    fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
+    return bad_char_count;
+  }
+  else
+    fprintf (stdout, "OK.\n");
 
   return 0;
 }
@@ -256,25 +281,33 @@ int stress_rxtx(int port, int num_packets, int packet_len)
       recv = (unsigned char)(root % 97 + 31);
       write(port, &recv, 1);
       root = (root * STRESS_RXTX_MUL) % STRESS_RXTX_MOD;
+      usleep(USLEEP_STEP);
     }
 
     // Terminate this string with a \r
     recv = '\r';
     write(port, &recv, 1);
+    usleep(USLEEP_STEP);
 
     // Now receive the string back and compare char-by-char
+    read_result = receive_string(port, recv_buffer, packet_len);
+    if (read_result == -1)
+    {
+      fprintf (stdout, "timed out while waiting for data.\n");
+      return 1;
+    }
+    else if (read_result == 0)
+    {
+      fprintf (stdout, "unexpected EOF.\n");
+      return 1;
+    }
+
+    // Compare the data
     root = this_root;
     for (i = 0; i < packet_len; i++)
     {
-      // receive char
-      read_result = read_b(port, &recv);
-
-      // Abort on time out or EOF (which is unexpected)
-      if (read_result == -1 || read_result == 0)
-        break;
-
       // compare with what it should be
-      if (recv != (unsigned char)(root % 97 + 31))
+      if (recv_buffer[i] != (unsigned char)(root % 97 + 31))
         bad_char_count++;
 
       // Compute the next character that we should receive
@@ -286,7 +319,58 @@ int stress_rxtx(int port, int num_packets, int packet_len)
       fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
       return bad_char_count;
     }
-    else if (read_result == -1)
+  }
+
+  fprintf (stdout, "OK.\n");
+  return 0;
+}
+
+char format_string[ARM_BUFFER_SIZE];
+char printf_string[ARM_BUFFER_SIZE];
+
+int stress_printf(int port, int num_packets, int args_per_packet)
+{
+  char * pch;
+  int i, j;
+  int len;
+
+  int read_result, bad_char_count;
+
+  fprintf (stdout, "Printf test, %d lines with %d arguments each...",
+    num_packets, args_per_packet);
+  send_header(port, STRESS_TYPE_PRINTF);
+  send_int (port, num_packets);
+  send_string (port, "\r");
+
+  // Construct the unformatted string that we want the ARM to format
+  pch = format_string;
+  for (i = 0; i < args_per_packet; i++)
+  {
+    len = sprintf (pch, " b%%d");
+
+    if (len < 0)
+    {
+      fprintf (stderr, "Fatal error. Die.\n");
+      exit(0);
+    }
+    
+    pch += len;
+  }
+
+  *pch = 0;
+  
+  for (j = 0; j < num_packets; j++)
+  {
+    send_string (port, format_string);
+    send_string (port, "\r");
+
+    // Receive result; compare by printf'ing format_string
+    generate_printf_string(printf_string, format_string);
+    len = strlen(printf_string);
+
+    read_result = receive_string (port, recv_buffer, len);
+
+    if (read_result == -1)
     {
       fprintf (stdout, "timed out while waiting for data.\n");
       return 1;
@@ -296,12 +380,26 @@ int stress_rxtx(int port, int num_packets, int packet_len)
       fprintf (stdout, "unexpected EOF.\n");
       return 1;
     }
-    else
-      fprintf (stdout, "OK.\n");
+
+    bad_char_count = 0;
+    for (pch = printf_string, i = 0; i < len; i++, pch++)
+    {
+      // compare with what it should be, e.g. a char of printf_string
+      if (recv_buffer[i] != *pch)
+        bad_char_count++;
+    }
+
+    if (bad_char_count > 0)
+    {
+      fprintf (stdout, "%d bad characters, aborting.\n", bad_char_count);
+      return bad_char_count;
+    }
   }
 
+  fprintf (stdout, "OK.\n");
   return 0;
 }
+
 
 char rx_buffer[ARM_BUFFER_SIZE];
 char * rx_ptr = rx_buffer;
@@ -357,12 +455,16 @@ void test_command()
 
   *str_end = 0;
   fprintf (stdout, "Received '%s'\n", rx_buffer);
-  *str_end = '\r'; 
 
   // Emulate the serial IO handler for the RXTX test
   if (test_rxtx_num_packets)
   {
     test_rxtx_data();
+    return;
+  }
+  else if (test_printf_num_packets)
+  {
+    test_printf_data();
     return;
   }
   
@@ -378,6 +480,9 @@ void test_command()
     case STRESS_TYPE_RXTX:
       test_rxtx(length);
       break;
+    case STRESS_TYPE_PRINTF:
+      test_printf(length);
+      break;
     default:
       fprintf (stdout, "ARM emulator received invalid command: %d\n", type);
       break;
@@ -387,7 +492,7 @@ void test_command()
 void test_ARM_putchar(char c)
 {
   *tx_ptr = c;
-  if (tx_ptr++ == tx_buffer + sizeof(tx_buffer))
+  if (++tx_ptr == tx_buffer + sizeof(tx_buffer))
     tx_ptr = tx_buffer;
 }
 
@@ -437,6 +542,12 @@ void test_rxtx(int num_packets)
   test_rxtx_num_packets = num_packets;
 }
 
+void test_printf(int num_packets)
+{
+  // Same as RXTX
+  test_printf_num_packets = num_packets;
+}
+
 void test_rxtx_data()
 {
   char * pch;
@@ -444,6 +555,33 @@ void test_rxtx_data()
   // Echo all characters received in the buffer, to and excluding \r
   for (pch = rx_buffer; *pch && *pch != '\r'; pch++)
     test_ARM_nputchar(*pch);
-
+  
   test_rxtx_num_packets--;
 }
+
+char test_printf_buffer[ARM_BUFFER_SIZE];
+
+void test_printf_data()
+{
+  char * pch;
+
+  // rx_buffer contains a formatting string - let's format it!
+  generate_printf_string(test_printf_buffer, rx_buffer);
+  // Now return it
+  for (pch = test_printf_buffer; *pch; pch++)
+  {
+    test_ARM_nputchar(*pch);
+  }
+
+  test_printf_num_packets--;
+}
+
+void generate_printf_string(char * dst, char * src)
+{
+  sprintf (dst, src, 
+      0x1, 0x4, 0x10, 0x40, 
+      0x100, 0x400, 0x1000, 0x4000,
+      0x10000, 0x40000, 0x100000, 0x400000,
+      0x1000000, 0x4000000, 0x10000000, 0x40000000);
+}
+
