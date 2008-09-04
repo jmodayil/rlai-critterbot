@@ -78,7 +78,7 @@ int CritterDriver::init(USeconds &wokeAt) {
   fcntl(fid, F_SETFL, O_NONBLOCK);
   
   printf("Initializing serial port.\n");
-  initport(fid);
+  initport();
 
 
   return 0;
@@ -125,7 +125,7 @@ void CritterDriver::readPacket() {
 
 int CritterDriver::sense(USeconds &wokeAt) {
 
-  unsigned char header = {'a','b','c','d'};
+  unsigned char header[] = {'a','b','c','d'};
   unsigned char buf;
 
   int i = 0;
@@ -200,9 +200,7 @@ int CritterDriver::think(USeconds &now) {
       (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
       lake->doneWriteHead(stateId);
       newData = false;
-    
-
+    }
   }
-
   return 1;
 }

@@ -14,9 +14,10 @@ int CritterStateDrop::getSize() {
   return 324; 
 }
 
-void CritterStateDrop::writeArray(void *data) {
+void CritterStateDrop::writeArray(void *d) {
   
   int i = 0;
+  char *data = (char *)d;
   memcpy(data + i, &power_source, 4); i += 4;
   memcpy(data + i, &bus_voltage, 1);  i += 1;
   memcpy(data + i, &batv40, 1);       i += 1;
@@ -40,9 +41,10 @@ void CritterStateDrop::writeArray(void *data) {
 
 }
 
-void CritterStateDrop::readArray(void *data) {
+void CritterStateDrop::readArray(void *d) {
 
   int i = 0;
+  char *data = (char *)d;
   memcpy(&power_source, data + i, 4); i += 4;
   memcpy(&bus_voltage, data + i, 1);  i += 1;
   memcpy(&batv40, data + i, 1);       i += 1;
