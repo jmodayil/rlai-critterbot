@@ -35,12 +35,14 @@ int motor_event() {
   for(i = 0; i < MOTOR_NUM_MOTORS; i++)
     spi_send_packet(&motor_packet[i]);
   
-  if(motor_event_s.event_count % 100 == 0) {
+  if(motor_test < 10000) { //motor_event_s.event_count % 100 == 0) {
     for(i = 0; i < 1; i++)
-      armprintf("Motor %d: %d %d %d\r", i, motor_rx_data[i][0] & 0xFF,
+      armprintf("Motor %d: %d %d %d\r", i, (char)(motor_rx_data[i][0] & 0xFF),
          motor_rx_data[i][1] & 0xFF, motor_rx_data[i][2] & 0xFF); 
-    armprintf("\r");
-    }
+    //armprintf("\r");
+    motor_test++;
+  }
+
   return 0; 
 }
 
