@@ -38,7 +38,7 @@
 char ser_tx_buf[SER_TX_BUF_SIZE];
 char ser_rx_buf[SER_RX_BUF_SIZE];
 volatile char *ser_rx_head, *ser_rx_tail;
-volatile char *ser_tx_head, *ser_tx_tail;
+volatile char * volatile ser_tx_head, * volatile ser_tx_tail;
 char *read_loc;
 /*
  * outputs a character to the serial port

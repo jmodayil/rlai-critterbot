@@ -8,6 +8,8 @@
 #include "armio.h"
 #include "lib_error.h"
 
+volatile int ia;
+
 event_s serial_event_s = {
   init_serial_port_stdio,
   NULL,
@@ -203,7 +205,7 @@ void armprintf(char *format, ...) {
 	int ival;
 	unsigned int uival;
 
-	va_start(ap, format);
+  va_start(ap, format);
 	for(p = format; *p; p++) {
 		if(*p != '%') {
 			armputchar(*p);
@@ -260,7 +262,6 @@ void armprintf(char *format, ...) {
 				break;
 		}
 	}
-	
 }
 
 void armitoa(int val, char str[], int base, int valsigned) {
@@ -310,11 +311,16 @@ ARM_CODE RAMFUNC void __armputchar(char val) {
 
 void armputchar(char val) {
   
+  crit_disable_int();
+  
+  //ia = 0;
+  //while(ia < 10) 
+  //  ia++; 
   if(ser_tx_head >= ser_tx_buf + SER_TX_BUF_SIZE) { 
     error_set(ERR_TXOVERFLOW);
+    crit_enable_int();
     return;
   }
-  crit_disable_int();
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTDIS;
   *ser_tx_head++ = val;
   AT91C_BASE_US0->US_TCR++;
