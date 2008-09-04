@@ -683,6 +683,8 @@ void ui_test_stress(char * cmdstr)
   }
 }
 
+extern int swi_fail_count;
+
 /** Tests something, specified by the first argument. E.g.
   * test ramfunc
   */
@@ -707,6 +709,10 @@ void ui_test (char * cmdstr)
   else if (strncmp (ui_strarg, "stress", sizeof(ui_strarg)) == 0)
   {
     ui_test_stress(cmdstr);
+  }
+  else if (strncmp (ui_strarg, "bad_disable", sizeof(ui_strarg)) == 0)
+  {
+    armprintf ("Number of retarded calls to crit_disable_int: %d\r");
   }
   else
     armprintf ("Invalid argument.\r");

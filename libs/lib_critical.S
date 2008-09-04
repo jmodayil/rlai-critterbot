@@ -1,5 +1,7 @@
 /** Critical section for the events driver */
 
+  .equ I_Bit,     0x80
+
 /*.section	.text.events_has_event,"ax",%progbits
 	.align	4
 	.global	events_has_event
@@ -26,7 +28,24 @@ events_has_event:
 crit_disable_int:
 // Call the software interrupt with value 1 to disable the IRQ
   swi   0x000001
+// Nasty! We have to wait until interrupts actually get disabled
+crit_disable_int_loop:
+  mrs   r1, CPSR
+  tst   r1, #I_Bit
+  //beq   crit_disable_int_loop
+  bne   crit_disable_return
+// Increment swi_fail_count - keep track of how often this happens
+  ldr   r2, =swi_fail_count
+  ldr   r1, [r2,#0]
+  add   r1, r1, #1
+  str   r1, [r2,#0]
+  b     crit_disable_int_loop
+
+crit_disable_return:
   bx    lr
+
+swi_fail_count:
+  .word 0 
 
   .section	.fastrun.crit_enable_int,"ax",%progbits
   .global crit_enable_int
