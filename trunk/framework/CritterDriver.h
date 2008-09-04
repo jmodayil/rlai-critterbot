@@ -4,14 +4,16 @@
 #include "Component.h"
 #include "BitMask.h"
 #include "ErrorMessage.h"
+#include "CritrterControlDrop.h"
+#include "CritrterStateDrop.h"
 
 using namespace std;
 
 class CritterDriver : public Component {
   private:
     USeconds lastPost, postWait; //postTimer commandWait
-    RiverReads controlId;
-    RiverWrites stateId;
+    RiverRead controlId;
+    RiverWrite stateId;
 
     CritterControlDrop* controlDrop;
     CritterStateDrop stateDrop;
