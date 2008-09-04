@@ -18,6 +18,7 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
   controlId = lake->readyReading("CritterControlDrop");
   stateId   = lake->readyWriting("CritterStateDrop");
   thinks    = 0;
+  newData   = false;
 
   postWait = 100000;
 
@@ -25,10 +26,17 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
 }
 
 CritterDriver::~CritterDriver() {
-  closeport();
-  close(fid);
+  cleanup();
 }
 
+void CritterDriver::cleanup() {
+
+  lake->doneRead(controlId);
+  lake->doneWriteHead(stateId);
+  closeport();
+  close(fid);
+
+}
 
 void CritterDriver::initport() {
   
@@ -76,26 +84,68 @@ int CritterDriver::init(USeconds &wokeAt) {
   return 0;
 }
 
+void CritterDriver::readPacket() {
+
+  unsigned char buf[34];
+  
+  if(fid > 0) {
+    if (34 == read(fid, buf, 34)) {
+      int i = 0;
+      stateDrop.motor100.velocity = (int) buf[i++];
+      stateDrop.motor100.current  = (int) buf[i++];
+      stateDrop.motor100.temp     = (int) buf[i++];
+      stateDrop.motor220.velocity = (int) buf[i++];
+      stateDrop.motor220.current  = (int) buf[i++];
+      stateDrop.motor220.temp     = (int) buf[i++];
+      stateDrop.motor340.velocity = (int) buf[i++];
+      stateDrop.motor340.current  = (int) buf[i++];
+      stateDrop.motor340.temp     = (int) buf[i++];
+      
+      stateDrop.accel.x           = (int) buf[i++];
+      stateDrop.accel.y           = (int) buf[i++];
+      stateDrop.accel.z           = (int) buf[i++];
+      stateDrop.mag.x             = (int) buf[i++];
+      stateDrop.mag.y             = (int) buf[i++];
+      stateDrop.mag.z             = (int) buf[i++];
+
+      for(int j=0; j<10; j++) stateDrop.ir_distance[j] = (int) buf[i++];
+      for(int j=0; j<4; j++) stateDrop.light[j]        = (int) buf[i++];
+
+      stateDrop.error_flags = 0;
+      for(int j=0; j<4; j++) {
+        stateDrop.error_flags << 8;
+        stateDrop.error_flags += buf[i++];
+      }
+      newData = true;
+    } // else??? - serial must have sent a EOF in the middle of a packet, or timed out
+  } else {
+    ErrorMessage::sendMessage(lake, getName(), "CritterDriver::readPacket(): Serial port closed unexpectedly.");
+  }
+}
 
 int CritterDriver::sense(USeconds &wokeAt) {
-  
-  char buf;
 
+  unsigned char header = {'a','b','c','d'};
+  unsigned char buf;
+
+  int i = 0;
+  
   if(fid > 0) {
     while(read(fid, &buf, 1) > 0) {
       
+      if (buf == header[i]) {
+        if (i == 3) readPacket();
+        else i++;
+      } else {
+        i = 0;
+      }
       
-      
-{
-      ErrorMessage::sendMessage(lake, getName(), "sense(): Error reading from serial port.");
-      return -1;
     }
-  }
-  else
+  } else {
+    ErrorMessage::sendMessage(lake, getName(), "sense(): Error reading from serial port.");
     return -1;
+  }  
   
-  
-
 }
 
 int CritterDriver::think(USeconds &now) {
@@ -109,8 +159,7 @@ int CritterDriver::think(USeconds &now) {
     controlDrop = (CritterControlDrop*)lake->readHead(controlId);  
     
     if (controlDrop) {
-      // do whatever with struct
-
+      
       if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
         sprintf(str,"motor 0 %3d\r",controlDrop->m100_vel);
@@ -144,11 +193,15 @@ int CritterDriver::think(USeconds &now) {
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
       
       }
-      
-      
     }
-
     lake->doneRead(controlId);
+
+    if (newData) {
+      (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
+      lake->doneWriteHead(stateId);
+      newData = false;
+    
+
   }
 
   return 1;

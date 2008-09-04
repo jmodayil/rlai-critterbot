@@ -8,7 +8,7 @@ using namespace std;
 class CritterStateDrop : public DataDrop {
  public:
 	static string name;
-
+  
   enum Power_Source { SHORE, BAT40, BAT160, BAT280 } power_source;
 
   unsigned char bus_voltage;
@@ -19,21 +19,21 @@ class CritterStateDrop : public DataDrop {
     int velocity;
     int current;
     int temp;
-  } motor100, motor220, motor340;
+  } motor100, motor220, motor340; // 9
 
   struct {
     int x;
     int y;
     int z;
-  } accel, mag;
+  } accel, mag; // 15
 
-  int rotation;
-  unsigned int ir_distance[10];
-  unsigned int ir_light[8];
-  unsigned int light[4];
+  int rotation; // 16
+  unsigned int ir_distance[10]; // 26
+  unsigned int ir_light[8]; 
+  unsigned int light[4];  // 30
   unsigned int thermal[8];
   unsigned int bump[32];
-  unsigned int error_flags;
+  unsigned int error_flags; // (4) 34
 
 	CritterStateDrop();
 	virtual ~CritterStateDrop();

@@ -14,8 +14,9 @@ class CritterDriver : public Component {
     RiverWrites stateId;
 
     CritterControlDrop* controlDrop;
+    CritterStateDrop stateDrop;
 
-    //critterdrop;
+    boolean newData;
 
     int thinks;
     
@@ -57,6 +58,8 @@ class CritterDriver : public Component {
  private:
     void initport(int port);
     void closeport(int port);
+    void readPacket();
+    
 };
 
 #endif
