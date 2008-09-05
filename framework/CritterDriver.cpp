@@ -33,6 +33,7 @@ void CritterDriver::cleanup() {
 
   lake->doneRead(controlId);
   lake->doneWriteHead(stateId);
+
   closeport();
   close(fid);
 
