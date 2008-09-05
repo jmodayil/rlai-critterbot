@@ -3,6 +3,25 @@
 string CritterStateDrop::name = "CritterStateDrop";
 
 CritterStateDrop::CritterStateDrop() {
+  bus_voltage = 0;
+  batv40 = 0;
+  batv160 = 0;
+  batv280 = 0;
+  accel.x = 0;
+  accel.y = 0;
+  accel.z = 0;
+  mag.x = 0;
+  mag.y = 0;
+  mag.z = 0;
+  motor100.velocity = 0;
+  motor100.current = 0;
+  motor100.temp = 0;
+  motor220.velocity = 0;
+  motor220.current = 0;
+  motor220.temp = 0;
+  motor340.velocity = 0;
+  motor340.current = 0;
+  motor340.temp = 0;
   
 }
 
@@ -95,8 +114,4 @@ string CritterStateDrop::toString(string offset) {
   for(int i=0; i<32; i++) printf(" [%d]: %d ", i, bump[i]);
   printf("\n error_flags: %d\n\n", error_flags);
 
-}
-
-string CritterStateDrop::getName() {
-  return name;
 }
