@@ -11,7 +11,7 @@ CritterControlDrop::~CritterControlDrop() {
 }
 
 int CritterControlDrop::getSize() {
-  return 1; //sizeof(dataPoints);
+  return sizeof(robot_command);
 }
 
 void CritterControlDrop::writeArray(void *data) {
