@@ -1,9 +1,9 @@
-/* CritterDriver.cpp
+/* CritterDriver_debug.cpp
  * Seial driver for the main CritterBot hardware
  * James Neufeld (neufeld@cs.ualberta.ca)
  */
 
-#include "CritterDriver.h"
+#include "CritterDriver_debug.h"
 #include "CritterControlDrop.h"
 #include "CritterStateDrop.h"
 #include <stdio.h>
@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 
-CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf, 
+CritterDriver_debug::CritterDriver_debug(DataLake *lake, ComponentConfig &conf, 
                    string &name) : Component(lake, conf, name) {
 
   fid       = -1;
@@ -25,27 +25,27 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
   lastPost.setAsNow();
 }
 
-CritterDriver::~CritterDriver() {
+CritterDriver_debug::~CritterDriver_debug() {
   cleanup();
 }
 
-void CritterDriver::cleanup() {
+void CritterDriver_debug::cleanup() {
 
   lake->doneRead(controlId);
   lake->doneWriteHead(stateId);
 
 }
 
-void CritterDriver::initport() {
+void CritterDriver_debug::initport() {
   
 }
 
-void CritterDriver::closeport() {
+void CritterDriver_debug::closeport() {
 
 }
 
 
-int CritterDriver::init(USeconds &wokeAt) {
+int CritterDriver_debug::init(USeconds &wokeAt) {
 
   printf("Opening FAKE serial port. weeee\n");
 
@@ -53,10 +53,10 @@ int CritterDriver::init(USeconds &wokeAt) {
   
   printf("Initializing FAKE serial port.\n");
 
-  return 0;
+  return 1;
 }
 
-void CritterDriver::readPacket() {  
+void CritterDriver_debug::readPacket() {  
 
   stateDrop.motor100.velocity = 10;
   stateDrop.motor100.current  = 10;
@@ -88,17 +88,19 @@ void CritterDriver::readPacket() {
 
 }
 
-int CritterDriver::think(USeconds &wokeAt) {
+int CritterDriver_debug::think(USeconds &wokeAt) {
   sense(wokeAt);
+  return 1;
 }
 
-int CritterDriver::sense(USeconds &wokeAt) {
+int CritterDriver_debug::sense(USeconds &wokeAt) {
 
   readPacket();
+  return 1;
   
 }
 
-int CritterDriver::act(USeconds &now) {
+int CritterDriver_debug::act(USeconds &now) {
 
   char str[100];
   
@@ -113,13 +115,13 @@ int CritterDriver::act(USeconds &now) {
       if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
         sprintf(str,"motor 0 %3d\r",controlDrop->m100_vel);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
         
         sprintf(str,"motor 1 %3d\r",controlDrop->m220_vel);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
         sprintf(str,"motor 2 %3d\r",controlDrop->m340_vel);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
         
 
       } else { // assert(controlDrop->motor_mode == CritterControlDrop::XYTHETA_SPACE)
@@ -134,13 +136,13 @@ int CritterDriver::act(USeconds &now) {
         v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 90*controlDrop->theta_vel);
 
         sprintf(str,"motor 0 %3d\r", v1);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
         sprintf(str,"motor 0 %3d\r", v2);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
         sprintf(str,"motor 0 %3d\r", v3);
-        printf("CritterDriver: FAKE wrote command: %s\n", str);
+        printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
       
       }
     }

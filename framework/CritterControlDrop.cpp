@@ -47,7 +47,7 @@ string CritterControlDrop::toString(string offset) {
   
   printf("motor_mode: %d\n", motor_mode);
   printf("m100_vel: \t %d m220_vel: \t %d m340_vel: \t %d \n\n", m100_vel, m220_vel, m340_vel);
-  
+  return ""; 
 }
 
 string CritterControlDrop::getName() {
