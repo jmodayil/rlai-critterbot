@@ -39,8 +39,8 @@ class CritterStateDrop : public DataDrop {
 	virtual ~CritterStateDrop();
 
 	virtual int getSize();
-	virtual void writeArray(void *data);
-	virtual void readArray(void *data);
+	virtual void writeArray(void *d);
+	virtual void readArray(void *d);
 	virtual string toString(string offset = "");
 	virtual string getName();
 

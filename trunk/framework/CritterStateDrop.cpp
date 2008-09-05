@@ -71,7 +71,29 @@ void CritterStateDrop::readArray(void *d) {
 string CritterStateDrop::toString(string offset) {
 
 
-  printf("TODO: Write CritterStateDrop::toString(string offset) :P\n");
+  printf("- Critter State Drop -\n");
+
+  printf("Power_Source: %d \t", power_source);
+  printf("bus_voltage: %d \t", (int)bus_voltage);
+  printf("batv [40,160,280]: [%d,%d,%d] \n", (int)batv40, (int)batv160, (int)batv280);
+
+  printf("motor | \tvelocity, \tcurrent, \ttemp\n");
+  printf("motor100 | \t %d \t %d \t %d \n", motor100.velocity, motor100.current, motor100.temp);
+  printf("motor220 | \t %d \t %d \t %d \n", motor220.velocity, motor220.current, motor220.temp);
+  printf("motor340 | \t %d \t %d \t %d \n", motor340.velocity, motor340.current, motor340.temp);
+
+  printf("accel (x,y,z): (%d,%d,%d) \t mag (x,y,z): (%d,%d,%d)\n",accel.x,accel.y,accel.z,mag.x,mag.y,mag.z);
+  printf("rotation: %d \n ir_dists: ",rotation);
+  for(int i=0; i<10; i++) printf(" [%d]: %d ", i, ir_distance[i]);
+  printf("\n ir_light: ");
+  for(int i=0; i<8; i++) printf(" [%d]: %d ", i, ir_light[i]);
+  printf("\n light: ");
+  for(int i=0; i<4; i++) printf(" [%d]: %d ", i, light[i]);
+  printf("\n thermal: ");
+  for(int i=0; i<8; i++) printf(" [%d]: %d ", i, thermal[i]);
+  printf("\n bump: ");
+  for(int i=0; i<32; i++) printf(" [%d]: %d ", i, bump[i]);
+  printf("\n error_flags: %d\n\n", error_flags);
 
 }
 

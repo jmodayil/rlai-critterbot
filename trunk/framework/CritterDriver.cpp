@@ -17,10 +17,10 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
   fid       = -1;
   controlId = lake->readyReading("CritterControlDrop");
   stateId   = lake->readyWriting("CritterStateDrop");
-  thinks    = 0;
+  acts      = 0;
   newData   = false;
 
-  postWait = 100000;
+  postWait = 10000;
 
   lastPost.setAsNow();
 }
@@ -80,7 +80,6 @@ int CritterDriver::init(USeconds &wokeAt) {
   printf("Initializing serial port.\n");
   initport();
 
-
   return 0;
 }
 
@@ -108,6 +107,7 @@ void CritterDriver::readPacket() {
       stateDrop.mag.y             = (int) buf[i++];
       stateDrop.mag.z             = (int) buf[i++];
 
+      stateDrop.rotation          = (int) buf[i++];
       for(int j=0; j<10; j++) stateDrop.ir_distance[j] = (int) buf[i++];
       for(int j=0; j<4; j++) stateDrop.light[j]        = (int) buf[i++];
 
@@ -148,13 +148,13 @@ int CritterDriver::sense(USeconds &wokeAt) {
   
 }
 
-int CritterDriver::think(USeconds &now) {
+int CritterDriver::act(USeconds &now) {
 
   char str[100];
   
   if(now - lastPost >= postWait) {
     lastPost = now + (now - lastPost - postWait);
-    thinks++;
+    acts++;
     
     controlDrop = (CritterControlDrop*)lake->readHead(controlId);  
     
