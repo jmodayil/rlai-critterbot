@@ -25,7 +25,7 @@ class CritterDriver : public Component {
 
     bool newData;
 
-    int thinks;
+    int acts;
     
     struct termios oldterm;
     int fid;
@@ -41,6 +41,8 @@ class CritterDriver : public Component {
     virtual int init(USeconds &wokeAt);
     virtual int think(USeconds &wokeAt);
     virtual int sense(USeconds &wokeAt);
+    virtual int act(USeconds &wokeAt);
+
     virtual int loadConfig(ComponentConfig *conf);
     int readConfig(ComponentConfig *conf, string &device, int &postWait);
     void cleanup();
