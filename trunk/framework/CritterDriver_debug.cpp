@@ -138,10 +138,10 @@ int CritterDriver_debug::act(USeconds &now) {
         sprintf(str,"motor 0 %3d\r", v1);
         printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
-        sprintf(str,"motor 0 %3d\r", v2);
+        sprintf(str,"motor 1 %3d\r", v2);
         printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
-        sprintf(str,"motor 0 %3d\r", v3);
+        sprintf(str,"motor 2 %3d\r", v3);
         printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
       
       }
