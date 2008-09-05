@@ -63,9 +63,9 @@ int Manager::think(USeconds &wokeAt) {
 		// controls the turning
 		// these are set to a valid between -100 and 100 ?
 		controlDrop.motor_mode = CritterControlDrop::XYTHETA_SPACE;
-		controlDrop.x_vel = speed*(joystickDrop->rightAnalogX)/JOY_AXIS_MAX;
-		controlDrop.y_vel = (joystickDrop->rightAnalogY/JOY_AXIS_MAX)*speed;
-		controlDrop.theta_vel = (joystickDrop->leftAnalogX/JOY_AXIS_MAX)*speed;
+		controlDrop.x_vel = (int)speed*(joystickDrop->rightAnalogX)/JOY_AXIS_MAX;
+		controlDrop.y_vel = (int)speed*(joystickDrop->rightAnalogY)/JOY_AXIS_MAX;
+		controlDrop.theta_vel = (int)speed*(joystickDrop->leftAnalogX)/JOY_AXIS_MAX;
 		
 		//copying James
 		(*(CritterControlDrop*)lake->startWriteHead(controlOutput)) = controlDrop;
