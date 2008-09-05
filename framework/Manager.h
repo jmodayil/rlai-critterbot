@@ -1,4 +1,4 @@
-#ifndef _H
+#ifndef Manager_H
 #define Manager_H
 
 #include "Component.h"
@@ -27,6 +27,17 @@ class Manager : public Component {
  private:
 		RiverWrite controlOutput;
 		RiverRead joystickInput;
+
+		CritterControlDrop controlDrop;
+		JoystickDrop* joystickDrop;
+
+		bool newData;
+		int thinks;
+
+		int fid;
+
+		// control variables
+		float speed;
 };
 
 #endif

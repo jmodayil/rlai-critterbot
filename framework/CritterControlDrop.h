@@ -27,7 +27,7 @@ class CritterControlDrop : public DataDrop {
     int theta_vel;
   };
   // leaving this aside for now
-  //enum { THING1, THING2, THING3} led_mode;
+  enum { THING1, THING2, THING3} led_mode;
   
 	CritterControlDrop();
 	virtual ~CritterControlDrop();
