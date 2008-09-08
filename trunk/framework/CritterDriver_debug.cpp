@@ -135,6 +135,8 @@ int CritterDriver_debug::act(USeconds &now) {
         v2 = (int)(0.6428*controlDrop->x_vel + -0.766*controlDrop->y_vel + 90*controlDrop->theta_vel);
         v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 90*controlDrop->theta_vel);
 
+        printf("CritterDriver: Took in commands: (%d %d %d)\n", controlDrop->x_vel, controlDrop->y_vel, controlDrop->theta_vel);
+
         sprintf(str,"motor 0 %3d\r", v1);
         printf("CritterDriver_debug: FAKE wrote command: %s\n", str);
 
