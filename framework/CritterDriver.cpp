@@ -191,12 +191,12 @@ int CritterDriver::act(USeconds &now) {
         
         int v1,v2,v3; // wheel velocities 
 
-        // [ v1 ]   [ cos(90+100) sin(90+100) 90 ]   [ v_x ]
-        // [ v2 ] = [ cos(90+220) sin(90+220) 90 ] * [ v_y ]
-        // [ v3 ]   [ cos(90+340) sin(90+340) 90 ]   [ v_theta ]
-        v1 = (int)(-0.9848*controlDrop->x_vel + -0.1736*controlDrop->y_vel + 90*controlDrop->theta_vel);
-        v2 = (int)(0.6428*controlDrop->x_vel + -0.766*controlDrop->y_vel + 90*controlDrop->theta_vel);
-        v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 90*controlDrop->theta_vel);
+        // [ v1 ]   [ cos(90+100) sin(90+100) 10.7 ]   [ v_x ]
+        // [ v2 ] = [ cos(90+220) sin(90+220) 10.7 ] * [ v_y ]
+        // [ v3 ]   [ cos(90+340) sin(90+340) 10.7 ]   [ v_theta ]
+        v1 = (int)(-0.9848*controlDrop->x_vel + -0.1736*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
+        v2 = (int)(0.6428*controlDrop->x_vel + -0.766*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
+        v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
 
 
         // scale velocities to max |v| <= 100
