@@ -349,15 +349,13 @@ int armreadline(char *read_to, int max_size) {
   
   int size;
   char *buf_end, *cur_ptr;
-
   if(read_to == NULL || max_size == 0)
     return EOF;
   
   buf_end = ser_rx_buf + SER_RX_BUF_SIZE;
   cur_ptr = (char*)AT91C_BASE_US0->US_RPR;
-  if(cur_ptr == ser_rx_head){
+  if(cur_ptr == ser_rx_head)
     return EOF;
-  }
   // MGB 27/08/08 - rewrote logic
   //  We MUST test for read_loc == cur_ptr BEFORE *read_loc == '\r'
   // We leave this loop iff we reach cur_ptr or a CR, one of which must happen
@@ -435,10 +433,11 @@ int init_serial_port_stdio(void) {
   AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
   
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN | AT91C_PDC_TXTEN;
- 
-  armprintf("rpr: %p\r", AT91C_BASE_US0->US_RPR);
-  
-  // Disable Amplifier
+
+  while(AT91C_BASE_US0->US_RPR == 0) {
+    AT91C_BASE_US0->US_RPR = (unsigned int)ser_rx_buf;
+  }  
+    // Disable Amplifier
   AT91C_BASE_PIOA->PIO_PER = 1 << 8;
   AT91C_BASE_PIOA->PIO_OER = 1 << 8;
   AT91C_BASE_PIOA->PIO_SODR = 1 << 8;
