@@ -75,7 +75,7 @@ char ui_command_string[256];
 char ui_cmdname[64];
 char ui_strarg[64];
 
-volatile ui_io_handler_fn ui_io_handler;
+volatile ui_io_handler_fn ui_io_handler = NULL;
 
 // Reporting mode - if nonzero, the UI will spit out some status information
 //  every so often.
