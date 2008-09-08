@@ -18,7 +18,7 @@ int motor_init() {
 
   int i;
 
-  for(i = 0; i < MOTOR_NUM_BYTES; i++) {
+  for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     motor_packet[i].device_id = 9 + i;
     motor_packet[i].num_words = MOTOR_NUM_BYTES;
     motor_packet[i].data_to_write = &motor_tx_data[i][0];
@@ -34,12 +34,15 @@ int motor_event() {
   
   for(i = 0; i < MOTOR_NUM_MOTORS; i++)
     spi_send_packet(&motor_packet[i]);
-  
-  if(motor_test < 10000) { //motor_event_s.event_count % 100 == 0) {
-    for(i = 0; i < 1; i++)
-      armprintf("Motor %d: %d %d %d\r", i, (char)(motor_rx_data[i][0] & 0xFF),
-         motor_rx_data[i][1] & 0xFF, motor_rx_data[i][2] & 0xFF); 
-    //armprintf("\r");
+ 
+  if(motor_event_s.event_count % 100 == 0) {
+    for(i = 0; i < MOTOR_NUM_MOTORS; i++)
+      armprintf("Motor %d: %d %d %d %d\r", i, 
+        motor_rx_data[i][1] & 0xFF, 
+        motor_rx_data[i][2] & 0xFF, 
+        motor_rx_data[i][3] & 0xFF,
+        motor_rx_data[i][4] & 0xFF); 
+    armprintf("\r");
     motor_test++;
   }
 
@@ -54,5 +57,6 @@ void motor_set_speed(int motor, int speed) {
   if(speed < -MOTOR_MAX_SPEED || speed > MOTOR_MAX_SPEED)
     return;
 
-  motor_tx_data[motor][0] = speed & 0xFF;
+  motor_tx_data[motor][0] = MOTOR_PACKET_HEADER;
+  motor_tx_data[motor][1] = speed & 0xFF;
 }

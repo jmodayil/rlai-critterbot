@@ -7,7 +7,9 @@
 #define MOTOR_NUM_MOTORS 3
 
 #define MOTOR_MAX_SPEED 127
-#define MOTOR_NUM_BYTES 3
+#define MOTOR_NUM_BYTES 5
+
+#define MOTOR_PACKET_HEADER 0xFF
 
 int motor_init( void );
 
