@@ -43,18 +43,12 @@ unsigned int events_has_event()
 {
   unsigned int result;
 
-  //AT91C_BASE_PITC->PITC_PIMR &= ~AT91C_PITC_PITIEN;  
-  //AT91F_AIC_DisableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
-  // 
-  // result = events_status;
   // Clear and return the status bit
-  // events_status = 0;
   asm volatile("mov r2,#0\n\t"
                "swp %0, r2, [%1]"
                : "=&r" (result)
                : "r" (&events_status) 
                : "r2" ); 
-  //AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_SYS);
 
   // MGB: New code using semaphores (actually not as good as just using SWP,
   //  but doesn't require inline assembly)

@@ -111,7 +111,7 @@ void ui_clear_handler(ui_io_handler_fn handler)
 {
   // The case when handler == NULL is still quite fine
   if (ui_io_handler == handler)
-    ui_io_handler = handler;
+    ui_io_handler = NULL;
 }
 
 int ui_init()

@@ -47,7 +47,8 @@ unsigned int event_flags;
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_ADC | \
     1 << EVENT_ID_LEDCTL | \
-    1 << EVENT_ID_ACCEL \
+    1 << EVENT_ID_ACCEL | \
+    1 << EVENT_ID_UI \
     )
 
 #define EVENTS_DEFAULTS ( \

@@ -340,7 +340,7 @@ int armgetchar(void) {
   if(read_loc >= ser_rx_buf + SER_RX_BUF_SIZE)
     read_loc = ser_rx_buf;
   gotchar = *ser_rx_head++;
-  if(ser_rx_head >= ser_rx_buf +SER_RX_BUF_SIZE)
+  if(ser_rx_head >= ser_rx_buf + SER_RX_BUF_SIZE)
     ser_rx_head = ser_rx_buf;
   return gotchar;
 }
