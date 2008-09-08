@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 
 CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf, 
@@ -163,13 +164,26 @@ int CritterDriver::act(USeconds &now) {
       
       if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
-        sprintf(str,"motor 0 %3d\r",controlDrop->m100_vel);
+        int v1 = controlDrop->m100_vel;
+        int v2 = controlDrop->m220_vel;
+        int v3 = controlDrop->m340_vel;
+
+        int amax = abs(v1);
+        if (abs(v2) > amax) amax = abs(v2);
+        if (abs(v3) > amax) amax = abs(v3);
+        if (amax > 100) {
+          v1 = v1*100/amax;
+          v2 = v2*100/amax;
+          v3 = v3*100/amax;
+        }
+        
+        sprintf(str,"motor 0 %3d\r",v1);
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
         
-        sprintf(str,"motor 1 %3d\r",controlDrop->m220_vel);
+        sprintf(str,"motor 1 %3d\r",v2);
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
 
-        sprintf(str,"motor 2 %3d\r",controlDrop->m340_vel);
+        sprintf(str,"motor 2 %3d\r",v3);
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
         
 
@@ -184,6 +198,17 @@ int CritterDriver::act(USeconds &now) {
         v2 = (int)(0.6428*controlDrop->x_vel + -0.766*controlDrop->y_vel + 90*controlDrop->theta_vel);
         v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 90*controlDrop->theta_vel);
 
+
+        // scale velocities to max |v| <= 100
+        int amax = abs(v1);
+        if (abs(v2) > amax) amax = abs(v2);
+        if (abs(v3) > amax) amax = abs(v3);
+        if (amax > 100) {
+          v1 = v1*100/amax;
+          v2 = v2*100/amax;
+          v3 = v3*100/amax;
+        }
+        
         sprintf(str,"motor 0 %3d\r", v1);
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
 
