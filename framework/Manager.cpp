@@ -34,6 +34,7 @@ int Manager::init(USeconds &wokeAt) {
 
 int Manager::think(USeconds &wokeAt) {
 	//do we need to wait and think and all that?
+	// only if we want to make sure we don't get swamped with joystick commands
 
 	// read in the Joystick Control Drop
 	joystickDrop = ((JoystickDrop*)lake->readHead(joystickInput));

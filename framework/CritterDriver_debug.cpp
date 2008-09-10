@@ -59,14 +59,14 @@ int CritterDriver_debug::init(USeconds &wokeAt) {
 void CritterDriver_debug::readPacket() {  
 
   stateDrop.motor100.velocity = 10;
-  stateDrop.motor100.current  = 10;
-  stateDrop.motor100.temp     = 10;
+  stateDrop.motor100.current  = 11;
+  stateDrop.motor100.temp     = 12;
   stateDrop.motor220.velocity = 20;
-  stateDrop.motor220.current  = 20;
-  stateDrop.motor220.temp     = 20;
+  stateDrop.motor220.current  = 21;
+  stateDrop.motor220.temp     = 22;
   stateDrop.motor340.velocity = 30;
-  stateDrop.motor340.current  = 30;
-  stateDrop.motor340.temp     = 30;
+  stateDrop.motor340.current  = 31;
+  stateDrop.motor340.temp     = 32;
   
   stateDrop.accel.x           = 10;
   stateDrop.accel.y           = 20;
