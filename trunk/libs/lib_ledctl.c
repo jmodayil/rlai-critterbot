@@ -361,7 +361,6 @@ void ledctl_init_packets()
     for (l = 0; l < LEDCTL_NUM_LEDS; l++)
     {
       // Set both transmit and receive buffers to 0 values
-      // @@@ replace this by a memset ?
       ledctl_txdata[i][l] = 0;
       ledctl_rxdata[i][l] = 0;
     }

@@ -41,6 +41,9 @@
                                  ADCSPI_PM_NORMAL |\
                                  ADCSPI_HALF_RANGE)
 
+#define ADCSPI_SEQ_CONTROL_FLAGS (ADCSPI_CONTROL_FLAGS |\
+                                  ADCSPI_CONSECUTIVE)
+
 #define ADCSPI_OUTPUTS_PER_DEVICE 16
 #define ADCSPI_DEVICE_ID_BASE   4
 #define ADCSPI_NUM_DEVICES      4
