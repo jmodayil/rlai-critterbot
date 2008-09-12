@@ -52,7 +52,7 @@
 // delay = value / MCK; min=0, max=255
 #define SPI_CS4_7_DELAY_BEFORE_CLOCK 1
 // rate = MCK / value; min=1, max=255
-#define SPI_CS4_7_BAUD_RATE 32
+#define SPI_CS4_7_BAUD_RATE 100 
 // bits = 8 + value; min=0, max=8
 #define SPI_CS4_7_WORD_SIZE 0x8
 // bit 0: Clock polarity, 0 clock starts low, 1 clock starts high

@@ -30,6 +30,7 @@ event_s ui_event_s = {
   0
 };
 
+extern volatile int motor_test;
 #define STATUS_STRING(a) ( (a)? "OK" : "FAIL" )
 
 /* Structure used to hold command name + function pairs */
@@ -499,7 +500,6 @@ void ui_bootloader(char * cmdstr)
     return;
   }
 
-  event_start(EVENT_ID_BOOT);
   boot_begin_receive(data_size);
 }
 
@@ -745,6 +745,7 @@ void ui_motor ( char * cmdstr)
     return;
   }
 
+  motor_test = 0;
   motor_set_speed(motor, speed);
   motor_test = 0;
 }
@@ -776,6 +777,7 @@ void ui_pid ( char * cmdstr)
     event_init(pid);
     return;
   }
+  
   if (strncmp (ui_strarg, "stop", sizeof(ui_strarg)) == 0)
   {
     event_stop(pid);
