@@ -13,6 +13,7 @@
 #include "armio.h"
 #include "lib_critical.h"
 #include "lib_ledctl.h"
+#include "lib_leddrive.h"
 #include "lib_events.h"
 #include "crctable.h"
 #include "AT91SAM7S256.h"
@@ -177,17 +178,16 @@ int boot_event()
   boot_timeout_counter++;
   if (boot_timeout_counter >= BOOT_RECEIVE_TIMEOUT)
   {
-    armprintf("\r");
-    // Copy to flash! this will never return (or shouldn't)
+    // If we got the right amount of data, verify with CRC.
     if (boot_data_head == boot_data_size)
     {
       // @@@ replace with boot_core once ready
       boot_verify();
     }
     else if (boot_data_head > boot_data_size) {
-     armprintf ("Got %d bytes too much data!\r", boot_data_head - boot_data_size);
+     armprintf ("Got %d bytes too much data.\r", boot_data_head - boot_data_size);
     } else {
-      armprintf ("Timeout!\r");
+      armprintf ("Timeout.\r");
       // If done receiving... (or returned from boot_core??)
       error_set(ERR_BOOT);
     }
@@ -230,6 +230,8 @@ void boot_begin_receive(int data_size)
   boot_data_size = data_size + 2;
   boot_timeout_counter = 0;
   crc_was_good = 0;
+  leddrive_busy();
+  event_start(EVENT_ID_BOOT);
   event_stop(EVENT_ID_UI);
   // run_ui = 0;
   // @@@ disable UI
@@ -240,6 +242,7 @@ void boot_begin_receive(int data_size)
   */
 void boot_end_receive()
 {
+  leddrive_ball();
   boot_receiving = 0;
   event_stop(EVENT_ID_BOOT);
   event_start(EVENT_ID_UI);

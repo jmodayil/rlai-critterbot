@@ -63,7 +63,7 @@ int adcspi_init()
     packet->num_words = ADCSPI_OUTPUTS_PER_DEVICE;
     packet->data_to_write = &adcspi_dummy_tx[i];
     packet->read_data = &adcspi_output[i * ADCSPI_OUTPUTS_PER_DEVICE];
-    packet->finished = 0;
+    packet->finished = 1;
   
     // Set up each off-board ADC's packets and power-up the chip itself
     packet = &adcspi_control_packet[i];
@@ -108,7 +108,7 @@ int adcspi_init()
 int adcspi_event()
 {
   int i;
-
+  __armprintf("1\r");
   // Send the new input selection, if there is one
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
   {
@@ -116,13 +116,14 @@ int adcspi_event()
     adcspi_send_select(i);
     adcspi_new_selection[i] = 0;
   }
+  __armprintf("2\r");
       // Test for error in addresses (only if no new data was selected)
     // adcspi_test_addresses();
 
   // Request new data in
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
     adcspi_read_data(i);
-
+  __armprintf("3\r");
   return 0;
 }
 
@@ -170,7 +171,17 @@ void adcspi_send_select(int device)
   adcspi_control_reg[device] = (ADCSPI_CONTROL_FLAGS | ADCSPI_WRITE | 
     ADCSPI_SELECT_SHADOW) << 4;
 
+  if(!adcspi_control_packet[device].finished) {
+    error_set(ERR_ADC_SPI);
+    return;
+  }
+  adcspi_control_packet[device].finished = 0;
   spi_send_packet(&adcspi_control_packet[device]);
+  if(!adcspi_shadow_packet[device].finished) {
+    error_set(ERR_ADC_SPI);
+    return;
+  } 
+  adcspi_shadow_packet[device].finished = 0;
   // Shadow packet contains bit-mapped inputs to be converted
   spi_send_packet(&adcspi_shadow_packet[device]);
 }
@@ -178,11 +189,16 @@ void adcspi_send_select(int device)
 /** Sends packets to read in data from the ADC (only for selected inputs) */
 void adcspi_read_data(int device)
 {
+  if(!adcspi_read_packets[device].finished) {
+    error_set(ERR_ADC_SPI);
+    return;
+  }
+  __armprintf("4\r");
   adcspi_read_packets[device].finished = 0;
 
-  // @@@ error-checking: if !finished, throw error
   // We request all data (16 packets)
   spi_send_packet(&adcspi_read_packets[device]);
+  __armprintf("5\r");
 }
 
 int adcspi_get_output(int index)

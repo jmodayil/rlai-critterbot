@@ -179,7 +179,7 @@ int event_init(unsigned int id) {
   {
     // Flag the event as having being initialized if there is no init function
     events[id]->first_init = 0;
-    return 1;
+    return 0;
   }
   
   result = events[id]->init_func();

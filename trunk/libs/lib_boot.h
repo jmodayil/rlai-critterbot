@@ -31,7 +31,7 @@
 #define BOOT_COPY_SECTION   __attribute__ ((section (".bootcopy")))
 
 // How long to wait before giving up on transfer, in 100Hz (event-driven)
-#define BOOT_RECEIVE_TIMEOUT  100
+#define BOOT_RECEIVE_TIMEOUT  100 
 
 #define BOOT_PASSWORD "cookie"
 

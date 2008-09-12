@@ -341,7 +341,7 @@ IRQ_Handler_Entry:
       beq   Bad_Vector_IRQ
 
 // Enable Interrupt and Switch in Supervisor Mode
-           msr         CPSR_c, #ARM_MODE_SVC
+            msr         CPSR_c, #ARM_MODE_SVC
 
 // Save scratch/used registers and LR in User Stack
             stmfd       sp!, { r1-r3, r12, r14}
