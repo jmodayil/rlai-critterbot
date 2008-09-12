@@ -46,14 +46,13 @@ ARM_CODE RAMFUNC void boot_core()
   //remove
   int tmp = 0;
 
-  if(0 ==  crc_was_good) {
+  if(0 == crc_was_good) {
     armprintf("No valid boot image to flash!\r");
     return;
   }
   // Disable interrupts
   crit_disable_int();
   // @@@ Disable motors, etc
-  // @@@ Enable watchdog - don't take too long; reset watchdog while copying
   // Switch to supervisor mode?
   // We don't need the CRC in flash
   boot_data_size -= 2;

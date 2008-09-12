@@ -19,7 +19,8 @@ event_s adcspi_event_s = {
 };
 
 // Dummy data that we send to read in data; bit 15 must be 0 (READ)
-unsigned int adcspi_dummy_tx[ADCSPI_NUM_DEVICES];
+// We need 64 of these because of the way the spi_packet works :(
+unsigned int adcspi_dummy_tx[ADCSPI_NUM_OUTPUTS];
 // Dummy variable that receives unused data when transmitting (e.g. the control
 //  register)
 unsigned int adcspi_dummy_rx;
@@ -61,7 +62,7 @@ int adcspi_init()
 
     packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
     packet->num_words = ADCSPI_OUTPUTS_PER_DEVICE;
-    packet->data_to_write = &adcspi_dummy_tx[i];
+    packet->data_to_write = &adcspi_dummy_tx[i * ADCSPI_OUTPUTS_PER_DEVICE];
     packet->read_data = &adcspi_output[i * ADCSPI_OUTPUTS_PER_DEVICE];
     packet->finished = 1;
   
@@ -108,7 +109,6 @@ int adcspi_init()
 int adcspi_event()
 {
   int i;
-  __armprintf("1\r");
   // Send the new input selection, if there is one
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
   {
@@ -116,14 +116,12 @@ int adcspi_event()
     adcspi_send_select(i);
     adcspi_new_selection[i] = 0;
   }
-  __armprintf("2\r");
       // Test for error in addresses (only if no new data was selected)
     // adcspi_test_addresses();
 
   // Request new data in
   for (i = 0; i < ADCSPI_NUM_DEVICES; i++)
     adcspi_read_data(i);
-  __armprintf("3\r");
   return 0;
 }
 
@@ -193,12 +191,10 @@ void adcspi_read_data(int device)
     error_set(ERR_ADC_SPI);
     return;
   }
-  __armprintf("4\r");
   adcspi_read_packets[device].finished = 0;
 
   // We request all data (16 packets)
   spi_send_packet(&adcspi_read_packets[device]);
-  __armprintf("5\r");
 }
 
 int adcspi_get_output(int index)
