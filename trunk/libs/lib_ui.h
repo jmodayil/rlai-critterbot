@@ -49,6 +49,7 @@ void ui_error (char * cmdstr);
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
 void ui_motor ( char * cmdstr);
+void ui_mi ( char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);

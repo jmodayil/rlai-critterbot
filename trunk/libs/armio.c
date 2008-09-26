@@ -345,6 +345,25 @@ int armgetchar(void) {
   return gotchar;
 }
 
+int armgetnumchars(void) {
+
+  char *loc;
+  unsigned int size;
+
+  size = 0;
+  loc = (char*)ser_rx_head;
+
+  while(loc != (char*)AT91C_BASE_US0->US_RPR) {
+    if(++loc > ser_rx_buf + SER_RX_BUF_SIZE)
+      loc = ser_rx_buf;
+    size++;
+    if(size > SER_RX_BUF_SIZE) 
+      return -1;
+  }
+  return size;
+
+}
+
 int armreadline(char *read_to, int max_size) {
   
   int size;
@@ -360,6 +379,8 @@ int armreadline(char *read_to, int max_size) {
   //  We MUST test for read_loc == cur_ptr BEFORE *read_loc == '\r'
   // We leave this loop iff we reach cur_ptr or a CR, one of which must happen
   //  unless US_RPR has been corrupted
+  // MVS 26/09/08 - added saftey net if RPR is corrupt
+  size = 0;
   while(1)
   {
     if(read_loc == cur_ptr)
@@ -369,6 +390,8 @@ int armreadline(char *read_to, int max_size) {
     // If not done, go on to the next character
     if(++read_loc >= buf_end)
       read_loc = ser_rx_buf;
+    if(++size > SER_RX_BUF_SIZE)
+      return EOF;
   }
   for(size = 0; ser_rx_head != read_loc; size++) {
     if(size >= max_size - 1)
