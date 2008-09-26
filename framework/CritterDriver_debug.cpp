@@ -69,7 +69,7 @@ void CritterDriver_debug::readPacket() {
   stateDrop.motor340.temp     = 32;
   
   stateDrop.accel.x           = 10;
-  stateDrop.accel.y           = 20;
+  stateDrop.accel.y           = 2;
   stateDrop.accel.z           = 30;
   stateDrop.mag.x             = 11;
   stateDrop.mag.y             = 21;
