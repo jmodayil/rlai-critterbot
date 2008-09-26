@@ -20,6 +20,7 @@
 #include "lib_events.h"
 #include "lib_adcspi.h"
 #include "lib_adc.h"
+#include "lib_mi.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -67,7 +68,8 @@ ui_cmd_item ui_commands[] = {
   {"fortune", ui_fortune, "fortune"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
   {"error", ui_error, "error [clear]"},
-  {"motor", ui_motor, "motor [motor #] [speed #]"}
+  {"motor", ui_motor, "motor [motor #] [speed #]"},
+  {"mi", ui_mi, "mi on"}
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -748,6 +750,16 @@ void ui_motor ( char * cmdstr)
   motor_test = 0;
   motor_set_speed(motor, speed);
   motor_test = 0;
+}
+
+void ui_mi ( char * cmdstr)
+{
+
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+    return;
+
+  if(strncmp (ui_strarg, "on", sizeof(ui_strarg)) == 0)
+    mi_start();
 }
 
 void ui_pid ( char * cmdstr)

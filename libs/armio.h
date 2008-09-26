@@ -58,6 +58,11 @@ ARM_CODE RAMFUNC void __armputchar(char);
 int armgetchar();
 
 /*
+ * gets the number of unread characters in the serial buffer
+ */
+int armgetnumchars(void); 
+
+/*
  * prints a formatted string to the serial port
  * format string % supports:
  * d = signed decimal integer

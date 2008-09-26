@@ -69,18 +69,18 @@
 
 // Transfer settings for chip selects 8 - 11
 // delay = 32 * value / MCK; min=0, max=255
-#define SPI_CS8_11_DELAY_BETWEEN_TRANSFERS 170
+#define SPI_CS8_11_DELAY_BETWEEN_TRANSFERS 80
 // delay = value / MCK; min=0, max=255
 #define SPI_CS8_11_DELAY_BEFORE_CLOCK 0
 // rate = MCK / value; min=1, max=255
-#define SPI_CS8_11_BAUD_RATE 100
+#define SPI_CS8_11_BAUD_RATE 255
 // bits = 8 + value; min=0, max=8
 #define SPI_CS8_11_WORD_SIZE 0x0
 // bit 0: Clock polarity, 0 clock starts low, 1 clock starts high
 // bit 1: Clock phase, 0 leading edge change, 1 leading edge capture
 // bit 2: Don't care
 // bit 3: Chip select behavior, 0 nCS rises after transfer, 1 stays low
-#define SPI_CS8_11_FLAGS 0x1
+#define SPI_CS8_11_FLAGS 0x0
 #define SPI_CSR2_SETTINGS ( SPI_CS8_11_DELAY_BETWEEN_TRANSFERS<<24 | \
                               SPI_CS8_11_DELAY_BEFORE_CLOCK<<16 | \
                               SPI_CS8_11_BAUD_RATE<<8 | \
