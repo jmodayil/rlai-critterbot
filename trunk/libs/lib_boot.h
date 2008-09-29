@@ -57,8 +57,7 @@ extern unsigned int boot_timeout_counter;
 ARM_CODE RAMFUNC void boot_core();
 
 /**
-  * After receiving a new binary, compares it with the current binary
-  * Sets all LEDs to blue in response
+  * Verifies the CRC of the new file
   */
 void boot_verify();
 
@@ -78,7 +77,7 @@ int boot_event();
 void boot_begin_receive(int data_size);
 
 /**
-  * Mayday! Abort the reception of new code
+  * We're done receiving code (for whatever reason)
   */
 void boot_end_receive();
 

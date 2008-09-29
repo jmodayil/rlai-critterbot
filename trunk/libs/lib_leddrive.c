@@ -11,7 +11,7 @@ event_s leddrive_event_s = {
 
 
 //cos/sin of 0-359 degress multiplied by 9000
-int cos_lookup[360] = {
+/*int cos_lookup[360] = {
   9000,8999,8995,8988,8978,8966,8951,8933,
   8912,8889,8863,8835,8803,8769,8733,8693,
   8651,8607,8560,8510,8457,8402,8345,8285,
@@ -56,7 +56,7 @@ int cos_lookup[360] = {
   7632,7715,7794,7872,7947,8019,8089,8157,
   8222,8285,8345,8402,8457,8510,8560,8607,
   8651,8693,8733,8769,8803,8835,8863,8889,
-  8912,8933,8951,8966,8978,8988,8995,8999};
+  8912,8933,8951,8966,8978,8988,8995,8999};*/
 
 int sin_lookup[360] = {
   0,157,314,471,628,784,941,1097,
@@ -285,11 +285,12 @@ void rotate(int rot){
 		r =LED[0].r;
 		g =LED[0].g;
 		b =LED[0].b;
-		for (i=0;i<=15;++i){
+		memmove(&LED[0], &LED[1], sizeof(LED) - sizeof(LED[0]));
+		/*for (i=0;i<=15;++i){
 			LED[i].r=LED[i+1].r;
 			LED[i].g=LED[i+1].g;
 			LED[i].b=LED[i+1].b;
-		}			
+		}*/			
 		LED[15].r=r;
 		LED[15].g=g;
 		LED[15].b=b; 
@@ -299,11 +300,12 @@ void rotate(int rot){
 		r =LED[15].r;
 		g =LED[15].g;
 		b =LED[15].b;
-		for (i=15;i>=0;--i){
+		memmove(&LED[1], &LED[0], sizeof(LED) - sizeof(LED[0]));
+		/*for (i=15;i>=0;--i){
 			LED[i].r=LED[i-1].r;
 			LED[i].g=LED[i-1].g;
 			LED[i].b=LED[i-1].b;
-		}			
+		}*/			
 		LED[0].r=r;
 		LED[0].g=g;
 		LED[0].b=b;
@@ -356,115 +358,115 @@ void startup(void){
 		static unsigned int a,i;
 		a++;
 	switch(leddrive_startver){
-	case 1:
-		a=0;
-		leddrive_startver = -1;
-	case -1:
-		if (a<148){
-			for (i=0;i<=15;++i)
-				fadeto(&LED[i],255,255,255,2);
-		}
-		if (a>150 && a < 1100){
-			for (i=0;i<=15;i+=4)
-				fadeto(&LED[i],0,0,255,2);
-			for (i=1;i<=15;i+=4)
-				fadeto(&LED[i],0,255,0,2);
-			for (i=2;i<=15;i+=4)
-				fadeto(&LED[i],255,0,0,2);
-			for (i=3;i<=15;i+=4)
-				fadeto(&LED[i],255,255,0,2);
-		}
-		if(a>300 && a<900)
-			rotate(48);
+		case 1:
+			a=0;
+			leddrive_startver = -1;
+		case -1:
+			if (a<148){
+				for (i=0;i<=15;++i)
+					fadeto(&LED[i],255,255,255,2);
+			}
+			if (a>150 && a < 1100){
+				for (i=0;i<=15;i+=4)
+					fadeto(&LED[i],0,0,255,2);
+				for (i=1;i<=15;i+=4)
+					fadeto(&LED[i],0,255,0,2);
+				for (i=2;i<=15;i+=4)
+					fadeto(&LED[i],255,0,0,2);
+				for (i=3;i<=15;i+=4)
+					fadeto(&LED[i],255,255,0,2);
+			}
+			if(a>300 && a<900)
+				rotate(48);
 	
-		if(a>1100 && a<1250){
-			for (i=0;i<=15;++i)
-				fadeto(&LED[i],0,0,0,2);
-		}
-		if (a>1250)		
-			leddrive_ball();
-		break;
-	case 2:
-		a=0;
-		leddrive_startver = -2;
-	case -2:
-		if (a<10)
-			gradient(14,90,33,0,0,100);
-		if (a>=50 && a<=740)
-			rotate(5);
-		if(a>=250&& a<600)
- 			fadeto(&LED[0],255,0,0,5);
-		if (a>=400&& a<600)
-			fadeto(&LED[0],255,0,0,17);
-		if (a==600||a==620||a==640||a==660)
-			LED[0].g=128;
-		if (a>780 && a<920){
-			for (i=0;i<=15;++i)
-				fadeto(&LED[i],0,0,0,2);
-		}
-		if(a>920)
-			leddrive_ball();
-		break;
-	case 3://Special U of A colours startup.
-	default:
-		a=0;
-		i=0;
-		leddrive_startver=-3;
-	case -3:
-		if (a==1){
-			LED[0].r=255;
-			LED[0].g=204;
-		}
-		if (a<=80)
-			rotate(5);
-		if (a>110 && a<= 190)
-			rotate(-5);
-		if (a>210 && a<= 290)
-			rotate(5);
-		if (a==210){
-			LED[8].g=102;
-			LED[8].b=51;
-		}
-		if (a==230){
-			LED[0].r=LED[8].r=124;
-			LED[0].g=LED[8].g=150;
-			LED[0].b=LED[8].b=23;
-		}
-		if (a>310 && a<= 390)
-			rotate(-5);
-		if (a==460)
-			gradient(255,204,0,0,102,51);
-		if (a>=500&& a<800){
-			i++;
-			switch (i){
-			case 1:
+			if(a>1100 && a<1250){
+				for (i=0;i<=15;++i)
+					fadeto(&LED[i],0,0,0,2);
+			}
+			if (a>1250)		
+				leddrive_ball();
+			break;
+		case 2:
+			a=0;
+			leddrive_startver = -2;
+		case -2:
+			if (a<10)
+				gradient(14,90,33,0,0,100);
+			if (a>=50 && a<=740)
+				rotate(5);
+			if(a>=250&& a<600)
+	 			fadeto(&LED[0],255,0,0,5);
+			if (a>=400&& a<600)
+				fadeto(&LED[0],255,0,0,17);
+			if (a==600||a==620||a==640||a==660)
+				LED[0].g=128;
+			if (a>780 && a<920){
+				for (i=0;i<=15;++i)
+					fadeto(&LED[i],0,0,0,2);
+			}
+			if(a>920)
+				leddrive_ball();
+			break;
+		case 3://Special U of A colours startup.
+		default:
+			a=0;
+			i=0;
+			leddrive_startver=-3;
+		case -3:
+			if (a==1){
+				LED[0].r=255;
+				LED[0].g=204;
+			}
+			if (a<=80)
+				rotate(5);
+			if (a>110 && a<= 190)
+				rotate(-5);
+			if (a>210 && a<= 290)
+				rotate(5);
+			if (a==210){
+				LED[8].g=102;
+				LED[8].b=51;
+			}
+			if (a==230){
+				LED[0].r=LED[8].r=124;
+				LED[0].g=LED[8].g=150;
+				LED[0].b=LED[8].b=23;
+			}
+			if (a>310 && a<= 390)
+				rotate(-5);
+			if (a==460)
 				gradient(255,204,0,0,102,51);
-				break;
-			case 31:
-				gradient(0,102,51,255,204,0);	
-				break;
-			case 60:
-				i=0;
-				break;
+			if (a>=500&& a<800){
+				i++;
+				switch (i){
+					case 1:
+						gradient(255,204,0,0,102,51);
+						break;
+					case 31:
+						gradient(0,102,51,255,204,0);	
+						break;
+					case 60:
+						i=0;
+						break;
+				}
 			}
-		}
-		if (a>=800&&a<960){
-			for (i=0;i<=15;i+=2)
-				fadeto(&LED[i],255,204,0,3);
-			for (i=1;i<=15;i+=2)
-				fadeto(&LED[i],0,102,51,3);	
+			if (a>=800&&a<960){
+				for (i=0;i<=15;i+=2)
+					fadeto(&LED[i],255,204,0,3);
+				for (i=1;i<=15;i+=2)
+					fadeto(&LED[i],0,102,51,3);	
+				}
+			if(a>=960&&a<1280){
+				rotate(20);
+				fadeto(&LED[0],0,0,0,3);
 			}
-		if(a>=960&&a<1280){
-			rotate(20);
-			fadeto(&LED[0],0,0,0,3);
-		}
-		if(a>=1280&& a<1600){
-			rotate(-20);
-			fadeto(&LED[0],0,0,0,10);
-		}
-		if(a>= 1650)
-			leddrive_ball();
-		break;
+			if(a>=1280&& a<1600){
+				rotate(-20);
+				fadeto(&LED[0],0,0,0,10);
+			}
+			if(a>= 1650)
+				leddrive_ball();
+			break;
 	}	
 }
 // MAIN EVENT CONTROLLER
@@ -473,114 +475,121 @@ int leddrive_event(void) {
 	unsigned char r,g,b,r1,g1,b1;
 	int i,j;
 	static int a;
+	static enum leddrive_states old_state;
 	
+	if(old_state != leddrive_state)
+		a = 0;
+		
 	switch (leddrive_state){
-	case STARTUP:
-		startup();
-		break;
-	case BATSTATUS:
-		clearled();
-		battlvl(leddrive_batlvl);//
-		break;
-	case BALL:
-  	ledball_crtl();	
-  	ANGLEINFO[0].deg=&ledball_angle;
-    ANGLEINFO[0].cval=&ledball_cval;
-    ANGLEINFO[0].grad=BLUERED;
-    *(ANGLEINFO[1].cval)=*(ANGLEINFO[2].cval)=*(ANGLEINFO[3].cval)=5000;
-	case ANGLE:
-		clearled();
-		for(i=0;i<=3;i++){
-			if (*(ANGLEINFO[i].cval)<4096){
-				cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
-				anglelight(*(ANGLEINFO[i].deg),r,g,b);
-			}
-		}	
-		break;
-	case ROTATE:
-		rotate(*leddrive_rot);
-		break;
-	case GRADIENT:
-		if(old_leddrive_gradcval1 == *leddrive_gradcval1 && old_leddrive_gradcval2 == *leddrive_gradcval2)
+		case STARTUP:
+			startup();
 			break;
-		clearled();
-		cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
-		cvalselect(&r1,&g1,&b1,leddrive_grad2,*leddrive_gradcval2);
-		gradient(r,g,b,r1,g1,b1);
-		old_leddrive_gradcval1 = *leddrive_gradcval1;
-		old_leddrive_gradcval2 = *leddrive_gradcval2;
-		break;
-	case FADEANGLE:
-		clearled();
-		for(i=0;i<=3;i++){
-			if (*(ANGLEINFO[i].cval)<4096){
-				cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
-				fadeangle(*(ANGLEINFO[i].deg),r,g,b);
+		case BATSTATUS:
+			clearled();
+			battlvl(leddrive_batlvl);//
+			break;
+		case BALL:
+	  	ledball_crtl();	
+	  	ANGLEINFO[0].deg=&ledball_angle;
+	    ANGLEINFO[0].cval=&ledball_cval;
+	    ANGLEINFO[0].grad=BLUERED;
+	    *(ANGLEINFO[1].cval)=*(ANGLEINFO[2].cval)=*(ANGLEINFO[3].cval)=5000;
+		case ANGLE:
+			clearled();
+			for(i=0;i<=3;i++){
+				if (*(ANGLEINFO[i].cval)<4096){
+					cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
+					anglelight(*(ANGLEINFO[i].deg),r,g,b);
+				}
+			}	
+			break;
+		case ROTATE:
+			rotate(*leddrive_rot);
+			break;
+		case GRADIENT:
+			if(old_leddrive_gradcval1 == *leddrive_gradcval1 && old_leddrive_gradcval2 == *leddrive_gradcval2)
+				break;
+			clearled();
+			cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
+			cvalselect(&r1,&g1,&b1,leddrive_grad2,*leddrive_gradcval2);
+			gradient(r,g,b,r1,g1,b1);
+			old_leddrive_gradcval1 = *leddrive_gradcval1;
+			old_leddrive_gradcval2 = *leddrive_gradcval2;
+			break;
+		case FADEANGLE:
+			clearled();
+			for(i=0;i<=3;i++){
+				if (*(ANGLEINFO[i].cval)<4096){
+					cvalselect(&r,&g,&b,ANGLEINFO[i].grad,*(ANGLEINFO[i].cval));
+					fadeangle(*(ANGLEINFO[i].deg),r,g,b);
+				}
 			}
-		}
-		break;	
-	case ERROR:
-		a++;
-		if (a==1){
-			for(i=0;i<=15;i++){
-				LED[i].r=255;					
-				LED[i].g=128;
-			}
-		}
-		if (a==15){
-			for(i=0;i<=15;i++)
-				LED[i].g=0;
-		}
-		if (a==30)
-			a=0;
-		break;
-	case EMERG:
-		a++;
-		if (a==1){
-		for(i=0;i<=15;i+=2)
-			LED[i].r=255;
-		for(j=1;j<=15;j+=2)
-			LED[j].b=255;
-		}
-		rotate(25);
-		break;
-	case BUSY:
-		a++;
-		LED[(a>>3)].g=80+(a);
-		if ((a>>3)>15){
-		a=0;
-		clearled();
-		}
-		break;
-	case COLORDIS:
-			rotate(15);
+			break;	
+		case ERROR:
 			a++;
 			if (a==1){
-				clearled();
-				gradient(255,0,0,0,0,0);
-			}	
-			if (a>50 && a<600)
-				fadein(&LED[0].g,5,255);
-			if (a>600 && a<1200)
-				fadein(&LED[0].b,5,255);
-			if (a>900 && a<1200)
-				fadeout(&LED[0].r,5,0);
-			if (a>1200)
-				fadeout(&LED[0].g,5,0);
-			if (a>1500)
-				fadein(&LED[0].r,5,255);
-			if (a>2000)
-				fadeout(&LED[0].b,7,0);
-			if (a==2400)
+				for(i=0;i<=15;i++){
+					LED[i].r=255;					
+					LED[i].g=128;
+				}
+			}
+			if (a==15){
+				for(i=0;i<=15;i++)
+					LED[i].g=0;
+			}
+			if (a>=30)
 				a=0;
-		break;	
-  case CLEAR:	
-    clearled();
-    leddrive_stop();
-    break;
-  case STOP:
-  	break;
+			break;
+		case EMERG:
+			a++;
+			if (a==1){
+			for(i=0;i<=15;i+=2)
+				LED[i].r=255;
+			for(j=1;j<=15;j+=2)
+				LED[j].b=255;
+			}
+			rotate(25);
+			break;
+		case BUSY:
+			/*a++;
+			LED[(a>>3)].g=80+(a);
+			if ((a>>3)>15){
+			a=0;
+			clearled();
+			}*/
+		gradient(0,0,0,0,255,100);
+		rotate(7);
+			break;
+		case COLORDIS:
+				rotate(15);
+				a++;
+				if (a==1){
+					clearled();
+					gradient(255,0,0,0,0,0);
+				}	
+				if (a>50 && a<600)
+					fadein(&LED[0].g,5,255);
+				if (a>600 && a<1200)
+					fadein(&LED[0].b,5,255);
+				if (a>900 && a<1200)
+					fadeout(&LED[0].r,5,0);
+				if (a>1200)
+					fadeout(&LED[0].g,5,0);
+				if (a>1500)
+					fadein(&LED[0].r,5,255);
+				if (a>2000)
+					fadeout(&LED[0].b,7,0);
+				if (a>=2400)
+					a=0;
+			break;	
+	  case CLEAR:	
+	    clearled();
+	    leddrive_stop();
+	    break;
+	  case STOP:
+	  	break;
 	}
+	old_state = leddrive_state;
 	leddrive_write();//sends LED[] values to the leds
   return 0;
 }
@@ -687,7 +696,9 @@ void ledball_crtl(void){
 	else
 		fricaccel=0;
 
-	accely=-(ledball_gy)*(cos_lookup[ledball_angle]);
+	accely=-(ledball_gy)*(sin_lookup[
+		((ledball_angle < 269) ? (ledball_angle + 90) : (ledball_angle - 270))
+		]);
 	accelx=-(ledball_gx)*(sin_lookup[ledball_angle]);
 
 	

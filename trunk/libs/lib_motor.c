@@ -94,6 +94,8 @@ unsigned char motor_get_voltage() {
   
   unsigned int temp;
  
+	if(0 == (power_rx_data & 0xFF))
+		return 255;
   temp = power_rx_data & 0xFF;
   return ((temp + 148) * 7) / 27;
 }

@@ -64,8 +64,6 @@ ARM_CODE RAMFUNC void boot_core()
   
   source = (unsigned char*)BOOT_BUFFER;
   dest = (unsigned char*)BOOT_COPY_DESTINATION;
-
-  //__armprintf("\r\rFLASHING BOOT IMAGE!!!\r\r");
   
   // Copy all pages except possibly the last one
   for (i = 0; i < num_pages; i++)
@@ -109,6 +107,8 @@ ARM_CODE RAMFUNC void boot_core()
     boot_reset_arm();
   else
   {
+		// No particular reason to think anything will still be running if we get here,
+		// but just in case...
     __armputchar('\r'); 
     __armputchar('F');
     __armputchar('L');
@@ -179,15 +179,12 @@ int boot_event()
   {
     // If we got the right amount of data, verify with CRC.
     if (boot_data_head == boot_data_size)
-    {
-      // @@@ replace with boot_core once ready
       boot_verify();
-    }
     else if (boot_data_head > boot_data_size) {
      armprintf ("Got %d bytes too much data.\r", boot_data_head - boot_data_size);
     } else {
       armprintf ("Timeout.\r");
-      // If done receiving... (or returned from boot_core??)
+      // If done receiving... 
       error_set(ERR_BOOT);
     }
     boot_end_receive();
@@ -206,8 +203,6 @@ int boot_event()
       boot_data_head == BOOT_MAX_CODE_SIZE)
       {
         error_set(ERR_BOOT);
-        //boot_end_receive();
-        //return;
         boot_data_head++;
       }
     else {// Store byte in buffer
@@ -232,12 +227,10 @@ void boot_begin_receive(int data_size)
   leddrive_busy();
   event_start(EVENT_ID_BOOT);
   event_stop(EVENT_ID_UI);
-  // run_ui = 0;
-  // @@@ disable UI
 }
 
 /**
-  * Mayday! Abort the reception of new code
+  * Ends reception of code (for whatever reason)
   */
 void boot_end_receive()
 {
