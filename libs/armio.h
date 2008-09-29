@@ -37,16 +37,21 @@
 
 char ser_tx_buf[SER_TX_BUF_SIZE];
 char ser_rx_buf[SER_RX_BUF_SIZE];
-volatile char *ser_rx_head, *ser_rx_tail;
-volatile char * volatile ser_tx_head, * volatile ser_tx_tail;
+
+/* 28/09/08 MVS
+ * Removed volatile flag from ser_rx_head as I don't think it is needed.
+ */
+volatile char *ser_rx_head;
+volatile char * volatile ser_tx_head;
 char *read_loc;
+
 /*
  * outputs a character to the serial port
  */ 
 void armputchar(char);
 
 /*
- * manually outputs a character to the serial port
+ * outputs a character to the serial port (blocking)
  */ 
 ARM_CODE RAMFUNC void __armputchar(char);
 
@@ -76,7 +81,7 @@ int armgetnumchars(void);
 void armprintf(char*, ...);
 
 /*
- * Blocking, no-isr, no-pdc implementation
+ * same as above but blocking
  */
 void __armprintf(char*, ...);
 
@@ -106,18 +111,6 @@ ARM_CODE RAMFUNC void ser_isr(void);
  * Initialize the serail port for character stream input/output
  */
 int init_serial_port_stdio(void);
-
-/*
- * Send a character out the serial port
- */
-void armputchar(char);
-
-/*
- * Get a character from the serial port
- *
- * returns character, or EOF if no data in buffer
- */
-int armgetchar(void);
 
 /*
  * Reads a newline terminated string from the serial port.
