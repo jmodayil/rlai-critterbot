@@ -17,7 +17,6 @@
 #define PIT_INTERRUPT_LEVEL  5
 #define EVENTS_HZ 100
 // Number of clock cycles (at 3MHz) - 1 before the PIT triggers an interrupt
-// We want a 100Hz timer, so we set this to 29999.
 #define EVENTS_PIV_VALUE     (MCK / 16 / EVENTS_HZ)
 
 #define EVENT_ID_UART 0
@@ -90,6 +89,13 @@ void event_start(unsigned int);
 int event_init(unsigned int);
 
 void events_do();
+
+
+/*
+ * Returns the percent of the event loop that the last cycle took.
+ * Assumes no overrun.
+ */
+unsigned char events_time(void);
 
 /** Initializes the event timer.
   */

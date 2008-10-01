@@ -108,7 +108,7 @@ int sin_lookup[360] = {
 int leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
-	leddrive_startver = 3;
+	leddrive_startver = 2;
 	int i,j;
 	for(i=0,j=5000;i<=3;i++)
 		*(ANGLEINFO[i].cval)=j;
@@ -507,7 +507,8 @@ int leddrive_event(void) {
 			rotate(*leddrive_rot);
 			break;
 		case GRADIENT:
-			if(old_leddrive_gradcval1 == *leddrive_gradcval1 && old_leddrive_gradcval2 == *leddrive_gradcval2)
+			if(old_leddrive_gradcval1 == *leddrive_gradcval1 && 
+         old_leddrive_gradcval2 == *leddrive_gradcval2)
 				break;
 			clearled();
 			cvalselect(&r,&g,&b,leddrive_grad1,*leddrive_gradcval1);
@@ -527,17 +528,15 @@ int leddrive_event(void) {
 			break;	
 		case ERROR:
 			a++;
-			if (a==1){
+			if (a<3){
 				for(i=0;i<=15;i++){
 					LED[i].r=255;					
 					LED[i].g=128;
 				}
 			}
-			if (a==15){
-				for(i=0;i<=15;i++)
-					LED[i].g=0;
-			}
-			if (a>=30)
+      else
+        clearled();
+			if (a>=50)
 				a=0;
 			break;
 		case EMERG:
@@ -581,12 +580,13 @@ int leddrive_event(void) {
 					fadeout(&LED[0].b,7,0);
 				if (a>=2400)
 					a=0;
-			break;	
+			break;
 	  case CLEAR:	
 	    clearled();
 	    leddrive_stop();
 	    break;
 	  case STOP:
+    default:
 	  	break;
 	}
 	old_state = leddrive_state;
