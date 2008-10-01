@@ -22,7 +22,8 @@ CritterStateDrop::CritterStateDrop() {
   motor340.velocity = 0;
   motor340.current = 0;
   motor340.temp = 0;
-  
+  cycle_time = 0;
+
 }
 
 CritterStateDrop::~CritterStateDrop() {
@@ -57,7 +58,7 @@ void CritterStateDrop::writeArray(void *d) {
   memcpy(data + i, &thermal, 32);     i += 32;
   memcpy(data + i, &bump, 128);       i += 128;
   memcpy(data + i, &error_flags, 4);  i += 4;
-
+  memcpy(data + i, &cycle_time, 4);   i += 4;
 }
 
 void CritterStateDrop::readArray(void *d) {
@@ -84,6 +85,7 @@ void CritterStateDrop::readArray(void *d) {
   memcpy(&thermal, data + i, 32);     i += 32;
   memcpy(&bump, data + i, 128);       i += 128;
   memcpy(&error_flags, data + i, 4);  i += 4;
+  memcpy(&cycle_time, data + i, 4);   i += 4;
 
 }
 
@@ -112,6 +114,7 @@ string CritterStateDrop::toString(string offset) {
   for(int i=0; i<8; i++) printf(" [%d]: %d ", i, thermal[i]);
   printf("\n bump: ");
   for(int i=0; i<32; i++) printf(" [%d]: %d ", i, bump[i]);
-  printf("\n error_flags: %d\n\n", error_flags);
+  printf("\n error_flags: %d", error_flags);
+  printf("\n cycle_time: %d\n\n", cycle_time);
 
 }

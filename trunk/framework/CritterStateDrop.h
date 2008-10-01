@@ -34,6 +34,7 @@ class CritterStateDrop : public DataDrop {
   unsigned int thermal[8];
   unsigned int bump[32];
   unsigned int error_flags; // (4) 34
+  unsigned int cycle_time;
 
 	CritterStateDrop();
 	virtual ~CritterStateDrop();

@@ -127,7 +127,7 @@ void CritterDriver::readPacket() {
 
 int CritterDriver::sense(USeconds &wokeAt) {
 
-  unsigned char header[] = {'a','b','c','d'};
+  unsigned char header[] = {SER_HEADER1, SER_HEADER2, SER_HEADER3, SER_HEADER4};
   unsigned char buf;
 
   int i = 0;
@@ -152,7 +152,8 @@ int CritterDriver::sense(USeconds &wokeAt) {
 
 int CritterDriver::act(USeconds &now) {
 
-  char str[100];
+  unsigned char sdata[] = {SER_HEADER1, SER_HEADER2, SER_HEADER3, SER_HEADER4,
+    0, 0, 0, 0, 0};
   
   if(now - lastPost >= postWait) {
     lastPost = now + (now - lastPost - postWait);
@@ -161,8 +162,17 @@ int CritterDriver::act(USeconds &now) {
     controlDrop = (CritterControlDrop*)lake->readHead(controlId);  
     
     if (controlDrop) {
-      
-      if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
+     
+      sdata[4] = (char)controlDrop->motor_mode;
+      sdata[5] = (char)controlDrop->m100_vel;
+      sdata[6] = (char)controlDrop->m220_vel;
+      sdata[7] = (char)controlDrop->m340_vel;
+      sdata[8] = (char)controlDrop->led_mode;
+
+      if(9 != write(fid, &sdata, 9) 
+          fprintf(stderr, "Error writing data out to serial port!\n"); 
+    }
+    /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
         int v1 = controlDrop->m100_vel;
         int v2 = controlDrop->m220_vel;
@@ -219,7 +229,7 @@ int CritterDriver::act(USeconds &now) {
         if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
       
       }
-    }
+    }*/
     lake->doneRead(controlId);
 
     if (newData) {

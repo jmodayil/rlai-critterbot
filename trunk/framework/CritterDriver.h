@@ -12,6 +12,11 @@
 #include "CritterControlDrop.h"
 #include "CritterStateDrop.h"
 
+#define SER_HEADER1 0xDE;
+#define SER_HEADER2 0xAD;
+#define SER_HEADER3 0xBE;
+#define SER_HEADER4 0xEF;
+
 using namespace std;
 
 class CritterDriver : public Component {

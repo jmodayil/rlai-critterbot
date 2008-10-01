@@ -38,6 +38,8 @@ extern event_s adcspi_event_s;
 volatile unsigned int events_status;
 // Semapore related to events_status
 crit_sem events_status_sem;
+// Execution time of the last event cycle
+unsigned int event_time;
 
 unsigned int events_has_event()
 {
@@ -211,6 +213,12 @@ void events_do()
       (*events[i]).event_count++;
     }
   }
+  event_time = AT91C_BASE_PITC->PITC_PIIR & 0x0000FFFF;
+  event_time = (event_time * 100 ) / EVENTS_PIV_VALUE;
+}
+
+unsigned char events_time() {
+  return event_time;
 }
 
 ARM_CODE RAMFUNC void events_isr()

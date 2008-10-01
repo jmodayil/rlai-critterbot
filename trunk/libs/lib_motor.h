@@ -6,12 +6,19 @@
 
 #define MOTOR_NUM_MOTORS 3
 
+// This limited the value you can set the motors to, and also
+// provides scaling for incoming commands
 #define MOTOR_MAX_SPEED 100
+
 #define MOTOR_MAX_PWM 127
+// Number of bytes in a motor packet (including header)
 #define MOTOR_NUM_BYTES 5
 
 #define MOTOR_PACKET_HEADER 0x7F
 #define MOTOR_PWM_HEADER 0x7E
+
+// Time (in cycle) to slew to new speed
+#define MOTOR_SLEW_TIME 100
 
 /*
  * Initialize motor driver
@@ -44,3 +51,18 @@ void motor_init_packet(int motor);
  * Also collects system voltage (for now, this should move to lib_power)
  */
 int motor_event( void );
+
+/*
+ * Returns number of clicks (speed) for the last cycle of the motor
+ */
+char motor_clicks(int motor);
+
+/*
+ * Returns raw current sense value for the last cycle of the motor
+ */
+unsigned char motor_current(int motor);
+
+/*
+ * Returns raw temperature sense value for the last cycle of the motor
+ */
+unsigned char motor_temp(int motor);

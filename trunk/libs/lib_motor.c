@@ -19,6 +19,11 @@ volatile int motor_test;
 
 char motor_speed[MOTOR_NUM_MOTORS];
 
+static char motor_slew_interval[MOTOR_NUM_MOTORS];
+static char motor_slew_each[MOTOR_NUM_MOTORS];
+static char motor_slew_mod;
+static char motor_slew_count;
+
 int motor_init() {
 
   int i;
@@ -46,6 +51,18 @@ int motor_event() {
   
   unsigned int volt;
   int i;
+
+  if(motor_slew_count < MOTOR_SLEW_TIME) {
+    for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+      motor_speed[i] += motor_slew_each[i];
+      if(motor_slew_mod == motor_slew_interval[i]) {
+        motor_slew_mod = 0;
+        motor_speed[i] += (motor_slew_each[i] > 0) ? 1 : -1;
+      }
+      motor_slew_mod++;
+      motor_slew_count++;
+    }
+  }
 
 
   volt = motor_get_voltage();
@@ -79,6 +96,8 @@ int motor_event() {
 
 void motor_set_speed(int motor, int speed) {
 
+  char temp;
+
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return;
 
@@ -87,7 +106,13 @@ void motor_set_speed(int motor, int speed) {
   if(speed > MOTOR_MAX_SPEED) 
     speed = MOTOR_MAX_SPEED;
 
-  motor_speed[motor] = speed & 0xFF;
+  motor_slew_mod = 1;
+  motor_slew_count = 0;
+  motor_slew_each[motor] = (speed - motor_speed[motor]) / MOTOR_SLEW_TIME;
+  motor_slew_interval[motor] = (speed - motor_speed[motor]) % MOTOR_SLEW_TIME;
+  if(motor_slew_interval[motor] != 0)
+    motor_slew_interval[motor] = MOTOR_SLEW_TIME / motor_slew_interval[motor];
+  //motor_speed[motor] = speed & 0xFF;
 }
 
 unsigned char motor_get_voltage() {
@@ -126,5 +151,28 @@ void motor_set_pwm(int motor, int pwm) {
   motor_tx_data[motor][0] = MOTOR_PWM_HEADER;
   motor_tx_data[motor][1] = pwm & 0xFF;
   motor_tx_data[motor][2] = temp & 0xFF;
+}
+
+char motor_clicks(int motor) {
+
+  if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
+    return 0;
+
+  return motor_rx_data[motor][0] & 0xFF;
+}
+
+unsigned char motor_current(int motor) {
+
+  if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
+    return 0;
+
+  return motor_rx_data[motor][1] & 0xFF;
+}
+
+unsigned char motor_temp(int motor) {
+  if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
+    return 0;
+
+  return motor_rx_data[motor][2] & 0xFF;
 }
 
