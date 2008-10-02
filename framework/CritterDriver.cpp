@@ -82,15 +82,19 @@ int CritterDriver::init(USeconds &wokeAt) {
   printf("Initializing serial port.\n");
   initport();
 
-  return 0;
+  return 1;
+}
+
+int CritterDriver::getFID() {
+  return fid;
 }
 
 void CritterDriver::readPacket() {
 
-  unsigned char buf[34];
+  unsigned char buf[35];
   
   if(fid > 0) {
-    if (34 == read(fid, buf, 34)) {
+    if (35 == read(fid, buf, 35)) {
       int i = 0;
       stateDrop.motor100.velocity = (int) buf[i++];
       stateDrop.motor100.current  = (int) buf[i++];
@@ -118,6 +122,7 @@ void CritterDriver::readPacket() {
         stateDrop.error_flags << 8;
         stateDrop.error_flags += buf[i++];
       }
+      stateDrop.cycle_time += (int) buf[i++];
       newData = true;
     } // else??? - serial must have sent a EOF in the middle of a packet, or timed out
   } else {
@@ -128,13 +133,13 @@ void CritterDriver::readPacket() {
 int CritterDriver::sense(USeconds &wokeAt) {
 
   unsigned char header[] = {SER_HEADER1, SER_HEADER2, SER_HEADER3, SER_HEADER4};
-  unsigned char buf;
+  static unsigned char buf;
 
   int i = 0;
   
   if(fid > 0) {
     while(read(fid, &buf, 1) > 0) {
-      
+      fprintf(stderr, "buf: %x.\n", buf); 
       if (buf == header[i]) {
         if (i == 3) readPacket();
         else i++;
@@ -169,11 +174,21 @@ int CritterDriver::act(USeconds &now) {
       sdata[7] = (char)controlDrop->m340_vel;
       sdata[8] = (char)controlDrop->led_mode;
 
+<<<<<<< .mine
+      if(9 != write(fid, &sdata, 9)) 
+          fprintf(stderr, "Error writing data out to serial port!\n"); 
+      else
+          fprintf(stderr, ".");
+    }
+    /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
+
+=======
       if(9 != write(fid, &sdata, 9) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
     }
     /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
+>>>>>>> .r143
         int v1 = controlDrop->m100_vel;
         int v2 = controlDrop->m220_vel;
         int v3 = controlDrop->m340_vel;
