@@ -60,7 +60,7 @@ ui_cmd_item ui_commands[] = {
   {"get_adcspi", ui_getadcspi, "get_adcspi"},
   {"toggle_adcspi", ui_toggle_adcspi, "toggle_adcspi"},
   {"status", ui_status, "status"},
-  {"report", ui_report, "report"},
+  {"report", ui_report, "report [led|accel|adc0-4|error]"},
   {"mode", ui_mode, "mode <led [gs|dc]> - broken"},
   {"test", ui_test, "test [ramfunc|int|stress]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
@@ -84,6 +84,7 @@ volatile ui_io_handler_fn ui_io_handler = NULL;
 //  every so often.
 volatile int ui_report_mode = 0;
 volatile int ui_report_clock = 0;
+volatile int ui_report_list = UI_REPORT_DEFAULT;
 
 /** Finds the requested command in our list of commands.
   * Returns the corresponding item if found, NULL otherwise.
@@ -169,12 +170,20 @@ void ui_do_report()
 {
   int i;
   // The lazy way - call other status-related functions from the UI
-  ui_statled("stat_led");
-  ui_getaccel("get_accel");
-  ui_getadcspi("get_adcspi");
-  for(i = 4; i < 8; i++)
-    armprintf("ADC Channel %d: %d\r", i, adc_output[i]);
-  armprintf ("Error status: %x\r", error_get());
+  if (ui_report_list & UI_REPORT_LED)
+    ui_statled("stat_led");
+  if (ui_report_list & UI_REPORT_ACCEL)
+    ui_getaccel("get_accel");
+  // @@@ Fixme
+  if (ui_report_list & UI_REPORT_ADC0)
+    ui_getadcspi("get_adcspi");
+  if (ui_report_list & UI_REPORT_ADC_ONBOARD)
+  {
+    for(i = 4; i < 8; i++)
+      armprintf("ADC Channel %d: %d\r", i, adc_output[i]);
+  }
+  if (ui_report_list & UI_REPORT_ERROR)
+    armprintf ("Error status: %x\r", error_get());
 }
 
 void ui_help(char * cmdstr)
@@ -428,9 +437,35 @@ void ui_toggle_adcspi(char * cmdstr)
 void ui_report (char * cmdstr)
 {
   // Toggle reporting mode
-  ui_report_mode ^= 0x1;
-  if (!ui_report_mode)
-    ui_report_clock = 0;
+  if (armsscanf (cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+  {
+    ui_report_mode ^= 0x1;
+    if (!ui_report_mode)
+      ui_report_clock = 0;
+  }
+  else // Parse argument
+  {
+    if (strncmp(ui_strarg, "led", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_LED;
+    else if (strncmp(ui_strarg, "accel", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ACCEL;
+    else if (strncmp(ui_strarg, "adc0", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ADC0;
+    else if (strncmp(ui_strarg, "adc1", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ADC1;
+    else if (strncmp(ui_strarg, "adc2", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ADC2;
+    else if (strncmp(ui_strarg, "adc3", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ADC3;
+    else if (strncmp(ui_strarg, "adc4", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ADC_ONBOARD;
+    else if (strncmp(ui_strarg, "error", sizeof(ui_strarg)) == 0)
+      ui_report_list ^= UI_REPORT_ERROR;
+    else
+    {
+      armprintf ("Unknown report element: %s\r", ui_strarg);
+    }
+  }
 }
 
 void ui_mode (char * cmdstr)
