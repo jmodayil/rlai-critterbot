@@ -16,6 +16,18 @@
 // How frequently to report status in reporting mode, in 100th of a second
 #define UI_REPORT_INTERVAL 200
 
+// Flags for the different elements that can be reported
+#define UI_REPORT_LED      ( 1 << 0 )
+#define UI_REPORT_ACCEL    ( 1 << 1 )
+#define UI_REPORT_ADC0     ( 1 << 2 )
+#define UI_REPORT_ADC1     ( 1 << 3 )
+#define UI_REPORT_ADC2     ( 1 << 4 )
+#define UI_REPORT_ADC3     ( 1 << 5 )
+#define UI_REPORT_ADC_ONBOARD     ( 1 << 6 )
+#define UI_REPORT_ERROR    ( 1 << 7 )
+
+#define UI_REPORT_DEFAULT  ( UI_REPORT_LED | UI_REPORT_ERROR )
+
 #define UI_RESET_PASSWORD  "now"
 
 typedef void (*ui_function) (char * cmdstr);
