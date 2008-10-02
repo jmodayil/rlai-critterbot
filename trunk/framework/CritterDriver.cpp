@@ -174,7 +174,6 @@ int CritterDriver::act(USeconds &now) {
       sdata[7] = (char)controlDrop->m340_vel;
       sdata[8] = (char)controlDrop->led_mode;
 
-<<<<<<< .mine
       if(9 != write(fid, &sdata, 9)) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
       else
@@ -182,13 +181,6 @@ int CritterDriver::act(USeconds &now) {
     }
     /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
 
-=======
-      if(9 != write(fid, &sdata, 9) 
-          fprintf(stderr, "Error writing data out to serial port!\n"); 
-    }
-    /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
-
->>>>>>> .r143
         int v1 = controlDrop->m100_vel;
         int v2 = controlDrop->m220_vel;
         int v3 = controlDrop->m340_vel;
