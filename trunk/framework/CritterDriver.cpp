@@ -240,6 +240,8 @@ int CritterDriver::act(USeconds &now) {
     lake->doneRead(controlId);
 
     if (newData) {
+      // @@@ MGB: The = operator should be explicitly defined - don't rely on 
+      //  the default to work when using = to copy objects?
       (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
       lake->doneWriteHead(stateId);
       newData = false;
