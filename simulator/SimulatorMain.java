@@ -26,22 +26,30 @@ public class SimulatorMain
       subjPort = Integer.parseInt(args[1]);
 
     System.out.println ("Creating simulator engine...");
-    SimulatorEngine engine = new SimulatorEngine();
+    final SimulatorEngine engine = new SimulatorEngine();
 
     // Get the first agent from the engine
-    SimulatorAgent agent = engine.getAgentList().getFirst();
+    //SimulatorAgent agent = engine.getAgentList().getFirst();
 
     System.out.println ("Starting servers on ports "+objPort+" and "+subjPort);
     // Create a server for each
     ObjectiveDataServer objServer = new ObjectiveDataServer(objPort);
-    SubjectiveDataServer subjServer = new SubjectiveDataServer(agent, subjPort);
+    //SubjectiveDataServer subjServer = new SubjectiveDataServer(agent, subjPort);
 
+    javax.swing.SwingUtilities.invokeLater(new Runnable() {
+        public void run() {
+        	new SimulatorViz(engine);
+        }
+    });
+
+    
+    
     while (true)
     {
       engine.step();
-      objServer.sendUpdate(engine.getState());
-      subjServer.sendUpdate();
-      subjServer.receiveData();
+      //objServer.sendUpdate(engine.getState());
+      //subjServer.sendUpdate();
+      //subjServer.receiveData();
     }
   }
 }
