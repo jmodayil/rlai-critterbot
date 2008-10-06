@@ -26,13 +26,15 @@ public final class SimulatorViz extends JFrame {
     	
     	SimulatorDrawWorld world = new SimulatorDrawWorld(engine);
     	JScrollPane sPane = new JScrollPane(world);
-    	sPane.setPreferredSize(new Dimension(500,500));
+
+    	//sPane.setPreferredSize(new Dimension(500,500));
     	//sPane.add(world);
     	
     	//Container cp = this.getContentPane();
     	add(sPane);
-    	setMaximumSize(world.getPreferredSize());
+    	//setMaximumSize(world.getPreferredSize());
         world.requestFocusInWindow();
+        world.addKeyListener(engine.vizHandler);
         pack();
         
         //setResizable(false);

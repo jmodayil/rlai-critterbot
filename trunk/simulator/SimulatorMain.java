@@ -47,6 +47,12 @@ public class SimulatorMain
     while (true)
     {
       engine.step();
+      try {
+		Thread.sleep(9);
+      } catch (InterruptedException e) {
+		// TODO Auto-generated catch block
+		e.printStackTrace();
+      }
       //objServer.sendUpdate(engine.getState());
       //subjServer.sendUpdate();
       //subjServer.receiveData();
