@@ -14,7 +14,9 @@ public class SimulatorObject
 {
   /** Some physical properties of the object - position, velocity, mass, moment of intertia */
   protected Point2D.Double aPos;
+  protected double aDir;
   protected Vector2D aVel;
+  protected double aRot;
   protected double mass;
   protected double momI;
   
@@ -35,20 +37,24 @@ public class SimulatorObject
     aLabel = new String(pLabel);
     aId = pId;
     aPos = new Point2D.Double(0,0);
+    aDir = 0;
     aVel = new Vector2D(0,0);
+    aRot = 0;
     mass = 0;
     momI = 0;
   }
   
+  private void loadObject() {
+	  // Open files, lookup plabel, etc???
+  }
+  
   /**
-   * I am not clear if this needs to be a static method for thread safety,
-   * or if making it static even makes it thread safe.
    * 
    * 
    * @param obj
    * @param g
    */
-  static public void drawObj(SimulatorObject obj, Graphics g){
+  public void drawObj(Graphics g){
 	  
   }
   
@@ -85,6 +91,5 @@ public class SimulatorObject
   double getMoment() {
 	  return momI;
   }
-  
   
 }

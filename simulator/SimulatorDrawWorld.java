@@ -37,20 +37,24 @@ public class SimulatorDrawWorld extends JPanel {
 		
 		super.paintComponent(g);
 		
-		// Temporarily draw walls for the world;
-		g.setColor(Color.black);
-		g.drawRect(20, 20, x_size-40, y_size-40);
+		drawObjs(g);
 		drawAgents(g);
 		
 	}
 	
 	private void drawAgents(Graphics g) {
-	
-		/*Iterator<Agent> i = engine.getAgentList().iterator();
+		Iterator<SimulatorAgent> i = engine.getAgentList().iterator();
 		
 		while(i.hasNext()) {
-			Agent a = i.next();
-			a.drawAgent(g,a);
-		}*/
+			i.next().drawAgent(g);
+		}
+	}
+	
+	private void drawObjs(Graphics g) {
+		Iterator<SimulatorObject> i = engine.getObjList().iterator();
+		
+		while(i.hasNext()) {
+			i.next().drawObj(g);
+		}
 	}
 }

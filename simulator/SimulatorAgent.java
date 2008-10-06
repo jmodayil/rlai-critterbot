@@ -1,3 +1,6 @@
+import java.awt.Color;
+import java.awt.Graphics;
+
 /**
   * SimulatorAgent
   *
@@ -18,5 +21,16 @@ public class SimulatorAgent extends SimulatorObject
   {
     super(pLabel, pId);
     aCmdX = aCmdY = aCmdTheta;
+  }
+  
+  public void drawAgent(Graphics g) {
+	  Color tempC = g.getColor();
+	  g.setColor(Color.black);
+	  g.drawOval((int)aPos.x - 10, (int)aPos.y - 10, 20, 20);
+	  g.setColor(Color.red);
+	  g.drawLine((int)aPos.x, (int)aPos.y, (int)(aPos.x + 10 * Math.sin(aDir)), (int)(aPos.y + 10 * Math.cos(aDir)));
+	  g.setColor(Color.lightGray);
+	  g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
+	  g.setColor(tempC);
   }
 }
