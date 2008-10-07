@@ -33,6 +33,12 @@ class SimulatorInterface : public Component {
 		int thinks;
 		bool newData;
 		USeconds postWait, lastPost;
+
+    int robotSocket;
+    int objectiveSocket;
+
+    int robotPort;
+    int objectivePort; 
 };
 
 #endif
