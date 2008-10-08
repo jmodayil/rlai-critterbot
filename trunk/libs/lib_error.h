@@ -27,7 +27,10 @@
 #define ERR_SPI_OVERFLOW  (1<<8)
 #define ERR_ADC_SPI       (1<<9)
 #define ERR_SELF_TEST     (1<<10)
-#define ERR_MAXERR      10
+#define ERR_SER_PARITY    (1<<11)
+#define ERR_SER_OVRRUN    (1<<12)
+#define ERR_SER_FRAME     (1<<13)
+#define ERR_MAXERR      13
 
 
 extern unsigned int error_reg;

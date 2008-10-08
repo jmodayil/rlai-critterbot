@@ -424,6 +424,15 @@ ARM_CODE RAMFUNC void ser_isr(void) {
     AT91C_BASE_US0->US_TPR = (unsigned int)(ser_tx_head = ser_tx_buf);
     AT91C_BASE_US0->US_IDR = AT91C_US_ENDTX;
   }
+  if(status & AT91C_US_FRAME) {
+    error_set(ERR_SER_FRAME);
+  }
+  if(status & AT91C_US_PARE) {
+    error_set(ERR_SER_PARITY);
+  }
+  if(status & AT91C_US_FRAME) {
+    error_set(ERR_SER_FRAME);
+  }
   //else
     //AT91C_BASE_US0->US_PTCR = AT91C_PDC_TXTEN;
   AT91C_BASE_US0->US_PTCR = AT91C_PDC_RXTEN;
@@ -434,7 +443,7 @@ int init_serial_port_stdio(void) {
   
   AT91F_PMC_EnablePeriphClock(AT91C_BASE_PMC, 1 << AT91C_ID_US0);
   AT91F_PIO_CfgPeriph(AT91C_BASE_PIOA, SERIAL_A_PINS, SERIAL_B_PINS);
-  AT91C_BASE_US0->US_MR = (AT91C_US_CHRL_8_BITS | AT91C_US_PAR_NONE);
+  AT91C_BASE_US0->US_MR = (AT91C_US_CHRL_8_BITS | AT91C_US_PAR_ODD);
   AT91C_BASE_US0->US_BRGR = SER_BRGR;
   AT91C_BASE_US0->US_CR = (AT91C_US_RXEN | AT91C_US_TXEN | AT91C_US_RSTSTA );
   AT91F_AIC_ConfigureIt(AT91C_BASE_AIC,
@@ -442,7 +451,8 @@ int init_serial_port_stdio(void) {
                         AT91C_AIC_PRIOR_LOWEST,
                         AT91C_AIC_SRCTYPE_INT_HIGH_LEVEL,
                         (void*)ser_isr );
-  AT91C_BASE_US0->US_IER = AT91C_US_ENDRX;
+  AT91C_BASE_US0->US_IER = AT91C_US_ENDRX | AT91C_US_FRAME | 
+                           AT91C_US_PARE | AT91C_US_OVRE;
   
   AT91F_AIC_EnableIt(AT91C_BASE_AIC, AT91C_ID_US0);
 
