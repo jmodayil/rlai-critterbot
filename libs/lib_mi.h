@@ -25,6 +25,7 @@ void mi_get_commands(void);
 void mi_start(void);
 void mi_stop(void);
 int mi_event(void);
+void putwcrc(unsigned char data);
 
 struct command_packet {
 

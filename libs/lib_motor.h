@@ -28,7 +28,7 @@ int motor_init( void );
 /*
  * Sets the speed of motor, within +/-MOTOR_MAX_SPEED
  */
-void motor_set_speed(int motor, int speed);
+void motor_set_speed(int motor, signed char speed);
 
 /*
  * Sets a raw PWM motor value in range +/-127

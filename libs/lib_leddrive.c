@@ -105,6 +105,8 @@ int sin_lookup[360] = {
   -2481,-2329,-2177,-2025,-1871,-1717,-1563,-1408,
   -1253,-1097,-941,-784,-628,-471,-314,-157};
 
+static unsigned char *byte_val;
+
 int leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
@@ -312,6 +314,14 @@ void rotate(int rot){
 		a=0;
 	}
 }
+
+void dispbyte(unsigned char val) {
+  int i;
+  for(i = 0; i < 8; i++) {
+    LED[i].r = (val & (1 << i)) ? 50 : 0;
+  }
+}
+
 void clearled(void){
 	memset(LED, 0x00, sizeof(LED));
 }
@@ -506,6 +516,9 @@ int leddrive_event(void) {
 		case ROTATE:
 			rotate(*leddrive_rot);
 			break;
+    case BYTE:
+      dispbyte(*byte_val);
+      break;
 		case GRADIENT:
 			if(old_leddrive_gradcval1 == *leddrive_gradcval1 && 
          old_leddrive_gradcval2 == *leddrive_gradcval2)
@@ -661,7 +674,11 @@ void leddrive_busy(void){
 	leddrive_state=BUSY;
 }
 
-
+void leddrive_byte(unsigned char *val){
+  byte_val = val;
+  clearled();
+  leddrive_state=BYTE;
+}
 
 
 /* 
