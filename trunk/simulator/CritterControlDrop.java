@@ -1,0 +1,90 @@
+/**
+  * CritterControlDrop
+  *
+  * This class encapsulates data received from DisCo about commands sent
+  *  to the robot. Somewhat a clone of CritterControlDrop.{h,cpp}.
+  */
+
+import java.io.DataOutputStream;
+import java.io.DataInputStream;
+import java.io.IOException;
+import java.util.EnumSet;
+
+public class CritterControlDrop implements SimulatorDrop
+{
+  public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE };
+  public enum LedMode { THING1, THING2, THING3 };
+
+  protected MotorMode motor_mode;
+  protected LedMode   led_mode;
+
+  /** Velocities used in XYTHETA_SPACE */
+  int x_vel, y_vel, theta_vel;
+  /** Velocities used in WHEEL_SPACE */
+  int m100_vel, m220_vel, m340_vel;
+
+  /** Write control drop data out to a stream. The order in which things 
+    *  are sent must be:
+    *
+    *  motor_mode, led_mode (as ints)
+    *  x_vel, y_vel, theta_vel OR
+    *   m100_vel, m220_vel, m340_vel
+    *
+    * @param pOut The output stream to which the data should be written
+    */
+  public void writeData(DataOutputStream pOut) throws IOException
+  {
+    // Write modes
+    pOut.writeInt(motor_mode.ordinal());
+    pOut.writeInt(led_mode.ordinal());
+
+    // Write 3 velocities
+    switch (motor_mode)
+    {
+      case WHEEL_SPACE:
+        pOut.writeInt(m100_vel);
+        pOut.writeInt(m220_vel);
+        pOut.writeInt(m340_vel);
+        break;
+      case XYTHETA_SPACE:
+        pOut.writeInt(x_vel);
+        pOut.writeInt(y_vel);
+        pOut.writeInt(theta_vel);
+        break;
+      default:
+        throw new IOException("Unknown motor mode.");
+    }
+  }
+  
+  /** Reverse of writeData; reads the drop from a DataInputStream
+    *
+    * @param pIn The input stream from which we read the data
+    */
+  public void readData(DataInputStream pIn) throws IOException
+  {
+    // Read modes and convert them to enums
+    // Unfortunately, Java hates integer enums, so we have to circumvent this
+    motor_mode = (MotorMode)EnumSet.range(MotorMode.WHEEL_SPACE, 
+      MotorMode.XYTHETA_SPACE).toArray()[pIn.readInt()];
+    led_mode = (LedMode)EnumSet.range(LedMode.THING1, 
+      LedMode.THING3).toArray()[pIn.readInt()];
+
+    // Read in the three velocities
+    switch (motor_mode)
+    {
+      case WHEEL_SPACE:
+        m100_vel = pIn.readInt();
+        m220_vel = pIn.readInt();
+        m340_vel = pIn.readInt();
+        break;
+      case XYTHETA_SPACE:
+        x_vel = pIn.readInt();
+        y_vel = pIn.readInt();
+        theta_vel = pIn.readInt();
+        break;
+      default:
+        throw new IOException("Unknown motor mode.");
+    }
+    
+  }
+}
