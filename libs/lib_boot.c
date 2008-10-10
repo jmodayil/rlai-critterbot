@@ -224,7 +224,7 @@ void boot_begin_receive(int data_size)
   boot_data_size = data_size + 2;
   boot_timeout_counter = 0;
   crc_was_good = 0;
-  leddrive_busy();
+  leddrive_emerg();
   event_start(EVENT_ID_BOOT);
   event_stop(EVENT_ID_UI);
 }

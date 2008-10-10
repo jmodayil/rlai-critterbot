@@ -30,7 +30,8 @@
 #define ERR_SER_PARITY    (1<<11)
 #define ERR_SER_OVRRUN    (1<<12)
 #define ERR_SER_FRAME     (1<<13)
-#define ERR_MAXERR      13
+#define ERR_MOTOR_ALIGN   (1<<14)
+#define ERR_MAXERR      14
 
 
 extern unsigned int error_reg;
