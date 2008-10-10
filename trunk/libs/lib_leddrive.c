@@ -281,7 +281,6 @@ void gradient(unsigned char r1,unsigned char g1,unsigned char b1,unsigned char r
 void rotate(int rot){
 	static int a;
 	unsigned char r,g,b;
-	int i;
 	a++;
 	if (rot >0 && a>=rot){
 		r =LED[0].r;
@@ -500,7 +499,7 @@ int leddrive_event(void) {
 			break;
 		case BALL:
 	  	ledball_crtl();	
-	  	ANGLEINFO[0].deg=&ledball_angle;
+	  	ANGLEINFO[0].deg=(int*)&ledball_angle;
 	    ANGLEINFO[0].cval=&ledball_cval;
 	    ANGLEINFO[0].grad=BLUERED;
 	    *(ANGLEINFO[1].cval)=*(ANGLEINFO[2].cval)=*(ANGLEINFO[3].cval)=5000;

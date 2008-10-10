@@ -15,13 +15,11 @@ unsigned int power_rx_data;
 struct spi_packet motor_packet[MOTOR_NUM_MOTORS]; 
 struct spi_packet power_packet;
 
-volatile int motor_test;
-
 char motor_speed[MOTOR_NUM_MOTORS];
+char motor_speed_final[MOTOR_NUM_MOTORS];
 
-static char motor_slew_interval[MOTOR_NUM_MOTORS];
-static char motor_slew_each[MOTOR_NUM_MOTORS];
-static char motor_slew_mod;
+static float motor_speed_float[MOTOR_NUM_MOTORS];
+static float motor_slew_interval[MOTOR_NUM_MOTORS];
 static char motor_slew_count;
 
 int motor_init() {
@@ -52,18 +50,19 @@ int motor_event() {
   unsigned int volt;
   int i;
 
-  /*if(motor_slew_count < MOTOR_SLEW_TIME) {
+  if(motor_slew_count < MOTOR_SLEW_TIME) {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
-      motor_speed[i] += motor_slew_each[i];
-      if(motor_slew_mod == motor_slew_interval[i]) {
-        motor_slew_mod = 0;
-        motor_speed[i] += (motor_slew_each[i] > 0) ? 1 : -1;
-      }
-      motor_slew_mod++;
+      motor_speed_float[i] += motor_slew_interval[i];
+      motor_speed[i] = (char)motor_speed_float[i];
       motor_slew_count++;
     }
-  }*/
-
+  }
+  else if(motor_slew_count == MOTOR_SLEW_TIME) {
+    for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+      motor_speed[i] = motor_speed_final[i];
+      motor_slew_count++;
+    }
+  }
 
   volt = motor_get_voltage();
 
@@ -73,9 +72,11 @@ int motor_event() {
     spi_send_packet(&motor_packet[i]);
   }
   spi_send_packet(&power_packet); 
-  /*for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+  for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     if((motor_rx_data[i][4] & 0xFF) != MOTOR_PACKET_HEADER)
-      armprintf("!Motor %d: %d %d %d %d\r", i, 
+      error_set(ERR_MOTOR_ALIGN);
+  }
+      /*armprintf("!Motor %d: %d %d %d %d\r", i, 
         motor_rx_data[i][1] & 0xFF, 
         motor_rx_data[i][2] & 0xFF, 
         motor_rx_data[i][3] & 0xFF,
@@ -96,8 +97,6 @@ int motor_event() {
 
 void motor_set_speed(int motor, signed char speed) {
 
-  char temp;
-
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return;
 
@@ -106,13 +105,12 @@ void motor_set_speed(int motor, signed char speed) {
   if(speed > MOTOR_MAX_SPEED) 
     speed = MOTOR_MAX_SPEED;
 
-/*  motor_slew_mod = 1;
   motor_slew_count = 0;
-  motor_slew_each[motor] = (speed - motor_speed[motor]) / MOTOR_SLEW_TIME;
-  motor_slew_interval[motor] = (speed - motor_speed[motor]) % MOTOR_SLEW_TIME;
-  if(motor_slew_interval[motor] != 0)
-    motor_slew_interval[motor] = MOTOR_SLEW_TIME / motor_slew_interval[motor];
-  */motor_speed[motor] = speed;
+  motor_speed_float[motor] = motor_speed[motor];
+  motor_speed_final[motor] = speed;
+  motor_slew_interval[motor] = (float)(speed - motor_speed[motor]) / 
+                                MOTOR_SLEW_TIME;
+  //motor_speed[motor] = speed;
 }
 
 unsigned char motor_get_voltage() {

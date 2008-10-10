@@ -6,6 +6,7 @@
 #include "lib_adcspi.h"
 #include "lib_accel.h"
 #include "lib_events.h"
+#include "lib_leddrive.h"
 
 struct command_packet robot_command;
 extern unsigned short crctable[256];
@@ -41,11 +42,11 @@ void mi_send_status(void) {
   int i;
  
   crc = 0; 
-  putwcrc(MI_HEADER1);
-  putwcrc(MI_HEADER2);
-  putwcrc(MI_HEADER3);
-  putwcrc(MI_HEADER4);
-  /*for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+  armputchar(MI_HEADER1);
+  armputchar(MI_HEADER2);
+  armputchar(MI_HEADER3);
+  armputchar(MI_HEADER4);
+  for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     putwcrc(motor_clicks(i));
     putwcrc(motor_current(i));
     putwcrc(motor_temp(i));
@@ -53,20 +54,20 @@ void mi_send_status(void) {
   putwcrc(accel_output[0] >> 4);
   putwcrc(accel_output[1] >> 4);
   putwcrc(accel_output[2] >> 4);
-  putwcrc(1);//adc_output[0] >> 2);
-  putwcrc(2);//adc_output[1] >> 2);
-  putwcrc(3);//adc_output[3] >> 2);
-  putwcrc(4);//adcspi_get_output(12) >> 4);
-*/  for(i = 0; i < 35; i++)
+  putwcrc(adc_output[0] >> 2);
+  putwcrc(adc_output[1] >> 2);
+  putwcrc(adc_output[3] >> 2);
+  putwcrc(adcspi_get_output(12) >> 4);
+  for(i = 0; i < 10; i++)
     putwcrc(0);
-  /*for(i = 0; i < 4; i++)
+  for(i = 0; i < 4; i++)
     putwcrc(3);
   putwcrc(error_reg >> 24);
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
   putwcrc(error_reg);
   putwcrc(events_time());
-*/
+
   armputchar(crc >> 8);
   armputchar(crc & 0xFF);
 }

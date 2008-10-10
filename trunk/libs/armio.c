@@ -425,12 +425,15 @@ ARM_CODE RAMFUNC void ser_isr(void) {
     AT91C_BASE_US0->US_IDR = AT91C_US_ENDTX;
   }
   if(status & AT91C_US_FRAME) {
+    AT91C_BASE_US0->US_CR = AT91C_US_RSTSTA;
     error_set(ERR_SER_FRAME);
   }
   if(status & AT91C_US_PARE) {
+    AT91C_BASE_US0->US_CR = AT91C_US_RSTSTA;
     error_set(ERR_SER_PARITY);
   }
   if(status & AT91C_US_FRAME) {
+    AT91C_BASE_US0->US_CR = AT91C_US_RSTSTA;
     error_set(ERR_SER_FRAME);
   }
   //else

@@ -131,6 +131,7 @@ int ui_init()
 
 int ui_event()
 {
+  
   // If some task has requested to be in charge of the serial IO, the UI
   //  will completely stop its operation until the ui_io_handler is cleared.
   if (ui_io_handler != NULL)
@@ -154,9 +155,7 @@ int ui_event()
   ui_cmd_item * cmd = ui_parse_command(ui_command_string);
   // Not found, write error message
   if (cmd == NULL)
-  {
     armprintf ("Invalid command: \"%s\"\r", ui_command_string);
-  }
   else
   {
     // Call function
@@ -782,9 +781,7 @@ void ui_motor ( char * cmdstr)
     return;
   }
 
-  motor_test = 0;
   motor_set_speed(motor, speed);
-  motor_test = 0;
 }
 
 void ui_mi ( char * cmdstr)
