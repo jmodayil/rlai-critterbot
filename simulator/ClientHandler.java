@@ -14,6 +14,8 @@ import java.io.IOException;
 
 public class ClientHandler extends Thread
 {
+  public final int MAX_CLASSNAME_LENGTH = 1024;
+
   protected Socket aClient;
  
   /** List of queue'd elements waiting to be parsed by our server */
@@ -42,10 +44,32 @@ public class ClientHandler extends Thread
   {
     while (true)
     {
+      try
+      {
+        byte b = aIn.readByte();
+        System.out.print(b+" ");
+        if (b == -125) break;
+      }
+      catch (Exception e)
+      {
+        return;
+      }
+    }
+
+    while (true)
+    {
       // Block and wait for new data
       // Read in a new drop (first its class name)
       try {
       int nameLength = aIn.readInt();
+      System.out.println ("I've got some data... "+nameLength+" length");
+
+      // If we don't test for this, we can kill the heap 
+      if (nameLength > MAX_CLASSNAME_LENGTH)
+      {
+        throw new RuntimeException ("Garbage data");
+      }
+
       byte[] nameData = new byte[nameLength];
       
       aIn.read(nameData, 0, nameLength);
