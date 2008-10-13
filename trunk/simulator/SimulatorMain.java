@@ -32,9 +32,9 @@ public class SimulatorMain
     //SimulatorAgent agent = engine.getAgentList().getFirst();
 
     System.out.println ("Starting servers on ports "+objPort+" and "+subjPort);
-    // Create a server for each
-    ObjectiveDataServer objServer = new ObjectiveDataServer(objPort);
-    //SubjectiveDataServer subjServer = new SubjectiveDataServer(agent, subjPort);
+    // Create a drop server to send and receive robot (subjective) data
+    DropServer server = new DropServer(subjPort);
+    server.start();
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {

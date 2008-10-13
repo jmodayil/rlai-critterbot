@@ -73,6 +73,7 @@ public class DropServer extends Thread
       {
         // Listen for a new connection (blocks here)
         Socket clientSocket = aSocket.accept();
+        System.out.println ("New client!");
         ClientHandler ch = new ClientHandler(clientSocket);
         ch.start();
       }
