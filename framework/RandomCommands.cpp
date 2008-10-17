@@ -1,6 +1,8 @@
 #include "RandomCommands.h"
 #include "CritterControlDrop.h"
 
+#include <stdlib.h>
+
 RandomCommands::RandomCommands(DataLake *lake, 
                                    ComponentConfig &config, 
                                    string &name) : 
@@ -37,15 +39,18 @@ int RandomCommands::think(USeconds &wokeAt) {
     drop->motor_mode = CritterControlDrop::XYTHETA_SPACE;
     drop->m100_vel = drop->m220_vel = drop->m340_vel = 0;
     drop->theta_vel = randomState; // Very slow spin for now
+    drop->x_vel = (int)((random() * 1.0) / (RAND_MAX + 1.0) * 50.0 - 25.0);
+    drop->y_vel = (int)((random() * 1.0) / (RAND_MAX + 1.0) * 50.0 - 25.0);
+
     drop->led_mode = CritterControlDrop::THING1;
 
     lake->doneWriteHead(commandWrite);
 
     randomState = randomState + 1;
     if (randomState > 10) randomState = -10;
+ 
+    thinkTime = thinkWait + wokeAt;
   }
-
-  thinkTime += thinkWait + wokeAt - thinkTime;
 
   return 1;
 } 

@@ -26,7 +26,6 @@ void CritterControlDrop::writeArray(void *d) {
   memcpy(data + i, &m220_vel, 4);   i += 4;
   memcpy(data + i, &m340_vel, 4);   i += 4;
   memcpy(data + i, &led_mode, 4);   i += 4;
-  
 }
 
 void CritterControlDrop::readArray(void *d) {
@@ -38,7 +37,6 @@ void CritterControlDrop::readArray(void *d) {
   memcpy(&m220_vel, data + i, 4);   i += 4;
   memcpy(&m340_vel, data + i, 4);   i += 4;
   memcpy(&led_mode, data + i, 4);   i += 4;
-  
 }
 
 string CritterControlDrop::toString(string offset) {
