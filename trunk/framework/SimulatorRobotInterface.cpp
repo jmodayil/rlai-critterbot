@@ -117,8 +117,6 @@ void SimulatorRobotInterfaceProc::writeDrop(DataDrop * drop)
 
   // Keep track of how many bytes we just added to the buffer
   writeSize += (int)(writePtr - bufferHead);
-  memset (writeData, 0, writeSize);
-  *((int*)writeData) = 0xDEADBEEF;
 }
 
 
