@@ -17,6 +17,10 @@ import java.util.List;
 
 public class SimulatorEngine
 {
+  // Terribly broken... remove this asap
+  protected CritterControlDrop aCommand;
+
+
   protected LinkedList<SimulatorAgent> aAgentList;
   protected LinkedList<SimulatorObject> aObjList;
   protected SimulatorState aState;
@@ -31,6 +35,8 @@ public class SimulatorEngine
     aObjList = new LinkedList<SimulatorObject>();
     aState = new SimulatorState();
     vizHandler = new SimulatorVizEvents();
+
+    aCommand = new CritterControlDrop();
 
     // Construct the simulator state by adding objects to it
     Wall w = new Wall("Um?", 1);
@@ -60,7 +66,13 @@ public class SimulatorEngine
   {
     return aState;
   }
-  
+
+  // @@@ remove me
+  public void setCommand(CritterControlDrop pDrop)
+  {
+    aCommand = pDrop;
+  }
+
   /** Takes one 'step' in the simulation: update positions, velocities, etc
     */
   public void step()
@@ -85,7 +97,13 @@ public class SimulatorEngine
 	  forceX = vizHandler.up * 4 * Math.sin(test.aDir);
 	  forceY = vizHandler.up * 4 * Math.cos(test.aDir);
 	  torque = (vizHandler.right * -2  + vizHandler.left * 2);
-	  
+
+    // Add RobotControlDrop's forces! Also, not quite right - the command
+    //  is a velocity, not a force
+    forceX += (aCommand.x_vel / 10.0) * 4;
+    forceY += (aCommand.y_vel / 10.0) * 4;
+    torque += (aCommand.theta_vel / 10.0) * (-2);
+
 	  // A very sad attempt at friction
 	  forceX -= test.aVel.x * .1;
 	  forceY -= test.aVel.y * .1;

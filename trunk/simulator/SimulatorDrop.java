@@ -15,5 +15,5 @@ public interface SimulatorDrop
   /** Write the drop's data to the given DataOutputStream */
   public void writeData(DataOutputStream pOut) throws IOException;
   /** Restore data from a given array */
-  public void readData(DataInputStream pIn) throws IOException;
+  public void readData(InterfaceInputStream pIn) throws IOException;
 }

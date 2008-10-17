@@ -18,7 +18,7 @@ public class CritterStateDrop implements SimulatorDrop
     pOut.writeInt(bus_voltage);
   }
 
-  public void readData(DataInputStream pIn) throws IOException
+  public void readData(InterfaceInputStream pIn) throws IOException
   {
     bus_voltage = pIn.readInt();
   }

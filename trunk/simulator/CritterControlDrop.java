@@ -55,19 +55,17 @@ public class CritterControlDrop implements SimulatorDrop
         throw new IOException("Unknown motor mode.");
     }
   }
-  
+ 
   /** Reverse of writeData; reads the drop from a DataInputStream
     *
     * @param pIn The input stream from which we read the data
     */
-  public void readData(DataInputStream pIn) throws IOException
+  public void readData(InterfaceInputStream pIn) throws IOException
   {
-    // Read modes and convert them to enums
+    // Read motor mode and convert it to an enum
     // Unfortunately, Java hates integer enums, so we have to circumvent this
     motor_mode = (MotorMode)EnumSet.range(MotorMode.WHEEL_SPACE, 
       MotorMode.XYTHETA_SPACE).toArray()[pIn.readInt()];
-    led_mode = (LedMode)EnumSet.range(LedMode.THING1, 
-      LedMode.THING3).toArray()[pIn.readInt()];
 
     // Read in the three velocities
     switch (motor_mode)
@@ -85,6 +83,15 @@ public class CritterControlDrop implements SimulatorDrop
       default:
         throw new IOException("Unknown motor mode.");
     }
-    
+   
+    // Read LED mode
+    led_mode = (LedMode)EnumSet.range(LedMode.THING1, 
+      LedMode.THING3).toArray()[pIn.readInt()];
+  }
+
+  public String toString()
+  {
+    return "Motor mode: "+motor_mode+" Vels: "+x_vel+" "+y_vel+" "+theta_vel+
+      " Led mode: "+led_mode;
   }
 }
