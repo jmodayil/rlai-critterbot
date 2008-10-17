@@ -12,6 +12,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
+import java.nio.ByteBuffer;
+
 public class ClientHandler extends Thread
 {
   public final int MAX_CLASSNAME_LENGTH = 1024;
@@ -19,9 +21,9 @@ public class ClientHandler extends Thread
   protected Socket aClient;
  
   /** List of queue'd elements waiting to be parsed by our server */
-  protected LinkedList<CritterControlDrop> aInQueue;
+  protected LinkedList<SimulatorDrop> aInQueue;
 
-  protected DataInputStream aIn;
+  protected InterfaceInputStream aIn;
   protected DataOutputStream aOut;
 
   /** Creates a new client handler corresponding to the given Socket */
@@ -30,23 +32,25 @@ public class ClientHandler extends Thread
     aClient = pClient;
     try
     {
-      aIn = new DataInputStream(aClient.getInputStream());
+      aIn = new InterfaceInputStream(aClient.getInputStream());
       aOut = new DataOutputStream(aClient.getOutputStream());
     }
     catch (IOException e)
     {
       System.err.println ("Failed to create input/output streams."); 
     }
+
+    aInQueue = new LinkedList<SimulatorDrop>();
   }
 
   /** Main code for this Thread */
   public void run()
   {
-    while (true)
+    /*while (true)
     {
       try
       {
-        byte b = aIn.readByte();
+        int b = aIn.readFixedInt();
         System.out.print(b+" ");
         if (b == -125) break;
       }
@@ -54,53 +58,55 @@ public class ClientHandler extends Thread
       {
         return;
       }
-    }
+    } */
 
     while (true)
     {
       // Block and wait for new data
       // Read in a new drop (first its class name)
-      try {
-      int nameLength = aIn.readInt();
-      System.out.println ("I've got some data... "+nameLength+" length");
-
-      // If we don't test for this, we can kill the heap 
-      if (nameLength > MAX_CLASSNAME_LENGTH)
+      try 
       {
-        throw new RuntimeException ("Garbage data");
-      }
+        int nameLength = aIn.readInt();
+        System.out.println ("I've got some data... "+nameLength+" length");
 
-      byte[] nameData = new byte[nameLength];
-      
-      aIn.read(nameData, 0, nameLength);
-      String className = new String(nameData, "US-ASCII");
-
-      // Create a new Drop
-      try
-      {
-        Class<?> dropType  = Class.forName(className);
-        // Create a new instance and cross your fingers - it has better be
-        //  a subclass of SimulatorDrop
-        SimulatorDrop newDrop = (SimulatorDrop) dropType.newInstance();
-        // Read in the drop!
-        newDrop.readData(aIn);
-        
-        // Add the drop to the queue
-        synchronized(aInQueue)
+        // If we don't test for this, we can kill the heap 
+        if (nameLength > MAX_CLASSNAME_LENGTH)
         {
-          // @@@ Add...
+          throw new RuntimeException ("Garbage data");
         }
-      }
-      catch (ClassNotFoundException e)
-      {
-        System.err.println ("Invalid drop name: "+className);
-        // @@@ the data from then on is going to be garbage
-      }
-      // Catch other ugly exceptions here, and throw them as Runtime
-      catch (Exception e)
-      {
-        throw new RuntimeException(e);
-      }
+
+        String className = aIn.readString(nameLength); 
+
+        System.err.println ("A class is "+className);
+        // Create a new Drop
+        try
+        {
+          Class<?> dropType  = Class.forName(className);
+          // Create a new instance and cross your fingers - it has better be
+          //  a subclass of SimulatorDrop
+          SimulatorDrop newDrop = (SimulatorDrop) dropType.newInstance();
+          // Read in the drop!
+          newDrop.readData(aIn);
+        
+          System.err.println ("New drop: "+newDrop.toString());
+       
+          // Add the drop to the queue
+          synchronized(aInQueue)
+          {
+            // @@@ Add...
+            aInQueue.add(newDrop);
+          }
+        }
+        catch (ClassNotFoundException e)
+        {
+          System.err.println ("Invalid drop name: "+className);
+          // @@@ the data from then on is going to be garbage
+        }
+        // Catch other ugly exceptions here, and throw them as Runtime
+        catch (Exception e)
+        {
+          throw new RuntimeException(e);
+        }
       }
       catch (IOException e)
       {
@@ -133,6 +139,16 @@ public class ClientHandler extends Thread
         System.err.println ("IOException in ClientHandler.send");
         // @@@ abort?
       }
+    }
+  }
+
+  public SimulatorDrop receive()
+  {
+    // Pop a drop if there is one
+    synchronized (aInQueue)
+    {
+      if (aInQueue.isEmpty()) return null;
+      else return aInQueue.remove();
     }
   }
 }

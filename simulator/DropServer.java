@@ -21,7 +21,7 @@ import java.io.IOException;
 public class DropServer extends Thread
 {
   protected ServerSocket aSocket;
-  protected LinkedList<Socket> aClients;
+  protected LinkedList<ClientHandler> aClients;
 
   /**
     * Constructs a new DropServer which listens on the given port, sending
@@ -40,6 +40,8 @@ public class DropServer extends Thread
       System.err.println ("Failed to create DropServer socket, "+
         e.getMessage());
     }
+    
+    aClients = new LinkedList<ClientHandler>();
   }
 
   /**
@@ -61,6 +63,20 @@ public class DropServer extends Thread
     LinkedList<SimulatorDrop> drops = new LinkedList<SimulatorDrop>();
     // 1. Collect  drops into list from client handlers
     // 2. Clear the client handlers' lists
+
+    for (ClientHandler ch : aClients)
+    {
+      SimulatorDrop drop;
+      drop = ch.receive();
+
+      while (drop != null)
+      {
+        System.err.println ("Passing drop back");
+        drops.add(drop);
+        drop = ch.receive();
+      }
+    }
+
     return drops;
   }
 
@@ -76,6 +92,7 @@ public class DropServer extends Thread
         System.out.println ("New client!");
         ClientHandler ch = new ClientHandler(clientSocket);
         ch.start();
+        aClients.add(ch);
       }
       catch (IOException e)
       {
