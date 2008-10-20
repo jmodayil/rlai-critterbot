@@ -3,6 +3,7 @@
 string CritterStateDrop::name = "CritterStateDrop";
 
 CritterStateDrop::CritterStateDrop() {
+  power_source = SHORE;
   bus_voltage = 0;
   batv40 = 0;
   batv160 = 0;
@@ -48,29 +49,60 @@ int CritterStateDrop::getSize() {
 
 void CritterStateDrop::writeArray(void *d) {
   
-  int i = 0;
   char *data = (char *)d;
-  memcpy(data + i, &power_source, 4); i += 4;
-  memcpy(data + i, &bus_voltage, 1);  i += 1;
-  memcpy(data + i, &batv40, 1);       i += 1;
-  memcpy(data + i, &batv160, 1);      i += 1;
-  memcpy(data + i, &batv280, 1);      i += 1;
+  memcpy(data, &power_source, sizeof(power_source));
+  data += sizeof(power_source);
   
-  memcpy(data + i, &motor100, 12);    i += 12;
-  memcpy(data + i, &motor220, 12);    i += 12;
-  memcpy(data + i, &motor340, 12);    i += 12;
+  memcpy(data, &bus_voltage, sizeof(bus_voltage));
+  data += sizeof(bus_voltage);
   
-  memcpy(data + i, &accel, 12);       i += 12;
-  memcpy(data + i, &mag, 12);         i += 12;
-
-  memcpy(data + i, &rotation, 4);     i += 4;
-  memcpy(data + i, &ir_distance, 40); i += 40;
-  memcpy(data + i, &ir_light, 32);    i += 32;
-  memcpy(data + i, &light, 16);       i += 16;
-  memcpy(data + i, &thermal, 32);     i += 32;
-  memcpy(data + i, &bump, 128);       i += 128;
-  memcpy(data + i, &error_flags, 4);  i += 4;
-  memcpy(data + i, &cycle_time, 4);   i += 4;
+  memcpy(data, &batv40, sizeof(batv40));
+  data += sizeof(batv40);
+  
+  memcpy(data, &batv160, sizeof(batv160));
+  data += sizeof(batv160);
+  
+  memcpy(data, &batv280, sizeof(batv280));
+  data += sizeof(batv280);
+  
+  memcpy(data, &motor100, sizeof(motor100));
+  data += sizeof(motor100);
+  
+  memcpy(data, &motor220, sizeof(motor220));
+  data += sizeof(motor220);
+  
+  memcpy(data, &motor340, sizeof(motor340));
+  data += sizeof(motor340);
+  
+  memcpy(data, &accel, sizeof(accel));
+  data += sizeof(accel);
+  
+  memcpy(data, &mag, sizeof(mag));
+  data += sizeof(mag);
+  
+  memcpy(data, &rotation, sizeof(rotation));
+  data += sizeof(rotation);
+  
+  memcpy(data, &ir_distance, sizeof(ir_distance));
+  data += sizeof(ir_distance);
+  
+  memcpy(data, &ir_light, sizeof(ir_light));
+  data += sizeof(ir_light);
+  
+  memcpy(data, &light, sizeof(light));
+  data += sizeof(light);
+  
+  memcpy(data, &thermal, sizeof(thermal));
+  data += sizeof(thermal);
+  
+  memcpy(data, &bump, sizeof(bump));
+  data += sizeof(bump);
+  
+  memcpy(data, &error_flags, sizeof(error_flags));
+  data += sizeof(error_flags);
+  
+  memcpy(data, &cycle_time, sizeof(cycle_time));
+  data += sizeof(cycle_time);
 
   fprintf (stderr, "Last bit read was %x from %x (%d)\n", data+i, data,
     (int)((data+i) - data));
@@ -78,58 +110,119 @@ void CritterStateDrop::writeArray(void *d) {
 
 void CritterStateDrop::readArray(void *d) {
 
-  int i = 0;
   char *data = (char *)d;
-  memcpy(&power_source, data + i, 4); i += 4;
-  memcpy(&bus_voltage, data + i, 1);  i += 1;
-  memcpy(&batv40, data + i, 1);       i += 1;
-  memcpy(&batv160, data + i, 1);      i += 1;
-  memcpy(&batv280, data + i, 1);      i += 1;
   
-  memcpy(&motor100, data + i, 12);    i += 12;
-  memcpy(&motor220, data + i, 12);    i += 12;
-  memcpy(&motor340, data + i, 12);    i += 12;
+  memcpy(&power_source, data, sizeof(power_source));
+  data += sizeof(power_source);
   
-  memcpy(&accel, data + i, 12);       i += 12;
-  memcpy(&mag, data + i, 12);         i += 12;
-
-  memcpy(&rotation, data + i, 4);     i += 4;
-  memcpy(&ir_distance, data + i, 40); i += 40;
-  memcpy(&ir_light, data + i, 32);    i += 32;
-  memcpy(&light, data + i, 16);       i += 16;
-  memcpy(&thermal, data + i, 32);     i += 32;
-  memcpy(&bump, data + i, 128);       i += 128;
-  memcpy(&error_flags, data + i, 4);  i += 4;
-  memcpy(&cycle_time, data + i, 4);   i += 4;
+  memcpy(&bus_voltage, data, sizeof(bus_voltage));
+  data += sizeof(bus_voltage);
+  
+  memcpy(&batv40, data, sizeof(batv40));
+  data += sizeof(batv40);
+  
+  memcpy(&batv160, data, sizeof(batv160));
+  data += sizeof(batv160);
+  
+  memcpy(&batv280, data, sizeof(batv280));
+  data += sizeof(batv280);
+  
+  memcpy(&motor100, data, sizeof(motor100));
+  data += sizeof(motor100);
+  
+  memcpy(&motor220, data, sizeof(motor220));
+  data += sizeof(motor220);
+  
+  memcpy(&motor340, data, sizeof(motor340));
+  data += sizeof(motor340);
+  
+  memcpy(&accel, data, sizeof(accel));
+  data += sizeof(accel);
+  
+  memcpy(&mag, data, sizeof(mag));
+  data += sizeof(mag);
+  
+  memcpy(&rotation, data, sizeof(rotation));
+  data += sizeof(rotation);
+  
+  memcpy(&ir_distance, data, sizeof(ir_distance));
+  data += sizeof(ir_distance);
+  
+  memcpy(&ir_light, data, sizeof(ir_light));
+  data += sizeof(ir_light);
+  
+  memcpy(&light, data, sizeof(light));
+  data += sizeof(light);
+  
+  memcpy(&thermal, data, sizeof(thermal));
+  data += sizeof(thermal);
+  
+  memcpy(&bump, data, sizeof(bump));
+  data += sizeof(bump);
+  
+  memcpy(&error_flags, data, sizeof(error_flags));
+  data += sizeof(error_flags);
+  
+  memcpy(&cycle_time, data, sizeof(cycle_time));
+  data += sizeof(cycle_time);
 
 }
 
+
 string CritterStateDrop::toString(string offset) {
 
+  string value;
+  char buf[100];
 
-  printf("- Critter State Drop -\n");
+  value += "\nPower Source: ";
+  switch(power_source) {
+    case SHORE:
+      value += "SHORE\n";
+      break;
+    case BAT40:
+      value += "BAT40\n";
+      break;
+    case BAT160:
+      value += "BAT160\n";
+      break;
+    case BAT280:
+      value += "BAT280\n";
+      break;
+    default:
+      value += "ERROR?\n";
+      break;
+  }
+  sprintf(buf, "System Voltage: %u\n", bus_voltage);
+  value += buf;
+  sprintf(buf, "Battery 40 Voltage: %u\n", batv40);
+  value += buf;
+  sprintf(buf, "Battery 160 Voltage: %u\n", batv160);
+  value += buf;
+  sprintf(buf, "Battery 280 Voltage: %u\n\n", batv280);
+  value += buf;
+  sprintf(buf, "Motor100: %d, %u, %u\n", motor100.velocity,
+          motor100.current, motor100.temp);
+  value += buf;
+  sprintf(buf, "Motor220: %d, %u, %u\n", motor220.velocity,
+          motor220.current, motor220.temp);
+  value += buf;
+  sprintf(buf, "Motor340: %d, %u, %u\n", motor340.velocity,
+          motor340.current, motor340.temp);
+  value += buf;
+  sprintf(buf, "\nAccelerometer: %d %d %d\n", accel.x, accel.y, accel.z);
+  value += buf;
+  sprintf(buf, "Gyroscope: %d\n", rotation);
+  value += buf;
+  sprintf(buf, "Magnetometer: %d %d %d\n", mag.x, mag.y, mag.z);
+  value += buf;
+  sprintf(buf, "Light Sensors: %u %u %u %u\n", light[0], light[1],
+      light[2], light[3]);
+  value += buf;
+  sprintf(buf, "\nError Codes: %08x\n", error_flags);
+  value += buf;
+  sprintf(buf, "CPU \%: %u\n", cycle_time);
+  value += buf;
 
-  printf("Power_Source: %d \t", power_source);
-  printf("bus_voltage: %d \t", (int)bus_voltage);
-  printf("batv [40,160,280]: [%d,%d,%d] \n", (int)batv40, (int)batv160, (int)batv280);
 
-  printf("motor | \tvelocity, \tcurrent, \ttemp\n");
-  printf("motor100 | \t %d \t %d \t %d \n", motor100.velocity, motor100.current, motor100.temp);
-  printf("motor220 | \t %d \t %d \t %d \n", motor220.velocity, motor220.current, motor220.temp);
-  printf("motor340 | \t %d \t %d \t %d \n", motor340.velocity, motor340.current, motor340.temp);
-
-  printf("accel (x,y,z): (%d,%d,%d) \t mag (x,y,z): (%d,%d,%d)\n",accel.x,accel.y,accel.z,mag.x,mag.y,mag.z);
-  printf("rotation: %d \n ir_dists: ",rotation);
-  for(int i=0; i<10; i++) printf(" [%d]: %d ", i, ir_distance[i]);
-  printf("\n ir_light: ");
-  for(int i=0; i<8; i++) printf(" [%d]: %d ", i, ir_light[i]);
-  printf("\n light: ");
-  for(int i=0; i<4; i++) printf(" [%d]: %d ", i, light[i]);
-  printf("\n thermal: ");
-  for(int i=0; i<8; i++) printf(" [%d]: %d ", i, thermal[i]);
-  printf("\n bump: ");
-  for(int i=0; i<32; i++) printf(" [%d]: %d ", i, bump[i]);
-  printf("\n error_flags: %d", error_flags);
-  printf("\n cycle_time: %d\n\n", cycle_time);
-
+  return offset + value;
 }
