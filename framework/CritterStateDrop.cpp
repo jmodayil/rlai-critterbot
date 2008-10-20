@@ -31,7 +31,19 @@ CritterStateDrop::~CritterStateDrop() {
 }
 
 int CritterStateDrop::getSize() {
-  return 324; 
+  return sizeof(power_source) +
+         sizeof(bus_voltage) +
+         sizeof(batv40) + sizeof(batv160) + sizeof(batv280) +
+         sizeof(motor100) + sizeof(motor220) + sizeof(motor340) +
+         sizeof(accel) + sizeof(mag) + 
+         sizeof(rotation) +
+         sizeof(ir_distance) +
+         sizeof(ir_light) + 
+         sizeof(light) + 
+         sizeof(thermal) +
+         sizeof(bump) +
+         sizeof(error_flags) +
+         sizeof(cycle_time);
 }
 
 void CritterStateDrop::writeArray(void *d) {
@@ -59,6 +71,9 @@ void CritterStateDrop::writeArray(void *d) {
   memcpy(data + i, &bump, 128);       i += 128;
   memcpy(data + i, &error_flags, 4);  i += 4;
   memcpy(data + i, &cycle_time, 4);   i += 4;
+
+  fprintf (stderr, "Last bit read was %x from %x (%d)\n", data+i, data,
+    (int)((data+i) - data));
 }
 
 void CritterStateDrop::readArray(void *d) {

@@ -16,6 +16,7 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
     char writeData[MAX_ROBOT_INTERFACE_DATA_LENGTH];
     int writeSize;
     char * writePtr;
+    char * readPtr, * unreadDataPtr;
 
     int readConfig();
 
@@ -24,6 +25,7 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
 
   protected:
     void clearWriteData();
+    void clearReadData();
 
   public:
     SimulatorRobotInterfaceProc(DataLake *lake, 
@@ -41,6 +43,9 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
 
     // Additional methods specific to the SimulatorRobotInterface
     void writeDrop(DataDrop * drop);
+    // Attempts to read a drop from the read buffer (socket) and send it into 
+    //  the Disco world
+    int processDrop();
 };
 
 //! Socket that sends strings
