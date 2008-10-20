@@ -271,7 +271,8 @@ void ui_status(char * cmdstr)
   armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
-
+  armprintf ("On board adc: %d %d %d %d\r", adc_output[0], adc_output[1],
+     adc_output[2], adc_output[3]); 
   armprintf ("Coffee consumption: 0.266 cup / hr\r");
   armprintf("\r");
 }
@@ -379,47 +380,22 @@ void ui_getaccel (char * cmdstr)
 
 void ui_getadcspi (char * cmdstr)
 {
-  int i;
-  int sel;
-  int one_sel;
+  int i,j;
 
   armprintf ("Off-board ADC outputs: \r");
-  // Print out one output if requested, otherwise all
-  if (armsscanf(cmdstr, "%s %s", ui_cmdname, &i) >= 2)
-  {
-    sel = adcspi_is_selected(i);
-
-    if (sel)
-      armprintf ("%d: %d\r", i, adcspi_get_output(i));
-    else
-      armprintf ("%d: N/S\r", i);
-  }
-  else
-  {
-    one_sel = 0;
-
-    // Loop throuh all outputs (64 of them) and print their value
-    for (i = 0; i < ADCSPI_NUM_OUTPUTS; i++)
-    {
-      sel = adcspi_is_selected(i);
-
-      if (sel)
-      {
-        armprintf ("%d (%d): %d\r", i, adcspi_get_address(i), 
-          adcspi_get_output(i));
-        one_sel |= 1;
-      }
+  
+  for(i = 0; i < ADCSPI_NUM_DEVICES; i++) {
+    armprintf("ADC%d: ", i);
+    for(j = 0; j < ADCSPI_OUTPUTS_PER_DEVICE; j++) {
+      armprintf("%d ", adcspi_get_output(i,j));
     }
-
-    // If no selected outputs, print out 'No selected outputs'
-    if (!one_sel)
-      armprintf ("No selected outputs.\r");
+    armprintf("\r");
   }
 }
 
 void ui_toggle_adcspi(char * cmdstr)
 {
-  int index;
+/*  int index;
   
   if (armsscanf(cmdstr, "%s %d", ui_cmdname, &index) < 2)
   {
@@ -430,7 +406,7 @@ void ui_toggle_adcspi(char * cmdstr)
   if (adcspi_is_selected(index))
     adcspi_deselect(index);
   else
-    adcspi_select(index);
+    adcspi_select(index);*/
 }
 
 void ui_report (char * cmdstr)
@@ -770,18 +746,22 @@ void ui_error ( char * cmdstr)
 
 void ui_motor ( char * cmdstr)
 {
-  int motor, speed;
+  int motor, speed, last; 
 
   motor = 0;
   speed = 0;
   
-  if (armsscanf(cmdstr, "%s %d %d", ui_cmdname, &motor, &speed) < 3)
+  if (armsscanf(cmdstr, "%s %d %d %d", ui_cmdname, &motor, &speed, &last) < 3)
   {
     armprintf ("Too few arguments");
     return;
   }
-
-  motor_set_speed(motor, speed);
+  if (armsscanf(cmdstr, "%s %d %d %d", ui_cmdname, &motor, &speed, &last) < 4)
+  {
+    motor_set_speed(motor, speed);
+    return;
+  }
+  motor_set_speed_slew(motor, speed, last);
 }
 
 void ui_mi ( char * cmdstr)

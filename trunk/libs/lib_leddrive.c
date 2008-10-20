@@ -568,8 +568,15 @@ int leddrive_event(void) {
 			a=0;
 			clearled();
 			}*/
-		gradient(0,0,0,0,255,100);
-		rotate(7);
+      switch(a) {
+        case 0:
+          gradient(0,0,0,0,255,100);
+          a++;
+          break;
+        default:
+          rotate(7);
+          break;
+      }
 			break;
 		case COLORDIS:
 				rotate(15);

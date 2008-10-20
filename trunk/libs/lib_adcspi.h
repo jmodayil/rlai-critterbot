@@ -68,33 +68,33 @@ int adcspi_event();
 /** Selects a set of inputs that should be converted. The inputs are numbered
   *  from 0 to 63.
   */
-void adcspi_select(int input);
+//void adcspi_select(int input);
 
 /** Deselects a previously selected input for conversion. */
-void adcspi_deselect(int input);
+//void adcspi_deselect(int input);
 
 /** Returns whether a particular input channel is selected for conversion */
-int adcspi_is_selected(int input);
+//int adcspi_is_selected(int input);
 
 /** Sends packets to select a new set of inputs (via the shadow register) 
   * to an ADC.
   */
-void adcspi_send_select(int device);
+//void adcspi_send_select(int device);
 
 /** Sends packets to read in data from the ADC (only for selected inputs) */
-void adcspi_read_data(int device);
+void adcspi_read_data(unsigned int device);
 
 /** Returns a 12-bit output from the ADC */
-int adcspi_get_output(int index);
+int adcspi_get_output(unsigned int device, unsigned int index);
 
 /** Returns the 4-bit address as provided by the ADC */
-int adcspi_get_address(int index);
+//int adcspi_get_address(int index);
 
 /** Test whether the provided addresses correspond to our output indices.
   *
   * Used for error checking.
   */
-void adcspi_test_addresses(int device);
+//void adcspi_test_addresses(int device);
 
 #endif /* LIB_ADCSPI_H */
 

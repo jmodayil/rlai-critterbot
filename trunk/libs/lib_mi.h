@@ -18,7 +18,7 @@
 #define YSC340 (962) // sin(90+340) * 1024
 #define TSC340 (1096) // 1.07 * 1024
 
-#define ABS(a) (a >= 0 ? a : -a)
+#define ABS(a) (((int)(a)) >= 0 ? (int)(a) : -(int)(a))
 
 void mi_send_status(void);
 void mi_get_commands(void);
