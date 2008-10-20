@@ -8,8 +8,6 @@ import java.net.Socket;
 
 import java.util.LinkedList;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 
 import java.nio.ByteBuffer;
@@ -24,7 +22,7 @@ public class ClientHandler extends Thread
   protected LinkedList<SimulatorDrop> aInQueue;
 
   protected InterfaceInputStream aIn;
-  protected DataOutputStream aOut;
+  protected InterfaceOutputStream aOut;
 
   /** Creates a new client handler corresponding to the given Socket */
   public ClientHandler(Socket pClient)
@@ -33,7 +31,7 @@ public class ClientHandler extends Thread
     try
     {
       aIn = new InterfaceInputStream(aClient.getInputStream());
-      aOut = new DataOutputStream(aClient.getOutputStream());
+      aOut = new InterfaceOutputStream(aClient.getOutputStream());
     }
     catch (IOException e)
     {
@@ -46,6 +44,7 @@ public class ClientHandler extends Thread
   /** Main code for this Thread */
   public void run()
   {
+    // @@@ cleanup
     /*while (true)
     {
       try
@@ -119,7 +118,7 @@ public class ClientHandler extends Thread
     }
   }
 
-  /** Send out the state of the system */
+  /** Send out a drop */ 
   public void send(SimulatorDrop pData)
   {
     synchronized(aOut) 
@@ -128,8 +127,7 @@ public class ClientHandler extends Thread
       try
       {
         String className = pData.getClass().getName();
-        aOut.writeInt(className.length());
-        aOut.writeBytes(className);
+        aOut.writeString(className);
     
         // Get the drop to write itself to the output stream
         pData.writeData(aOut);
@@ -137,7 +135,7 @@ public class ClientHandler extends Thread
       catch (IOException e)
       {
         System.err.println ("IOException in ClientHandler.send");
-        // @@@ abort?
+        throw new RuntimeException(e);
       }
     }
   }

@@ -5,8 +5,6 @@
   *  to the robot. Somewhat a clone of CritterControlDrop.{h,cpp}.
   */
 
-import java.io.DataOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.util.EnumSet;
 
@@ -15,13 +13,13 @@ public class CritterControlDrop implements SimulatorDrop
   public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE };
   public enum LedMode { THING1, THING2, THING3 };
 
-  protected MotorMode motor_mode;
-  protected LedMode   led_mode;
+  public MotorMode motor_mode;
+  public LedMode   led_mode;
 
   /** Velocities used in XYTHETA_SPACE */
-  int x_vel, y_vel, theta_vel;
+  public int x_vel, y_vel, theta_vel;
   /** Velocities used in WHEEL_SPACE */
-  int m100_vel, m220_vel, m340_vel;
+  public int m100_vel, m220_vel, m340_vel;
 
   /** Write control drop data out to a stream. The order in which things 
     *  are sent must be:
@@ -32,7 +30,7 @@ public class CritterControlDrop implements SimulatorDrop
     *
     * @param pOut The output stream to which the data should be written
     */
-  public void writeData(DataOutputStream pOut) throws IOException
+  public void writeData(InterfaceOutputStream pOut) throws IOException
   {
     // Write modes
     pOut.writeInt(motor_mode.ordinal());
@@ -91,7 +89,9 @@ public class CritterControlDrop implements SimulatorDrop
 
   public String toString()
   {
-    return "Motor mode: "+motor_mode+" Vels: "+x_vel+" "+y_vel+" "+theta_vel+
+    return "Motor mode: "+motor_mode+
+      " XYT ("+x_vel+","+y_vel+","+theta_vel+")"+
+      " WHE: ("+m100_vel+","+m220_vel+","+m340_vel+")"+
       " Led mode: "+led_mode;
   }
 }
