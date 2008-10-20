@@ -46,6 +46,7 @@ void mi_send_status(void) {
   armputchar(MI_HEADER2);
   armputchar(MI_HEADER3);
   armputchar(MI_HEADER4);
+  putwcrc(motor_get_voltage());
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     putwcrc(motor_clicks(i));
     putwcrc(motor_current(i));
@@ -57,11 +58,13 @@ void mi_send_status(void) {
   putwcrc(adc_output[0] >> 2);
   putwcrc(adc_output[1] >> 2);
   putwcrc(adc_output[3] >> 2);
-  putwcrc(adcspi_get_output(12) >> 4);
+  putwcrc((adcspi_get_output(3, 12) >> 2) - 128);
   for(i = 0; i < 10; i++)
     putwcrc(0);
-  for(i = 0; i < 4; i++)
-    putwcrc(3);
+  putwcrc(adcspi_get_output(3,8) >> 2);
+  putwcrc(adcspi_get_output(3,9) >> 2);
+  putwcrc(adcspi_get_output(3,10) >> 2);
+  putwcrc(adcspi_get_output(3,11) >> 2);
   putwcrc(error_reg >> 24);
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
@@ -120,9 +123,8 @@ void mi_get_commands(void) {
       }
 
       mi_test = (signed char)m100;
-      motor_set_speed(0, (signed char)m100);
-      motor_set_speed(1, (signed char)m220);
-      motor_set_speed(2, (signed char)m340);
+      motor_set_speed_slew((signed char)m100, (signed char)m220,
+          (signed char)m340);
       break;
     default:
       robot_command.motor_mode = WHEEL_SPACE;
