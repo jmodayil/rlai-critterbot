@@ -45,17 +45,43 @@ public class SimulatorMain
     });
 
     
-    
+   
+    int stateThrottle = 0;
+
     while (true)
     {
       engine.step();
-      List<SimulatorDrop> drops = robotServ.receiveData();
+      List<SimulatorDrop> drops = robotServ.receiveDrops();
 
+      // Receive some actions (@@@ needs to be written properly)
       for (SimulatorDrop drop : drops)
       {
         CritterControlDrop command = (CritterControlDrop)drop;
         engine.setCommand(command);
       }
+
+      // Send the system state
+      // @@@ call makeDropFromState or such
+      CritterStateDrop stateDrop = new CritterStateDrop();
+      List<SimulatorAgent> agentList = engine.getAgentList();
+      SimulatorAgent varun = agentList.get(0);
+
+      // @@@ NOTE TO SELF: need to synchronize with the agent list
+      if (varun != null)
+      {
+        // Wrong (this isn't acceleration!), but this is only for debugging
+        //  purposes
+        stateDrop.accel.x = (int)(varun.aVel.x*100);
+        stateDrop.accel.y = (int)(varun.aVel.y*100);
+
+        if (++stateThrottle >= 100)
+        {
+          robotServ.sendDrop(stateDrop);
+          stateThrottle = 0;
+        }
+      }
+      else throw new RuntimeException("No agent!");
+
       try {
 		Thread.sleep(9);
       } catch (InterruptedException e) {

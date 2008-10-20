@@ -6,14 +6,12 @@
   *  saving their data into a byte array and reading data from a byte array.
   */
 
-import java.io.DataOutputStream;
-import java.io.DataInputStream;
 import java.io.IOException;
 
 public interface SimulatorDrop
 {
-  /** Write the drop's data to the given DataOutputStream */
-  public void writeData(DataOutputStream pOut) throws IOException;
+  /** Write the drop's data to the given output stream */
+  public void writeData(InterfaceOutputStream pOut) throws IOException;
   /** Restore data from a given array */
   public void readData(InterfaceInputStream pIn) throws IOException;
 }

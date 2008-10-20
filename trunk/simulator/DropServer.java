@@ -47,18 +47,18 @@ public class DropServer extends Thread
   /**
     * Send a given Drop out to all connected clients.
     */
-  public void sendUpdate(SimulatorDrop pDrop)
+  public void sendDrop(SimulatorDrop pDrop)
   {
-    // @@@
-    // 1. Create a CritterStateDrop
-    // 2. Call send() for all clients
+    // Simply call each client handler's send method
+    for (ClientHandler ch : aClients)
+      ch.send(pDrop);
   }
 
   /**
     * Returns a (possibly empty) list of drops that were received from all
-    *  connected clients since the last call to receiveData.
+    *  connected clients since the last call to receiveDrops.
     */
-  public List<SimulatorDrop> receiveData()
+  public List<SimulatorDrop> receiveDrops()
   {
     LinkedList<SimulatorDrop> drops = new LinkedList<SimulatorDrop>();
     // 1. Collect  drops into list from client handlers
