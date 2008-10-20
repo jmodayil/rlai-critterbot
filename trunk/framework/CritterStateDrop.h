@@ -11,10 +11,10 @@ class CritterStateDrop : public DataDrop {
   
   enum Power_Source { SHORE, BAT40, BAT160, BAT280 } power_source;
 
-  unsigned char bus_voltage;
-  unsigned char batv40;
-  unsigned char batv160;
-  unsigned char batv280;
+  unsigned int bus_voltage;
+  unsigned int batv40;
+  unsigned int batv160;
+  unsigned int batv280;
   struct {
     int velocity;
     int current;
