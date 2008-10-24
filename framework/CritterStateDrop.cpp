@@ -213,6 +213,11 @@ string CritterStateDrop::toString(string offset) {
   value += buf;
   sprintf(buf, "Magnetometer: %d %d %d\n", mag.x, mag.y, mag.z);
   value += buf;
+  sprintf(buf, "IR Distance: %u %u %u %u %u %u %u %u %u %u\n", ir_distance[0], 
+    ir_distance[1], ir_distance[2], ir_distance[3], ir_distance[4], 
+    ir_distance[5], ir_distance[6], ir_distance[7], ir_distance[8],
+    ir_distance[9]);
+  value += buf;
   sprintf(buf, "Light Sensors: %u %u %u %u\n", light[0], light[1],
       light[2], light[3]);
   value += buf;
