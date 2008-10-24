@@ -10,6 +10,42 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <time.h>
+
+const unsigned short CritterDriver::crctable[256] = {
+	 0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
+	 0x8108, 0x9129, 0xA14A, 0xB16B, 0xC18C, 0xD1AD, 0xE1CE, 0xF1EF,
+	 0x1231, 0x0210, 0x3273, 0x2252, 0x52B5, 0x4294, 0x72F7, 0x62D6,
+	 0x9339, 0x8318, 0xB37B, 0xA35A, 0xD3BD, 0xC39C, 0xF3FF, 0xE3DE,
+	 0x2462, 0x3443, 0x0420, 0x1401, 0x64E6, 0x74C7, 0x44A4, 0x5485,
+	 0xA56A, 0xB54B, 0x8528, 0x9509, 0xE5EE, 0xF5CF, 0xC5AC, 0xD58D,
+	 0x3653, 0x2672, 0x1611, 0x0630, 0x76D7, 0x66F6, 0x5695, 0x46B4,
+	 0xB75B, 0xA77A, 0x9719, 0x8738, 0xF7DF, 0xE7FE, 0xD79D, 0xC7BC,
+	 0x48C4, 0x58E5, 0x6886, 0x78A7, 0x0840, 0x1861, 0x2802, 0x3823,
+	 0xC9CC, 0xD9ED, 0xE98E, 0xF9AF, 0x8948, 0x9969, 0xA90A, 0xB92B,
+	 0x5AF5, 0x4AD4, 0x7AB7, 0x6A96, 0x1A71, 0x0A50, 0x3A33, 0x2A12,
+	 0xDBFD, 0xCBDC, 0xFBBF, 0xEB9E, 0x9B79, 0x8B58, 0xBB3B, 0xAB1A,
+	 0x6CA6, 0x7C87, 0x4CE4, 0x5CC5, 0x2C22, 0x3C03, 0x0C60, 0x1C41,
+	 0xEDAE, 0xFD8F, 0xCDEC, 0xDDCD, 0xAD2A, 0xBD0B, 0x8D68, 0x9D49,
+	 0x7E97, 0x6EB6, 0x5ED5, 0x4EF4, 0x3E13, 0x2E32, 0x1E51, 0x0E70,
+	 0xFF9F, 0xEFBE, 0xDFDD, 0xCFFC, 0xBF1B, 0xAF3A, 0x9F59, 0x8F78,
+	 0x9188, 0x81A9, 0xB1CA, 0xA1EB, 0xD10C, 0xC12D, 0xF14E, 0xE16F,
+	 0x1080, 0x00A1, 0x30C2, 0x20E3, 0x5004, 0x4025, 0x7046, 0x6067,
+	 0x83B9, 0x9398, 0xA3FB, 0xB3DA, 0xC33D, 0xD31C, 0xE37F, 0xF35E,
+	 0x02B1, 0x1290, 0x22F3, 0x32D2, 0x4235, 0x5214, 0x6277, 0x7256,
+	 0xB5EA, 0xA5CB, 0x95A8, 0x8589, 0xF56E, 0xE54F, 0xD52C, 0xC50D,
+	 0x34E2, 0x24C3, 0x14A0, 0x0481, 0x7466, 0x6447, 0x5424, 0x4405,
+	 0xA7DB, 0xB7FA, 0x8799, 0x97B8, 0xE75F, 0xF77E, 0xC71D, 0xD73C,
+	 0x26D3, 0x36F2, 0x0691, 0x16B0, 0x6657, 0x7676, 0x4615, 0x5634,
+	 0xD94C, 0xC96D, 0xF90E, 0xE92F, 0x99C8, 0x89E9, 0xB98A, 0xA9AB,
+	 0x5844, 0x4865, 0x7806, 0x6827, 0x18C0, 0x08E1, 0x3882, 0x28A3,
+	 0xCB7D, 0xDB5C, 0xEB3F, 0xFB1E, 0x8BF9, 0x9BD8, 0xABBB, 0xBB9A,
+	 0x4A75, 0x5A54, 0x6A37, 0x7A16, 0x0AF1, 0x1AD0, 0x2AB3, 0x3A92,
+	 0xFD2E, 0xED0F, 0xDD6C, 0xCD4D, 0xBDAA, 0xAD8B, 0x9DE8, 0x8DC9,
+	 0x7C26, 0x6C07, 0x5C64, 0x4C45, 0x3CA2, 0x2C83, 0x1CE0, 0x0CC1,
+	 0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
+	 0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
+};	
 
 
 CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf, 
@@ -24,6 +60,8 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
   postWait = 10000;
 
   lastPost.setAsNow();
+
+  log = fopen("/var/log/robot.log","a");
 }
 
 CritterDriver::~CritterDriver() {
@@ -37,6 +75,7 @@ void CritterDriver::cleanup() {
 
   closeport();
   close(fid);
+  fclose(log);
 
 }
 
@@ -46,12 +85,15 @@ void CritterDriver::initport() {
   tcflush(fid, TCIOFLUSH);
   tcgetattr(fid, &oldterm);
   tcgetattr(fid, &options);
-  options.c_cflag &= ~(CSIZE | CSTOPB | PARENB | CRTSCTS);
-  options.c_cflag |= (CS8 | CLOCAL | CREAD);
+  options.c_cflag &= ~(CSIZE | CSTOPB | CRTSCTS);
+  options.c_cflag |= (CS8 | CLOCAL | CREAD | PARENB | PARODD);
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-  options.c_iflag &= (INPCK | IXON | IXOFF);
-  options.c_iflag |= IGNPAR | OCRNL;
-  options.c_oflag &= ~OPOST; 
+  //options.c_lflag = 0;
+  options.c_iflag &= ~(IXON | IXOFF | OCRNL);
+  //options.c_iflag = 0;
+  options.c_iflag |= (INPCK | PARMRK | IGNBRK);
+  //options.c_oflag &= ~OPOST; 
+  options.c_oflag = 0;
   options.c_cc[VTIME] = 0;
   options.c_cc[VMIN] = 1;
   cfsetispeed(&options, BAUDRATE);
@@ -81,7 +123,6 @@ int CritterDriver::init(USeconds &wokeAt) {
   
   printf("Initializing serial port.\n");
   initport();
-
   return 1;
 }
 
@@ -89,70 +130,146 @@ int CritterDriver::getFID() {
   return fid;
 }
 
-void CritterDriver::readPacket() {
+void CritterDriver::readPacket( unsigned char buf[]) {
 
-  unsigned char buf[35];
-  
-  if(fid > 0) {
-    if (35 == read(fid, buf, 35)) {
       int i = 0;
-      stateDrop.motor100.velocity = (int) buf[i++];
-      stateDrop.motor100.current  = (int) buf[i++];
+      unsigned short their_crc;
+      time_t now;
+//for(i = 0; i < 37; i++) {
+//fprintf(stderr, "%02x ", buf[i]);
+//}
+//i = 0;
+      stateDrop.bus_voltage       = (int) buf[i++] * 25;
       stateDrop.motor100.temp     = (int) buf[i++];
-      stateDrop.motor220.velocity = (int) buf[i++];
-      stateDrop.motor220.current  = (int) buf[i++];
+      stateDrop.motor100.velocity = (char) buf[i++];
+      stateDrop.motor100.current  = (int) buf[i++];
       stateDrop.motor220.temp     = (int) buf[i++];
-      stateDrop.motor340.velocity = (int) buf[i++];
-      stateDrop.motor340.current  = (int) buf[i++];
+      stateDrop.motor220.velocity = (char) buf[i++];
+      stateDrop.motor220.current  = (int) buf[i++];
       stateDrop.motor340.temp     = (int) buf[i++];
+      stateDrop.motor340.velocity = (char) buf[i++];
+      stateDrop.motor340.current  = (int) buf[i++];
       
-      stateDrop.accel.x           = (int) buf[i++];
-      stateDrop.accel.y           = (int) buf[i++];
-      stateDrop.accel.z           = (int) buf[i++];
-      stateDrop.mag.x             = (int) buf[i++];
-      stateDrop.mag.y             = (int) buf[i++];
-      stateDrop.mag.z             = (int) buf[i++];
+      stateDrop.accel.x           = ((char) buf[i++]) << 4;
+      stateDrop.accel.y           = ((char) buf[i++]) << 4;
+      stateDrop.accel.z           = ((char) buf[i++]) << 4;
+      stateDrop.mag.x             = ((char) buf[i++]) << 2;
+      stateDrop.mag.y             = ((char) buf[i++]) << 2;
+      stateDrop.mag.z             = ((char) buf[i++]) << 2;
 
-      stateDrop.rotation          = (int) buf[i++];
+      stateDrop.rotation          = ((char) buf[i++]) << 2;
+
       for(int j=0; j<10; j++) stateDrop.ir_distance[j] = (int) buf[i++];
-      for(int j=0; j<4; j++) stateDrop.light[j]        = (int) buf[i++];
+      for(int j=0; j<4; j++) stateDrop.light[j]        = ((int) buf[i++]) << 2 ;
 
-      stateDrop.error_flags = 0;
-      for(int j=0; j<4; j++) {
-        stateDrop.error_flags << 8;
-        stateDrop.error_flags += buf[i++];
-      }
-      stateDrop.cycle_time += (int) buf[i++];
-      newData = true;
-    } // else??? - serial must have sent a EOF in the middle of a packet, or timed out
-  } else {
-    ErrorMessage::sendMessage(lake, getName(), "CritterDriver::readPacket(): Serial port closed unexpectedly.");
+      stateDrop.error_flags = buf[i++] << 24;
+      stateDrop.error_flags |= buf[i++] << 16;
+      stateDrop.error_flags |= buf[i++] << 8;
+      stateDrop.error_flags |= buf[i++];
+      stateDrop.cycle_time = (int) buf[i++];
+      their_crc = ((unsigned short)buf[i++]) << 8;
+      their_crc += buf[i++];
+//fprintf(stderr, "-- %04x\n", calccrc(buf, STATE_LENGTH - 2));
+  //    if(their_crc != calccrc(buf, STATE_LENGTH - 2)) {
+//	error("Receive a Corrupt Robot State Packet!");
+//	return;
+  //    }
+      now = time(NULL);
+      fprintf(log, "%u: ", now);
+      for(i = 0; i < STATE_LENGTH - 2; i++ ) {
+        fprintf(log, "%d ", buf[i]);
+      } 
+      fprintf(log, "\n");
+      (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
+      lake->doneWriteHead(stateId);
+}
+
+unsigned short CritterDriver::calccrc(unsigned char* data, int size) {
+
+  unsigned short crc = 0;
+
+  if(size < 1)
+    return 0;
+
+  while(size--) {
+    crc = (crc<<8) ^ crctable[(crc >> 8) ^ *data++];  
   }
+
+  return crc;
+
 }
 
 int CritterDriver::sense(USeconds &wokeAt) {
 
+  static enum {HEADER, DATA, FLAG} state;
   unsigned char header[] = {SER_HEADER1, SER_HEADER2, SER_HEADER3, SER_HEADER4};
   static unsigned char buf;
 
-  int i = 0;
+  static int i;
   
-  if(fid > 0) {
-    while(read(fid, &buf, 1) > 0) {
-      fprintf(stderr, "buf: %x.\n", buf); 
-      if (buf == header[i]) {
-        if (i == 3) readPacket();
-        else i++;
-      } else {
+  if(fid <= 0)
+    return error("sense(): Error reading from serial port.  FID: %d", fid);
+
+  
+  while(read(fid, &buf, 1) == 1) {
+    switch(state) {
+      case HEADER:
+        if(buf == header[i]) {
+          if(i >= 3) {
+	    i = 0;
+	    state = DATA;
+          }
+	  else
+	    i++;
+          break;
+        }
+        break;
+      case DATA:
+        if(buf == 0xFF) {
+	  state = FLAG;
+	  break;
+	}
+        state_buf[i++] = buf;
+	if(i == STATE_LENGTH) {
+	  readPacket(state_buf);
+	  i = 0;
+	  state = HEADER;
+	}
+	break;
+      case FLAG:
+        if(buf == 0xFF) {
+	  state_buf[i++] = buf;
+		if(i == STATE_LENGTH) {
+		  readPacket(state_buf);
+		  i = 0;
+		  state = HEADER;
+		  break;
+		}
+	  state = DATA;
+	  break;
+	}
+	else if(buf == 0x00) {
+	  if(read(fid, &buf, 1) == 1)
+	    fprintf(stderr, "Parity error on buf: %u\n", buf);
+	  else 
+	    fprintf(stderr, "Error reading from serial port?!?!\n");
+	  state = HEADER;
+	  i = 0;
+	  break;
+	}
+	else {
+	  fprintf(stderr, "Errr, not sure how this could happen, buf: %u", buf);
+	  i = 0;
+	  state = HEADER;
+	  break;
+	}
+      default:
         i = 0;
-      }
-      
+	state = HEADER;
+	break;
     }
-  } else {
-    ErrorMessage::sendMessage(lake, getName(), "sense(): Error reading from serial port.");
-    return -1;
-  }  
-  
+  }
+  return 1; 
 }
 
 int CritterDriver::act(USeconds &now) {
@@ -165,86 +282,20 @@ int CritterDriver::act(USeconds &now) {
     acts++;
     
     controlDrop = (CritterControlDrop*)lake->readHead(controlId);  
+    lake->doneRead(controlId);
     
     if (controlDrop) {
-     
+      //fprintf(stderr, "X: %d Y: %d Theta: %d\n", (char)controlDrop->x_vel,
+      //  (char)controlDrop->y_vel, (char)controlDrop->theta_vel);
       sdata[4] = (char)controlDrop->motor_mode;
-      sdata[5] = (char)controlDrop->m100_vel;
-      sdata[6] = (char)controlDrop->m220_vel;
-      sdata[7] = (char)controlDrop->m340_vel;
+      sdata[5] = (char)-controlDrop->x_vel;
+      sdata[6] = (char)-controlDrop->y_vel;
+      sdata[7] = (char)controlDrop->theta_vel;
       sdata[8] = (char)controlDrop->led_mode;
 
       if(9 != write(fid, &sdata, 9)) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
-      else
-          fprintf(stderr, ".");
-    }
-    /*  if (controlDrop->motor_mode == CritterControlDrop::WHEEL_SPACE) {
-
-        int v1 = controlDrop->m100_vel;
-        int v2 = controlDrop->m220_vel;
-        int v3 = controlDrop->m340_vel;
-
-        int amax = abs(v1);
-        if (abs(v2) > amax) amax = abs(v2);
-        if (abs(v3) > amax) amax = abs(v3);
-        if (amax > 100) {
-          v1 = v1*100/amax;
-          v2 = v2*100/amax;
-          v3 = v3*100/amax;
-        }
-        
-        sprintf(str,"motor 0 %3d\r",v1);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-        
-        sprintf(str,"motor 1 %3d\r",v2);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-
-        sprintf(str,"motor 2 %3d\r",v3);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-        
-
-      } else { // assert(controlDrop->motor_mode == CritterControlDrop::XYTHETA_SPACE)
-        
-        int v1,v2,v3; // wheel velocities 
-
-        // [ v1 ]   [ cos(90+100) sin(90+100) 10.7 ]   [ v_x ]
-        // [ v2 ] = [ cos(90+220) sin(90+220) 10.7 ] * [ v_y ]
-        // [ v3 ]   [ cos(90+340) sin(90+340) 10.7 ]   [ v_theta ]
-        v1 = (int)(-0.9848*controlDrop->x_vel + -0.1736*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
-        v2 = (int)(0.6428*controlDrop->x_vel + -0.766*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
-        v3 = (int)(0.342*controlDrop->x_vel + 0.9397*controlDrop->y_vel + 1.07*controlDrop->theta_vel);
-
-
-        // scale velocities to max |v| <= 100
-        int amax = abs(v1);
-        if (abs(v2) > amax) amax = abs(v2);
-        if (abs(v3) > amax) amax = abs(v3);
-        if (amax > 100) {
-          v1 = v1*100/amax;
-          v2 = v2*100/amax;
-          v3 = v3*100/amax;
-        }
-        
-        sprintf(str,"motor 0 %3d\r", v1);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-
-        sprintf(str,"motor 0 %3d\r", v2);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-
-        sprintf(str,"motor 0 %3d\r", v3);
-        if (12 != write(fid, &str, 12)) fprintf(stderr, "write failed! (%s)\n", str); 
-      
-      }
-    }*/
-    lake->doneRead(controlId);
-
-    if (newData) {
-      // @@@ MGB: The = operator should be explicitly defined - don't rely on 
-      //  the default to work when using = to copy objects?
-      (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
-      lake->doneWriteHead(stateId);
-      newData = false;
+     
     }
   }
   return 1;

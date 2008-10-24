@@ -17,6 +17,8 @@
 #define SER_HEADER3 0xBE
 #define SER_HEADER4 0xEF
 
+#define STATE_LENGTH 38
+
 using namespace std;
 
 class CritterDriver : public Component {
@@ -36,7 +38,11 @@ class CritterDriver : public Component {
     int fid;
     string device;
     int port;
-
+    unsigned char state_buf[STATE_LENGTH];
+    static const unsigned short crctable[256]; 
+    
+    FILE *log;
+  
   public:
     
     CritterDriver(DataLake *lake, ComponentConfig &conf, string &name);
@@ -53,9 +59,10 @@ class CritterDriver : public Component {
     void cleanup();
 
  private:
+    unsigned short calccrc(unsigned char* buf, int size); 
     void initport();
     void closeport();
-    void readPacket();
+    void readPacket(unsigned char buf[]);
     
 };
 
