@@ -21,6 +21,18 @@ public class CritterControlDrop implements SimulatorDrop
   /** Velocities used in WHEEL_SPACE */
   public int m100_vel, m220_vel, m340_vel;
 
+  /** Returns the size of the data contained in this drop.
+    *  This must correspond to the amount of data written and read by
+    *  writeData and readData, respectively. 
+    * @return The number of bytes contained in this drop.
+    */
+  public int getSize()
+  {
+    return Integer.SIZE + // motor_mode
+           Integer.SIZE + // led_mode
+           3 * Integer.SIZE; // x_vel + y_vel + theta_vel OR m_vel's
+  }
+
   /** Write control drop data out to a stream. The order in which things 
     *  are sent must be:
     *

@@ -10,6 +10,11 @@ import java.io.IOException;
 
 public interface SimulatorDrop
 {
+  /** Returns the size of the drop (amount of bytes written/read by
+    *  writeData/readData.
+    */
+  public int getSize();
+
   /** Write the drop's data to the given output stream */
   public void writeData(InterfaceOutputStream pOut) throws IOException;
   /** Restore data from a given array */
