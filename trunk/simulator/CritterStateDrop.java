@@ -30,6 +30,11 @@ public class CritterStateDrop implements SimulatorDrop
       pOut.writeInt(current);
       pOut.writeInt(temp);
     }
+
+    public int getSize()
+    {
+      return 3 * Integer.SIZE;
+    }
   }
 
   class vector3d
@@ -48,6 +53,11 @@ public class CritterStateDrop implements SimulatorDrop
       pOut.writeInt(x);
       pOut.writeInt(y);
       pOut.writeInt(z);
+    }
+
+    public int getSize()
+    {
+      return 3 * Integer.SIZE;
     }
   }
 
@@ -76,6 +86,33 @@ public class CritterStateDrop implements SimulatorDrop
   public final int LIGHT_SIZE         = 4;
   public final int THERMAL_SIZE       = 8;
   public final int BUMP_SIZE          = 32;
+
+  /** Returns the size of the data contained in this Drop.
+    * This value must correspond to the amount of data sent/received in
+    *  writeData/readData.
+    *
+    * @return The size of the data contained in this Drop
+    */
+  public int getSize()
+  {
+    return Integer.SIZE + // power_source (as an int)
+           Byte.SIZE + // bus_voltage
+           3 * Byte.SIZE + // batv40 + batv160 + batv280
+           motor100.getSize() +
+           motor220.getSize() + 
+           motor340.getSize() +
+           accel.getSize() +
+           mag.getSize() +
+           Integer.SIZE + // rotation
+           IR_DISTANCE_SIZE * Integer.SIZE +
+           IR_LIGHT_SIZE * Integer.SIZE +
+           LIGHT_SIZE * Integer.SIZE +
+           THERMAL_SIZE * Integer.SIZE +
+           BUMP_SIZE * Integer.SIZE +
+           Integer.SIZE + // error_flags
+           Integer.SIZE;// cycle_time
+
+  }
 
   public CritterStateDrop()
   {
