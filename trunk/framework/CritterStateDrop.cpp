@@ -104,8 +104,6 @@ void CritterStateDrop::writeArray(void *d) {
   memcpy(data, &cycle_time, sizeof(cycle_time));
   data += sizeof(cycle_time);
 
-  fprintf (stderr, "Last bit read was %x from %x (%d)\n", data+i, data,
-    (int)((data+i) - data));
 }
 
 void CritterStateDrop::readArray(void *d) {
