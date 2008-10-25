@@ -65,8 +65,8 @@ public class CritterStateDrop implements SimulatorDrop
 
   public PowerSource power_source;
 
-  public byte bus_voltage;
-  public byte batv40, batv160, batv280;
+  public int bus_voltage;
+  public int batv40, batv160, batv280;
 
   public motor_struct motor100, motor220, motor340;
   public vector3d accel, mag;
@@ -95,9 +95,9 @@ public class CritterStateDrop implements SimulatorDrop
     */
   public int getSize()
   {
-    return Integer.SIZE + // power_source (as an int)
-           Byte.SIZE + // bus_voltage
-           3 * Byte.SIZE + // batv40 + batv160 + batv280
+    return (Integer.SIZE + // power_source (as an int)
+           Integer.SIZE + // bus_voltage
+           3 * Integer.SIZE + // batv40 + batv160 + batv280
            motor100.getSize() +
            motor220.getSize() + 
            motor340.getSize() +
@@ -110,8 +110,8 @@ public class CritterStateDrop implements SimulatorDrop
            THERMAL_SIZE * Integer.SIZE +
            BUMP_SIZE * Integer.SIZE +
            Integer.SIZE + // error_flags
-           Integer.SIZE;// cycle_time
-
+           Integer.SIZE) // cycle_time
+           / 8; // divide by 8 because all of these are bit sizes
   }
 
   public CritterStateDrop()
@@ -135,10 +135,10 @@ public class CritterStateDrop implements SimulatorDrop
   {
     pOut.writeInt(power_source.ordinal());
 
-    pOut.writeByte(bus_voltage);
-    pOut.writeByte(batv40);
-    pOut.writeByte(batv160);
-    pOut.writeByte(batv280);
+    pOut.writeInt(bus_voltage);
+    pOut.writeInt(batv40);
+    pOut.writeInt(batv160);
+    pOut.writeInt(batv280);
 
     motor100.writeData(pOut);
     motor220.writeData(pOut);
@@ -168,10 +168,10 @@ public class CritterStateDrop implements SimulatorDrop
       PowerSource.BAT280).toArray()[pIn.readInt()];
     
     // Read in all the data, one variable at a time
-    bus_voltage = pIn.readByte();
-    batv40 = pIn.readByte();
-    batv160 = pIn.readByte();
-    batv280 = pIn.readByte();
+    bus_voltage = pIn.readInt();
+    batv40 = pIn.readInt();
+    batv160 = pIn.readInt();
+    batv280 = pIn.readInt();
 
     motor100.readData(pIn);
     motor220.readData(pIn);
