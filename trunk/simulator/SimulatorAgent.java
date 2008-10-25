@@ -33,4 +33,23 @@ public class SimulatorAgent extends SimulatorObject
 	  g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
 	  g.setColor(tempC);
   }
+
+  public Object clone()
+  {
+    SimulatorAgent sa = new SimulatorAgent(this.aLabel, this.aId);
+    sa.copyFrom(this);
+
+    return sa;
+  }
+
+  public void copyFrom(SimulatorObject obj)
+  {
+    super.copyFrom(obj);
+    SimulatorAgent org = (SimulatorAgent)obj;
+
+    // Make a copy of relevant agent data
+    this.aCmdX = org.aCmdX;
+    this.aCmdY = org.aCmdY;
+    this.aCmdTheta = org.aCmdTheta;
+  }
 }

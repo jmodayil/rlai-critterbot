@@ -64,7 +64,9 @@ public class SimulatorMain
       // @@@ call makeDropFromState or such
       CritterStateDrop stateDrop = new CritterStateDrop();
       List<SimulatorAgent> agentList = engine.getAgentList();
-      SimulatorAgent varun = agentList.get(0);
+      SimulatorAgent varun = null;
+      if (agentList.size() > 0)
+        varun = agentList.get(0);
 
       // @@@ NOTE TO SELF: need to synchronize with the agent list
       if (varun != null)

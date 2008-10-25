@@ -20,45 +20,50 @@ public class SimulatorEngine
   // Terribly broken... remove this asap
   protected CritterControlDrop aCommand;
 
-
-  protected LinkedList<SimulatorAgent> aAgentList;
-  protected LinkedList<SimulatorObject> aObjList;
   protected SimulatorState aState;
-  
+  protected LinkedList<SimulatorComponent> aComponents;
+
   private long last_time;
   
   protected SimulatorVizEvents vizHandler;
 
   public SimulatorEngine()
   {
-    aAgentList = new LinkedList<SimulatorAgent>();
-    aObjList = new LinkedList<SimulatorObject>();
     aState = new SimulatorState();
+    aComponents = new LinkedList<SimulatorComponent>();
+
     vizHandler = new SimulatorVizEvents();
 
     aCommand = new CritterControlDrop();
 
     // Construct the simulator state by adding objects to it
-    Wall w = new Wall("Um?", 1);
+    Wall w = new Wall("Wall", 1);
     w.addPoint(20,20);
     w.addPoint(20,480);
     w.addPoint(480,480);
     w.addPoint(480,20);
     w.addPoint(20,20);
-    aObjList.add(w);
     
-    SimulatorAgent sa = new SimulatorAgent("Varun", 2);
+    aState.addObject(w);
+
+    SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
     sa.setPosition(new Point2D.Double(250,250));
     sa.setMass(4);
     sa.setMoment(2);
-    aAgentList.add(sa);
-    
+   
+    aState.addObject(sa);
   }
 
   /** Returns a list of existing agents */
-  public List<SimulatorAgent> getAgentList() { return Collections.unmodifiableList(aAgentList); }
+  public List<SimulatorAgent> getAgentList() { 
+    return Collections.unmodifiableList(aState.getAgents()); 
+  }
 
-  public List<SimulatorObject> getObjList() { return Collections.unmodifiableList(aObjList); }
+  /** Returns a list of existing objects */
+  public List<SimulatorObject> getObjectList() { 
+    return Collections.unmodifiableList(aState.getObjects()); 
+  }
+
   /**
     * Returns the current state of the simulator. 
     */
@@ -77,6 +82,7 @@ public class SimulatorEngine
     */
   public void step()
   {
+    // @@@ remove this!!! 
 	  long time = System.currentTimeMillis();
 	  if(last_time == 0) {
 		  last_time = time;
@@ -89,7 +95,7 @@ public class SimulatorEngine
 		  return;
 	  last_time = time;
 	  
-	  SimulatorAgent test = aAgentList.getFirst();
+	  SimulatorAgent test = aState.getAgents().getFirst();
 	  
 	  // This is the motion calculation.
 	  double forceX, forceY, torque;
@@ -118,7 +124,7 @@ public class SimulatorEngine
 	  double newY = test.aPos.y + test.aVel.y * ms / 1000;
 	  
 	  // Now test for collisions, again very sad.
-	  List<Line2D.Double> lines = ((Wall)aObjList.getFirst()).getLines();
+	  List<Line2D.Double> lines = ((Wall)aState.getObject(1)).getLines();
 	  Iterator<Line2D.Double> i = lines.iterator();
 	  while(i.hasNext()) {
 		  Line2D.Double line = i.next();
@@ -135,7 +141,18 @@ public class SimulatorEngine
 	  test.aPos.x = newX;
 	  test.aPos.y = newY;
 
-	  
-	  
+
+    /** Begin new (real) simulator code - everything above has to be moved */
+    // Make a copy of the state, which will later become the new state
+    SimulatorState newState = (SimulatorState)aState.clone();
+
+    // Apply each component in turn (order matters!)
+    for (SimulatorComponent comp : aComponents)
+    {
+      comp.apply(aState, newState);
+    }
+
+    // Replace the current state by the new state
+    aState = newState;
   }
 }
