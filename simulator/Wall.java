@@ -32,9 +32,11 @@ public class Wall extends SimulatorObject {
 	}
 	
 	public Wall(String pLabel, int pId, ArrayList<Point2D.Double> newWalls) {
-		super(pLabel, pId);
-		
-		walls = new ArrayList<Point2D.Double>(newWalls);
+		this(pLabel, pId);
+
+    // @@@ Add each point in turn?
+    for (Point2D.Double pt : newWalls)
+      addPoint (pt);
 	}
 	
 	public void addPoint(Point2D.Double point) {
@@ -78,4 +80,20 @@ public class Wall extends SimulatorObject {
 		g.drawPolyline(getXPoints(), getYPoints(), walls.size());
 		g.setColor(tempC);
 	}
+
+
+  /** SimulatorObject interface */
+  public Object clone()
+  {
+    Wall sw = new Wall(this.aLabel, this.aId, this.walls);
+    sw.copyFrom(this);
+    
+    return sw;
+  }
+
+  public void copyFrom(SimulatorObject obj)
+  {
+    super.copyFrom(obj);
+    // Copy relevant data
+  }
 }

@@ -13,6 +13,7 @@ import java.awt.geom.Point2D;
 public class SimulatorObject
 {
   /** Some physical properties of the object - position, velocity, mass, moment of intertia */
+  // @@@ Move all of these but position into a Physics 'state'
   protected Point2D.Double aPos;
   protected double aDir;
   protected Vector2D aVel;
@@ -22,9 +23,9 @@ public class SimulatorObject
   
   protected String aLabel;
 
-  /** Is this useful?  If it is, shouldn't it be automatically assigned by the constructor rather than
-   *  passed as an argument?
-   */
+  /** A unique identifier which is used to keep track of an object from state
+    *  to state
+    */
   protected int aId;
 
   /** Creates a new object with a given label (e.g., "wall") and identifier.
@@ -58,6 +59,11 @@ public class SimulatorObject
 	  
   }
   
+  public int getId()
+  {
+    return aId;
+  }
+
   public void setPosition(Point2D.Double newPos) {
 	  aPos.x = newPos.x;
 	  aPos.y = newPos.y;
@@ -91,5 +97,35 @@ public class SimulatorObject
   double getMoment() {
 	  return momI;
   }
+ 
+ 
+  /** Makes a copy of this object. For cloning purposes, the Object id 
+    *  remains identical. This method's purpose is to be used for copying
+    *  objects between states.
+    */
+  public Object clone()
+  {
+    SimulatorObject newObj = new SimulatorObject(this.aLabel, this.aId);
+
+    newObj.copyFrom(this);
+    return newObj; 
+  }
+
+  /** Copies the data from 'original' onto this object. This is used for
+    *  cloning purposes.
+    */
+  public void copyFrom(SimulatorObject org)
+  {
+    this.aPos = (Point2D.Double) org.aPos.clone();
   
+    /* @@@ Copy the other attributes of the object, the actuator and sensor 
+     * list */
+  
+    // @@@ remove these attributes, move to physics
+    this.aDir = org.aDir;
+    this.aVel = new Vector2D(org.aVel.x, org.aVel.y);
+    this.aRot = org.aRot;
+    this.mass = org.mass;
+    this.momI = org.momI;
+  }
 }

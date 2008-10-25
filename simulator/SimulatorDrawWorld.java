@@ -51,7 +51,7 @@ public class SimulatorDrawWorld extends JPanel {
 	}
 	
 	private void drawObjs(Graphics g) {
-		Iterator<SimulatorObject> i = engine.getObjList().iterator();
+		Iterator<SimulatorObject> i = engine.getObjectList().iterator();
 		
 		while(i.hasNext()) {
 			i.next().drawObj(g);
