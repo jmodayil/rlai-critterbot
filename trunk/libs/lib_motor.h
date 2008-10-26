@@ -20,6 +20,8 @@
 // Time (in cycle) to slew to new speed
 #define MOTOR_SLEW_TIME 100
 
+// Time (in cycles) to timeout if no commands received
+#define MOTOR_TIMEOUT 50
 /*
  * Initialize motor driver
  */
