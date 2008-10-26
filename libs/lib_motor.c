@@ -24,6 +24,8 @@ static float motor_speed_float[MOTOR_NUM_MOTORS];
 static float motor_slew_interval[MOTOR_NUM_MOTORS];
 static char motor_slew_count;
 
+static unsigned int motor_timeout_count;
+
 int motor_init() {
 
   int i;
@@ -54,6 +56,10 @@ int motor_event() {
   
   unsigned int volt;
   int i;
+
+  if(++motor_timeout_count == MOTOR_TIMEOUT) {
+    motor_set_slew(0,0,0);
+  }
 
   if(motor_slew_count < motor_slew_steps) {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
@@ -158,6 +164,7 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_speed_float[1] = motor_speed[1];
   motor_speed_float[2] = motor_speed[2];
   motor_slew_count = 0;
+  motor_timeout_count = 0;
 } 
 
 unsigned char motor_get_voltage() {
