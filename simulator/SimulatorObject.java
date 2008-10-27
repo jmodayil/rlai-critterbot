@@ -1,26 +1,28 @@
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.Point2D;
-
 /**
   * SimulatorObject
   *
   * Defines the basic properties and methods relevant to any simulator object,
   *  be it a wall, a tennis ball or a critterbot.
   *
-  * @author Marc G. Bellemare
+  * @author Marc G. Bellemare, Mike Sokolsky
   */
+
+import java.util.LinkedList;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+
 public class SimulatorObject
 {
   /** Some physical properties of the object - position, velocity, mass, moment of intertia */
   // @@@ Move all of these but position into a Physics 'state'
-  protected Point2D.Double aPos;
+  protected Vector2D aPos;
   protected double aDir;
-  protected Vector2D aVel;
-  protected double aRot;
   protected double mass;
   protected double momI;
-  
+
+  protected LinkedList<ObjectState> aStates;
+
   protected String aLabel;
 
   /** A unique identifier which is used to keep track of an object from state
@@ -37,14 +39,40 @@ public class SimulatorObject
   {
     aLabel = new String(pLabel);
     aId = pId;
-    aPos = new Point2D.Double(0,0);
+    aPos = new Vector2D(0,0);
     aDir = 0;
-    aVel = new Vector2D(0,0);
-    aRot = 0;
     mass = 0;
     momI = 0;
+
+    aStates = new LinkedList<ObjectState>();
   }
-  
+
+  /** Returns the partial state corresponding to a particular component,
+    * identified by pLabel.
+    *
+    * @param pLabel The identifier used by the SimulatorComponent and 
+    *   the corresponding ObjectState.
+    * @return The corresponding ObjectState or null if this object does not
+    *   store this state information.
+    *
+    */
+  public ObjectState getState(String pLabel)
+  {
+    for (ObjectState s : aStates)
+    {
+      if (s.getName().equals(pLabel))
+        return s;
+    }
+
+    return null;
+  }
+
+  public void addState(ObjectState pState)
+  {
+    // @@@ check for duplicates?
+    aStates.add(pState);
+  }
+
   private void loadObject() {
 	  // Open files, lookup plabel, etc???
   }
@@ -64,16 +92,10 @@ public class SimulatorObject
     return aId;
   }
 
-  public void setPosition(Point2D.Double newPos) {
-	  aPos.x = newPos.x;
-	  aPos.y = newPos.y;
+  public void setPosition(Vector2D newPos) {
+	  aPos = (Vector2D) newPos.clone();
   }
 
-  void setVelocity(Vector2D newVel) {
-	  aVel.x = newVel.x;
-	  aVel.y = newVel.y;
-  }
-	
   void setMoment(double newMoment) {
 	  momI = newMoment;
   }
@@ -82,12 +104,8 @@ public class SimulatorObject
 	  mass = newMass;
   }
 	
-  Point2D.Double getPosition() {
+  Vector2D getPosition() {
 	  return aPos;
-  }
-
-  Vector2D getVelocity() {
-	  return aVel;
   }
 
   double getMass() {
@@ -116,16 +134,14 @@ public class SimulatorObject
     */
   public void copyFrom(SimulatorObject org)
   {
-    this.aPos = (Point2D.Double) org.aPos.clone();
+    this.aPos = (Vector2D) org.aPos.clone();
+    this.aDir = org.aDir;
+    this.mass = org.mass;
+    this.momI = org.momI;
   
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */
-  
-    // @@@ remove these attributes, move to physics
-    this.aDir = org.aDir;
-    this.aVel = new Vector2D(org.aVel.x, org.aVel.y);
-    this.aRot = org.aRot;
-    this.mass = org.mass;
-    this.momI = org.momI;
+    for (ObjectState os : org.aStates)
+      this.addState((ObjectState)os.clone());
   }
 }

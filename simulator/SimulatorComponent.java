@@ -17,6 +17,8 @@ public interface SimulatorComponent
     *  @param pCurrent The current state (should not be modified)
     *  @param pNext    The next state, in which the results of applying the
     *       this component should be stored.
+    *  @param delta    The amount of time (in ms) elapsed between 
+    *       the current and next states.
     */
-  public void apply (SimulatorState pCurrent, SimulatorState pNext);
+  public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta);
 }
