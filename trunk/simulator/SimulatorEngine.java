@@ -47,10 +47,12 @@ public class SimulatorEngine
     aState.addObject(w);
 
     SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
-    sa.setPosition(new Point2D.Double(250,250));
+    sa.setPosition(new Vector2D(250,250));
     sa.setMass(4);
     sa.setMoment(2);
-   
+    // Give the agent a 'physics' state
+    sa.addState(new ObjectStatePhysics());
+
     aState.addObject(sa);
   }
 
@@ -72,6 +74,11 @@ public class SimulatorEngine
     return aState;
   }
 
+  public void addComponent(SimulatorComponent pComponent)
+  {
+    aComponents.add(pComponent);
+  }
+
   // @@@ remove me
   public void setCommand(CritterControlDrop pDrop)
   {
@@ -88,7 +95,7 @@ public class SimulatorEngine
 		  last_time = time;
 		  return;
 	  }
-	  long ms = time - last_time;  
+	  int ms = (int)(time - last_time); 
 	  
 	  /** Don't run too fast */
 	  if(ms < 10)
@@ -97,7 +104,8 @@ public class SimulatorEngine
 	  
 	  SimulatorAgent test = aState.getAgents().getFirst();
 	  
-	  // This is the motion calculation.
+	  // @@@ this needs to be removed
+    // This is the motion calculation.
 	  double forceX, forceY, torque;
 	  
 	  forceX = vizHandler.up * 4 * Math.sin(test.aDir);
@@ -110,46 +118,21 @@ public class SimulatorEngine
     forceY += (aCommand.y_vel / 10.0) * 4;
     torque += (aCommand.theta_vel / 10.0) * (-2);
 
-	  // A very sad attempt at friction
-	  forceX -= test.aVel.x * .1;
-	  forceY -= test.aVel.y * .1;
-	  torque -= test.aRot * .5;
-	  
-	  test.aRot += torque / test.momI;
-	  test.aVel.x += forceX / test.mass;
-	  test.aVel.y += forceY / test.mass;
-	  
-	  double newDir = test.aDir + test.aRot * ms / 1000;
-	  double newX = test.aPos.x + test.aVel.x * ms / 1000;
-	  double newY = test.aPos.y + test.aVel.y * ms / 1000;
-	  
-	  // Now test for collisions, again very sad.
-	  List<Line2D.Double> lines = ((Wall)aState.getObject(1)).getLines();
-	  Iterator<Line2D.Double> i = lines.iterator();
-	  while(i.hasNext()) {
-		  Line2D.Double line = i.next();
-		  double dist = line.ptSegDist(newX, newY);
-		  //System.out.println(dist);
-		  if(10 >= dist) {
-			  System.out.println("Collision!!!");
-			  test.aVel.x = test.aVel.y = 0;
-			  newX = test.aPos.x;
-			  newY = test.aPos.y;
-		  }
-	  }
-	  test.aDir = newDir;
-	  test.aPos.x = newX;
-	  test.aPos.y = newY;
+    // Modify the agent's physics state by the external forces
+    ObjectStatePhysics phys = 
+      (ObjectStatePhysics)test.getState(SimulatorComponentPhysics.NAME);
+    phys.setForce(new Vector2D(forceX, forceY));
+    phys.setTorque(torque);
 
-
-    /** Begin new (real) simulator code - everything above has to be moved */
+    /** Begin new (real) simulator code - everything above has to be moved
+      *  (more or less) */
     // Make a copy of the state, which will later become the new state
     SimulatorState newState = (SimulatorState)aState.clone();
 
     // Apply each component in turn (order matters!)
     for (SimulatorComponent comp : aComponents)
     {
-      comp.apply(aState, newState);
+      comp.apply(aState, newState, ms);
     }
 
     // Replace the current state by the new state

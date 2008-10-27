@@ -29,6 +29,7 @@ public class SimulatorMain
 
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine();
+    engine.addComponent(new SimulatorComponentPhysics());
 
     // Get the first agent from the engine
     //SimulatorAgent agent = engine.getAgentList().getFirst();
@@ -73,8 +74,8 @@ public class SimulatorMain
       {
         // Wrong (this isn't acceleration!), but this is only for debugging
         //  purposes
-        stateDrop.accel.x = (int)(varun.aVel.x*100);
-        stateDrop.accel.y = (int)(varun.aVel.y*100);
+        stateDrop.accel.x = 14;
+        stateDrop.accel.y = 92; 
 
         if (++stateThrottle >= 100)
         {
