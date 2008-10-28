@@ -53,6 +53,7 @@ unsigned int event_flags;
 #define EVENTS_DEFAULTS ( \
     1 << EVENT_ID_LEDDRIVE | \
     1 << EVENT_ID_LEDCTL | \
+    1 << EVENT_ID_MOTOR | \
     1 << EVENT_ID_ACCEL | \
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_ADC | \

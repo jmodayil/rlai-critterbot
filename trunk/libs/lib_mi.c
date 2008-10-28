@@ -77,9 +77,8 @@ void mi_send_status(void) {
 
 void mi_get_commands(void) {
   
-  int max;
-  int xvel, yvel, tvel;
-  int m100, m220, m340;
+  signed char m1, m2, m3;
+  int i,j;
   
   ALIGNMENT_ERROR:
 
@@ -96,35 +95,17 @@ void mi_get_commands(void) {
     goto ALIGNMENT_ERROR;
   
   robot_command.motor_mode = armgetchar();
+  m1 = ((signed char)((unsigned char)armgetchar()));
+  m2 = ((signed char)((unsigned char)armgetchar()));
+  m3 = ((signed char)((unsigned char)armgetchar()));
+  robot_command.led_mode = armgetchar();
+  
   switch(robot_command.motor_mode) {
     case WHEEL_SPACE:
-      motor_set_speed(0, (char)armgetchar());
-      motor_set_speed(1, (char)armgetchar());
-      motor_set_speed(2, (char)armgetchar());
+      motor_set_speed_slew(m1, m2, m3);
       break;
     case XYTHETA_SPACE:
-      xvel = (signed int)((signed char)((unsigned char)armgetchar()));
-      yvel = (signed int)((signed char)((unsigned char)armgetchar()));
-      tvel = (signed int)((signed char)((unsigned char)armgetchar()));
-  
-      m100 = (xvel * XSC100 + yvel * YSC100 + tvel * TSC100) / 1024;
-      m220 = (xvel * XSC220 + yvel * YSC220 + tvel * TSC220) / 1024;
-      m340 = (xvel * XSC340 + yvel * YSC340 + tvel * TSC340) / 1024;  
-
-      max = ABS(m100);
-      if(ABS(m220) > max)
-        max = ABS(m220);
-      if(ABS(m340) > max)
-        max = ABS(m340);
-      if(max > MOTOR_MAX_SPEED) {
-        m100 = (m100 * MOTOR_MAX_SPEED) / max;
-        m220 = (m220 * MOTOR_MAX_SPEED) / max;
-        m340 = (m340 * MOTOR_MAX_SPEED) / max;
-      }
-
-      mi_test = (signed char)m100;
-      motor_set_speed_slew((signed char)m100, (signed char)m220,
-          (signed char)m340);
+      motor_set_speed_xytheta(m1, m2, m3);
       break;
     default:
       robot_command.motor_mode = WHEEL_SPACE;
@@ -133,6 +114,23 @@ void mi_get_commands(void) {
       motor_set_speed(2, 0);
       break;
   }
-  robot_command.led_mode = armgetchar();
+  
+  switch(robot_command.led_mode) {
+    case CBATTERY:
+      leddrive_batstatus();
+      break;
+    case CBALL:
+      leddrive_ball();
+      break;
+    case CERROR:
+      leddrive_emerg();
+      break;
+    case CBUSY:
+      leddrive_busy();
+      break;
+    default:
+      leddrive_clear();
+      break;
+  }
   return;
 }
