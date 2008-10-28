@@ -47,13 +47,14 @@ public class SimulatorComponentPhysics implements SimulatorComponent
       SimulatorObject newObj = pNext.getObject(obj.getId());
       ObjectStatePhysics newPhysData = 
         (ObjectStatePhysics)newObj.getState(this.NAME);
-
+      
+      newPhysData.clearForces();
       // Apply Euler's method to the position, its derivative and second
       //  derivative
 
       // First compute the sum of forces
       // @@@ sum up
-      Vector2D force = physData.getForce();
+      Vector2D force = physData.getForceSum();
       Vector2D vel = physData.getVelocity();
       double torque = physData.getTorque();
       double avel = physData.getAngVelocity();
@@ -73,6 +74,9 @@ public class SimulatorComponentPhysics implements SimulatorComponent
     }
 
 	  // Now test for collisions, again very sad.
+    // @@@ use SimulatorObject.aShape.intersects()!!
+
+
 	  /*List<Line2D.Double> lines = ((Wall)aState.getObject(1)).getLines();
 	  Iterator<Line2D.Double> i = lines.iterator();
 	  while(i.hasNext()) {

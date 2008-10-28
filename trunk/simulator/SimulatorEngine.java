@@ -108,9 +108,9 @@ public class SimulatorEngine
     // This is the motion calculation.
 	  double forceX, forceY, torque;
 	  
-	  forceX = vizHandler.up * 4 * Math.sin(test.aDir);
-	  forceY = vizHandler.up * 4 * Math.cos(test.aDir);
-	  torque = (vizHandler.right * -2  + vizHandler.left * 2);
+	  forceX = vizHandler.up * 8 * Math.sin(test.aDir);
+	  forceY = vizHandler.up * 8 * Math.cos(test.aDir);
+	  torque = (vizHandler.right * -4  + vizHandler.left * 4);
 
     // Add RobotControlDrop's forces! Also, not quite right - the command
     //  is a velocity, not a force
@@ -121,8 +121,18 @@ public class SimulatorEngine
     // Modify the agent's physics state by the external forces
     ObjectStatePhysics phys = 
       (ObjectStatePhysics)test.getState(SimulatorComponentPhysics.NAME);
-    phys.setForce(new Vector2D(forceX, forceY));
+    phys.addForce(new Vector2D(forceX, forceY));
     phys.setTorque(torque);
+
+    // Ha ha ha.
+    if (test.aPos.y >= 500)
+      phys.addForce(new Vector2D(0, -2000));
+    else if (test.aPos.y < 0)
+      phys.addForce(new Vector2D(0, 2000));
+    if (test.aPos.x >= 500)
+      phys.addForce(new Vector2D(-2000, 0));
+    else if (test.aPos.x < 0)
+      phys.addForce(new Vector2D(2000, 0));
 
     /** Begin new (real) simulator code - everything above has to be moved
       *  (more or less) */

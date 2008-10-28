@@ -21,6 +21,8 @@ public class SimulatorObject
   protected double mass;
   protected double momI;
 
+  protected Polygon shape;
+
   protected LinkedList<ObjectState> aStates;
 
   protected String aLabel;
@@ -138,7 +140,11 @@ public class SimulatorObject
     this.aDir = org.aDir;
     this.mass = org.mass;
     this.momI = org.momI;
-  
+
+    // To avoid copying too much stuff around, let's assume objects don't
+    //  change shapes from state to state
+    this.shape = org.shape;
+
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */
     for (ObjectState os : org.aStates)
