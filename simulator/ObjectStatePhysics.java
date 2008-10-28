@@ -6,23 +6,52 @@
   * @author Marc G. Bellemare
   */
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class ObjectStatePhysics implements ObjectState
 {
   protected Vector2D aVel;
-  protected Vector2D aForce;
+  protected LinkedList<Vector2D> aForces;
   
   protected double aRot;
   protected double aTorque;
 
   public ObjectStatePhysics()
   {
-    aForce = new Vector2D(0,0); 
     aVel = new Vector2D(0,0);
     aRot = aTorque = 0;
   }
 
-  public Vector2D getForce() { return aForce; }
-  public void setForce(Vector2D f) { aForce = f; }
+  public Vector2D getForceSum()
+  { 
+    Vector2D sum = new Vector2D(0,0);
+
+    if (aForces == null) return sum;
+
+    for (Vector2D f : aForces)
+      sum.addEquals(f);
+
+    return sum;
+  }
+
+  public List<Vector2D> getForces()
+  {
+    return aForces;
+  }
+
+  public void addForce(Vector2D f)
+  {
+    if (aForces == null) aForces = new LinkedList<Vector2D>();
+
+    aForces.add(f);
+  }
+
+  public void clearForces()
+  {
+    if (aForces != null)
+      aForces.clear();
+  }
 
   public Vector2D getVelocity() { return aVel; }
   public void setVelocity(Vector2D v) { aVel = v; }
@@ -52,7 +81,8 @@ public class ObjectStatePhysics implements ObjectState
     ObjectStatePhysics phys = (ObjectStatePhysics) os;
     
     this.aVel = (Vector2D) phys.aVel.clone();
-    this.aForce = (Vector2D) phys.aForce.clone();
+    // Should we copy the forces over? by definition we shouldn't carry
+    //  them from state to state, but...
 
     this.aRot = phys.aRot;
     this.aTorque = phys.aTorque;

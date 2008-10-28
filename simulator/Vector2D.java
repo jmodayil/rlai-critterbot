@@ -36,7 +36,20 @@ public class Vector2D {
 		x = vect.x;
 		y = vect.y;
 	}
-	
+
+  /**
+    * Adds the given vector to this one.
+    * @param vect The vector to be added to this vector.
+    * @return The result (as this)
+    */
+  public Vector2D addEquals(Vector2D vect)
+  {
+    this.x += vect.x;
+    this.y += vect.y;
+    
+    return this;
+  }
+
 	/**
 	 * length()
 	 * @return Length of the vector
