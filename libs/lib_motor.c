@@ -10,8 +10,8 @@ event_s motor_event_s = {
 
 unsigned int motor_tx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
 unsigned int motor_rx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
-unsigned int power_tx_data;
-unsigned int power_rx_data;
+unsigned int power_tx_data[MOTOR_PWR_BYTES];
+unsigned int power_rx_data[MOTOR_PWR_BYTES];
 
 struct spi_packet motor_packet[MOTOR_NUM_MOTORS]; 
 struct spi_packet power_packet;
@@ -30,7 +30,7 @@ int motor_init() {
 
   int i;
 
-  motor_slew_steps - 0;
+  motor_slew_steps = 0;
   motor_slew_count = 1;
 
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
@@ -44,9 +44,9 @@ int motor_init() {
   }
 
   power_packet.device_id = 8;
-  power_packet.num_words = 1;
-  power_packet.data_to_write = &power_tx_data;
-  power_packet.read_data = &power_rx_data;
+  power_packet.num_words = MOTOR_PWR_BYTES;
+  power_packet.data_to_write = &power_tx_data[0];
+  power_packet.read_data = &power_rx_data[0];
   power_packet.finished = 1;
 
   return 0;  
@@ -58,7 +58,7 @@ int motor_event() {
   int i;
 
   if(++motor_timeout_count == MOTOR_TIMEOUT) {
-    motor_set_slew(0,0,0);
+    motor_set_speed_slew(0,0,0);
   }
 
   if(motor_slew_count < motor_slew_steps) {
@@ -127,6 +127,32 @@ void motor_set_speed(int motor, signed char speed) {
   motor_speed[motor] = speed;
 }
 
+void motor_set_speed_xytheta(signed char xvel, signed char yvel, 
+    signed char tvel) {
+ 
+  int max;
+  int m100, m220, m340;
+  
+  m100 = (xvel * XSC100 + yvel * YSC100 + tvel * TSC100) / 1024;
+  m220 = (xvel * XSC220 + yvel * YSC220 + tvel * TSC220) / 1024;
+  m340 = (xvel * XSC340 + yvel * YSC340 + tvel * TSC340) / 1024;  
+
+  max = ABS(m100);
+  if(ABS(m220) > max)
+    max = ABS(m220);
+  if(ABS(m340) > max)
+    max = ABS(m340);
+  if(max > MOTOR_MAX_SPEED) {
+    m100 = (m100 * MOTOR_MAX_SPEED) / max;
+    m220 = (m220 * MOTOR_MAX_SPEED) / max;
+    m340 = (m340 * MOTOR_MAX_SPEED) / max;
+  }
+
+  motor_set_speed_slew((signed char)m100, (signed char)m220,
+      (signed char)m340);
+
+}
+
 void motor_set_speed_slew(signed char speed100, signed char speed220,
    signed char speed340) {
 
@@ -153,6 +179,7 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   if(ABS(speed340 - motor_speed[2]) > motor_slew_steps)
     motor_slew_steps = ABS(speed340 - motor_speed[2]);
 
+  motor_slew_steps *= MOTOR_SLEW_RATE;
   motor_speed_final[0] = speed100;
   motor_speed_final[1] = speed220;
   motor_speed_final[2] = speed340;
@@ -171,9 +198,9 @@ unsigned char motor_get_voltage() {
   
   unsigned int temp;
  
-	if(0 == (power_rx_data & 0xFF))
+	if(0 == (power_rx_data[0] & 0xFF))
 		return 255;
-  temp = power_rx_data & 0xFF;
+  temp = power_rx_data[0] & 0xFF;
   return ((temp + 148) * 7) / 27;
 }
 
@@ -198,7 +225,7 @@ void motor_set_pwm(int motor, int pwm) {
   if(pwm < -MOTOR_MAX_PWM || pwm > MOTOR_MAX_PWM)
     return;
 
-  temp = power_rx_data & 0xFF;
+  temp = power_rx_data[0] & 0xFF;
   temp = ((temp + 148) * 7) / 27; 
   motor_tx_data[motor][0] = MOTOR_PWM_HEADER;
   motor_tx_data[motor][1] = pwm & 0xFF;
