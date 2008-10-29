@@ -54,7 +54,7 @@ public class SimulatorComponentPhysics implements SimulatorComponent
 
       // First compute the sum of forces
       // @@@ sum up
-      Vector2D force = physData.getForceSum();
+      Vector2D force = physData.getForceSum().vec;
       Vector2D vel = physData.getVelocity();
       double torque = physData.getTorque();
       double avel = physData.getAngVelocity();
@@ -69,8 +69,8 @@ public class SimulatorComponentPhysics implements SimulatorComponent
         new Vector2D(vel.x + force.x / obj.mass, vel.y + force.y / obj.mass));
 
       newObj.aDir = obj.aDir + avel * delta / 1000;
-      newObj.aPos = new Vector2D(obj.aPos.x + vel.x * delta / 1000,
-                                 obj.aPos.y + vel.y * delta / 1000);
+      newObj.setPosition(new Vector2D(obj.aPos.x + vel.x * delta / 1000,
+                                 obj.aPos.y + vel.y * delta / 1000));
     }
 
 	  // Now test for collisions, again very sad.

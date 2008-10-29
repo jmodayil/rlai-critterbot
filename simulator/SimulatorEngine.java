@@ -43,10 +43,19 @@ public class SimulatorEngine
     w.addPoint(480,480);
     w.addPoint(480,20);
     w.addPoint(20,20);
-    
+   
     aState.addObject(w);
 
     SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
+
+    Polygon agentShape = new Polygon();
+    agentShape.addPoint (-10,-10);
+    agentShape.addPoint (10,-10);
+    agentShape.addPoint (10,10);
+    agentShape.addPoint(-10,10);
+
+    sa.setShape(agentShape);
+
     sa.setPosition(new Vector2D(250,250));
     sa.setMass(4);
     sa.setMoment(2);
@@ -54,6 +63,30 @@ public class SimulatorEngine
     sa.addState(new ObjectStatePhysics());
 
     aState.addObject(sa);
+    
+    // Add an hexagonal obstacle
+    SimulatorObject hex = new SimulatorObject("Hex", 3);
+
+    // This obstacle can be moved around
+    hex.addState (new ObjectStatePhysics());
+
+    // Create the hex polygon
+    Polygon hexShape = new Polygon();
+    hexShape.addPoint(0,0);
+    hexShape.addPoint(-4,-3);
+    hexShape.addPoint(-4,-8);
+    hexShape.addPoint(0,-11);
+    hexShape.addPoint(4,-8);
+    hexShape.addPoint(4,-3);
+
+    hex.setShape(hexShape);
+
+    // Important - set position after setting shape
+    hex.setPosition(new Vector2D(100,100));
+    hex.setMass(1);
+    hex.setMoment(2);
+   
+    aState.addObject(hex);
   }
 
   /** Returns a list of existing agents */
@@ -121,18 +154,33 @@ public class SimulatorEngine
     // Modify the agent's physics state by the external forces
     ObjectStatePhysics phys = 
       (ObjectStatePhysics)test.getState(SimulatorComponentPhysics.NAME);
-    phys.addForce(new Vector2D(forceX, forceY));
+    phys.addForce(new Force(forceX, forceY));
     phys.setTorque(torque);
 
     // Ha ha ha.
     if (test.aPos.y >= 500)
-      phys.addForce(new Vector2D(0, -2000));
+      phys.addForce(new Force(0, -2000));
     else if (test.aPos.y < 0)
-      phys.addForce(new Vector2D(0, 2000));
+      phys.addForce(new Force(0, 2000));
     if (test.aPos.x >= 500)
-      phys.addForce(new Vector2D(-2000, 0));
+      phys.addForce(new Force(-2000, 0));
     else if (test.aPos.x < 0)
-      phys.addForce(new Vector2D(2000, 0));
+      phys.addForce(new Force(2000, 0));
+
+    // Take this out, Anna
+    SimulatorObject hex = aState.getObject(3);
+    if (hex.getShape().intersects(test.getShape()))
+    {
+      System.err.println("Bang!");
+      Vector2D fv = hex.getPosition().minus(test.getPosition());
+      Vector2D vel = phys.getVelocity();
+      fv.x = fv.x * vel.length() / 5;
+      fv.y = fv.y * vel.length() / 5;
+
+      ObjectStatePhysics hexPhys =
+        (ObjectStatePhysics)hex.getState(SimulatorComponentPhysics.NAME);
+      hexPhys.addForce(new Force(fv,test.getPosition()));
+    }
 
     /** Begin new (real) simulator code - everything above has to be moved
       *  (more or less) */

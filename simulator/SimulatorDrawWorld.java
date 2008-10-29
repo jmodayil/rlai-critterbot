@@ -37,24 +37,12 @@ public class SimulatorDrawWorld extends JPanel {
 		
 		super.paintComponent(g);
 		
-		drawObjs(g);
-		drawAgents(g);
+		drawObjects(g);
 		
 	}
 	
-	private void drawAgents(Graphics g) {
-		Iterator<SimulatorAgent> i = engine.getAgentList().iterator();
-		
-		while(i.hasNext()) {
-			i.next().drawAgent(g);
-		}
-	}
-	
-	private void drawObjs(Graphics g) {
-		Iterator<SimulatorObject> i = engine.getObjectList().iterator();
-		
-		while(i.hasNext()) {
-			i.next().drawObj(g);
-		}
+	private void drawObjects(Graphics g) {
+		for (SimulatorObject obj : engine.getObjectList())
+      obj.draw(g);
 	}
 }

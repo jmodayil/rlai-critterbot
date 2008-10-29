@@ -74,7 +74,7 @@ public class Wall extends SimulatorObject {
 		return points;
 	}
 	
-	public void drawObj(Graphics g) {
+	public void draw(Graphics g) {
 		Color tempC = g.getColor();
 		g.setColor(Color.green);
 		g.drawPolyline(getXPoints(), getYPoints(), walls.size());

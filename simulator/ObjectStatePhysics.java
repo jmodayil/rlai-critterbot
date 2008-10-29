@@ -12,7 +12,7 @@ import java.util.List;
 public class ObjectStatePhysics implements ObjectState
 {
   protected Vector2D aVel;
-  protected LinkedList<Vector2D> aForces;
+  protected LinkedList<Force> aForces;
   
   protected double aRot;
   protected double aTorque;
@@ -23,26 +23,32 @@ public class ObjectStatePhysics implements ObjectState
     aRot = aTorque = 0;
   }
 
-  public Vector2D getForceSum()
+  /** Return the sum of forces acting on the object. Because it is meaningless
+    *  to talk about a point of contact when many forces are in play,
+    *  this new force has no 'source'.
+    *
+    * @return The sum of the forces
+    */
+  public Force getForceSum()
   { 
-    Vector2D sum = new Vector2D(0,0);
+    Force sum = new Force(0,0);
 
     if (aForces == null) return sum;
 
-    for (Vector2D f : aForces)
-      sum.addEquals(f);
+    for (Force f : aForces)
+      sum.vec.addEquals(f.vec);
 
     return sum;
   }
 
-  public List<Vector2D> getForces()
+  public List<Force> getForces()
   {
     return aForces;
   }
 
-  public void addForce(Vector2D f)
+  public void addForce(Force f)
   {
-    if (aForces == null) aForces = new LinkedList<Vector2D>();
+    if (aForces == null) aForces = new LinkedList<Force>();
 
     aForces.add(f);
   }

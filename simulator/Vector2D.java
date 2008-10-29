@@ -50,6 +50,15 @@ public class Vector2D {
     return this;
   }
 
+  /**
+    * Subtracts the given vector from this one; does not modify this vector.
+    * @param vect The vector to be subtracted this vector.
+    * @return The result
+    */
+  public Vector2D minus(Vector2D vect)
+  {
+    return new Vector2D(this.x - vect.x, this.y - vect.y);
+  }
 	/**
 	 * length()
 	 * @return Length of the vector
