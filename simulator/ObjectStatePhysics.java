@@ -11,6 +11,7 @@ import java.util.List;
 
 public class ObjectStatePhysics implements ObjectState
 {
+  /** Physics state */
   protected Vector2D aVel;
   protected LinkedList<Force> aForces;
   
