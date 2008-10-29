@@ -11,12 +11,17 @@
 
 import java.util.LinkedList;
 
+import java.awt.Color;
+import java.awt.Graphics;
+
 public class Polygon
 {
   /** The polygon's bounding box */
   protected double bx,by,bw,bh;
 
   protected LinkedList<Vector2D> points;
+
+  protected int[] aXPoints, aYPoints;
 
   public Polygon()
   {
@@ -39,6 +44,9 @@ public class Polygon
 
     if (y < by) by = y;
     else if (y - by > bh) bh = y - by;
+
+    // Not quite efficient
+    aXPoints = aYPoints = null;
   }
 
   /** Translate this polygon with the given (dx,dy) vector
@@ -54,10 +62,25 @@ public class Polygon
     // adjust all points :( we could also optimize things by simply keeping
     //  track of the translation and adjusting only when necessary (e.g.
     //  when we need the points, rather than the bounding box)
+    int idx = 0;
     for (Vector2D p : points)
     {
       p.x += delta.x;
       p.y += delta.y;
+
+      if (aXPoints != null)
+      {
+        aXPoints[idx] = (int)Math.round(p.x);
+        aYPoints[idx] = (int)Math.round(p.y);
+        idx++;
+      }
+    }
+
+    if (aXPoints != null && points.size() > 0)
+    {
+      Vector2D first = points.getFirst();
+      aXPoints[idx] = (int)Math.round(first.x);
+      aYPoints[idx] = (int)Math.round(first.y);
     }
   }
 
@@ -170,6 +193,36 @@ public class Polygon
     return false;
   }
 
+  public void draw(Graphics g) 
+  {
+    // If the point arrays are missing, re-create them
+    if (aXPoints == null || aYPoints == null)
+    {
+      int num = points.size();
+      aXPoints = new int[num+1];
+      aYPoints = new int[num+1];
+      
+      int idx = 0;
+      // Set the (x,y) coordinates of each point in turn
+      for (Vector2D pt : points)
+      {
+        aXPoints[idx] = (int)Math.round(pt.x);
+        aYPoints[idx] = (int)Math.round(pt.y);
+
+        idx++;
+      }
+     
+      // Re-iterate the first point to close the loop
+      Vector2D first = points.getFirst();
+      aXPoints[num] = (int)Math.round(first.x);
+      aYPoints[num] = (int)Math.round(first.y);
+    }
+
+    Color tempC = g.getColor();
+		g.setColor(Color.black);
+		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
+		g.setColor(tempC);
+  }
 
 
 

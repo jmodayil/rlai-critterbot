@@ -21,7 +21,7 @@ public class SimulatorObject
   protected double mass;
   protected double momI;
 
-  protected Polygon shape;
+  protected Polygon aShape;
 
   protected LinkedList<ObjectState> aStates;
 
@@ -47,6 +47,20 @@ public class SimulatorObject
     momI = 0;
 
     aStates = new LinkedList<ObjectState>();
+  }
+
+  /** Sets the shape of the object (which is shapeless by default).
+    *
+    * @param pShape The polygon representing the shape. It is not copied over.
+    */
+  public void setShape(Polygon pShape)
+  {
+    aShape = pShape;
+  }
+
+  public Polygon getShape()
+  {
+    return aShape;
   }
 
   /** Returns the partial state corresponding to a particular component,
@@ -85,8 +99,9 @@ public class SimulatorObject
    * @param obj
    * @param g
    */
-  public void drawObj(Graphics g){
-	  
+  public void draw(Graphics g)
+  {
+	  aShape.draw(g);  
   }
   
   public int getId()
@@ -95,6 +110,10 @@ public class SimulatorObject
   }
 
   public void setPosition(Vector2D newPos) {
+    // If we have a shape, also translate it by the difference
+    if (aShape != null)
+      aShape.translate(newPos.minus(aPos));
+
 	  aPos = (Vector2D) newPos.clone();
   }
 
@@ -143,7 +162,7 @@ public class SimulatorObject
 
     // To avoid copying too much stuff around, let's assume objects don't
     //  change shapes from state to state
-    this.shape = org.shape;
+    this.aShape = org.aShape;
 
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */

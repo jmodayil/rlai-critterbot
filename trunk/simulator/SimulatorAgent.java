@@ -1,6 +1,3 @@
-import java.awt.Color;
-import java.awt.Graphics;
-
 /**
   * SimulatorAgent
   *
@@ -10,6 +7,10 @@ import java.awt.Graphics;
   *
   * @author Marc G. Bellemare
   */
+
+import java.awt.Color;
+import java.awt.Graphics;
+
 public class SimulatorAgent extends SimulatorObject
 {
   /** Three values representing the current robot command */
@@ -23,7 +24,7 @@ public class SimulatorAgent extends SimulatorObject
     aCmdX = aCmdY = aCmdTheta;
   }
   
-  public void drawAgent(Graphics g) {
+  public void draw(Graphics g) {
 	  Color tempC = g.getColor();
 	  g.setColor(Color.black);
 	  g.drawOval((int)aPos.x - 10, (int)aPos.y - 10, 20, 20);
