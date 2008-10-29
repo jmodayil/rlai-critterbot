@@ -30,6 +30,7 @@ public class SimulatorMain
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine();
     engine.addComponent(new SimulatorComponentPhysics());
+    engine.addComponent(new SimulatorComponentOmnidrive());
 
     // Get the first agent from the engine
     //SimulatorAgent agent = engine.getAgentList().getFirst();
@@ -52,14 +53,7 @@ public class SimulatorMain
     while (true)
     {
       engine.step();
-      List<SimulatorDrop> drops = robotServ.receiveDrops();
-
-      // Receive some actions (@@@ needs to be written properly)
-      for (SimulatorDrop drop : drops)
-      {
-        CritterControlDrop command = (CritterControlDrop)drop;
-        engine.setCommand(command);
-      }
+      receiveControlDrops(engine, robotServ);
 
       // Send the system state
       // @@@ call makeDropFromState or such
@@ -94,6 +88,29 @@ public class SimulatorMain
       //objServer.sendUpdate(engine.getState());
       //subjServer.sendUpdate();
       //subjServer.receiveData();
+    }
+  }
+      
+  public static void receiveControlDrops(SimulatorEngine engine,
+    DropServer robotServ)
+  {
+    List<SimulatorDrop> drops = robotServ.receiveDrops();
+    List<SimulatorObject> drivable = 
+      engine.getObjects(SimulatorComponentOmnidrive.NAME);
+
+    // Receive some actions (@@@ needs to be written properly)
+    //  @@@ In particular, we probably want to encapsulate the setFromDrop 
+    //  code somewhere else (maybe here?)
+    for (SimulatorDrop drop : drops)
+    {
+      CritterControlDrop command = (CritterControlDrop)drop;
+      for (SimulatorObject obj : drivable)
+      {
+        ObjectStateOmnidrive driveData = 
+          (ObjectStateOmnidrive)obj.getState(SimulatorComponentOmnidrive.NAME);
+
+        driveData.setFromDrop(command);
+      }
     }
   }
 }

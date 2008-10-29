@@ -53,9 +53,31 @@ public class SimulatorState
     return list;
   }
 
+  /** Returns a list of all objects current in the simulator.
+    *
+    * @return A list of all existing objects
+    */
   public LinkedList<SimulatorObject> getObjects()
   {
     return aObjList;
+  }
+
+  /** Returns all objects which are affected by the given component.
+    * 
+    * @param pComponent The identifier of the component of interest
+    * @return A list of objects o such that o.getState(pComponent) != null
+    */
+  public LinkedList<SimulatorObject> getObjects(String pComponent)
+  {
+    LinkedList<SimulatorObject> objs = new LinkedList<SimulatorObject>();
+
+    for (SimulatorObject o : aObjList)
+    {
+      if (o.getState(pComponent) != null)
+        objs.add(o);
+    }
+
+    return objs;
   }
 
   public Object clone()

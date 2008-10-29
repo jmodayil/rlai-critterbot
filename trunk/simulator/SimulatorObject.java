@@ -153,7 +153,7 @@ public class SimulatorObject
   /** Copies the data from 'original' onto this object. This is used for
     *  cloning purposes.
     */
-  public void copyFrom(SimulatorObject org)
+  protected void copyFrom(SimulatorObject org)
   {
     this.aPos = (Vector2D) org.aPos.clone();
     this.aDir = org.aDir;
