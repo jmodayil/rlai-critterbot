@@ -30,16 +30,16 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       SimulatorObject futureObj = pNext.getObject(o.getId());
       if (futureObj == null) continue;
 
-      ObjectState os = futureObj.getState(SimulatorComponentPhysics.NAME);
+      ObjectState os = futureObj.getState(SimulatorComponentKinematics.NAME);
 
       if (os == null) continue;
-      ObjectStatePhysics physState = (ObjectStatePhysics)os;
+      ObjectStateKinematics kinState = (ObjectStateKinematics)os;
 
       // The Omnidrive state contains target velocities, while the 
-      //  Physics state contains actual velocities
+      //  Kinematics state contains actual velocities
       // @@@ properly deal with this
-      physState.addForce (new Force(driveState.getVelocity()));
-      physState.addTorque (driveState.getAngVelocity());
+      kinState.addForce (new Force(driveState.getVelocity()));
+      kinState.addTorque (driveState.getAngVelocity());
 
       // For now, "consume" the action by setting the next state's action
       //  back to 0

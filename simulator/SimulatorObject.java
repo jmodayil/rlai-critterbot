@@ -14,8 +14,9 @@ import java.awt.Graphics2D;
 
 public class SimulatorObject
 {
-  /** Some physical properties of the object - position, velocity, mass, moment of intertia */
-  // @@@ Move all of these but position into a Physics 'state'
+  /** Some physical properties of the object - position, velocity, mass, 
+    * moment of inertia ( possibly mass and momI should be moved to 
+    *  Kinematics?) */
   protected Vector2D aPos;
   protected double aDir;
   protected double mass;

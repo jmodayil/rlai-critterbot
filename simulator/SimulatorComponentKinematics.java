@@ -1,18 +1,18 @@
 /**
-  * SimulatorComponentPhysics
+  * SimulatorComponentKinematics
   *
-  * This SimulatorComponent encodes all the physics interaction. As well
-  *  as modifying data for the ObjectStatePhysics state of objects, 
+  * This SimulatorComponent encodes all the kinematics interactions. As well
+  *  as modifying data for the ObjectStateKinematics state of objects, 
   *  it also is in charge of modifying position.
   *
-  * @author SimulatorComponentPhysics
+  * @author SimulatorComponentKinematics
   */
 
-public class SimulatorComponentPhysics implements SimulatorComponent
+public class SimulatorComponentKinematics implements SimulatorComponent
 {
-  public static final String NAME = "physics";
+  public static final String NAME = "kinematics";
 
-  public SimulatorComponentPhysics()
+  public SimulatorComponentKinematics()
   {
   }
 
@@ -41,31 +41,31 @@ public class SimulatorComponentPhysics implements SimulatorComponent
       ObjectState os = obj.getState(this.NAME);
       if (os == null)
         continue;
-      ObjectStatePhysics physData = (ObjectStatePhysics) os;
+      ObjectStateKinematics kinData = (ObjectStateKinematics) os;
 
       // Find the corresponding object in the next state
       SimulatorObject newObj = pNext.getObject(obj.getId());
-      ObjectStatePhysics newPhysData = 
-        (ObjectStatePhysics)newObj.getState(this.NAME);
+      ObjectStateKinematics newKinData = 
+        (ObjectStateKinematics)newObj.getState(this.NAME);
       
-      newPhysData.clearForces();
+      newKinData.clearForces();
       // Apply Euler's method to the position, its derivative and second
       //  derivative
 
       // First compute the sum of forces
       // @@@ sum up
-      Vector2D force = physData.getForceSum().vec;
-      Vector2D vel = physData.getVelocity();
-      double torque = physData.getTorque();
-      double avel = physData.getAngVelocity();
+      Vector2D force = kinData.getForceSum().vec;
+      Vector2D vel = kinData.getVelocity();
+      double torque = kinData.getTorque();
+      double avel = kinData.getAngVelocity();
 
 	    // A very sad attempt at friction
 	    force.x -= vel.x * .1;
 	    force.y -= vel.y * .1;
 	    torque -= avel * .5;
 	  
-	    newPhysData.setAngVelocity(avel + torque / obj.momI);
-	    newPhysData.setVelocity(
+	    newKinData.setAngVelocity(avel + torque / obj.momI);
+	    newKinData.setVelocity(
         new Vector2D(vel.x + force.x / obj.mass, vel.y + force.y / obj.mass));
 
       newObj.aDir = obj.aDir + avel * delta / 1000;
