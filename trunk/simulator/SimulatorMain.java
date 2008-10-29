@@ -29,7 +29,7 @@ public class SimulatorMain
 
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine();
-    engine.addComponent(new SimulatorComponentPhysics());
+    engine.addComponent(new SimulatorComponentKinematics());
     engine.addComponent(new SimulatorComponentOmnidrive());
 
     // Get the first agent from the engine

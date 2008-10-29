@@ -55,7 +55,7 @@ public class SimulatorEngine
     sa.setMass(4);
     sa.setMoment(2);
     // Give the agent a 'physics' state
-    sa.addState(new ObjectStatePhysics());
+    sa.addState(new ObjectStateKinematics());
     // Give the agent an omnidirectional drive
     sa.addState(new ObjectStateOmnidrive());
 
@@ -65,7 +65,7 @@ public class SimulatorEngine
     SimulatorObject hex = new SimulatorObject("Hex", 3);
 
     // This obstacle can be moved around
-    hex.addState (new ObjectStatePhysics());
+    hex.addState (new ObjectStateKinematics());
 
     // Create the hex polygon
     Polygon hexShape = new Polygon();
@@ -155,8 +155,8 @@ public class SimulatorEngine
       driveData.setAngVelocity (torque);
     }
 
-    ObjectStatePhysics phys =
-      (ObjectStatePhysics)test.getState(SimulatorComponentPhysics.NAME);
+    ObjectStateKinematics phys =
+      (ObjectStateKinematics)test.getState(SimulatorComponentKinematics.NAME);
 
     // Ha ha ha.
     if (test.aPos.y >= 500)
@@ -178,8 +178,8 @@ public class SimulatorEngine
       fv.x = fv.x * vel.length() / 5;
       fv.y = fv.y * vel.length() / 5;
 
-      ObjectStatePhysics hexPhys =
-        (ObjectStatePhysics)hex.getState(SimulatorComponentPhysics.NAME);
+      ObjectStateKinematics hexPhys =
+        (ObjectStateKinematics)hex.getState(SimulatorComponentKinematics.NAME);
       hexPhys.addForce(new Force(fv,test.getPosition()));
     }
 

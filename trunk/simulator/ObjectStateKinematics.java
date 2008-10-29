@@ -1,7 +1,7 @@
 /**
-  * ObjectStatePhysics
+  * ObjectStateKinematics
   *
-  * Defines physics-related properties of an object.
+  * Defines kinematics-related properties of an object.
   *
   * @author Marc G. Bellemare
   */
@@ -9,16 +9,16 @@
 import java.util.LinkedList;
 import java.util.List;
 
-public class ObjectStatePhysics implements ObjectState
+public class ObjectStateKinematics implements ObjectState
 {
-  /** Physics state */
+  /** Kinematics state */
   protected Vector2D aVel;
   protected LinkedList<Force> aForces;
   
   protected double aRot;
   protected double aTorque;
 
-  public ObjectStatePhysics()
+  public ObjectStateKinematics()
   {
     aVel = new Vector2D(0,0);
     aRot = aTorque = 0;
@@ -76,22 +76,22 @@ public class ObjectStatePhysics implements ObjectState
   // @@@    torque should have corr. methods addTorque to compound torques
 
   /** ObjectState interface */
-  public String getName() { return SimulatorComponentPhysics.NAME; }
+  public String getName() { return SimulatorComponentKinematics.NAME; }
 
   public Object clone()
   {
-    ObjectStatePhysics newPhys = new ObjectStatePhysics();
-    newPhys.copyFrom(this);
+    ObjectStateKinematics newKin = new ObjectStateKinematics();
+    newKin.copyFrom(this);
 
-    return newPhys;
+    return newKin;
   }
 
   protected void copyFrom(ObjectState os)
   {
-    ObjectStatePhysics phys = (ObjectStatePhysics) os;
+    ObjectStateKinematics kin = (ObjectStateKinematics) os;
     
-    this.aVel = (Vector2D) phys.aVel.clone();
-    this.aRot = phys.aRot;
+    this.aVel = (Vector2D) kin.aVel.clone();
+    this.aRot = kin.aRot;
     
     // Should we copy the forces over? by definition we shouldn't carry
     //  them from state to state, but...
