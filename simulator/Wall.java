@@ -91,7 +91,7 @@ public class Wall extends SimulatorObject {
     return sw;
   }
 
-  public void copyFrom(SimulatorObject obj)
+  protected void copyFrom(SimulatorObject obj)
   {
     super.copyFrom(obj);
     // Copy relevant data

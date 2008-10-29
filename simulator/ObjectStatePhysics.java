@@ -67,7 +67,10 @@ public class ObjectStatePhysics implements ObjectState
   public void setAngVelocity(double v) { aRot = v; }
 
   public double getTorque() { return aTorque; }
+  public void addTorque(double t) { aTorque += t; }
   public void setTorque(double t) { aTorque = t; }
+
+  public void clearTorque() { aTorque = 0; }
 
   // @@@ add: forces should be a list which gets compounded
   // @@@    torque should have corr. methods addTorque to compound torques
@@ -88,11 +91,10 @@ public class ObjectStatePhysics implements ObjectState
     ObjectStatePhysics phys = (ObjectStatePhysics) os;
     
     this.aVel = (Vector2D) phys.aVel.clone();
+    this.aRot = phys.aRot;
+    
     // Should we copy the forces over? by definition we shouldn't carry
     //  them from state to state, but...
-
-    this.aRot = phys.aRot;
-    this.aTorque = phys.aTorque;
   }
 }
 

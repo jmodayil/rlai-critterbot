@@ -17,9 +17,6 @@ import java.util.List;
 
 public class SimulatorEngine
 {
-  // Terribly broken... remove this asap
-  protected CritterControlDrop aCommand;
-
   protected SimulatorState aState;
   protected LinkedList<SimulatorComponent> aComponents;
 
@@ -33,8 +30,6 @@ public class SimulatorEngine
     aComponents = new LinkedList<SimulatorComponent>();
 
     vizHandler = new SimulatorVizEvents();
-
-    aCommand = new CritterControlDrop();
 
     // Construct the simulator state by adding objects to it
     Wall w = new Wall("Wall", 1);
@@ -61,6 +56,8 @@ public class SimulatorEngine
     sa.setMoment(2);
     // Give the agent a 'physics' state
     sa.addState(new ObjectStatePhysics());
+    // Give the agent an omnidirectional drive
+    sa.addState(new ObjectStateOmnidrive());
 
     aState.addObject(sa);
     
@@ -73,11 +70,11 @@ public class SimulatorEngine
     // Create the hex polygon
     Polygon hexShape = new Polygon();
     hexShape.addPoint(0,0);
-    hexShape.addPoint(-4,-3);
-    hexShape.addPoint(-4,-8);
-    hexShape.addPoint(0,-11);
-    hexShape.addPoint(4,-8);
-    hexShape.addPoint(4,-3);
+    hexShape.addPoint(-8,-6);
+    hexShape.addPoint(-8,-16);
+    hexShape.addPoint(0,-22);
+    hexShape.addPoint(8,-16);
+    hexShape.addPoint(8,-6);
 
     hex.setShape(hexShape);
 
@@ -99,6 +96,16 @@ public class SimulatorEngine
     return Collections.unmodifiableList(aState.getObjects()); 
   }
 
+  /** Returns a list of objects influenced by the given component
+    *
+    * @param pComponent The identifier of the component of interest
+    * @return A list of objects as per SimulatorState.getObjects(pComponent)
+    */
+  public List<SimulatorObject> getObjects(String pComponent)
+  {
+    return aState.getObjects(pComponent);
+  }
+
   /**
     * Returns the current state of the simulator. 
     */
@@ -110,12 +117,6 @@ public class SimulatorEngine
   public void addComponent(SimulatorComponent pComponent)
   {
     aComponents.add(pComponent);
-  }
-
-  // @@@ remove me
-  public void setCommand(CritterControlDrop pDrop)
-  {
-    aCommand = pDrop;
   }
 
   /** Takes one 'step' in the simulation: update positions, velocities, etc
@@ -137,25 +138,25 @@ public class SimulatorEngine
 	  
 	  SimulatorAgent test = aState.getAgents().getFirst();
 	  
-	  // @@@ this needs to be removed
-    // This is the motion calculation.
 	  double forceX, forceY, torque;
-	  
-	  forceX = vizHandler.up * 8 * Math.sin(test.aDir);
-	  forceY = vizHandler.up * 8 * Math.cos(test.aDir);
-	  torque = (vizHandler.right * -4  + vizHandler.left * 4);
+	 
+    // If any of the visualizer keys is pressed, we override the omnidrive
+    //  @@@ This needs to be moved somewhere else or ...
+    if (vizHandler.up > 0 || vizHandler.right > 0 || vizHandler.left > 0)
+    {
+	    forceX = vizHandler.up * 8 * Math.sin(test.aDir);
+	    forceY = vizHandler.up * 8 * Math.cos(test.aDir);
+	    torque = (vizHandler.right * -4  + vizHandler.left * 4);
 
-    // Add RobotControlDrop's forces! Also, not quite right - the command
-    //  is a velocity, not a force
-    forceX += (aCommand.x_vel / 10.0) * 4;
-    forceY += (aCommand.y_vel / 10.0) * 4;
-    torque += (aCommand.theta_vel / 10.0) * (-2);
+      // Modify the agent's omni drive data 
+      ObjectStateOmnidrive driveData = 
+        (ObjectStateOmnidrive)test.getState(SimulatorComponentOmnidrive.NAME);
+      driveData.setVelocity (new Vector2D(forceX, forceY));
+      driveData.setAngVelocity (torque);
+    }
 
-    // Modify the agent's physics state by the external forces
-    ObjectStatePhysics phys = 
+    ObjectStatePhysics phys =
       (ObjectStatePhysics)test.getState(SimulatorComponentPhysics.NAME);
-    phys.addForce(new Force(forceX, forceY));
-    phys.setTorque(torque);
 
     // Ha ha ha.
     if (test.aPos.y >= 500)

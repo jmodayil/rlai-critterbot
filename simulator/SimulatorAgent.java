@@ -43,7 +43,7 @@ public class SimulatorAgent extends SimulatorObject
     return sa;
   }
 
-  public void copyFrom(SimulatorObject obj)
+  protected void copyFrom(SimulatorObject obj)
   {
     super.copyFrom(obj);
     SimulatorAgent org = (SimulatorAgent)obj;
