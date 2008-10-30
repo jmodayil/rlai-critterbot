@@ -19,11 +19,11 @@ event_s adcspi_event_s = {
   0
 };
 
-unsigned int adcspi_command = 0;
+unsigned int adcspi_command[ADCSPI_NUM_DEVICES] = { 0, 0, 0, 0};
 unsigned int adcspi_output[ADCSPI_NUM_DEVICES][ADCSPI_OUTPUTS_PER_DEVICE];
 
-unsigned int adcspi_init_data = 0xFFFF;
-unsigned int adcspi_start_data = 0xFFB0;
+unsigned int adcspi_init_data[ADCSPI_NUM_DEVICES] = { 0xFFFF, 0xFFFF, 0xFFFF, 0xFFFF };
+unsigned int adcspi_start_data[ADCSPI_NUM_DEVICES] = { 0xFFB0, 0xFFB0, 0xFFB0, 0xFFB0 };
 unsigned int adcspi_dummy;
 
 struct spi_packet adcspi_command_packet[ADCSPI_NUM_DEVICES][ADCSPI_OUTPUTS_PER_DEVICE];
@@ -40,7 +40,7 @@ int adcspi_init()
 
     packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
     packet->num_words = 1;
-    packet->data_to_write = &adcspi_init_data;
+    packet->data_to_write = &adcspi_init_data[i];
     packet->read_data = &adcspi_dummy;
     packet->finished = 0;
 
@@ -48,7 +48,7 @@ int adcspi_init()
 
     packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
     packet->num_words = 1;
-    packet->data_to_write = &adcspi_start_data;
+    packet->data_to_write = &adcspi_start_data[i];
     packet->read_data = &adcspi_dummy;
     packet->finished = 0;
 
@@ -58,7 +58,7 @@ int adcspi_init()
 
         packet->device_id = i + ADCSPI_DEVICE_ID_BASE;
         packet->num_words = 1;
-        packet->data_to_write = &adcspi_command;
+        packet->data_to_write = &adcspi_command[i];
         packet->read_data = &adcspi_output[i][j];
         packet->finished = 0;
     }

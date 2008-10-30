@@ -15,8 +15,8 @@ unsigned short crc;
 unsigned char mi_test;
 
 void mi_start(void) {
+  leddrive_batstatus();
   ui_set_handler(mi_event);
-  leddrive_byte(&mi_test);
 }
 
 void mi_stop(void) {
@@ -60,7 +60,7 @@ void mi_send_status(void) {
   putwcrc(adc_output[3] >> 2);
   putwcrc((adcspi_get_output(3, 12) >> 2) - 128);
   for(i = 0; i < 10; i++)
-    putwcrc(0);
+    putwcrc(adcspi_get_output(0, i) >> 2);
   putwcrc(adcspi_get_output(3,8) >> 2);
   putwcrc(adcspi_get_output(3,9) >> 2);
   putwcrc(adcspi_get_output(3,10) >> 2);
@@ -73,6 +73,7 @@ void mi_send_status(void) {
 
   armputchar(crc >> 8);
   armputchar(crc & 0xFF);
+
 }
 
 void mi_get_commands(void) {
