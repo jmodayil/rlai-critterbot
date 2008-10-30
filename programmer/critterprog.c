@@ -22,8 +22,8 @@ void initport(int port) {
   options.c_cflag &= ~(CSIZE | CSTOPB | CRTSCTS);
   options.c_cflag |= (CS8 | CLOCAL | CREAD | PARENB | PARODD);
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-  options.c_iflag &= (IXON | IXOFF);
-  options.c_iflag |= (INPCK | PARMRK | OCRNL);
+  options.c_iflag &= ~(INPCK | IXON | IXOFF);
+  options.c_iflag |= IGNPAR | OCRNL;
   options.c_oflag &= ~OPOST; 
   options.c_cc[VTIME] = 0;
   options.c_cc[VMIN] = 1;
