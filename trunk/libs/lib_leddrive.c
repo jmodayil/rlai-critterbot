@@ -495,7 +495,7 @@ int leddrive_event(void) {
 			break;
 		case BATSTATUS:
 			clearled();
-			battlvl(leddrive_batlvl);//
+			battlvl((motor_get_voltage()-48)*6);//
 			break;
 		case BALL:
 	  	ledball_crtl();	
