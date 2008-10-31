@@ -131,6 +131,11 @@ public class SimulatorObject
     return aId;
   }
 
+  public String getLabel()
+  {
+    return aLabel;
+  }
+
   public void setPosition(Vector2D newPos) {
     // If we have a shape, also translate it by the difference
     if (aShape != null)
