@@ -105,7 +105,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                 // collision will be from the *other* thing having moved)
                 
                 // @todo this comparison may need to be a function
-                if(obj.getPosition()==pCurrent.getObject(obj.getId()).getPosition())
+                if(obj.getPosition().equals(pCurrent.getObject(obj.getId()).getPosition()))
                     continue;
                 for(SimulatorObject compObj : pNext.getObjects()) {
 
@@ -122,7 +122,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                         // it should be okay either way
                         resetPosition(compObj, pCurrent);
 
-                        //System.out.println("Collision at "+pt+"!");
+                        System.out.println("Collision at "+pt+"!");
                         // calculate forces
                         
                     }
