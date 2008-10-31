@@ -17,7 +17,7 @@ import java.util.List;
 
 public class SimulatorEngine
 {
-  protected SimulatorState aState;
+  protected SimulatorState aState, aNextState;
   protected LinkedList<SimulatorComponent> aComponents;
 
   private long last_time;
@@ -97,7 +97,8 @@ public class SimulatorEngine
     hexShape.addPoint(0,-22);
     hexShape.addPoint(8,-16);
     hexShape.addPoint(8,-6);
-    
+    hexShape.translate(new Vector2D(0, 11));
+
     /*hexShape.addPoint(0,0);
     hexShape.addPoint(40,0);
     hexShape.addPoint(40,40);
@@ -116,6 +117,10 @@ public class SimulatorEngine
     hex.setMoment(2);
    
     aState.addObject(hex);
+
+
+    // Clone the current state; we will use it to do state-state transitions
+    aNextState = (SimulatorState)aState.clone();
   }
 
   /** Returns a list of existing agents */
@@ -216,13 +221,14 @@ public class SimulatorEngine
     }
 
     // Take this out, Anna
-    if (hex.getShape().intersects(test.getShape()))
+    Vector2D iPoint = hex.getShape().intersects(test.getShape());
+    if (iPoint != null)
     {
-      System.err.println("Bang!");
-      Vector2D fv = hex.getPosition().minus(test.getPosition());
-      Vector2D vel = phys.getVelocity();
-      fv.x = fv.x * vel.length()/5;
-      fv.y = fv.y * vel.length()/5;
+      System.err.println("Bang ("+iPoint.x+","+iPoint.y+")");
+      Vector2D fv = hex.getPosition().minus(iPoint);
+      System.err.println ("\t fv is "+fv.x+","+fv.y);
+      fv.x = fv.x * 5;
+      fv.y = fv.y * 5; 
 
       ObjectStateKinematics hexPhys =
         (ObjectStateKinematics)hex.getState(SimulatorComponentKinematics.NAME);
@@ -231,16 +237,20 @@ public class SimulatorEngine
 
     /** Begin new (real) simulator code - everything above has to be moved
       *  (more or less) */
-    // Make a copy of the state, which will later become the new state
-    SimulatorState newState = (SimulatorState)aState.clone();
-
     // Apply each component in turn (order matters!)
+    // @@@ oops Marc, you need to fix this
+    aNextState = (SimulatorState)aState.clone();
+
     for (SimulatorComponent comp : aComponents)
     {
-      comp.apply(aState, newState, ms);
+      comp.apply(aState, aNextState, ms);
     }
 
+    SimulatorState tmpState = aState;
+
     // Replace the current state by the new state
-    aState = newState;
+    aState = aNextState;
+    // Be clever and reuse what was the current state as our next 'new state'
+    aNextState = tmpState;
   }
 }

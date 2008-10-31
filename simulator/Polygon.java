@@ -198,17 +198,17 @@ public class Polygon
   }
 
   /** 
-    * Returns whether this polygon intersects the given polygon. The
-    *  relationship is, of course, symmetric. Note that no efficiency
-    *  guarantee is given.
+    * Returns a point, if any, at which this polygon intersects the given 
+    *  polygon. The 'relationship' is, of course, symmetric. Note that no 
+    *  efficiency guarantee is given.
     *
-    * NOTE! In its current form, this algorithm is broken. 
     *
     * @param poly The polygon to be tested against.
-    * @return Whether the two polygons intersect.
+    * @return The (first) point of intersection of the two polygons, or 
+    *         null if none exist.
     */
 
-  public boolean intersects(Polygon poly)
+  public Vector2D intersects(Polygon poly)
   {
     // Compare the bounding boxes first, and hope that they don't intersect
     double l = poly.bx;
@@ -219,19 +219,15 @@ public class Polygon
     double br = bx + bw;
     double bb = by + bh;
 
-    // If none of our corners is inside the other guy's bounding box, we're
-    //  safe
+    // @@@ this can be simplified to - assume no intersection if bb's
+    //  don't intersect
     if (! ((l < bx && bx < r) || (l < br && br < r) ||
            (t < by && by < b) || (t < bb && bb < b)) &&
         ! ((bx < l && l < br) || (bx < r && r < br) ||
            (by < t && t < bb) || (by < b && b < bb)) )
-      return false;
+      return null;
 
-    // Make sure neither polygon is fully enclosed in the other one
-    //  If A is fully in B, then all of A's points must lie inside B
-    //  Otherwise we will have to go through the O(n^2) case, ick
-    if (poly.contains(this.points.getFirst())) return true;
-    else if (this.contains(poly.points.getFirst())) return true;
+    // Assume fully enclosed polygons do NOT intersect
 
     // Use brute force if the bounding box test fails, for lack of 
     //  programming time (all-edges comparison)
@@ -257,7 +253,8 @@ public class Polygon
         double beta = num2 / denom;
 
         if (alpha > 0 && alpha < 1 && beta > 0 && beta < 1)
-          return true;
+          return new Vector2D(pa1.x + alpha * (pa2.x - pa1.x),
+                              pa2.y + alpha * (pa2.y - pa1.y));
 
         pb1 = pb2;
       }
@@ -265,7 +262,7 @@ public class Polygon
       pa1 = pa2;
     }
 
-    return false;
+    return null;
   }
 
   public void draw(Graphics g) 
@@ -351,7 +348,7 @@ public class Polygon
    
       oth.translate(new Vector2D(x,y));
 
-      if (poly.intersects(oth))
+      if (poly.intersects(oth) != null)
         System.out.println (x+" "+y);
       else
         System.err.println (x+" "+y);

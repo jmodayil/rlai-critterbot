@@ -49,6 +49,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
         (ObjectStateKinematics)newObj.getState(this.NAME);
       
       newKinData.clearForces();
+      newKinData.clearTorque();
       // Apply Euler's method to the position, its derivative and second
       //  derivative
 
