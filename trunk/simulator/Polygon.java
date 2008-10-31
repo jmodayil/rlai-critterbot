@@ -35,6 +35,11 @@ public class Polygon
     return points.size();
   }
 
+  public LinkedList<Vector2D> getPoints()
+  {
+    return points; 
+  }
+
   /** Add a point to this polygon.
     */
   public void addPoint(double x, double y)
@@ -210,8 +215,9 @@ public class Polygon
 
   public Vector2D intersects(Polygon poly)
   {
-      if(poly == null)
-	  return null;
+    if(poly == null)
+	    return null;
+
     // Compare the bounding boxes first, and hope that they don't intersect
     double l = poly.bx;
     double r = poly.bx + poly.bw;
@@ -244,7 +250,11 @@ public class Polygon
                        (pb2.x - pb1.x) * (pa2.y - pa1.y);
         
         // Assume general case and go on with your life 
-        if (denom == 0) continue;
+        if (denom == 0)
+        {
+          pb1 = pb2;
+          continue;
+        }
 
         double num1 = (pb2.x - pb1.x) * (pa1.y - pb1.y) -
                        (pb2.y - pb1.y) * (pa1.x - pb1.x); 
@@ -255,8 +265,10 @@ public class Polygon
         double beta = num2 / denom;
 
         if (alpha > 0 && alpha < 1 && beta > 0 && beta < 1)
+        {
           return new Vector2D(pa1.x + alpha * (pa2.x - pa1.x),
-                              pa2.y + alpha * (pa2.y - pa1.y));
+                              pa1.y + alpha * (pa2.y - pa1.y));
+        }
 
         pb1 = pb2;
       }
