@@ -68,7 +68,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
 	    newKinData.setVelocity(
         new Vector2D(vel.x + force.x / obj.mass, vel.y + force.y / obj.mass));
 
-      newObj.aDir = obj.aDir + avel * delta / 1000;
+      newObj.setDirection(obj.aDir + avel * delta / 1000);
       newObj.setPosition(new Vector2D(obj.aPos.x + vel.x * delta / 1000,
                                  obj.aPos.y + vel.y * delta / 1000));
     }

@@ -1,3 +1,14 @@
+/**
+  * Wall
+  *
+  * Defines additional data and methods pertaining to a wall. Strictly
+  *  speaking, the Wall class (and in general, subclasses of SimulatorObject)
+  *  should only need to override the draw method. Data which is Wall-specific
+  *  should be put in ObjectState*, not in here.
+  *
+  *  @author Mike Sokolsky, Marc G. Bellemare
+  */
+
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.geom.Line2D;

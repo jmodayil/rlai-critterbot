@@ -38,16 +38,38 @@ public class SimulatorEngine
     w.addPoint(480,480);
     w.addPoint(480,20);
     w.addPoint(20,20);
-   
+
+    // Make a polygon for the wall as well
+    Polygon wallShape = new Polygon();
+    // Interior
+    wallShape.addPoint(20,20);
+    wallShape.addPoint(20,480);
+    wallShape.addPoint(480,480);
+    wallShape.addPoint(480,20);
+    wallShape.addPoint(20,20);
+    // Exterior
+    wallShape.addPoint(0,0);
+    wallShape.addPoint(0,500);
+    wallShape.addPoint(500,500);
+    wallShape.addPoint(500,0);
+    wallShape.addPoint(0,0);
+    // Note that this polygon self-intersects at the duplicated edge
+    //  (0,0)-(20,20)
+    // This polygon is also evil because everything falls within its bounding
+    //  box
+    w.setShape(wallShape);
+
     aState.addObject(w);
 
     SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
 
     Polygon agentShape = new Polygon();
-    agentShape.addPoint (-10,-10);
-    agentShape.addPoint (10,-10);
+    agentShape.addPoint (-10,10);
     agentShape.addPoint (10,10);
-    agentShape.addPoint(-10,10);
+    agentShape.addPoint (10,-40);
+    agentShape.addPoint (6,-40);
+    agentShape.addPoint (6,-10);
+    agentShape.addPoint (-10,-10);
 
     sa.setShape(agentShape);
 
@@ -75,6 +97,16 @@ public class SimulatorEngine
     hexShape.addPoint(0,-22);
     hexShape.addPoint(8,-16);
     hexShape.addPoint(8,-6);
+    
+    /*hexShape.addPoint(0,0);
+    hexShape.addPoint(40,0);
+    hexShape.addPoint(40,40);
+    hexShape.addPoint(0, 40);
+    hexShape.addPoint(0, 35);
+    hexShape.addPoint(35,35);
+    hexShape.addPoint(35, 5);
+    hexShape.addPoint(0, 5);*/
+
 
     hex.setShape(hexShape);
 
@@ -140,7 +172,7 @@ public class SimulatorEngine
 	  
 	  double forceX, forceY, torque;
 	 
-    // If any of the visualizer keys is pressed, we override the omnidrive
+    // If any of the visualizer keys are pressed, we override the omnidrive
     //  @@@ This needs to be moved somewhere else or ...
     if (vizHandler.up > 0 || vizHandler.right > 0 || vizHandler.left > 0)
     {
@@ -159,14 +191,14 @@ public class SimulatorEngine
       (ObjectStateKinematics)test.getState(SimulatorComponentKinematics.NAME);
 
     // Ha ha ha.
-    if (test.aPos.y >= 500)
+    /*if (test.aPos.y >= 500)
       phys.addForce(new Force(0, -2000));
     else if (test.aPos.y < 0)
       phys.addForce(new Force(0, 2000));
     if (test.aPos.x >= 500)
       phys.addForce(new Force(-2000, 0));
     else if (test.aPos.x < 0)
-      phys.addForce(new Force(2000, 0));
+      phys.addForce(new Force(2000, 0)); */
 
     // Take this out, Anna
     SimulatorObject hex = aState.getObject(3);
@@ -175,8 +207,8 @@ public class SimulatorEngine
       System.err.println("Bang!");
       Vector2D fv = hex.getPosition().minus(test.getPosition());
       Vector2D vel = phys.getVelocity();
-      fv.x = fv.x * vel.length() / 5;
-      fv.y = fv.y * vel.length() / 5;
+      fv.x = fv.x * vel.length()/5;
+      fv.y = fv.y * vel.length()/5;
 
       ObjectStateKinematics hexPhys =
         (ObjectStateKinematics)hex.getState(SimulatorComponentKinematics.NAME);
