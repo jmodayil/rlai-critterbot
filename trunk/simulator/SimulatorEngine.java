@@ -190,18 +190,32 @@ public class SimulatorEngine
     ObjectStateKinematics phys =
       (ObjectStateKinematics)test.getState(SimulatorComponentKinematics.NAME);
 
+    LinkedList<SimulatorObject> stuff = new LinkedList<SimulatorObject>();
+
+    SimulatorObject hex = aState.getObject(3);
+    
+    stuff.add (test);
+    stuff.add (hex);
+
     // Ha ha ha.
-    /*if (test.aPos.y >= 500)
-      phys.addForce(new Force(0, -2000));
-    else if (test.aPos.y < 0)
-      phys.addForce(new Force(0, 2000));
-    if (test.aPos.x >= 500)
-      phys.addForce(new Force(-2000, 0));
-    else if (test.aPos.x < 0)
-      phys.addForce(new Force(2000, 0)); */
+    for (SimulatorObject o : stuff)
+    {
+      if (o.getState(SimulatorComponentKinematics.NAME) == null) continue;
+
+      ObjectStateKinematics oPhys = (ObjectStateKinematics)
+        o.getState(SimulatorComponentKinematics.NAME);
+      
+      if (o.aPos.y >= 500)
+        oPhys.addForce(new Force(0, -1000));
+      else if (o.aPos.y < 0)
+        oPhys.addForce(new Force(0, 1000));
+      if (o.aPos.x >= 500)
+        oPhys.addForce(new Force(-1000, 0));
+      else if (o.aPos.x < 0)
+        oPhys.addForce(new Force(1000, 0));
+    }
 
     // Take this out, Anna
-    SimulatorObject hex = aState.getObject(3);
     if (hex.getShape().intersects(test.getShape()))
     {
       System.err.println("Bang!");

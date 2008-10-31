@@ -299,7 +299,7 @@ public class Polygon
 		g.setColor(tempC);
     
     // Draw the bounding box (@@@ only for debugging, take me out)
-    int[] bbx = new int[5];
+    /* int[] bbx = new int[5];
     int[] bby = new int[5];
 
 		bbx[0] = bbx[1] = bbx[4] = (int)Math.round(bx);
@@ -309,7 +309,7 @@ public class Polygon
 
     g.setColor(Color.cyan);
 		g.drawPolyline(bbx, bby, bbx.length);
-		g.setColor(tempC);
+		g.setColor(tempC); */
   }
 
 
