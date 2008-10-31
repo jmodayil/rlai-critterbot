@@ -45,7 +45,22 @@ public class SimulatorObject
     aDir = 0;
 
     aStates = new LinkedList<ObjectState>();
+    //umm, any reason we wouldn't initialize this?
+    aShape = new Polygon();
   }
+
+    /**
+     * Returns true of this objects' shape intersects the parameter objects'
+     *
+     * @returns True if the passed object intersects this object
+     **/
+    public Vector2D intersects(SimulatorObject compObj) 
+    {
+	//@@todo find out why this was throwing a null
+	// pointer exception before I initialzed aShape
+	// in the constructor
+	return this.getShape().intersects(compObj.getShape());
+    }
 
   /** Sets the shape of the object (which is shapeless by default).
     *
@@ -165,4 +180,5 @@ public class SimulatorObject
     for (ObjectState os : org.aStates)
       this.addState((ObjectState)os.clone());
   }
+
 }

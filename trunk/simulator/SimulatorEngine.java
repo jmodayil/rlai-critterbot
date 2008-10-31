@@ -263,6 +263,7 @@ public class SimulatorEngine
 
     LinkedList<SimulatorObject> stuff = new LinkedList<SimulatorObject>();
 
+    /*
     SimulatorObject hex = aState.getObject(3);
     
     stuff.add (agent);
@@ -285,7 +286,6 @@ public class SimulatorEngine
       else if (o.aPos.x < 0)
         oPhys.addForce(new Force(1000, 0));
     }
-
     // Anna: simple collision detection, take this out once your stuff is
     //  in place (or in fact when you start working on it)
     Vector2D iPoint = hex.getShape().intersects(agent.getShape());
@@ -300,6 +300,7 @@ public class SimulatorEngine
         (ObjectStateKinematics)hex.getState(SimulatorComponentKinematics.NAME);
       hexPhys.addForce(new Force(fv,agent.getPosition()));
     }
+    */
 
   }
 }
