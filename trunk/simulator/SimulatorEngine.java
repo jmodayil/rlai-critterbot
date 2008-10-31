@@ -240,10 +240,11 @@ public class SimulatorEngine
 	 
     // If any of the visualizer keys are pressed, we override the omnidrive
     //  @@@ This needs to be moved somewhere else or ...
-    if (vizHandler.up > 0 || vizHandler.right > 0 || vizHandler.left > 0)
+    if (vizHandler.up > 0 || vizHandler.down > 0 ||
+        vizHandler.right > 0 || vizHandler.left > 0)
     {
-	    forceX = vizHandler.up * 8 * Math.sin(agent.aDir);
-	    forceY = vizHandler.up * 8 * Math.cos(agent.aDir);
+	    forceX = (vizHandler.up * 8 - vizHandler.down * 8) * Math.sin(agent.aDir);
+	    forceY = (vizHandler.up * 8 - vizHandler.down * 8) * Math.cos(agent.aDir);
 	    torque = (vizHandler.right * -4  + vizHandler.left * 4);
 
       // Modify the agent's omni drive data 
