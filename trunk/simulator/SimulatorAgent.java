@@ -25,14 +25,25 @@ public class SimulatorAgent extends SimulatorObject
   }
   
   public void draw(Graphics g) {
-	  Color tempC = g.getColor();
-	  g.setColor(Color.black);
-	  g.drawOval((int)aPos.x - 10, (int)aPos.y - 10, 20, 20);
-	  g.setColor(Color.red);
-	  g.drawLine((int)aPos.x, (int)aPos.y, (int)(aPos.x + 10 * Math.sin(aDir)), (int)(aPos.y + 10 * Math.cos(aDir)));
-	  g.setColor(Color.lightGray);
-	  g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
-	  g.setColor(tempC);
+    if (true)
+    {
+      super.draw(g);
+	    Color tempC = g.getColor();
+	    g.setColor(Color.lightGray);
+	    g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
+	    g.setColor(tempC);
+    }
+    else
+    {
+	    Color tempC = g.getColor();
+	    g.setColor(Color.black);
+	    g.drawOval((int)aPos.x - 10, (int)aPos.y - 10, 20, 20);
+	    g.setColor(Color.red);
+	    g.drawLine((int)aPos.x, (int)aPos.y, (int)(aPos.x + 10 * Math.sin(aDir)), (int)(aPos.y + 10 * Math.cos(aDir)));
+	    g.setColor(Color.lightGray);
+	    g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
+	    g.setColor(tempC);
+    }
   }
 
   public Object clone()

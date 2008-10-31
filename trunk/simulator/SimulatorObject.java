@@ -118,25 +118,28 @@ public class SimulatorObject
 	  aPos = (Vector2D) newPos.clone();
   }
 
-  void setMoment(double newMoment) {
+  public void setDirection(double newDir) {
+    if (aShape != null)
+      aShape.rotate(aDir - newDir, aPos);
+  
+    aDir = newDir;
+  }
+
+  public void setMoment(double newMoment) {
 	  momI = newMoment;
   }
 	
-  void setMass(double newMass) {
+  public void setMass(double newMass) {
 	  mass = newMass;
   }
 	
-  Vector2D getPosition() {
-	  return aPos;
-  }
+  public Vector2D getPosition() { return aPos; }
 
-  double getMass() {
-	  return mass;
-  }
+  public double getDirection() { return aDir; }
 
-  double getMoment() {
-	  return momI;
-  }
+  public double getMass() { return mass; }
+
+  public double getMoment() { return momI; }
  
  
   /** Makes a copy of this object. For cloning purposes, the Object id 

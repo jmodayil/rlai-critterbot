@@ -26,7 +26,8 @@ public class Polygon
   public Polygon()
   {
     points = new LinkedList<Vector2D>();
-    bx = by = bw = bh = 0;
+    bx = by = Double.POSITIVE_INFINITY;
+    bw = bh = 0;
   }
 
   public int size()
@@ -38,12 +39,10 @@ public class Polygon
     */
   public void addPoint(double x, double y)
   {
-    points.add(new Vector2D(x,y));
-    if (x < bx) bx = x;
-    else if (x - bx > bw) bw = x - bx;
-
-    if (y < by) by = y;
-    else if (y - by > bh) bh = y - by;
+    Vector2D pt = new Vector2D(x,y);
+    // Add the new point to our list and adjust the bounding box if necessary
+    points.add(pt);
+    adjustBoundingBox(pt, points.size() == 1);
 
     // Not quite efficient
     aXPoints = aYPoints = null;
@@ -55,6 +54,9 @@ public class Polygon
     */
   public void translate(Vector2D delta)
   {
+    if (delta.x == 0 && delta.y == 0)
+      return;
+
     // Adjust the bounding box
     bx += delta.x;
     by += delta.y;
@@ -84,6 +86,79 @@ public class Polygon
     }
   }
 
+  /** Adjusts the bounding box to include a new point.
+    *
+    * @param pt The point to be included
+    * @param firstPt Whether this is the first point used to create
+    *   the bounding box
+    */
+  public void adjustBoundingBox(Vector2D pt, boolean firstPt)
+  {
+    if (pt.x < bx)
+    {
+      if (!firstPt)
+        bw += bx - pt.x;
+      bx = pt.x;
+    }
+    else if (pt.x - bx > bw) bw = pt.x - bx;
+
+    if (pt.y < by)
+    {
+      if (!firstPt)
+        bh += by - pt.y;
+      by = pt.y; 
+    }
+    else if (pt.y - by > bh) bh = pt.y - by;
+  }
+
+  /** Rotates this polygon (counter-clockwise) by the given angle around
+    *  the given center.
+    * 
+    * @param theta The angle to rotate by
+    * @param center The center of rotation
+    */
+  public void rotate(double theta, Vector2D center)
+  {
+    if (theta == 0) return;
+
+    double cost = Math.cos(theta);
+    double sint = Math.sin(theta);
+
+    double x, y;
+
+    // Adjust the bounding box by finding the new maxes
+    bx = by = Double.POSITIVE_INFINITY;
+    bw = bh = 0;
+
+    // Rotate all points
+    int idx = 0;
+    boolean firstPt = true;
+    for (Vector2D p : points)
+    {
+      x = p.x - center.x;
+      y = p.y - center.y;
+
+      p.x = center.x + (x * cost - y * sint);
+      p.y = center.y + (y * cost + x * sint);
+
+      adjustBoundingBox(p, firstPt);
+      firstPt = false;
+      
+      if (aXPoints != null)
+      {
+        aXPoints[idx] = (int)Math.round(p.x);
+        aYPoints[idx] = (int)Math.round(p.y);
+        idx++;
+      }
+    }
+
+    if (aXPoints != null && points.size() > 0)
+    {
+      Vector2D first = points.getFirst();
+      aXPoints[idx] = (int)Math.round(first.x);
+      aYPoints[idx] = (int)Math.round(first.y);
+    }
+  }
   /**
     * Returns whether the given point is inside this polygon. Polygons
     *  with less than three edges (points) are assumed to contain no points.
@@ -221,6 +296,19 @@ public class Polygon
     Color tempC = g.getColor();
 		g.setColor(Color.black);
 		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
+		g.setColor(tempC);
+    
+    // Draw the bounding box (@@@ only for debugging, take me out)
+    int[] bbx = new int[5];
+    int[] bby = new int[5];
+
+		bbx[0] = bbx[1] = bbx[4] = (int)Math.round(bx);
+    bbx[2] = bbx[3] = (int)Math.round(bx + bw);
+    bby[0] = bby[3] = bby[4] = (int)Math.round(by);
+    bby[1] = bby[2] = (int)Math.round(by + bh);
+
+    g.setColor(Color.cyan);
+		g.drawPolyline(bbx, bby, bbx.length);
 		g.setColor(tempC);
   }
 
