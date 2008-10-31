@@ -14,16 +14,15 @@ import java.awt.Graphics2D;
 
 public class SimulatorObject
 {
-  /** Some physical properties of the object - position, velocity, mass, 
-    * moment of inertia ( possibly mass and momI should be moved to 
-    *  Kinematics?) */
+  /** Some properties of the object - position, velocity */
   protected Vector2D aPos;
   protected double aDir;
-  protected double mass;
-  protected double momI;
 
+  /** A polygon describing the shape of the object; may be null if the
+    *  object is an invisible source */
   protected Polygon aShape;
 
+  /** List of state components for this object */
   protected LinkedList<ObjectState> aStates;
 
   protected String aLabel;
@@ -44,8 +43,6 @@ public class SimulatorObject
     aId = pId;
     aPos = new Vector2D(0,0);
     aDir = 0;
-    mass = 0;
-    momI = 0;
 
     aStates = new LinkedList<ObjectState>();
   }
@@ -84,6 +81,10 @@ public class SimulatorObject
     return null;
   }
 
+  /** Add a new state component to the object; duplicates are not allowed!
+    *
+    * @param pState The new state component
+    */
   public void addState(ObjectState pState)
   {
     // @@@ check for duplicates?
@@ -95,16 +96,21 @@ public class SimulatorObject
   }
   
   /**
+   * Draw the object on the provided canvas 
    * 
-   * 
-   * @param obj
-   * @param g
+   * @param g The Graphics object used to draw
    */
   public void draw(Graphics g)
   {
 	  aShape.draw(g);  
   }
   
+  /**
+    * Return the unique identifier of this object. The identifier is the same
+    *  across time steps.
+    *
+    * @return An integer uniquely identifying this object
+    */
   public int getId()
   {
     return aId;
@@ -119,29 +125,17 @@ public class SimulatorObject
   }
 
   public void setDirection(double newDir) {
+    // If we have a shape, also rotate it
     if (aShape != null)
       aShape.rotate(aDir - newDir, aPos);
   
     aDir = newDir;
   }
 
-  public void setMoment(double newMoment) {
-	  momI = newMoment;
-  }
-	
-  public void setMass(double newMass) {
-	  mass = newMass;
-  }
-	
   public Vector2D getPosition() { return aPos; }
 
   public double getDirection() { return aDir; }
 
-  public double getMass() { return mass; }
-
-  public double getMoment() { return momI; }
- 
- 
   /** Makes a copy of this object. For cloning purposes, the Object id 
     *  remains identical. This method's purpose is to be used for copying
     *  objects between states.
@@ -161,12 +155,10 @@ public class SimulatorObject
   {
     this.aPos = (Vector2D) org.aPos.clone();
     this.aDir = org.aDir;
-    this.mass = org.mass;
-    this.momI = org.momI;
 
-    // To avoid copying too much stuff around, let's assume objects don't
-    //  change shapes from state to state
-    this.aShape = org.aShape;
+    // We must copy the shape around, because the polygons get modified
+    //  by translations and rotations
+    this.aShape = (Polygon)org.aShape.clone();
 
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */

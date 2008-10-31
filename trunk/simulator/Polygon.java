@@ -265,6 +265,40 @@ public class Polygon
     return null;
   }
 
+
+  /** SimulatorObject interface **/
+
+  /** Create a deep copy of this polygon
+    *
+    * @return A copy of this polygon, with the guarantee that the original
+    *    and the copy do not share any data
+    */
+  public Object clone()
+  {
+    Polygon poly = new Polygon();
+
+    poly.copyFrom(this);
+
+    return poly;
+  }
+
+  /** Method used by clone() to copy data from the original polygon to the
+    *  new polygon
+    *
+    * @param org The polygon to copy data from
+    */
+  protected void copyFrom(Polygon org)
+  {
+    // We will add each point from the original polygon in
+    //  Because we are passing the (x,y) coordinates, we are assured 
+    //  that we will not be reusing the original Polygon's points
+    for (Vector2D pt : org.points)
+      this.addPoint(pt.x, pt.y);
+  }
+
+  /** Draw the polygon on the provided canvas
+    * @param g The main Graphics object to draw with
+    */
   public void draw(Graphics g) 
   {
     // If the point arrays are missing, re-create them
