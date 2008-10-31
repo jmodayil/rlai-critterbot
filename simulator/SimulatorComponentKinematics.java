@@ -42,7 +42,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
       if (os == null)
         continue;
       ObjectStateKinematics kinData = (ObjectStateKinematics) os;
-
+      
       // Find the corresponding object in the next state
       SimulatorObject newObj = pNext.getObject(obj.getId());
       ObjectStateKinematics newKinData = 
@@ -76,8 +76,66 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                                  obj.aPos.y + vel.y * delta / 1000));
     }
 
-    // @@@ Testing for collisions: look at the little example in 
-    //  SimulatorEngine
+    checkForCollisions(pCurrent, pNext, delta);
 
   }
+
+    /**
+     * This runs the objects in pNext to see if they are in collision with anything
+     * If there is a collision, the next position of the object(s) are reset to their
+     * current positions.
+     * The forces resulting from the collision are added to the force list for the 
+     * state.
+     * We assume that pCurrent contains no collisions.
+     * This should result in pNext containing no collisions
+     * 
+     *  @param pCurrent The current state of the system
+     *  @param pNext    The next state of the system (modified by this method)
+     *  @param delta    The amount of time (in ms) between the current and
+     *         next states.
+     **/
+    private void checkForCollisions(SimulatorState pCurrent, SimulatorState pNext, int delta) {
+        boolean positionReset = true;
+        while(positionReset) {
+            positionReset = false;
+
+            for (SimulatorObject obj : pNext.getObjects()) {
+                // if this object hasn't moved, we don't need
+                // to do further checks (because a possible 
+                // collision will be from the *other* thing having moved)
+                
+                // @todo this comparison may need to be a function
+                if(obj.getPosition()==pCurrent.getObject(obj.getId()).getPosition())
+                    continue;
+                for(SimulatorObject compObj : pNext.getObjects()) {
+
+                    //ignore this if it is the same object
+                    if(compObj.getId()==obj.getId())
+                        continue;
+
+                    //check for a collision between these
+		    Vector2D pt = obj.intersects(compObj);
+                    if(pt != null) {
+                        positionReset = true;
+                        resetPosition(obj, pCurrent);
+                        //this may or may not change things, but
+                        // it should be okay either way
+                        resetPosition(compObj, pCurrent);
+
+                        //System.out.println("Collision at "+pt+"!");
+                        // calculate forces
+                        
+                    }
+                }
+            }
+        } //end while we need to check for collisions
+    }
+
+        /**
+         * Little helper function for resetting positions
+         **/
+        private void resetPosition(SimulatorObject obj, SimulatorState pCurrent) 
+        {
+            obj.setPosition(pCurrent.getObject(obj.getId()).getPosition());
+        }
 }

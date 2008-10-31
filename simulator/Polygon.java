@@ -210,6 +210,8 @@ public class Polygon
 
   public Vector2D intersects(Polygon poly)
   {
+      if(poly == null)
+	  return null;
     // Compare the bounding boxes first, and hope that they don't intersect
     double l = poly.bx;
     double r = poly.bx + poly.bw;
