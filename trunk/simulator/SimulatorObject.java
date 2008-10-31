@@ -163,6 +163,10 @@ public class SimulatorObject
     return newObj; 
   }
 
+    public String toString() {
+	return aLabel;
+    }
+
   /** Copies the data from 'original' onto this object. This is used for
     *  cloning purposes.
     */

@@ -122,7 +122,8 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                         // it should be okay either way
                         resetPosition(compObj, pCurrent);
 
-                        System.out.println("Collision at "+pt+"!");
+                        System.out.println("Collision at "+pt+
+					   "between "+obj+" and "+compObj+"!");
                         // calculate forces
                         
                     }
