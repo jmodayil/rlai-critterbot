@@ -172,8 +172,23 @@ public class SimulatorObject
 	return aLabel;
     }
 
+    /**
+     * Compares the position and direction of the current object
+     * to the argument's position and direction
+     * @param Comparison SimulatorObject
+     **/
     public boolean geometryEquals(SimulatorObject compObj) {
 	return(aPos.equals(compObj.getPosition()) && aDir==compObj.getDirection());
+    }
+
+    /**
+     * Sets the position and direction of the current object
+     * to the argument's position and direction
+     * @param Template SimulatorObject
+     **/
+    public void setGeometry(SimulatorObject compObj) {
+	this.setPosition(compObj.getPosition());
+	this.setDirection(compObj.getDirection());
     }
 
   /** Copies the data from 'original' onto this object. This is used for
