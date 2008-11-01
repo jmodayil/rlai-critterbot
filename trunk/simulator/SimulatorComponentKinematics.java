@@ -148,6 +148,6 @@ public class SimulatorComponentKinematics implements SimulatorComponent
          **/
         private void resetPosition(SimulatorObject obj, SimulatorState pCurrent) 
         {
-            obj.setPosition(pCurrent.getObject(obj.getId()).getPosition());
+	    obj.setGeometry(pCurrent.getObject(obj.getId()));
         }
 }
