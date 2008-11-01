@@ -103,7 +103,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                 // if this object hasn't moved, we don't need
                 // to do further checks (because a possible 
                 // collision will be from the *other* thing having moved)
-                if(!obj.getPosition().equals(pCurrent.getObject(obj.getId()).getPosition())) {
+                if(!obj.geometryEquals(pCurrent.getObject(obj.getId()))) {
 		    for(SimulatorObject compObj : pNext.getObjects()) {
 
 			//ignore this if it is the same object
@@ -125,12 +125,17 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                         // calculate forces
 			    
 			    ObjectStateKinematics os = (ObjectStateKinematics) obj.getState(this.NAME);
-			    if( os != null )
+			    if( os != null ) {
 				os.setVelocity(new Vector2D(0,0));
+				os.setAngVelocity(0);
+				os.clearTorque();
+			    }
 			    ObjectStateKinematics cos =  (ObjectStateKinematics)obj.getState(this.NAME);
-			    if( cos != null )
+			    if( cos != null ) {
 				cos.setVelocity(new Vector2D(0,0));
-		        
+				cos.setAngVelocity(0);
+				cos.clearTorque();
+			    }
 			}
 		    }
 		}

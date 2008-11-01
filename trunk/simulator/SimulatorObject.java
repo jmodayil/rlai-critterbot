@@ -172,6 +172,10 @@ public class SimulatorObject
 	return aLabel;
     }
 
+    public boolean geometryEquals(SimulatorObject compObj) {
+	return(aPos.equals(compObj.getPosition()) && aDir==compObj.getDirection());
+    }
+
   /** Copies the data from 'original' onto this object. This is used for
     *  cloning purposes.
     */
