@@ -103,32 +103,38 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                 // if this object hasn't moved, we don't need
                 // to do further checks (because a possible 
                 // collision will be from the *other* thing having moved)
-                
-                // @todo this comparison may need to be a function
-                if(obj.getPosition().equals(pCurrent.getObject(obj.getId()).getPosition()))
-                    continue;
-                for(SimulatorObject compObj : pNext.getObjects()) {
+                if(!obj.getPosition().equals(pCurrent.getObject(obj.getId()).getPosition())) {
+		    for(SimulatorObject compObj : pNext.getObjects()) {
 
-                    //ignore this if it is the same object
-                    if(compObj.getId()==obj.getId())
-                        continue;
+			//ignore this if it is the same object
+			if(compObj.getId()==obj.getId())
+			    continue;
 
-                    //check for a collision between these
-		    Vector2D pt = obj.intersects(compObj);
-                    if(pt != null) {
-                        positionReset = true;
-                        resetPosition(obj, pCurrent);
-                        //this may or may not change things, but
-                        // it should be okay either way
-                        resetPosition(compObj, pCurrent);
+			//check for a collision between these
+			Vector2D pt = obj.intersects(compObj);
+			if(pt != null) {
+			    positionReset = true;
+			    resetPosition(obj, pCurrent);
+			    //this may or may not change things, but
+			    // it should be okay either way
+			    
+			    resetPosition(compObj, pCurrent);
 
-                        System.out.println("Collision at "+pt+
+			    System.out.println("Collision at "+pt+
 					   "between "+obj+" and "+compObj+"!");
                         // calculate forces
-                        
-                    }
-                }
-            }
+			    
+			    ObjectStateKinematics os = (ObjectStateKinematics) obj.getState(this.NAME);
+			    if( os != null )
+				os.setVelocity(new Vector2D(0,0));
+			    ObjectStateKinematics cos =  (ObjectStateKinematics)obj.getState(this.NAME);
+			    if( cos != null )
+				cos.setVelocity(new Vector2D(0,0));
+		        
+			}
+		    }
+		}
+	    }
         } //end while we need to check for collisions
     }
 
