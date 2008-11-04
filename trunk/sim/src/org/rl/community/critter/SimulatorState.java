@@ -26,7 +26,7 @@ public class SimulatorState
     aObjList.add(pObj);
   }
 
-  public SimulatorObject getObject(int pId)
+  private SimulatorObject getObject(int pId)
   {
     for (SimulatorObject o : aObjList)
     {
@@ -94,5 +94,9 @@ public class SimulatorState
 
     return newState;
   }
+
+    SimulatorObject getObject(SimulatorObject obj) {
+       return this.getObject(obj.getId());
+    }
 }
 

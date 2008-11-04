@@ -40,15 +40,16 @@ public class SimulatorComponentKinematics implements SimulatorComponent
     for (SimulatorObject obj : pCurrent.getObjects())
     {
       // If no physics data, ignore this object
-      ObjectState os = obj.getState(this.NAME);
+      ObjectState os = obj.getState(SimulatorComponentKinematics.NAME);
       if (os == null)
         continue;
       ObjectStateKinematics kinData = (ObjectStateKinematics) os;
       
       // Find the corresponding object in the next state
-      SimulatorObject newObj = pNext.getObject(obj.getId());
+      SimulatorObject newObj = pNext.getObject(obj);
       ObjectStateKinematics newKinData = 
-        (ObjectStateKinematics)newObj.getState(this.NAME);
+        (ObjectStateKinematics)newObj.getState(SimulatorComponentKinematics.NAME);
+      
       
       newKinData.clearForces();
       newKinData.clearTorque();
@@ -105,7 +106,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
                 // if this object hasn't moved, we don't need
                 // to do further checks (because a possible 
                 // collision will be from the *other* thing having moved)
-                if(!obj.geometryEquals(pCurrent.getObject(obj.getId()))) {
+                if(!obj.geometryEquals(pCurrent.getObject(obj))) {
 		    for(SimulatorObject compObj : pNext.getObjects()) {
 
 			//ignore this if it is the same object
@@ -126,7 +127,7 @@ public class SimulatorComponentKinematics implements SimulatorComponent
 					   "between "+obj+" and "+compObj+"!");
                         // calculate forces
 			    
-			    ObjectStateKinematics os = (ObjectStateKinematics) obj.getState(this.NAME);
+			    ObjectStateKinematics os = (ObjectStateKinematics) obj.getState(SimulatorComponentKinematics.NAME);
 			    if( os != null ) {
 				os.setVelocity(new Vector2D(0,0));
 				os.setAngVelocity(0);
@@ -150,6 +151,6 @@ public class SimulatorComponentKinematics implements SimulatorComponent
          **/
         private void resetPosition(SimulatorObject obj, SimulatorState pCurrent) 
         {
-	    obj.setGeometry(pCurrent.getObject(obj.getId()));
+	    obj.setGeometry(pCurrent.getObject(obj));
         }
 }
