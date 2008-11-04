@@ -22,14 +22,14 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     // Get all objects with an omni drive
     LinkedList<SimulatorObject> drivable = pCurrent.getObjects(NAME);
 
-    for (SimulatorObject o : drivable)
+    for (SimulatorObject thisObject : drivable)
     {
       // We know they must contain a driveState
-      ObjectStateOmnidrive driveState = (ObjectStateOmnidrive)o.getState(NAME);
+      ObjectStateOmnidrive driveState = (ObjectStateOmnidrive)thisObject.getState(NAME);
 
       // To actually produce force, we also need the physics component of the
       //  NEXT state!
-      SimulatorObject futureObj = pNext.getObject(o.getId());
+      SimulatorObject futureObj = pNext.getObject(thisObject);
       if (futureObj == null) continue;
 
       ObjectState os = futureObj.getState(SimulatorComponentKinematics.NAME);

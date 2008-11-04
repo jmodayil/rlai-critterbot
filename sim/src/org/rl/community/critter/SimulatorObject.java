@@ -13,8 +13,17 @@ import java.util.LinkedList;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeMap;
 
-public class SimulatorObject
+/**
+ * 
+ * 
+ * @author anna
+ */public class SimulatorObject
 {
   /** Some properties of the object - position, velocity */
   protected Vector2D aPos;
@@ -22,10 +31,12 @@ public class SimulatorObject
 
   /** A polygon describing the shape of the object; may be null if the
     *  object is an invisible source */
-  protected Polygon aShape;
+  protected Polygon aShape=new Polygon();
 
   /** List of state components for this object */
-  protected LinkedList<ObjectState> aStates;
+  //protected LinkedList<ObjectState> aStates;
+  protected Map<String, ObjectState> aStates=new TreeMap<String, ObjectState>();
+  
 
   protected String aLabel;
 
@@ -46,9 +57,6 @@ public class SimulatorObject
     aPos = new Vector2D(0,0);
     aDir = 0;
 
-    aStates = new LinkedList<ObjectState>();
-    //umm, any reason we wouldn't initialize this?
-    aShape = new Polygon();
   }
 
     /**
@@ -87,15 +95,11 @@ public class SimulatorObject
     *   store this state information.
     *
     */
+  
   public ObjectState getState(String pLabel)
   {
-    for (ObjectState s : aStates)
-    {
-      if (s.getName().equals(pLabel))
-        return s;
-    }
-
-    return null;
+      //Might want to assert that it's not null
+      return aStates.get(pLabel);
   }
 
   /** Add a new state component to the object; duplicates are not allowed!
@@ -105,7 +109,9 @@ public class SimulatorObject
   public void addState(ObjectState pState)
   {
     // @@@ check for duplicates?
-    aStates.add(pState);
+    // @@@ Automatically replaces duplicates.
+      assert(!aStates.containsKey(pState.getName()));
+    aStates.put(pState.getName(),pState);
   }
 
   private void loadObject() {
@@ -207,8 +213,11 @@ public class SimulatorObject
 
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */
-    for (ObjectState os : org.aStates)
-      this.addState((ObjectState)os.clone());
-  }
+    Set<Entry<String, ObjectState>> theEntrySet=org.aStates.entrySet();
+    
+      for (Entry<String, ObjectState> thisEntry : theEntrySet) {
+          this.addState((ObjectState)thisEntry.getValue().clone());
+      }
+   }
 
 }
