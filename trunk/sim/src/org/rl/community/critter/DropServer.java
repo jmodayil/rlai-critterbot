@@ -13,6 +13,8 @@ package org.rl.community.critter;
   *
   * @author Marc G. Bellemare
   */
+import org.rl.community.critter.Clients.ClientHandlerInterface;
+import org.rl.community.critter.Clients.DiscoClient;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -20,10 +22,16 @@ import java.util.List;
 
 import java.io.IOException;
 
+/**
+ * Drop server listens for connections of sockets (say from Disco) and for in-process connections
+ * (like having a keyboard controller added to it)
+ * Added by Brian
+ */
+
 public class DropServer extends Thread
 {
   protected ServerSocket aSocket;
-  protected LinkedList<ClientHandler> aClients;
+  protected LinkedList<ClientHandlerInterface> aClients;
 
   /**
     * Constructs a new DropServer which listens on the given port, sending
@@ -43,7 +51,7 @@ public class DropServer extends Thread
         e.getMessage());
     }
     
-    aClients = new LinkedList<ClientHandler>();
+    aClients = new LinkedList<ClientHandlerInterface>();
   }
 
   /**
@@ -52,7 +60,7 @@ public class DropServer extends Thread
   public void sendDrop(SimulatorDrop pDrop)
   {
     // Simply call each client handler's send method
-    for (ClientHandler ch : aClients)
+    for (ClientHandlerInterface ch : aClients)
       ch.send(pDrop);
   }
 
@@ -66,14 +74,14 @@ public class DropServer extends Thread
     // 1. Collect  drops into list from client handlers
     // 2. Clear the client handlers' lists
 
-    for (ClientHandler ch : aClients)
+    for (ClientHandlerInterface ch : aClients)
     {
       SimulatorDrop drop;
       drop = ch.receive();
 
       while (drop != null)
       {
-        System.err.println ("Passing drop back");
+//        System.err.println ("Passing drop back");
         drops.add(drop);
         drop = ch.receive();
       }
@@ -82,7 +90,12 @@ public class DropServer extends Thread
     return drops;
   }
 
+  public void addClient(ClientHandlerInterface newClient){
+      aClients.add(newClient);
+  }
+
   /** From the Thread class */
+    @Override
   public void run()
   {
     while (true)
@@ -92,7 +105,7 @@ public class DropServer extends Thread
         // Listen for a new connection (blocks here)
         Socket clientSocket = aSocket.accept();
         System.out.println ("New client!");
-        ClientHandler ch = new ClientHandler(clientSocket);
+        DiscoClient ch = new DiscoClient(clientSocket);
         ch.start();
         aClients.add(ch);
       }

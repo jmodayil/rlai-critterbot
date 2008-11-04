@@ -39,29 +39,7 @@ public class CritterStateDrop implements SimulatorDrop
     }
   }
 
-  class vector3d
-  {
-    public int x, y, z;
-
-    public void readData(InterfaceInputStream pIn) throws IOException
-    {
-      x = pIn.readInt();
-      y = pIn.readInt();
-      z = pIn.readInt();
-    }
-    
-    public void writeData(InterfaceOutputStream pOut) throws IOException
-    {
-      pOut.writeInt(x);
-      pOut.writeInt(y);
-      pOut.writeInt(z);
-    }
-
-    public int getSize()
-    {
-      return 3 * Integer.SIZE;
-    }
-  }
+  
 
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
