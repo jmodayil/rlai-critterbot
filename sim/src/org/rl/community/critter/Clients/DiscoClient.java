@@ -1,11 +1,12 @@
-package org.rl.community.critter;
+package org.rl.community.critter.Clients;
 
 /**
-  * ClientHandler
+  * DiscoClient
   *
   * This class handles client handling for generic DropServer's.
   */
 
+import org.rl.community.critter.*;
 import java.net.Socket;
 
 import java.util.LinkedList;
@@ -13,7 +14,7 @@ import java.util.LinkedList;
 import java.io.IOException;
 
 
-public class ClientHandler extends Thread
+public class DiscoClient extends Thread implements ClientHandlerInterface
 {
   public final int MAX_CLASSNAME_LENGTH = 1024;
 
@@ -26,7 +27,7 @@ public class ClientHandler extends Thread
   protected InterfaceOutputStream aOut;
 
   /** Creates a new client handler corresponding to the given Socket */
-  public ClientHandler(Socket pClient)
+  public DiscoClient(Socket pClient)
   {
     aClient = pClient;
     try

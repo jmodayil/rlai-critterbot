@@ -40,7 +40,14 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       // The Omnidrive state contains target velocities, while the 
       //  Kinematics state contains actual velocities
       // @@@ properly deal with this
-      kinState.addForce (new Force(driveState.getVelocity()));
+      Vector2D v = driveState.getVelocity();
+      // Convert v into object-space
+      double dir = thisObject.getDirection();
+     
+      kinState.addForce (new Force(
+              new Vector2D(v.y * Math.cos(dir) + v.x * Math.sin(dir),
+                           v.x * Math.cos(dir) - v.y * Math.sin(dir))));
+      
       kinState.addTorque (driveState.getAngVelocity());
 
       // For now, "consume" the action by setting the next state's action
