@@ -1,4 +1,4 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
 /**
  * These exist all over the place, but for the sake of portability

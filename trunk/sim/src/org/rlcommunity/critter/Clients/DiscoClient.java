@@ -1,4 +1,4 @@
-package org.rl.community.critter.Clients;
+package org.rlcommunity.critter.Clients;
 
 /**
   * DiscoClient
@@ -6,7 +6,7 @@ package org.rl.community.critter.Clients;
   * This class handles client handling for generic DropServer's.
   */
 
-import org.rl.community.critter.*;
+import org.rlcommunity.critter.*;
 import java.net.Socket;
 
 import java.util.LinkedList;

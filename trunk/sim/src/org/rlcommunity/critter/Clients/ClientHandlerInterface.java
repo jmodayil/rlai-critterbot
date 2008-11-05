@@ -17,9 +17,9 @@
  *  limitations under the License.
  */
 
-package org.rl.community.critter.Clients;
+package org.rlcommunity.critter.Clients;
 
-import org.rl.community.critter.*;
+import org.rlcommunity.critter.*;
 
 /**
  *

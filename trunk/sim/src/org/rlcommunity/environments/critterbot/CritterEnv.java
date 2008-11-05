@@ -19,20 +19,21 @@
 package org.rlcommunity.environments.critterbot;
 
 import java.util.List;
-import org.rl.community.critter.Clients.ClientHandlerInterface;
-import org.rl.community.critter.Clients.KeyboardClient;
-import org.rl.community.critter.CritterControlDrop;
-import org.rl.community.critter.CritterStateDrop;
-import org.rl.community.critter.DropServer;
-import org.rl.community.critter.ObjectStateOmnidrive;
-import org.rl.community.critter.SimulatorAgent;
-import org.rl.community.critter.SimulatorComponentDiscoInterface;
-import org.rl.community.critter.SimulatorComponentKinematics;
-import org.rl.community.critter.SimulatorComponentOmnidrive;
-import org.rl.community.critter.SimulatorDrop;
-import org.rl.community.critter.SimulatorEngine;
-import org.rl.community.critter.SimulatorObject;
-import org.rl.community.critter.SimulatorViz;
+import org.rlcommunity.critter.Clients.ClientHandlerInterface;
+import org.rlcommunity.critter.Clients.KeyboardClient;
+import org.rlcommunity.critter.CritterControlDrop;
+import org.rlcommunity.critter.CritterStateDrop;
+import org.rlcommunity.critter.DropServer;
+import org.rlcommunity.critter.ObjectStateOmnidrive;
+import org.rlcommunity.critter.SimulatorAgent;
+import org.rlcommunity.critter.SimulatorComponentDiscoInterface;
+import org.rlcommunity.critter.SimulatorComponentKinematics;
+import org.rlcommunity.critter.SimulatorComponentOmnidrive;
+import org.rlcommunity.critter.SimulatorDrop;
+import org.rlcommunity.critter.SimulatorEngine;
+import org.rlcommunity.critter.SimulatorObject;
+import org.rlcommunity.critter.SimulatorViz;
+import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
@@ -47,7 +48,7 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
 
     DropServer robotServ = null;
     SimulatorEngine engine = null;
-    Observation theObservation=new Observation(0,2,0);
+    Observation theObservation=new Observation(0,5,0);
 
     public String env_init() {
         int objPort, subjPort;
@@ -81,20 +82,18 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
         System.out.println("Environment inited");
 
         int taskSpecVersion = 2;
-        return taskSpecVersion + ":e:1_[f,f]_[-1000000,1000000]_[-1000000,1000000]:4_[i,i,i,i]_[0,1]_[0,1]_[0,1]_[0,1]:[-1,0]";
+        return taskSpecVersion + ":e:5_[f,f,f,f,f]_[-300,300]_[-300,300]_[0,500]_[0,500]_[-"+Math.PI+","+Math.PI+"]:1_[i]_[0,3]:[-1,0]";
     }
 
     public Observation env_start() {
-        System.out.println("Env start");
         return theObservation;
     }
 
     public Reward_observation_terminal env_step(Action theAction) {
-        System.out.println("Env step");
         lastAction=theAction;
-        System.out.println(theAction.intArray.length);
         stepThings();
-        return new Reward_observation_terminal(0,theObservation,false);
+        double theReward=theObservation.doubleArray[1]*theObservation.doubleArray[1];
+        return new Reward_observation_terminal(theReward,theObservation,false);
     }
 
     private void stepThings() {
@@ -104,12 +103,12 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
         for (stateThrottle = 0; stateThrottle <= maxThrottle; stateThrottle++) {
       engine.step();
 
-      try {
-		Thread.sleep(9);
-      } catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
-      }
+//      try {
+//		Thread.sleep(9);
+//      } catch (InterruptedException e) {
+//		// TODO Auto-generated catch block
+//		e.printStackTrace();
+//      }
 
       }
       //objServer.sendlastAction.intArray[0]date(engine.getState());
@@ -132,7 +131,7 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
     Action lastAction = new Action(0, 4);
 
     long lastDropTime=System.currentTimeMillis();
-    long keyboardDropInterval=50;
+    long keyboardDropInterval=1;
     public SimulatorDrop receive() {
         double velocityX,  torque;
         int maxVel=25;
@@ -141,13 +140,22 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
 
         // If any of the visualizer keys are pressed, we override the omnidrive
         //  @@@ This needs to be moved somewhere else or ...
-        if (lastAction.intArray[0] > 0 || lastAction.intArray[1] > 0 || lastAction.intArray[3] > 0 || lastAction.intArray[2] > 0) {
         if(System.currentTimeMillis()-lastDropTime<keyboardDropInterval){
             return null;
         }
+        
+        int up,down,left,right;
+        up=down=left=right=0;
+        
+        if(lastAction.intArray[0]==0)up=1;
+        if(lastAction.intArray[0]==1)down=1;
+        if(lastAction.intArray[0]==2)left=1;
+        if(lastAction.intArray[0]==3)right=1;
+        
+        
 
-        velocityX = (lastAction.intArray[0] * maxVel - lastAction.intArray[1] * maxVel);
-            torque = (lastAction.intArray[3] * -maxTorque + lastAction.intArray[2] * maxTorque);
+        velocityX = (up * maxVel - down * maxVel);
+            torque = (left * -maxTorque + right * maxTorque);
             CritterControlDrop controlDrop = new CritterControlDrop();
             controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
             controlDrop.x_vel = (int) velocityX;
@@ -155,15 +163,18 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
             controlDrop.theta_vel = (int) torque;
             lastDropTime=System.currentTimeMillis();
             return controlDrop;
-        }
         
-        return null;
     }
 
     public void send(SimulatorDrop pData) {
         CritterStateDrop theStateDrop=(CritterStateDrop)pData;
         theObservation.doubleArray[0]=theStateDrop.accel.x;
         theObservation.doubleArray[1]=theStateDrop.accel.y;
+        Vector2D thePos=engine.getAgentList().get(0).getPosition();
+        theObservation.doubleArray[2]=thePos.x;
+        theObservation.doubleArray[3]=thePos.y;
+        theObservation.doubleArray[4]=engine.getAgentList().get(0).getDirection();
+        
 //        System.out.println(theObservation.doubleArray[0]);
 //        System.out.println(theObservation.doubleArray[1]);
     }

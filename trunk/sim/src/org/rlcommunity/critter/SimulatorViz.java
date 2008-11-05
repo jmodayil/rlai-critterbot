@@ -1,4 +1,4 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
 import java.awt.Container;
 import java.awt.Dimension;
@@ -9,7 +9,7 @@ import java.awt.event.KeyListener;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.Timer;
-import org.rl.community.critter.Clients.KeyboardClient;
+import org.rlcommunity.critter.Clients.KeyboardClient;
 
 /**
  * Visualization component for the Simulator.

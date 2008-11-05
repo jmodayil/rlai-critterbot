@@ -1,4 +1,4 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;

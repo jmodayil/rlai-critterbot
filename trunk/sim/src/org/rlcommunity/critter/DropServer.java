@@ -1,4 +1,4 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
 /**
   * SubjectiveDataServer
@@ -13,8 +13,8 @@ package org.rl.community.critter;
   *
   * @author Marc G. Bellemare
   */
-import org.rl.community.critter.Clients.ClientHandlerInterface;
-import org.rl.community.critter.Clients.DiscoClient;
+import org.rlcommunity.critter.Clients.ClientHandlerInterface;
+import org.rlcommunity.critter.Clients.DiscoClient;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
