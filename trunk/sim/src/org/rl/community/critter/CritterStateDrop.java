@@ -39,7 +39,29 @@ public class CritterStateDrop implements SimulatorDrop
     }
   }
 
+  public class vector_struct {
   
+    public int x, y, z;
+
+    public void readData(InterfaceInputStream pIn) throws IOException
+    {
+      x = pIn.readInt();
+      y = pIn.readInt();
+      z = pIn.readInt();
+    }
+    
+    public void writeData(InterfaceOutputStream pOut) throws IOException
+    {
+      pOut.writeInt(x);
+      pOut.writeInt(y);
+      pOut.writeInt(z);
+    }
+
+    public int getSize()
+    {
+      return 3 * Integer.SIZE;
+    }
+  }
 
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
@@ -49,7 +71,7 @@ public class CritterStateDrop implements SimulatorDrop
   public int batv40, batv160, batv280;
 
   public motor_struct motor100, motor220, motor340;
-  public vector3d accel, mag;
+  public vector_struct accel, mag;
 
   public int rotation;
   public int[] ir_distance;
@@ -104,8 +126,8 @@ public class CritterStateDrop implements SimulatorDrop
     thermal     = new int[THERMAL_SIZE];
     bump        = new int[BUMP_SIZE];
 
-    accel = new vector3d();
-    mag = new vector3d();
+    accel = new vector_struct();
+    mag = new vector_struct();
     motor100 = new motor_struct();
     motor220 = new motor_struct();
     motor340 = new motor_struct();
