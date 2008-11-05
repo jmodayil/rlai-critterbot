@@ -9,7 +9,6 @@ package org.rl.community.critter;
   * @author Marc G. Bellemare
   */
 
-import org.rl.community.critter.*;
 import java.util.List;
 
 public class SimulatorComponentDiscoInterface implements SimulatorComponent
