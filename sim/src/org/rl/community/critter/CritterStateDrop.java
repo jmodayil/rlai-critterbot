@@ -13,7 +13,7 @@ import java.util.EnumSet;
 
 public class CritterStateDrop implements SimulatorDrop
 {
-  class motor_struct
+  public class motor_struct
   {
     public int velocity;
     public int current;
