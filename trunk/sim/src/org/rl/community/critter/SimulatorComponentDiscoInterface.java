@@ -82,8 +82,13 @@ public class SimulatorComponentDiscoInterface implements SimulatorComponent
       ObjectStateKinematics kinData = (ObjectStateKinematics)os;
       Force f = kinData.getForceSum();
       // @@@ Needs to be converted into proper units (I believe in g's)
-      stateDrop.accel.x = (int)(f.vec.x * 1000);
-      stateDrop.accel.y = (int)(f.vec.y * 1000);
+//      stateDrop.accel.x = (int)(f.vec.x * 1000);
+//      stateDrop.accel.y = (int)(f.vec.y * 1000);
+      Vector2D V=kinData.getVelocity();
+      stateDrop.accel.x=(int) V.x;
+      stateDrop.accel.y=(int) V.y;
+      
+              
     }
 
     return stateDrop;
