@@ -1,8 +1,4 @@
 package org.rl.community.critter;
-
-
-import java.io.IOException;
-
 /*
  * Copyright 2008 Brian Tanner
  * http://bt-recordbook.googlecode.com/
@@ -24,31 +20,17 @@ import java.io.IOException;
 import org.rl.community.critter.InterfaceInputStream;
 import org.rl.community.critter.InterfaceOutputStream;
 
+import java.io.IOException;
+
+
 /**
  *
  * @author Brian Tanner
  */
-public class vector3d {
+public class Vector3D {
   
     public int x, y, z;
 
-    public void readData(InterfaceInputStream pIn) throws IOException
-    {
-      x = pIn.readInt();
-      y = pIn.readInt();
-      z = pIn.readInt();
-    }
-    
-    public void writeData(InterfaceOutputStream pOut) throws IOException
-    {
-      pOut.writeInt(x);
-      pOut.writeInt(y);
-      pOut.writeInt(z);
-    }
-
-    public int getSize()
-    {
-      return 3 * Integer.SIZE;
-    }
-  }
+    // @@@ MGB: This class needs some methods 
+}
 
