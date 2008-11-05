@@ -71,6 +71,9 @@ public class KeyboardClient implements ClientHandlerInterface, KeyListener {
         }
     }
 
+
+    long lastDropTime=System.currentTimeMillis();
+    long keyboardDropInterval=50;
     /**
      * This might be setting velocity to 0 when no command received.
      * @return
@@ -79,17 +82,23 @@ public class KeyboardClient implements ClientHandlerInterface, KeyListener {
         double velocityX,  torque;
         int maxVel=25;
         int maxTorque=10;
+        
+
         // If any of the visualizer keys are pressed, we override the omnidrive
         //  @@@ This needs to be moved somewhere else or ...
         if (up > 0 || down > 0 || right > 0 || left > 0) {
-            velocityX = (up * maxVel - down * maxVel);
+        if(System.currentTimeMillis()-lastDropTime<keyboardDropInterval){
+            return null;
+        }
+
+        velocityX = (up * maxVel - down * maxVel);
             torque = (right * -maxTorque + left * maxTorque);
             CritterControlDrop controlDrop = new CritterControlDrop();
             controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
             controlDrop.x_vel = (int) velocityX;
             controlDrop.y_vel = 0;
             controlDrop.theta_vel = (int) torque;
-            up=down=right=left=0;
+            lastDropTime=System.currentTimeMillis();
             return controlDrop;
         }
         
