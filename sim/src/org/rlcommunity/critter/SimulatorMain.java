@@ -1,6 +1,6 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
-import org.rl.community.critter.Clients.KeyboardClient;
+import org.rlcommunity.critter.Clients.KeyboardClient;
 
 /**
   * SimulatorMain

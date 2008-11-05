@@ -16,12 +16,12 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package org.rl.community.critter.Clients;
+package org.rlcommunity.critter.Clients;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import org.rl.community.critter.CritterControlDrop;
-import org.rl.community.critter.SimulatorDrop;
+import org.rlcommunity.critter.CritterControlDrop;
+import org.rlcommunity.critter.SimulatorDrop;
 
 /**
  *

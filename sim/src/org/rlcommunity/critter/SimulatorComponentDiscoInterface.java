@@ -1,4 +1,4 @@
-package org.rl.community.critter;
+package org.rlcommunity.critter;
 
 /**
   * SimulatorComponentDiscoInterface
