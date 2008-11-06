@@ -1,7 +1,5 @@
 package org.rlcommunity.critter;
 
-import org.rlcommunity.critter.Clients.KeyboardClient;
-
 /**
   * SimulatorMain
   *
@@ -11,6 +9,8 @@ import org.rlcommunity.critter.Clients.KeyboardClient;
   *
   * @author Marc G. Bellemare
   */
+
+import org.rlcommunity.critter.Clients.*;
 
 public class SimulatorMain
 {
@@ -28,19 +28,26 @@ public class SimulatorMain
       subjPort = 2324;
     else
       subjPort = Integer.parseInt(args[1]);
+    
     final KeyboardClient theKeyboardClient=new KeyboardClient();
 
-    System.out.println ("Starting servers on ports "+objPort+" and "+subjPort);
+    System.out.println ("Starting Disco server on port "+subjPort);
     // Create a drop server to send and receive robot (subjective) data
-    DropServer robotServ = new DropServer(subjPort);
-    robotServ.addClient(theKeyboardClient);
-    robotServ.start();
+    DiscoInterfaceServer discoServer = new DiscoInterfaceServer(subjPort);
+    discoServer.start();
+
+    // Create the central drop interface
+    DropInterface dropInterface = new DropInterface();
+
+    dropInterface.addClient(discoServer);
+    dropInterface.addClient(theKeyboardClient);
 
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine();
     engine.addComponent(new SimulatorComponentKinematics());
     engine.addComponent(new SimulatorComponentOmnidrive());
-    engine.addComponent(new SimulatorComponentDiscoInterface(robotServ, null));
+    engine.addComponent(
+      new SimulatorComponentCritterbotInterface(dropInterface));
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {

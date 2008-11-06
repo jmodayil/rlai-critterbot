@@ -1,7 +1,7 @@
 package org.rlcommunity.critter;
 
 /**
-  * SimulatorComponentDiscoInterface
+  * SimulatorComponentCritterbotInterface
   *
   * A (very long-named) class that converts drops received from Disco
   *  (via a DropServer) into simulator data, and vice-versa.
@@ -11,29 +11,26 @@ package org.rlcommunity.critter;
 
 import java.util.List;
 
-public class SimulatorComponentDiscoInterface implements SimulatorComponent
+public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 {
-  public static final String NAME = "discointerface";
+  public static final String NAME = "critterbot_interface";
 
-  protected DropServer aSubjServer;
-  protected DropServer aObjServer;
+  protected DropInterface aDropInterface; 
 
   /** A simple method of slowing down the speed at which drops are sent;
     * needs to be fixed */
   public int aStateThrottle;
 
-  public SimulatorComponentDiscoInterface(DropServer subjectiveServer,
-    DropServer objectiveServer)
+  public SimulatorComponentCritterbotInterface(DropInterface pInterface)
   {
-    aSubjServer = subjectiveServer;
-    aObjServer = objectiveServer;
+    aDropInterface = pInterface;
   }
 
   public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta)
   {
-    if (aSubjServer != null)
+    if (aDropInterface != null)
     {
-      List<SimulatorDrop> drops = aSubjServer.receiveDrops();
+      List<SimulatorDrop> drops = aDropInterface.receiveDrops();
       List<SimulatorObject> drivable = 
         pNext.getObjects(SimulatorComponentOmnidrive.NAME);
 
@@ -61,7 +58,7 @@ public class SimulatorComponentDiscoInterface implements SimulatorComponent
       {
         if (++aStateThrottle >= 100)
         {
-          aSubjServer.sendDrop(makeStateDrop(agent));
+          aDropInterface.sendDrop(makeStateDrop(agent));
           aStateThrottle = 0;
         }
       }

@@ -20,13 +20,24 @@
 package org.rlcommunity.critter.Clients;
 
 import org.rlcommunity.critter.*;
+import java.util.List;
 
 /**
  *
- * @author btanner
+ * @author Brian Tanner, Marc G. Bellemare
  */
-public interface ClientHandlerInterface {
-    public SimulatorDrop receive();
-    public void send(SimulatorDrop pData);
+public interface DropClient 
+{
+    /** Returns a list of all new drops that were produced by this client
+      *  since the last call to receive().
+      *
+      * @return A list of unprocessed drops 
+      */
+    public List<SimulatorDrop> receive();
 
+    /** Passes a single drop to the client, e.g. a CritterStateDrop.
+      *
+      * @param pData The drop to be passed to the client
+      */
+    public void send(SimulatorDrop pData);
 }
