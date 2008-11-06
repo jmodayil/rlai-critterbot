@@ -23,11 +23,15 @@ import java.awt.event.KeyListener;
 import org.rlcommunity.critter.CritterControlDrop;
 import org.rlcommunity.critter.SimulatorDrop;
 
+import java.util.List;
+import java.util.LinkedList;
+
 /**
  *
  * @author Brian Tanner
+ * @author Marc G. Bellemare
  */
-public class KeyboardClient implements ClientHandlerInterface, KeyListener {
+public class KeyboardClient implements DropClient, KeyListener {
 
     public int up;
     public int down;
@@ -78,31 +82,34 @@ public class KeyboardClient implements ClientHandlerInterface, KeyListener {
      * This might be setting velocity to 0 when no command received.
      * @return
      */
-    public SimulatorDrop receive() {
-        double velocityX,  torque;
-        int maxVel=25;
-        int maxTorque=10;
-        
+    public List<SimulatorDrop> receive() 
+    {
+      double velocityX,  torque;
+      int maxVel=25;
+      int maxTorque=10;
 
-        // If any of the visualizer keys are pressed, we override the omnidrive
-        //  @@@ This needs to be moved somewhere else or ...
-        if (up > 0 || down > 0 || right > 0 || left > 0) {
-        if(System.currentTimeMillis()-lastDropTime<keyboardDropInterval){
-            return null;
-        }
+      LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 
-        velocityX = (up * maxVel - down * maxVel);
-            torque = (right * -maxTorque + left * maxTorque);
-            CritterControlDrop controlDrop = new CritterControlDrop();
-            controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-            controlDrop.x_vel = (int) velocityX;
-            controlDrop.y_vel = 0;
-            controlDrop.theta_vel = (int) torque;
-            lastDropTime=System.currentTimeMillis();
-            return controlDrop;
+      // Produce a drop iff: a key is pressed and enough time has elapsed
+      if (up > 0 || down > 0 || right > 0 || left > 0) 
+      {
+        if(System.currentTimeMillis()-lastDropTime >= keyboardDropInterval)
+        {
+          velocityX = (up * maxVel - down * maxVel);
+          torque = (right * -maxTorque + left * maxTorque);
+          CritterControlDrop controlDrop = new CritterControlDrop();
+          controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
+          controlDrop.x_vel = (int) velocityX;
+          controlDrop.y_vel = 0;
+          controlDrop.theta_vel = (int) torque;
+       
+          lastDropTime=System.currentTimeMillis();
+          dropList.add(controlDrop);
         }
-        
-        return null;
+      }
+    
+      
+      return dropList;
     }
 
     public void send(SimulatorDrop pData) {

@@ -19,14 +19,16 @@
 package org.rlcommunity.environments.critterbot;
 
 import java.util.List;
-import org.rlcommunity.critter.Clients.ClientHandlerInterface;
+import java.util.LinkedList;
+
+import org.rlcommunity.critter.Clients.DropClient;
 import org.rlcommunity.critter.Clients.KeyboardClient;
 import org.rlcommunity.critter.CritterControlDrop;
 import org.rlcommunity.critter.CritterStateDrop;
-import org.rlcommunity.critter.DropServer;
+import org.rlcommunity.critter.DropInterface;
 import org.rlcommunity.critter.ObjectStateOmnidrive;
 import org.rlcommunity.critter.SimulatorAgent;
-import org.rlcommunity.critter.SimulatorComponentDiscoInterface;
+import org.rlcommunity.critter.SimulatorComponentCritterbotInterface;
 import org.rlcommunity.critter.SimulatorComponentKinematics;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorDrop;
@@ -44,9 +46,9 @@ import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
  *
  * @author Brian Tanner
  */
-public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface {
+public class CritterEnv implements EnvironmentInterface, DropClient {
 
-    DropServer robotServ = null;
+    DropInterface robotServ = null;
     SimulatorEngine engine = null;
     Observation theObservation=new Observation(0,5,0);
 
@@ -63,15 +65,16 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
 
         // Get the first agent from the engine
         //SimulatorAgent agent = engine.getAgentList().getFirst();
-
-        System.out.println("Starting servers on ports " + objPort + " and " + subjPort);
+  
+        // @@@ MGB: I've taken out the Disco client - to add it, look
+        //  at SimulatorMain for the part that creates a DiscoInterfaceServer
         // Create a drop server to send and receive robot (subjective) data
-        robotServ = new DropServer(subjPort);
+        robotServ = new DropInterface();
 //        robotServ.addClient(new KeyboardClient());
         robotServ.addClient(this);
-        robotServ.start();
 
-        engine.addComponent(new SimulatorComponentDiscoInterface(robotServ, null));
+        engine.addComponent(
+          new SimulatorComponentCritterbotInterface(robotServ));
 
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
 
@@ -132,38 +135,36 @@ public class CritterEnv implements EnvironmentInterface, ClientHandlerInterface 
 
     long lastDropTime=System.currentTimeMillis();
     long keyboardDropInterval=1;
-    public SimulatorDrop receive() {
+    public List<SimulatorDrop> receive() {
         double velocityX,  torque;
         int maxVel=25;
         int maxTorque=10;
-        
+       
+        LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 
-        // If any of the visualizer keys are pressed, we override the omnidrive
-        //  @@@ This needs to be moved somewhere else or ...
-        if(System.currentTimeMillis()-lastDropTime<keyboardDropInterval){
-            return null;
+        if(System.currentTimeMillis()-lastDropTime >= keyboardDropInterval)
+        {
+          int up,down,left,right;
+          up=down=left=right=0;
+        
+          if(lastAction.intArray[0]==0)up=1;
+          if(lastAction.intArray[0]==1)down=1;
+          if(lastAction.intArray[0]==2)left=1;
+          if(lastAction.intArray[0]==3)right=1;
+        
+          velocityX = (up * maxVel - down * maxVel);
+          torque = (left * -maxTorque + right * maxTorque);
+          CritterControlDrop controlDrop = new CritterControlDrop();
+          controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
+          controlDrop.x_vel = (int) velocityX;
+          controlDrop.y_vel = 0;
+          controlDrop.theta_vel = (int) torque;
+          lastDropTime=System.currentTimeMillis();
+
+          dropList.add(controlDrop);
         }
-        
-        int up,down,left,right;
-        up=down=left=right=0;
-        
-        if(lastAction.intArray[0]==0)up=1;
-        if(lastAction.intArray[0]==1)down=1;
-        if(lastAction.intArray[0]==2)left=1;
-        if(lastAction.intArray[0]==3)right=1;
-        
-        
 
-        velocityX = (up * maxVel - down * maxVel);
-            torque = (left * -maxTorque + right * maxTorque);
-            CritterControlDrop controlDrop = new CritterControlDrop();
-            controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-            controlDrop.x_vel = (int) velocityX;
-            controlDrop.y_vel = 0;
-            controlDrop.theta_vel = (int) torque;
-            lastDropTime=System.currentTimeMillis();
-            return controlDrop;
-        
+      return dropList;
     }
 
     public void send(SimulatorDrop pData) {

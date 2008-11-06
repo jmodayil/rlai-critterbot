@@ -1,4 +1,4 @@
-package org.rlcommunity.critter;
+package org.rlcommunity.critter.Clients;
 
 /**
   * SubjectiveDataServer
@@ -13,8 +13,6 @@ package org.rlcommunity.critter;
   *
   * @author Marc G. Bellemare
   */
-import org.rlcommunity.critter.Clients.ClientHandlerInterface;
-import org.rlcommunity.critter.Clients.DiscoClient;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -22,24 +20,26 @@ import java.util.List;
 
 import java.io.IOException;
 
+import org.rlcommunity.critter.*;
+
 /**
  * Drop server listens for connections of sockets (say from Disco) and for in-process connections
  * (like having a keyboard controller added to it)
  * Added by Brian
  */
 
-public class DropServer extends Thread
+public class DiscoInterfaceServer extends Thread implements DropClient 
 {
   protected ServerSocket aSocket;
-  protected LinkedList<ClientHandlerInterface> aClients;
 
+  protected LinkedList<DiscoInterfaceClientHandler> aClients; 
   /**
-    * Constructs a new DropServer which listens on the given port, sending
+    * Constructs a new Server which listens on the given port, sending
     *  and receiving drops via TCP/IP.
     *
     * @param pPort The port to listen to.
     */
-  public DropServer(int pPort)
+  public DiscoInterfaceServer(int pPort)
   {
     try
     {
@@ -51,16 +51,16 @@ public class DropServer extends Thread
         e.getMessage());
     }
     
-    aClients = new LinkedList<ClientHandlerInterface>();
+    aClients = new LinkedList<DiscoInterfaceClientHandler>();
   }
 
   /**
     * Send a given Drop out to all connected clients.
     */
-  public void sendDrop(SimulatorDrop pDrop)
+  public void send(SimulatorDrop pDrop)
   {
     // Simply call each client handler's send method
-    for (ClientHandlerInterface ch : aClients)
+    for (DiscoInterfaceClientHandler ch : aClients)
       ch.send(pDrop);
   }
 
@@ -68,30 +68,25 @@ public class DropServer extends Thread
     * Returns a (possibly empty) list of drops that were received from all
     *  connected clients since the last call to receiveDrops.
     */
-  public List<SimulatorDrop> receiveDrops()
+  public List<SimulatorDrop> receive()
   {
     LinkedList<SimulatorDrop> drops = new LinkedList<SimulatorDrop>();
     // 1. Collect  drops into list from client handlers
     // 2. Clear the client handlers' lists
 
-    for (ClientHandlerInterface ch : aClients)
+    for (DiscoInterfaceClientHandler ch : aClients)
     {
       SimulatorDrop drop;
       drop = ch.receive();
 
       while (drop != null)
       {
-//        System.err.println ("Passing drop back");
         drops.add(drop);
         drop = ch.receive();
       }
     }
 
     return drops;
-  }
-
-  public void addClient(ClientHandlerInterface newClient){
-      aClients.add(newClient);
   }
 
   /** From the Thread class */
@@ -105,7 +100,8 @@ public class DropServer extends Thread
         // Listen for a new connection (blocks here)
         Socket clientSocket = aSocket.accept();
         System.out.println ("New client!");
-        DiscoClient ch = new DiscoClient(clientSocket);
+        DiscoInterfaceClientHandler ch = 
+          new DiscoInterfaceClientHandler(clientSocket);
         ch.start();
         aClients.add(ch);
       }

@@ -1,9 +1,9 @@
 package org.rlcommunity.critter.Clients;
 
 /**
-  * DiscoClient
+  * DiscoInterfaceClientHandler
   *
-  * This class handles client handling for generic DropServer's.
+  * This class handles client handling for the Disco Interface TCP/IP server.
   */
 
 import org.rlcommunity.critter.*;
@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.io.IOException;
 
 
-public class DiscoClient extends Thread implements ClientHandlerInterface
+public class DiscoInterfaceClientHandler extends Thread
 {
   public final int MAX_CLASSNAME_LENGTH = 1024;
 
@@ -27,7 +27,7 @@ public class DiscoClient extends Thread implements ClientHandlerInterface
   protected InterfaceOutputStream aOut;
 
   /** Creates a new client handler corresponding to the given Socket */
-  public DiscoClient(Socket pClient)
+  public DiscoInterfaceClientHandler(Socket pClient)
   {
     aClient = pClient;
     try
@@ -47,21 +47,6 @@ public class DiscoClient extends Thread implements ClientHandlerInterface
     @Override
   public void run()
   {
-    // @@@ cleanup
-    /*while (true)
-    {
-      try
-      {
-        int b = aIn.readFixedInt();
-        System.out.print(b+" ");
-        if (b == -125) break;
-      }
-      catch (Exception e)
-      {
-        return;
-      }
-    } */
-
     while (true)
     {
       // Block and wait for new data
@@ -69,7 +54,6 @@ public class DiscoClient extends Thread implements ClientHandlerInterface
       try 
       {
         int nameLength = aIn.readInt();
-        System.out.println ("I've got some data... "+nameLength+" length");
 
         // If we don't test for this, we can kill the heap 
         if (nameLength > MAX_CLASSNAME_LENGTH)
@@ -79,7 +63,6 @@ public class DiscoClient extends Thread implements ClientHandlerInterface
 
         String className = aIn.readString(nameLength); 
 
-        System.err.println ("A class is "+className);
         // Create a new Drop
         try
         {
@@ -90,8 +73,6 @@ public class DiscoClient extends Thread implements ClientHandlerInterface
           // Read in the drop!
           newDrop.readData(aIn);
         
-          System.err.println ("New drop: "+newDrop.toString());
-       
           // Add the drop to the queue
           synchronized(aInQueue)
           {
