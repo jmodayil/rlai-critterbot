@@ -44,7 +44,7 @@ public class SimulatorMain
 
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine();
-    engine.addComponent(new SimulatorComponentKinematics());
+    engine.addComponent(new SimulatorComponentDynamics());
     engine.addComponent(new SimulatorComponentOmnidrive());
     engine.addComponent(
       new SimulatorComponentCritterbotInterface(dropInterface));
