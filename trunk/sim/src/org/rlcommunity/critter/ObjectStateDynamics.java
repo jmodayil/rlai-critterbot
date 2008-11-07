@@ -1,22 +1,24 @@
 package org.rlcommunity.critter;
 
 /**
-  * ObjectStateKinematics
+  * ObjectStateDynamics
   *
-  * Defines kinematics-related properties of an object.
+  * Defines properties of an object necessary for movement (eg for velocity,
+ * collisions, friction, etc, etc).
   *
   * @author Marc G. Bellemare
+ * @author Anna Koop
   */
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class ObjectStateKinematics implements ObjectState
+public class ObjectStateDynamics implements ObjectState
 {
   public static final double MIN_MASS = 0.000001; // 1 mg
   public static final double MIN_MOMENT_INERTIA = MIN_MASS * 1; // 1 mg m^2
 
-  /** Kinematics state */
+  /** Dynamics state */
   /** Object velocity, in m/s */
   protected Vector2D aVel;
   /** Forces that will be applied to the object this time step (in N) */
@@ -32,7 +34,7 @@ public class ObjectStateKinematics implements ObjectState
   /** Object moment of inertia, in kg m^2 */
   protected double aMomI;
 
-  /** Creates a new kinematics state component with a particular mass and 
+  /** Creates a new dynamics state component with a particular mass and 
     *  moment of inertia.
     *
     * @param pMass The mass of the object to which this state component belongs,
@@ -40,7 +42,7 @@ public class ObjectStateKinematics implements ObjectState
     * @param pMomentI The moment of inertia of the object to which this state
     *   component belongs, in kg m^2
     */
-  public ObjectStateKinematics(double pMass, double pMomentInertia)
+  public ObjectStateDynamics(double pMass, double pMomentInertia)
   {
     aMass = pMass;
     aMomI = pMomentInertia;
@@ -49,12 +51,12 @@ public class ObjectStateKinematics implements ObjectState
     aAngVel = aTorque = 0;
   }
 
-  /** Creates a nearly massless kinematics state. Because a minimum mass 
+  /** Creates a nearly massless Dynamics state. Because a minimum mass 
     *  is recommended by classical physics, we use it here as well.
     *  Massless objects (e.g. invisible light, magnetic, etc, sources)
-    *  should not be given an ObjectStateKinematics.
+    *  should not be given an ObjectStateDynamics.
     */
-  public ObjectStateKinematics()
+  public ObjectStateDynamics()
   {
     this(MIN_MASS,MIN_MOMENT_INERTIA);
   }
@@ -114,25 +116,25 @@ public class ObjectStateKinematics implements ObjectState
   public double getMomentInertia() { return aMomI; }
 
   /** ObjectState interface */
-  public String getName() { return SimulatorComponentKinematics.NAME; }
+  public String getName() { return SimulatorComponentDynamics.NAME; }
 
   public Object clone()
   {
-    ObjectStateKinematics newKin = new ObjectStateKinematics();
-    newKin.copyFrom(this);
+    ObjectStateDynamics newDyn = new ObjectStateDynamics();
+    newDyn.copyFrom(this);
 
-    return newKin;
+    return newDyn;
   }
 
   protected void copyFrom(ObjectState os)
   {
-    ObjectStateKinematics kin = (ObjectStateKinematics) os;
+    ObjectStateDynamics dyn = (ObjectStateDynamics) os;
     
-    this.aVel = (Vector2D) kin.aVel.clone();
-    this.aAngVel = kin.aAngVel;
+    this.aVel = (Vector2D) dyn.aVel.clone();
+    this.aAngVel = dyn.aAngVel;
 
-    this.aMass = kin.aMass;
-    this.aMomI = kin.aMomI;
+    this.aMass = dyn.aMass;
+    this.aMomI = dyn.aMomI;
 
     // Should we copy the forces over? by definition we shouldn't carry
     //  them from state to state, but...

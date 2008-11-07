@@ -71,17 +71,17 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     
     ObjectState os;
 
-    os = pObject.getState(SimulatorComponentKinematics.NAME);
+    os = pObject.getState(SimulatorComponentDynamics.NAME);
 
-    // Set the kinematics data
+    // Set the dynamics data
     if (os != null)
     {
-      ObjectStateKinematics kinData = (ObjectStateKinematics)os;
-      Force f = kinData.getForceSum();
+      ObjectStateDynamics dynData = (ObjectStateDynamics)os;
+      Force f = dynData.getForceSum();
       // @@@ Needs to be converted into proper units (I believe in g's)
 //      stateDrop.accel.x = (int)(f.vec.x * 1000);
 //      stateDrop.accel.y = (int)(f.vec.y * 1000);
-      Vector2D V=kinData.getVelocity();
+      Vector2D V=dynData.getVelocity();
       stateDrop.accel.x=(int) V.x;
       stateDrop.accel.y=(int) V.y;
       

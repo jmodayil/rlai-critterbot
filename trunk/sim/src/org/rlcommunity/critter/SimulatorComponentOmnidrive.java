@@ -32,13 +32,13 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       SimulatorObject futureObj = pNext.getObject(thisObject);
       if (futureObj == null) continue;
 
-      ObjectState os = futureObj.getState(SimulatorComponentKinematics.NAME);
+      ObjectState os = futureObj.getState(SimulatorComponentDynamics.NAME);
 
       if (os == null) continue;
-      ObjectStateKinematics kinState = (ObjectStateKinematics)os;
+      ObjectStateDynamics kinState = (ObjectStateDynamics)os;
 
       // The Omnidrive state contains target velocities, while the 
-      //  Kinematics state contains actual velocities
+      //  dynamics state contains actual velocities
       // @@@ properly deal with this
       Vector2D v = driveState.getVelocity();
       // Convert v into object-space

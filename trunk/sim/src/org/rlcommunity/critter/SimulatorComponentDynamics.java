@@ -1,19 +1,20 @@
 package org.rlcommunity.critter;
 
 /**
- * SimulatorComponentKinematics
+ * SimulatorComponentDynamics
  *
- * This SimulatorComponent encodes all the kinematics interactions. As well
- *  as modifying data for the ObjectStateKinematics state of objects, 
+ * This SimulatorComponent encodes all the dynamics interactions. As well
+ *  as modifying data for the ObjectStateDynamics state of objects, 
  *  it also is in charge of modifying position.
  *
- * @author SimulatorComponentKinematics
+ * @author Marc G. Bellamre
+ * @author Anna Koop
  */
-public class SimulatorComponentKinematics implements SimulatorComponent {
+public class SimulatorComponentDynamics implements SimulatorComponent {
 
-    public static final String NAME = "kinematics";
+    public static final String NAME = "dynamics";
 
-    public SimulatorComponentKinematics() {
+    public SimulatorComponentDynamics() {
     }
 
     /** Applies physics to the current state to obtain the next state.
@@ -36,39 +37,39 @@ public class SimulatorComponentKinematics implements SimulatorComponent {
         //  affected by physics
         for (SimulatorObject obj : pCurrent.getObjects()) {
             // If no physics data, ignore this object
-            ObjectState os = obj.getState(SimulatorComponentKinematics.NAME);
+            ObjectState os = obj.getState(SimulatorComponentDynamics.NAME);
             if (os == null) {
                 continue;
             }
-            ObjectStateKinematics kinData = (ObjectStateKinematics) os;
+            ObjectStateDynamics dynData = (ObjectStateDynamics) os;
 
             // Find the corresponding object in the next state
             SimulatorObject newObj = pNext.getObject(obj);
-            ObjectStateKinematics newKinData =
-                    (ObjectStateKinematics) newObj.getState(SimulatorComponentKinematics.NAME);
+            ObjectStateDynamics newDynData =
+                    (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
 
 
-            newKinData.clearForces();
-            newKinData.clearTorque();
+            newDynData.clearForces();
+            newDynData.clearTorque();
             // Apply Euler's method to the position, its derivative and second
             //  derivative
 
             // First compute the sum of forces
             // @@@ sum up
-            Vector2D force = kinData.getForceSum().vec;
-            Vector2D vel = kinData.getVelocity();
-            double torque = kinData.getTorque();
-            double avel = kinData.getAngVelocity();
+            Vector2D force = dynData.getForceSum().vec;
+            Vector2D vel = dynData.getVelocity();
+            double torque = dynData.getTorque();
+            double avel = dynData.getAngVelocity();
 
             // A very sad attempt at friction
             force.x -= vel.x * .1;
             force.y -= vel.y * .1;
             torque -= avel * .5;
 
-            double mass = kinData.getMass();
+            double mass = dynData.getMass();
 
-            newKinData.setAngVelocity(avel + torque / kinData.getMomentInertia());
-            newKinData.setVelocity(
+            newDynData.setAngVelocity(avel + torque / dynData.getMomentInertia());
+            newDynData.setVelocity(
                     new Vector2D(vel.x + force.x / mass, vel.y + force.y / mass));
 
             double newDirect = obj.aDir + avel * delta / 1000;
@@ -130,13 +131,13 @@ public class SimulatorComponentKinematics implements SimulatorComponent {
                                     "between " + obj + " and " + compObj + "!");
                             // calculate forces
 
-                            ObjectStateKinematics os = (ObjectStateKinematics) obj.getState(SimulatorComponentKinematics.NAME);
+                            ObjectStateDynamics os = (ObjectStateDynamics) obj.getState(SimulatorComponentDynamics.NAME);
                             if (os != null) {
                                 os.setVelocity(new Vector2D(0, 0));
                                 os.setAngVelocity(0);
                                 os.clearTorque();
                             }
-                            ObjectStateKinematics cos = (ObjectStateKinematics) obj.getState(this.NAME);
+                            ObjectStateDynamics cos = (ObjectStateDynamics) obj.getState(this.NAME);
                             if (cos != null) {
                                 cos.setVelocity(new Vector2D(0, 0));
                                 cos.setAngVelocity(0);

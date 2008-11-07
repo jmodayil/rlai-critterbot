@@ -156,8 +156,8 @@ public class SimulatorEngine
     //  box
     w.setShape(wallShape);
 
-    // Make the wall react to kinematics
-    w.addState(new ObjectStateKinematics(10000,10000));
+    // Make the wall react to dynamics
+    w.addState(new ObjectStateDynamics(10000,10000));
     aState.addObject(w);
 
     SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
@@ -174,7 +174,7 @@ public class SimulatorEngine
 
     sa.setPosition(new Vector2D(250,250));
     // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
-    sa.addState(new ObjectStateKinematics(4,2));
+    sa.addState(new ObjectStateDynamics(4,2));
     // Give the agent an omnidirectional drive
     sa.addState(new ObjectStateOmnidrive());
 
@@ -208,8 +208,8 @@ public class SimulatorEngine
     // Important - set position after setting shape
     hex.setPosition(new Vector2D(100,100));
 
-    // Add kinematics to this object
-    hex.addState(new ObjectStateKinematics(0.5,2));
+    // Add dynamics to this object
+    hex.addState(new ObjectStateDynamics(0.5,2));
    
     aState.addObject(hex);
   }
@@ -262,8 +262,8 @@ public class SimulatorEngine
   {
     SimulatorAgent agent = aState.getAgents().getFirst();
 
-    ObjectStateKinematics phys =
-      (ObjectStateKinematics)agent.getState(SimulatorComponentKinematics.NAME);
+    ObjectStateDynamics phys =
+      (ObjectStateDynamics)agent.getState(SimulatorComponentDynamics.NAME);
 
     LinkedList<SimulatorObject> stuff = new LinkedList<SimulatorObject>();
 
@@ -276,10 +276,10 @@ public class SimulatorEngine
     // Ha ha ha.
     for (SimulatorObject o : stuff)
     {
-      if (o.getState(SimulatorComponentKinematics.NAME) == null) continue;
+      if (o.getState(SimulatorComponentDynamics.NAME) == null) continue;
 
-      ObjectStateKinematics oPhys = (ObjectStateKinematics)
-        o.getState(SimulatorComponentKinematics.NAME);
+      ObjectStateDynamics oPhys = (ObjectStateDynamics)
+        o.getState(SimulatorComponentDynamics.NAME);
       
       if (o.aPos.y >= 500)
         oPhys.addForce(new Force(0, -1000));
@@ -300,8 +300,8 @@ public class SimulatorEngine
       fv.x = fv.x * 5;
       fv.y = fv.y * 5; 
 
-      ObjectStateKinematics hexPhys =
-        (ObjectStateKinematics)hex.getState(SimulatorComponentKinematics.NAME);
+      ObjectStateDynamics hexPhys =
+        (ObjectStateDynamics)hex.getState(SimulatorComponentDynamics.NAME);
       hexPhys.addForce(new Force(fv,agent.getPosition()));
     }
     */
