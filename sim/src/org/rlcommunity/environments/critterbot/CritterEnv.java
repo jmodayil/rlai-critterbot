@@ -23,15 +23,12 @@ import java.util.LinkedList;
 
 import org.rlcommunity.critter.Clients.DropClient;
 import org.rlcommunity.critter.Clients.KeyboardClient;
-import org.rlcommunity.critter.CritterControlDrop;
-import org.rlcommunity.critter.CritterStateDrop;
-import org.rlcommunity.critter.DropInterface;
+import org.rlcommunity.critter.Drops.*;
 import org.rlcommunity.critter.ObjectStateOmnidrive;
 import org.rlcommunity.critter.SimulatorAgent;
 import org.rlcommunity.critter.SimulatorComponentCritterbotInterface;
-import org.rlcommunity.critter.SimulatorComponentKinematics;
+import org.rlcommunity.critter.SimulatorComponentDynamics;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
-import org.rlcommunity.critter.SimulatorDrop;
 import org.rlcommunity.critter.SimulatorEngine;
 import org.rlcommunity.critter.SimulatorObject;
 import org.rlcommunity.critter.SimulatorViz;
@@ -60,7 +57,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
 
         System.out.println("Creating simulator engine...");
         engine = new SimulatorEngine();
-        engine.addComponent(new SimulatorComponentKinematics());
+        engine.addComponent(new SimulatorComponentDynamics());
         engine.addComponent(new SimulatorComponentOmnidrive());
 
         // Get the first agent from the engine

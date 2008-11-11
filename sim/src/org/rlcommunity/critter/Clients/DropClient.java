@@ -19,7 +19,7 @@
 
 package org.rlcommunity.critter.Clients;
 
-import org.rlcommunity.critter.*;
+import org.rlcommunity.critter.Drops.SimulatorDrop;
 import java.util.List;
 
 /**

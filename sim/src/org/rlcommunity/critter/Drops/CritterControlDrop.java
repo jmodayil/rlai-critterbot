@@ -1,4 +1,4 @@
-package org.rlcommunity.critter;
+package org.rlcommunity.critter.Drops;
 
 /**
   * CritterControlDrop
@@ -9,6 +9,9 @@ package org.rlcommunity.critter;
 
 import java.io.IOException;
 import java.util.EnumSet;
+
+import org.rlcommunity.critter.InterfaceInputStream;
+import org.rlcommunity.critter.InterfaceOutputStream;
 
 public class CritterControlDrop implements SimulatorDrop
 {

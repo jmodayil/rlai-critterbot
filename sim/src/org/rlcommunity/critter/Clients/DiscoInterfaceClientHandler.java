@@ -7,6 +7,8 @@ package org.rlcommunity.critter.Clients;
   */
 
 import org.rlcommunity.critter.*;
+import org.rlcommunity.critter.Drops.*;
+
 import java.net.Socket;
 
 import java.util.LinkedList;
@@ -19,7 +21,7 @@ public class DiscoInterfaceClientHandler extends Thread
   public final int MAX_CLASSNAME_LENGTH = 1024;
 
   protected Socket aClient;
- 
+
   /** List of queue'd elements waiting to be parsed by our server */
   protected LinkedList<SimulatorDrop> aInQueue;
 
@@ -61,15 +63,12 @@ public class DiscoInterfaceClientHandler extends Thread
           throw new RuntimeException ("Garbage data");
         }
 
-        String className = aIn.readString(nameLength); 
+        String className = aIn.readString(nameLength);
 
         // Create a new Drop
         try
         {
-          Class<?> dropType  = Class.forName(className);
-          // Create a new instance and cross your fingers - it has better be
-          //  a subclass of SimulatorDrop
-          SimulatorDrop newDrop = (SimulatorDrop) dropType.newInstance();
+          SimulatorDrop newDrop = DropFactory.create(className);
           // Read in the drop!
           newDrop.readData(aIn);
         
@@ -110,7 +109,7 @@ public class DiscoInterfaceClientHandler extends Thread
       // Write the Drop's data to the output stream
       try
       {
-        String className = pData.getClass().getName();
+        String className = pData.getClass().getSimpleName();
         aOut.writeString(className);
     
         // Get the drop to write itself to the output stream

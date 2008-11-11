@@ -9,6 +9,8 @@ package org.rlcommunity.critter;
   * @author Marc G. Bellemare
   */
 
+import org.rlcommunity.critter.Drops.*;
+
 import java.util.List;
 
 public class SimulatorComponentCritterbotInterface implements SimulatorComponent

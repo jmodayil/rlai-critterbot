@@ -1,14 +1,14 @@
 package org.rlcommunity.critter.Clients;
 
 /**
-  * SubjectiveDataServer
+  * DiscoInterfaceServer
   *
   * This class handles the communication between the simulator and the
   *  DisCo wrapper corresponding to a particular agent. It receives 
   *  robot commands from the wrapper and sends back subjective information,
   *  such as sensor readings.
   *
-  *  A new SubjectiveDataServer should first be created, then started using
+  *  A new DiscoInterfaceServer should first be created, then started using
   *   Thread.start().
   *
   * @author Marc G. Bellemare
@@ -21,10 +21,9 @@ import java.util.List;
 import java.io.IOException;
 
 import org.rlcommunity.critter.*;
-
+import org.rlcommunity.critter.Drops.*;
 /**
- * Drop server listens for connections of sockets (say from Disco) and for in-process connections
- * (like having a keyboard controller added to it)
+ * Drop server listens for connections of sockets (say from Disco)
  * Added by Brian
  */
 
