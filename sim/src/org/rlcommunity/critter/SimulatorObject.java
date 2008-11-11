@@ -98,7 +98,7 @@ import java.util.TreeMap;
   
   public ObjectState getState(String pLabel)
   {
-      //Might want to assert that it's not null
+      // We want to return null if the ObjectState does not exist
       return aStates.get(pLabel);
   }
 
@@ -108,9 +108,10 @@ import java.util.TreeMap;
     */
   public void addState(ObjectState pState)
   {
-    // @@@ check for duplicates?
     // @@@ Automatically replaces duplicates.
-      assert(!aStates.containsKey(pState.getName()));
+    // @@@ MGB - we probably don't want an assert here, but it is fine for
+    //  now; whether we should crash on duplicates is open to discussion 
+    assert(!aStates.containsKey(pState.getName()));
     aStates.put(pState.getName(),pState);
   }
 
@@ -125,7 +126,15 @@ import java.util.TreeMap;
    */
   public void draw(Graphics g)
   {
-	  aShape.draw(g);  
+	  aShape.draw(g);
+
+    // Draw each ObjectState in turn
+    Set<Entry<String, ObjectState>> theEntrySet = aStates.entrySet();
+    
+      for (Entry<String, ObjectState> thisEntry : theEntrySet)
+      {
+        thisEntry.getValue().draw(g, this);
+      }
   }
   
   /**
@@ -195,8 +204,8 @@ import java.util.TreeMap;
      * @param Template SimulatorObject
      **/
     public void setGeometry(SimulatorObject compObj) {
-	this.setPosition(compObj.getPosition());
-	this.setDirection(compObj.getDirection());
+	    this.setPosition(compObj.getPosition());
+	    this.setDirection(compObj.getDirection());
     }
 
   /** Copies the data from 'original' onto this object. This is used for

@@ -11,6 +11,9 @@ package org.rlcommunity.critter;
 
 import org.rlcommunity.critter.Drops.CritterControlDrop;
 
+import java.awt.Graphics;
+import java.awt.Color;
+
 public class ObjectStateOmnidrive implements ObjectState
 {
   /** Target velocity */
@@ -87,5 +90,24 @@ public class ObjectStateOmnidrive implements ObjectState
   {
     this.aVel = new Vector2D(org.aVel);
     this.aAngVel = org.aAngVel;
+  }
+
+  public void draw(Graphics g, SimulatorObject parent)
+  {
+      // protected Vector2D aVel;
+      Vector2D objPos = parent.getPosition();
+      double objDir = parent.getDirection();
+
+      if (aVel.x != 0)
+      {
+	      Color tempC = g.getColor();
+	      g.setColor(Color.red);
+        // We're only drawing the x component here!
+        int endX = (int)(objPos.x + aVel.x * Math.sin(objDir));
+        int endY = (int)(objPos.y + aVel.x * Math.cos(objDir));
+
+	      g.drawLine((int)objPos.x, (int)objPos.y, endX, endY);
+	      g.setColor(tempC);
+      }
   }
 }

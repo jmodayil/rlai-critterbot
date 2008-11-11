@@ -13,6 +13,8 @@ package org.rlcommunity.critter;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.awt.Graphics;
+
 public class ObjectStateDynamics implements ObjectState
 {
   public static final double MIN_MASS = 0.000001; // 1 mg
@@ -138,6 +140,11 @@ public class ObjectStateDynamics implements ObjectState
 
     // Should we copy the forces over? by definition we shouldn't carry
     //  them from state to state, but...
+  }
+
+  public void draw (Graphics g, SimulatorObject o)
+  {
+    // @@@ Draw forces here? Collisions!
   }
 }
 
