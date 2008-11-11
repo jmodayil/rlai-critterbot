@@ -1,4 +1,4 @@
-package org.rlcommunity.critter;
+package org.rlcommunity.critter.Drops;
 
 /**
   * DropInterface

@@ -11,6 +11,7 @@ package org.rlcommunity.critter;
   */
 
 import org.rlcommunity.critter.Clients.*;
+import org.rlcommunity.critter.Drops.*;
 
 public class SimulatorMain
 {

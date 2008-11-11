@@ -1,4 +1,4 @@
-package org.rlcommunity.critter;
+package org.rlcommunity.critter.Drops;
 
 /**
   * SimulatorDrop
@@ -9,6 +9,9 @@ package org.rlcommunity.critter;
   */
 
 import java.io.IOException;
+
+import org.rlcommunity.critter.InterfaceInputStream;
+import org.rlcommunity.critter.InterfaceOutputStream;
 
 public interface SimulatorDrop
 {

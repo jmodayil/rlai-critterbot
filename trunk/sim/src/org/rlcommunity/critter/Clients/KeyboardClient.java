@@ -20,8 +20,7 @@ package org.rlcommunity.critter.Clients;
 
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import org.rlcommunity.critter.CritterControlDrop;
-import org.rlcommunity.critter.SimulatorDrop;
+import org.rlcommunity.critter.Drops.*;
 
 import java.util.List;
 import java.util.LinkedList;
@@ -113,6 +112,6 @@ public class KeyboardClient implements DropClient, KeyListener {
     }
 
     public void send(SimulatorDrop pData) {
-        System.err.println("Keyboard client doesnt send drops.");
+      // Do nothing - the keyboard client has no 'output' per se
     }
 }

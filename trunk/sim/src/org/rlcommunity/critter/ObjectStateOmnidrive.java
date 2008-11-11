@@ -9,6 +9,8 @@ package org.rlcommunity.critter;
   * @author Marc G. Bellemare
   */
 
+import org.rlcommunity.critter.Drops.CritterControlDrop;
+
 public class ObjectStateOmnidrive implements ObjectState
 {
   /** Target velocity */
