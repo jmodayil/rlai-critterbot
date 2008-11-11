@@ -17,7 +17,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 {
   public static final String NAME = "omnidrive";
   
-  public static final double VELOCITY_DECAY = 0.99;
+  public static int aCommandlessTimeThreshold = 500; 
 
   public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta)
   {
@@ -53,14 +53,26 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       kinState.addTorque (driveState.getAngVelocity());
 
       // Rather than "consuming" the action, which leads to very saccaded
-      //  movements when commands are issued slowly, we decay the 
-      //  target velocities by a constant factor
+      //  movements when commands are issued slowly, we kill it if 500ms
+      /// ( for now, 50 steps) have elapsed since the last command
       ObjectStateOmnidrive nextDriveState = 
         (ObjectStateOmnidrive)futureObj.getState(NAME);
-      nextDriveState.setVelocity(
-        new Vector2D(v.x * VELOCITY_DECAY, v.y * VELOCITY_DECAY));
-      nextDriveState.setAngVelocity(
-        driveState.getAngVelocity() * VELOCITY_DECAY);
+      nextDriveState.setTime(driveState.getTime()+delta);
+
+      // If enough steps have elapsed, reset data
+      if (driveState.getTime() >= aCommandlessTimeThreshold)
+      {
+        nextDriveState.clearTime();
+        nextDriveState.setVelocity(new Vector2D(0, 0));
+        nextDriveState.setAngVelocity(0);
+      }
+      else // Otherwise, copy over the target velocity and ang. velocity 
+      {
+        // @@@ this may be taken out once copyFrom is actually used to copy
+        //  from state to state
+        nextDriveState.setVelocity((Vector2D)v.clone());
+        nextDriveState.setAngVelocity(driveState.getAngVelocity());
+      }
     }
   }
 }
