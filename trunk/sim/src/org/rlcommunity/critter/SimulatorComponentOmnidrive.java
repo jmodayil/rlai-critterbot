@@ -16,6 +16,8 @@ import java.util.LinkedList;
 public class SimulatorComponentOmnidrive implements SimulatorComponent
 {
   public static final String NAME = "omnidrive";
+  
+  public static final double VELOCITY_DECAY = 0.99;
 
   public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta)
   {
@@ -50,12 +52,15 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       
       kinState.addTorque (driveState.getAngVelocity());
 
-      // For now, "consume" the action by setting the next state's action
-      //  back to 0
+      // Rather than "consuming" the action, which leads to very saccaded
+      //  movements when commands are issued slowly, we decay the 
+      //  target velocities by a constant factor
       ObjectStateOmnidrive nextDriveState = 
         (ObjectStateOmnidrive)futureObj.getState(NAME);
-      nextDriveState.setVelocity(new Vector2D(0,0));
-      nextDriveState.setAngVelocity(0);
+      nextDriveState.setVelocity(
+        new Vector2D(v.x * VELOCITY_DECAY, v.y * VELOCITY_DECAY));
+      nextDriveState.setAngVelocity(
+        driveState.getAngVelocity() * VELOCITY_DECAY);
     }
   }
 }
