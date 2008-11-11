@@ -37,14 +37,19 @@ public class KeyboardClient implements DropClient, KeyListener {
     public int left;
     public int right;
 
+    public boolean hasChange;
+
     public KeyboardClient() {
         up = down = left = right = 0;
+        hasChange = false;
     }
 
     public void keyTyped(KeyEvent e) {
     }
 
     public void keyPressed(KeyEvent e) {
+        hasChange = true;
+
         if (KeyEvent.VK_UP == e.getKeyCode()) {
             up = 1;
         }
@@ -60,6 +65,8 @@ public class KeyboardClient implements DropClient, KeyListener {
     }
 
     public void keyReleased(KeyEvent e) {
+        hasChange = true;
+
         if (KeyEvent.VK_UP == e.getKeyCode()) {
             up = 0;
         }
@@ -84,16 +91,19 @@ public class KeyboardClient implements DropClient, KeyListener {
     public List<SimulatorDrop> receive() 
     {
       double velocityX,  torque;
-      int maxVel=25;
+      int maxVel=15;
       int maxTorque=10;
 
       LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 
-      // Produce a drop iff: a key is pressed and enough time has elapsed
-      if (up > 0 || down > 0 || right > 0 || left > 0) 
+      // Produce a drop iff: a key is pressed, or was released, and enough 
+      //  time has elapsed
+      if (hasChange || up > 0 || down > 0 || right > 0 || left > 0) 
       {
         if(System.currentTimeMillis()-lastDropTime >= keyboardDropInterval)
         {
+          hasChange = false;
+
           velocityX = (up * maxVel - down * maxVel);
           torque = (right * -maxTorque + left * maxTorque);
           CritterControlDrop controlDrop = new CritterControlDrop();
