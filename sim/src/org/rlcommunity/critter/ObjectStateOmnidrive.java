@@ -21,10 +21,13 @@ public class ObjectStateOmnidrive implements ObjectState
   /** Target angular velocity */
   protected double aAngVel;
 
+  protected int aTimeSinceCommand; 
+
   public ObjectStateOmnidrive()
   {
     aVel = new Vector2D(0,0);
     aAngVel = 0;
+    aTimeSinceCommand = 0;
   }
 
   /** Returns the target velocity for this omni-drive
@@ -50,14 +53,34 @@ public class ObjectStateOmnidrive implements ObjectState
     */
   public void setAngVelocity(double pAngVel) { aAngVel = pAngVel; }
 
+  /**
+    * Sets the time-since-command counter.
+    *
+    * @param pSeconds The new number of ms since the last command was
+    *  given.
+    */
+  public void setTime(int pMillis) { aTimeSinceCommand = pMillis; }
+  /** Resets the time-since-command counter.
+    */
+  public void clearTime() { aTimeSinceCommand = 0; }
+
+  public int getTime() { return aTimeSinceCommand; }
+
   /** Copies over the relevant data from the given drop. Should probably
     *  be moved somewhere else, e.g. into a separate object which transforms
     *  drops into states.
+    *
+    *  IMPORTANT: If this gets removed, clearTime() should be called after
+    *   setting the drive values.
     *
     * @param pDrop The drop containing the data of interest
     */
   public void setFromDrop(CritterControlDrop pDrop)
   {
+    // Clear the number of steps since the last command
+    clearTime();
+
+    // Based on the motor mode, set velocities appropriately
     switch (pDrop.motor_mode)
     {
       case XYTHETA_SPACE:
@@ -90,6 +113,8 @@ public class ObjectStateOmnidrive implements ObjectState
   {
     this.aVel = new Vector2D(org.aVel);
     this.aAngVel = org.aAngVel;
+
+    this.aTimeSinceCommand = org.aTimeSinceCommand;
   }
 
   public void draw(Graphics g, SimulatorObject parent)
