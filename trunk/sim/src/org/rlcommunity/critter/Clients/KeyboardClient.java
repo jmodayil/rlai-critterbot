@@ -90,9 +90,9 @@ public class KeyboardClient implements DropClient, KeyListener {
      */
     public List<SimulatorDrop> receive() 
     {
-      double velocityX,  torque;
+      double velocityX,  angVel;
       int maxVel=15;
-      int maxTorque=10;
+      int maxAngularVel=5;
 
       LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 
@@ -105,12 +105,12 @@ public class KeyboardClient implements DropClient, KeyListener {
           hasChange = false;
 
           velocityX = (up * maxVel - down * maxVel);
-          torque = (right * -maxTorque + left * maxTorque);
+          angVel = (right * -maxAngularVel + left * maxAngularVel);
           CritterControlDrop controlDrop = new CritterControlDrop();
           controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
           controlDrop.x_vel = (int) velocityX;
           controlDrop.y_vel = 0;
-          controlDrop.theta_vel = (int) torque;
+          controlDrop.theta_vel = (int) angVel;
        
           lastDropTime=System.currentTimeMillis();
           dropList.add(controlDrop);
