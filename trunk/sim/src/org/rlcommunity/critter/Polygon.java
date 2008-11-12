@@ -281,6 +281,59 @@ public class Polygon
     return null;
   }
 
+  /**
+    * Determine whether the given ray interesects this polygon. Only 
+    *  positive intersections are considered, e.g. the ray intersects the
+    *  polygon iff there exists an alpha > 0 s.t. ray.src + alpha * ray.dir
+    *  is also a point on the polygon.
+    *
+    * @param r The ray of interest
+    * @return The strictly positive alpha such that ray.getPoint(alpha) is
+    *   on the polygon. Returns < 0 if there is no intersection.
+    */
+  public double intersect(Ray r)
+  {
+    // For now, do an all edges comparison with the polygon
+    //  I feel like there is a much easier way to do this...
+    Vector2D r1 = r.src;
+    Vector2D r2 = r.src.plus(r.dir);
+
+    Vector2D p1 = points.getLast();
+    for (Vector2D p2 : points)
+    {
+      // Test whether the line segment p1-p2 interescts r.src-(r.src+r.dir)
+      double denom = (r2.y - r1.y) * (p2.x - p1.x) -
+                     (r2.x - r1.x) * (p2.y - p1.y);
+      
+      // Parallel lines
+      if (denom == 0)
+      {
+        p1 = p2;
+        continue;
+      }
+
+      double num1 = (r2.x - r1.x) * (p1.y - r1.y) -
+                     (r2.y - r1.y) * (p1.x - r1.x); 
+      double num2 = (p2.x - p1.x) * (p1.y - r1.y) -
+                     (p2.y - p1.y) * (p1.x - r1.x); 
+
+      double alpha = num1 / denom;
+      double beta = num2 / denom;
+
+      // We only require that the ray be directed towards the polygon and
+      //  that the ray interesct the line segment
+      if (alpha > 0 && alpha < 1 && beta > 0)
+        // Return the 'alpha' corresponding to the ray (here, called beta)
+        return beta;
+
+      p1 = p2;
+    }
+
+    // No valid interesection, return -1 (we could also return 0, but this
+    //  is a bad idea).
+    return -1;
+  }
+
 
   /** SimulatorObject interface **/
 
