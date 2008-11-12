@@ -76,7 +76,7 @@ public class ObjectStateDynamics implements ObjectState
     if (aForces == null) return sum;
 
     for (Force f : aForces)
-      sum.vec.addEquals(f.vec);
+      sum.vec.plusEquals(f.vec);
 
     return sum;
   }

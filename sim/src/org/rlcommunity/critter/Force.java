@@ -37,7 +37,8 @@ public class Force
  
   /** Create a new force object. The source argument is used to construct
     *  bump sensor information and may potentially have other uses (such
-    *  as generating torque based on a vector force).
+    *  as generating torque based on a vector force). Note that the vectors
+    *  are NOT cloned.
     *
     * @param v The vector representing the force
     * @param src The point of contact where the force was transferred

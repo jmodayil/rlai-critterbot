@@ -44,7 +44,7 @@ public class Vector2D {
     * @param vect The vector to be added to this vector.
     * @return The result (as this)
     */
-  public Vector2D addEquals(Vector2D vect)
+  public Vector2D plusEquals(Vector2D vect)
   {
     this.x += vect.x;
     this.y += vect.y;
@@ -52,6 +52,18 @@ public class Vector2D {
     return this;
   }
 
+  /**
+    * Adds the given vector to this one and returns the result as a 
+    *  new object.
+    *
+    * @param vect The vector to be added to this vector.
+    * @return The result (as a new vector)
+    */
+  public Vector2D plus(Vector2D vect)
+  {
+    return new Vector2D(this.x + vect.x, this.y + vect.y);
+  }
+  
   /**
     * Subtracts the given vector from this one; does not modify this vector.
     * @param vect The vector to be subtracted this vector.

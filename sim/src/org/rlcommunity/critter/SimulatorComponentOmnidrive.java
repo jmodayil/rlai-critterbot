@@ -26,6 +26,9 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
     for (SimulatorObject thisObject : drivable)
     {
+      // Small debug routine hidden in this code
+      doDebug(thisObject, pCurrent);
+
       // We know they must contain a driveState
       ObjectStateOmnidrive driveState = 
         (ObjectStateOmnidrive)thisObject.getState(NAME);
@@ -135,5 +138,34 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     res += curVel * 0.5;
 
     return res;
+  }
+
+
+  /** Debug routine. Will be taken out. Ask Marc if it's still there when
+    *  you read this. */
+  public void doDebug(SimulatorObject agent, SimulatorState state)
+  {
+    // Cast a ray from the agent and try to intersect it with everything
+/*    double dir = agent.getDirection();
+    // Unit vector in the direction the agent is facing
+    Vector2D dirVec = new Vector2D(Math.cos(dir), Math.sin(dir));
+    Ray r = new Ray(agent.getPosition(), dirVec);
+
+    System.out.println (agent.getLabel()+" shoots "+r.src+" + "+r.dir+
+      " and interesects ("+dir+")");
+    for (SimulatorObject o : state.getObjects())
+    {
+      if (o.getId() == agent.getId()) // Avoid self-intersections
+        continue;
+
+      double alpha = o.getShape().intersect(r);
+      if (alpha > 0)
+      {
+        System.out.println ("\t"+o.getLabel()+" at "+r.getPoint(alpha)+
+          " ("+alpha+")");
+      }
+      else
+        System.out.println ("\t"+o.getLabel()+" not");
+    } */
   }
 }
