@@ -27,17 +27,23 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     for (SimulatorObject thisObject : drivable)
     {
       // We know they must contain a driveState
-      ObjectStateOmnidrive driveState = (ObjectStateOmnidrive)thisObject.getState(NAME);
+      ObjectStateOmnidrive driveState = 
+        (ObjectStateOmnidrive)thisObject.getState(NAME);
+
+      ObjectState os = thisObject.getState(SimulatorComponentDynamics.NAME);
+      if (os == null) continue;
+
+      ObjectStateDynamics kinState = (ObjectStateDynamics)os;
 
       // To actually produce force, we also need the physics component of the
       //  NEXT state!
       SimulatorObject futureObj = pNext.getObject(thisObject);
       if (futureObj == null) continue;
 
-      ObjectState os = futureObj.getState(SimulatorComponentDynamics.NAME);
+      os = futureObj.getState(SimulatorComponentDynamics.NAME);
 
       if (os == null) continue;
-      ObjectStateDynamics kinState = (ObjectStateDynamics)os;
+      ObjectStateDynamics nextKinState = (ObjectStateDynamics)os;
 
       // The Omnidrive state contains target velocities, while the 
       //  dynamics state contains actual velocities
@@ -45,12 +51,15 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       Vector2D v = driveState.getVelocity();
       // Convert v into object-space
       double dir = thisObject.getDirection();
+   
+      // Produce a force to provide the required velocity (which is in m/s)
+      Vector2D localVel = kinState.getVelocity().rotate(-dir+Math.PI/2);
+      Force f = simpleXYPid(driveState, kinState, localVel);
+
+      nextKinState.addForce (new Force(f.vec.rotate(dir-Math.PI/2)));
      
-      kinState.addForce (new Force(
-              new Vector2D(v.y * Math.cos(dir) + v.x * Math.sin(dir),
-                           v.x * Math.cos(dir) - v.y * Math.sin(dir))));
-      
-      kinState.addTorque (driveState.getAngVelocity());
+      // @@@ Should also be PID-driven
+      nextKinState.addTorque (driveState.getAngVelocity());
 
       // Rather than "consuming" the action, which leads to very saccaded
       //  movements when commands are issued slowly, we kill it if 500ms
@@ -74,5 +83,33 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
         nextDriveState.setAngVelocity(driveState.getAngVelocity());
       }
     }
+  }
+
+  public Force simpleXYPid(ObjectStateOmnidrive driveData, 
+    ObjectStateDynamics dynData, Vector2D curVel)
+  {
+    Vector2D targetVel = driveData.getVelocity();
+    double coeff = driveData.getPIDCoefficient();
+
+    // @@@ include a last error, as in pid_control, to make things smoother
+    Vector2D err = targetVel.minus(curVel);
+
+    err.x = err.x * coeff * dynData.getMass();
+    err.y = err.y * coeff * dynData.getMass();
+    
+    // Assume we 'know' friction, and bump the resulting force up
+    // @@@ this is of course, terribly bad
+    if (err.x > 0)
+      err.x = err.x + curVel.x * 0.1;
+    if (err.y > 0)
+      err.y = err.y + curVel.y * 0.1;
+
+    // Finally, cap the maximum force this PID produces to 10
+    if (err.x > 10) err.x = 10;
+    else if (err.x < -10) err.x = -10;
+    if (err.y > 10) err.y = 10;
+    else if (err.y < -10) err.y = -10;
+
+    return new Force(err);
   }
 }

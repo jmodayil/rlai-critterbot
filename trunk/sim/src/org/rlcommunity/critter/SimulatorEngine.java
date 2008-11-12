@@ -160,7 +160,7 @@ public class SimulatorEngine
     w.addState(new ObjectStateDynamics(10000,10000));
     aState.addObject(w);
 
-    SimulatorAgent sa = new SimulatorAgent("Anna Banana", 2);
+    SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);
 
     Polygon agentShape = new Polygon();
     agentShape.addPoint (-10,10);

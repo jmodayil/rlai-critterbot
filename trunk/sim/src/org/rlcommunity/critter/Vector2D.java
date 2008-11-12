@@ -61,6 +61,18 @@ public class Vector2D {
   {
     return new Vector2D(this.x - vect.x, this.y - vect.y);
   }
+
+  /** Rotates this vector by a given angle, and returns it (as a new instance).
+    *
+    * @param dir The angle of rotation
+    * @return A rotated version of this vector
+    */
+  public Vector2D rotate(double angle)
+  {
+    return new Vector2D(this.x * Math.cos(angle) + this.y * Math.sin(angle),
+         this.y * Math.cos(angle) - this.x * Math.sin(angle));
+  }
+
 	/**
 	 * length()
 	 * @return Length of the vector
