@@ -91,8 +91,8 @@ public class KeyboardClient implements DropClient, KeyListener {
     public List<SimulatorDrop> receive() 
     {
       double velocityX,  angVel;
-      int maxVel=100;
-      int maxAngularVel=5;
+      int maxVel=100; // 100m/s (or cm/s)
+      int maxAngularVel=27; // Roughly 1/2 a turn in a second
 
       LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 

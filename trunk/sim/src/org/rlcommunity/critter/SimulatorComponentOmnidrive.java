@@ -54,12 +54,13 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
    
       // Produce a force to provide the required velocity (which is in m/s)
       Vector2D localVel = kinState.getVelocity().rotate(-dir+Math.PI/2);
-      Force f = simpleXYPid(driveState, kinState, localVel);
+      Force fPID = simpleXYPid(driveState, kinState, localVel);
 
-      nextKinState.addForce (new Force(f.vec.rotate(dir-Math.PI/2)));
+      nextKinState.addForce (new Force(fPID.vec.rotate(dir-Math.PI/2)));
      
       // @@@ Should also be PID-driven
-      nextKinState.addTorque (driveState.getAngVelocity());
+      double torquePID = simpleTPID(driveState, kinState);
+      nextKinState.addTorque (torquePID);
 
       // Rather than "consuming" the action, which leads to very saccaded
       //  movements when commands are issued slowly, we kill it if 500ms
@@ -85,6 +86,11 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     }
   }
 
+  /** Method for computing the force that the omnidrive generates given
+    *  a target velocity. Not quite there though, but at least it
+    *  (for now) achieves the desired velocity, rather than creating some
+    *  force.
+    */
   public Force simpleXYPid(ObjectStateOmnidrive driveData, 
     ObjectStateDynamics dynData, Vector2D curVel)
   {
@@ -94,15 +100,13 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     // @@@ include a last error, as in pid_control, to make things smoother
     Vector2D err = targetVel.minus(curVel);
 
-    err.x = err.x * coeff * dynData.getMass();
-    err.y = err.y * coeff * dynData.getMass();
+    err.x = err.x * coeff;
+    err.y = err.y * coeff;
     
     // Assume we 'know' friction, and bump the resulting force up
     // @@@ this is of course, terribly bad
-    if (err.x > 0)
-      err.x = err.x + curVel.x * 0.1;
-    if (err.y > 0)
-      err.y = err.y + curVel.y * 0.1;
+    err.x = err.x + curVel.x * 0.1;
+    err.y = err.y + curVel.y * 0.1;
 
     // Finally, cap the maximum force this PID produces to 10
     if (err.x > 10) err.x = 10;
@@ -111,5 +115,25 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     else if (err.y < -10) err.y = -10;
 
     return new Force(err);
+  }
+
+  /** Method for computing the torque necessary to achieve the desired
+    * angular velocity. See comment in simpleXYPID above.
+    */
+  public double simpleTPID(ObjectStateOmnidrive driveData,
+    ObjectStateDynamics dynData)
+  {
+    double targetVel = driveData.getAngVelocity();
+    double curVel = dynData.getAngVelocity();
+
+    double err = targetVel - curVel;
+    double coeff = driveData.getPIDCoefficient();
+
+    double res = err * coeff;
+    // Compensate for 'friction'
+    // @@@ take this out, of course
+    res += curVel * 0.5;
+
+    return res;
   }
 }
