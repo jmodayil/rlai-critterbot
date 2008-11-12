@@ -99,8 +99,12 @@ public class ObjectStateOmnidrive implements ObjectState
     switch (pDrop.motor_mode)
     {
       case XYTHETA_SPACE:
+        // Units for the drop's x,y velocity are in cm/s, but for now 
+        //  I'm putting them in m/s - don't forget to change it!
         aVel = new Vector2D(pDrop.x_vel, pDrop.y_vel);
-        aAngVel = pDrop.theta_vel;
+        // Units for the drop's angular velocity are in 1/(18PI) of a circle 
+        //  per second, which is 1/9th of a radian per second
+        aAngVel = pDrop.theta_vel/9.0;
         break;
       case WHEEL_SPACE:
       default:
