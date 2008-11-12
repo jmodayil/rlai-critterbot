@@ -23,11 +23,24 @@ public class ObjectStateOmnidrive implements ObjectState
 
   protected int aTimeSinceCommand; 
 
+  /** 'Persistent' data */
+  /** How much the PID should compensate for velocity errors; for now
+    * a single value, most likely to be changed when other parts are in place 
+    */
+  protected double aPIDCoefficient;
+
   public ObjectStateOmnidrive()
+  {
+    this(0.5);
+  }
+
+  public ObjectStateOmnidrive(double pPIDCoeff)
   {
     aVel = new Vector2D(0,0);
     aAngVel = 0;
     aTimeSinceCommand = 0;
+
+    aPIDCoefficient = pPIDCoeff;
   }
 
   /** Returns the target velocity for this omni-drive
@@ -65,6 +78,8 @@ public class ObjectStateOmnidrive implements ObjectState
   public void clearTime() { aTimeSinceCommand = 0; }
 
   public int getTime() { return aTimeSinceCommand; }
+
+  public double getPIDCoefficient() { return aPIDCoefficient; }
 
   /** Copies over the relevant data from the given drop. Should probably
     *  be moved somewhere else, e.g. into a separate object which transforms
@@ -115,6 +130,8 @@ public class ObjectStateOmnidrive implements ObjectState
     this.aAngVel = org.aAngVel;
 
     this.aTimeSinceCommand = org.aTimeSinceCommand;
+
+    this.aPIDCoefficient = org.aPIDCoefficient;
   }
 
   public void draw(Graphics g, SimulatorObject parent)
