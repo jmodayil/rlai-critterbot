@@ -10,7 +10,9 @@ package org.rlcommunity.critter;
   * @author Marc G. Bellemare
   */
 
+import java.awt.geom.Line2D;
 import java.util.Set;
+
 
 public class Scene
 {
@@ -52,7 +54,7 @@ public class Scene
   {
     // Avoid the ugly case when p1 == p2 and the 'vec' vector would be 0
     if (p1.equals(p2)) return true;
-
+    
     // Create a ray from p1 to p2 and trace it
     Vector2D vec = p2.minus(p1);
     vec.normalize();
