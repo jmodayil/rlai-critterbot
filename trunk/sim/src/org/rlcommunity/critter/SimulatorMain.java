@@ -21,12 +21,12 @@ public class SimulatorMain
 
     // Read in some arguments
     if (args.length < 1)
-      objPort = 2623;
+      objPort = 2323;
     else
       objPort = Integer.parseInt(args[0]);
     
     if (args.length < 2)
-      subjPort = 2524;
+      subjPort = 2324;
     else
       subjPort = Integer.parseInt(args[1]);
     
