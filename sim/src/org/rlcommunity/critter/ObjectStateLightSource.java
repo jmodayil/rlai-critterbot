@@ -17,7 +17,7 @@ public class ObjectStateLightSource implements ObjectState
 
   public ObjectStateLightSource()
   {
-    aIntensity = 0;
+    aIntensity = 0.0;
   }
 
   public double getIntensity() { return aIntensity; }

@@ -14,7 +14,7 @@ public class ObjectStateLightSensor implements ObjectState
 {
   public static final String NAME = SimulatorComponentLight.NAME + "sensor";
 
-  public double aData;
+  protected double aData;
 
   public ObjectStateLightSensor()
   {

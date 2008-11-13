@@ -179,6 +179,8 @@ public class SimulatorEngine
     sa.addState(new ObjectStateOmnidrive());
     sa.addState(new ObjectStateBumpSensor());
     sa.addState(new ObjectStateLightSensor());
+    
+    
 
     aState.addObject(sa);
     
@@ -217,6 +219,8 @@ public class SimulatorEngine
     aState.addObject(hex);
     
     SimulatorObject lightSource = new SimulatorObject("light", 4);
+    
+    
     Polygon shape = new Polygon();
 
     shape.addPoint(0.0, 0.0);
@@ -224,10 +228,17 @@ public class SimulatorEngine
     shape.addPoint(6.0, 0.0);
     lightSource.setShape(shape);
     lightSource.setPosition(new Vector2D(50.0, 50.0));
+    
+    
+    ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
+    specificLightSource.setIntensity(10000.0);
+    System.out.println("initial light = " + specificLightSource.getIntensity());
+    lightSource.addState(specificLightSource);
 
-    lightSource.addState(new ObjectStateLightSource());
+    
 
     aState.addObject(lightSource);
+
     
   }
 
