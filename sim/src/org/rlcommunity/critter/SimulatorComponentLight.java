@@ -8,6 +8,9 @@ package org.rlcommunity.critter;
  *
  * @author Marc G. Bellamre
  */
+
+import java.util.*;
+
 public class SimulatorComponentLight implements SimulatorComponent {
 
     public static final String NAME = "light";
@@ -25,6 +28,25 @@ public class SimulatorComponentLight implements SimulatorComponent {
       */
     public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) 
     {
+        SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
+        SimulatorObject sensor = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
+    
+        Vector2D srcPosition = source.getPosition();
+        Vector2D sensorPosition = sensor.getPosition();
+        
+        Set<Polygon> polys = new HashSet<Polygon>();
+        
+        for (SimulatorObject o : pCurrent.getObjects())
+        {
+            if (o.equals(sensor) || o.equals(source)) continue;
+            Polygon shape = o.getShape();
+            
+            polys.add(shape);
+        }
+        if (Scene.isVisible(sensorPosition, srcPosition, polys))
+        {
+            System.out.println("I see light");
+        }
     }
 }
 
