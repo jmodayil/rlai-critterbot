@@ -88,7 +88,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     {
       ObjectStateLightSensor sData = (ObjectStateLightSensor)
         pObject.getState(ObjectStateLightSensor.NAME);
-      stateDrop.light[0] = (int)sData.getLightSensorValue();
+      stateDrop.light[0] = (int)(sData.getLightSensorValue() * 100);
     }
 
     return stateDrop;
