@@ -7,7 +7,6 @@ package org.rlcommunity.critter;
  *  pairing the two into a happy match.
  *
  * @author Marc G. Bellamre
- * @author Anna Koop
  */
 public class SimulatorComponentLight implements SimulatorComponent {
 

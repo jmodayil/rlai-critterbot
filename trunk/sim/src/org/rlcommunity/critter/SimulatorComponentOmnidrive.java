@@ -146,26 +146,26 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
   public void doDebug(SimulatorObject agent, SimulatorState state)
   {
     // Cast a ray from the agent and try to intersect it with everything
-/*    double dir = agent.getDirection();
+    double dir = agent.getDirection();
     // Unit vector in the direction the agent is facing
-    Vector2D dirVec = new Vector2D(Math.cos(dir), Math.sin(dir));
+    Vector2D dirVec = new Vector2D(Math.sin(dir), Math.cos(dir));
     Ray r = new Ray(agent.getPosition(), dirVec);
 
-    System.out.println (agent.getLabel()+" shoots "+r.src+" + "+r.dir+
-      " and interesects ("+dir+")");
+    /*System.out.println (agent.getLabel()+" shoots "+r.src+" + "+r.dir+
+      " and interesects ("+dir+")"); */
     for (SimulatorObject o : state.getObjects())
     {
       if (o.getId() == agent.getId()) // Avoid self-intersections
         continue;
 
       double alpha = o.getShape().intersect(r);
-      if (alpha > 0)
+/*      if (alpha > 0)
       {
         System.out.println ("\t"+o.getLabel()+" at "+r.getPoint(alpha)+
           " ("+alpha+")");
       }
       else
-        System.out.println ("\t"+o.getLabel()+" not");
-    } */
+        System.out.println ("\t"+o.getLabel()+" not"); */
+    }
   }
 }
