@@ -71,6 +71,14 @@ import java.util.TreeMap;
 	// in the constructor
 	return this.getShape().intersects(compObj.getShape());
     }
+    
+    public boolean corresponds(SimulatorObject o) {
+        
+        if(this.aId == o.aId) return true;
+   
+        return false;
+    }
+
 
   /** Sets the shape of the object (which is shapeless by default).
     *

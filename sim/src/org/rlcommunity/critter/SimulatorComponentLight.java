@@ -30,7 +30,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
     {
         SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
         SimulatorObject sensor = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
-    
+        
         Vector2D srcPosition = source.getPosition();
         Vector2D sensorPosition = sensor.getPosition();
         
@@ -38,7 +38,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
         
         for (SimulatorObject o : pCurrent.getObjects())
         {
-            if (o.equals(sensor) || o.equals(source)) continue;
+            if (o.corresponds(sensor) || o.corresponds(source)) continue;
             Polygon shape = o.getShape();
             
             polys.add(shape);
