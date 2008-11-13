@@ -40,6 +40,17 @@ public class ObjectStateLightSensor implements ObjectState
   
     this.aData = sensor.aData;
   }
+  
+  protected void setLightSensorValue (double intensity)
+  {
+      aData = intensity;
+  }
+  
+  protected double getLightSensorValue ()
+  {
+   return aData;   
+      
+  }
 
 
   /** (Potentially) draw something about the state; may be null. This
