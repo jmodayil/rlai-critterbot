@@ -178,11 +178,13 @@ public class SimulatorEngine
     // Give the agent an omnidirectional drive
     sa.addState(new ObjectStateOmnidrive());
     sa.addState(new ObjectStateBumpSensor());
+    sa.addState(new ObjectStateLightSensor());
 
     aState.addObject(sa);
     
     // Add an hexagonal obstacle
     SimulatorObject hex = new SimulatorObject("Hex", 3);
+    
 
     // Create the hex polygon
     Polygon hexShape = new Polygon();
@@ -213,6 +215,20 @@ public class SimulatorEngine
     hex.addState(new ObjectStateDynamics(0.5,2));
    
     aState.addObject(hex);
+    
+    SimulatorObject lightSource = new SimulatorObject("light", 4);
+    Polygon shape = new Polygon();
+
+    shape.addPoint(0.0, 0.0);
+    shape.addPoint(3.0, 3.0);
+    shape.addPoint(6.0, 0.0);
+    lightSource.setShape(shape);
+    lightSource.setPosition(new Vector2D(50.0, 50.0));
+
+    lightSource.addState(new ObjectStateLightSource());
+
+    aState.addObject(lightSource);
+    
   }
 
   public int debugGetElapsedTime()

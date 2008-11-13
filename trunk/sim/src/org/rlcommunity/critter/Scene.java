@@ -76,6 +76,8 @@ public class Scene
       iAlpha = (isect.y - p1.y) / vec.y;
       p2Alpha = (p2.y - p1.y) / vec.y;
     }
+    
+    System.out.println(p2Alpha +" "+iAlpha);
 
     // By how we constructed the ray, we know p2Alpha > 0; the ray tracer
     //  finds intersections s.t. iAlpha > 0 so we know p2 is visible if 

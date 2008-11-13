@@ -158,7 +158,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       if (o.getId() == agent.getId()) // Avoid self-intersections
         continue;
 
-      double alpha = o.getShape().intersect(r);
+//      double alpha = o.getShape().intersect(r);
 /*      if (alpha > 0)
       {
         System.out.println ("\t"+o.getLabel()+" at "+r.getPoint(alpha)+
