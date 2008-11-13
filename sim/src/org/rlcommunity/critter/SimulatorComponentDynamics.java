@@ -36,6 +36,17 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
         // Walk through all the objects in the current state that can be 
         //  affected by physics
         for (SimulatorObject obj : pCurrent.getObjects()) {
+            // @@@ Added by MGB - remove ASAP ---
+            SimulatorObject futureObj = pNext.getObject(obj);
+
+            if (futureObj.getState("bumpsensor") != null)
+            {
+              ObjectStateBumpSensor bs = (ObjectStateBumpSensor)
+                futureObj.getState("bumpsensor");
+              bs.clearForces();
+            }
+            // --- end MGB code
+
             // If no physics data, ignore this object
             ObjectState os = obj.getState(SimulatorComponentDynamics.NAME);
             if (os == null) {
@@ -120,6 +131,13 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         }
                         Vector2D pt = obj.intersects(compObj);
                         if (pt != null) {
+                            // Added by MGB
+                            //  Anna, you can take this part out. I apologize
+                            //  for conflicts!
+                            debugAddBump(obj, pt);
+                            debugAddBump(compObj, pt);
+                            // End added by MGB
+
                             positionReset = true;
                             resetPosition(obj, pCurrent);
                             //this may or may not change things, but
@@ -155,5 +173,18 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      **/
     private void resetPosition(SimulatorObject obj, SimulatorState pCurrent) {
         obj.setGeometry(pCurrent.getObject(obj));
+    }
+
+
+    /** Added by MGB - remove at your leisure */
+    public void debugAddBump (SimulatorObject obj, Vector2D pt)
+    {
+      ObjectState os = obj.getState(ObjectStateBumpSensor.NAME);
+
+      if (os == null) return;
+
+      ObjectStateBumpSensor bs = (ObjectStateBumpSensor)os;
+
+      bs.addForce(new Force(new Vector2D(5,5), pt));
     }
 }

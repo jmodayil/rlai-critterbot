@@ -100,7 +100,20 @@ public class Vector2D {
 	public double direction() {
 		return Math.atan2(y, x);
 	}
-	
+
+  /** Normalizes the vector so that it has unit length.
+    *  If this is the (0,0) vector, it is left unchanged.
+    */
+  public void normalize()
+  {
+    double l = length();
+    if ( l > 0 )
+    {
+      x /= l;
+      y /= l;
+    }
+  }
+
 	public boolean equals(Object o) {
 		if(o.getClass() != this.getClass())
 			return false;

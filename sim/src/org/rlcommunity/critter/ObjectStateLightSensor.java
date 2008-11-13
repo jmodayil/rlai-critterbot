@@ -4,6 +4,8 @@ package org.rlcommunity.critter;
   * ObjectStateLightSensor
   *
   * State component for an object which senses light.
+  *
+  * @author Marc G. Bellemare
   */
 
 import java.awt.Graphics;
