@@ -31,8 +31,10 @@ public class SimulatorComponentLight implements SimulatorComponent {
     {
         SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
         SimulatorObject sensor = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
-        ObjectStateLightSensor lightSensor = new ObjectStateLightSensor();
-        ObjectStateLightSource lightSource = new ObjectStateLightSource();
+        ObjectStateLightSensor lightSensor = (ObjectStateLightSensor)sensor.getState(ObjectStateLightSensor.NAME);
+        ObjectStateLightSource lightSource = (ObjectStateLightSource)source.getState(ObjectStateLightSource.NAME);
+
+               
         
         Vector2D srcPosition = source.getPosition();
         Vector2D sensorPosition = sensor.getPosition();
