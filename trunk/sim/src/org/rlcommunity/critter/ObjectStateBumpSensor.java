@@ -79,7 +79,6 @@ public class ObjectStateBumpSensor implements ObjectState
     // Draw a little circle where each bobo is
 	  Color tempC = g.getColor();
 	  g.setColor(Color.red);
-    System.err.println ("Num forces: "+aForces.size());
 
     for (Force f : aForces)
     {

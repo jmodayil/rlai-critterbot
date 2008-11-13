@@ -71,14 +71,11 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
   {
     CritterStateDrop stateDrop = new CritterStateDrop();
     
-    ObjectState os;
-
-    os = pObject.getState(SimulatorComponentDynamics.NAME);
-
     // Set the dynamics data
-    if (os != null)
+    if (pObject.getState(SimulatorComponentDynamics.NAME) != null)
     {
-      ObjectStateDynamics dynData = (ObjectStateDynamics)os;
+      ObjectStateDynamics dynData = (ObjectStateDynamics)
+        pObject.getState(SimulatorComponentDynamics.NAME);
       Force f = dynData.getForceSum();
       // @@@ Needs to be converted into proper units (I believe in g's)
 //      stateDrop.accel.x = (int)(f.vec.x * 1000);
@@ -86,8 +83,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       Vector2D V=dynData.getVelocity();
       stateDrop.accel.x=(int) V.x;
       stateDrop.accel.y=(int) V.y;
-      
-              
+    }
+    if (pObject.getState(ObjectStateLightSensor.NAME) != null)
+    {
+      ObjectStateLightSensor sData = (ObjectStateLightSensor)
+        pObject.getState(ObjectStateLightSensor.NAME);
+      stateDrop.light[0] = (int)sData.getLightSensorValue();
     }
 
     return stateDrop;
