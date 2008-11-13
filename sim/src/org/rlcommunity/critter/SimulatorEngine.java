@@ -232,7 +232,6 @@ public class SimulatorEngine
     
     ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
     specificLightSource.setIntensity(10000.0);
-    System.out.println("initial light = " + specificLightSource.getIntensity());
     lightSource.addState(specificLightSource);
 
     
