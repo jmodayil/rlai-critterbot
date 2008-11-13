@@ -9,6 +9,7 @@ package org.rlcommunity.critter;
  * @author Marc G. Bellamre
  */
 
+import java.awt.geom.Point2D;
 import java.util.*;
 
 public class SimulatorComponentLight implements SimulatorComponent {
@@ -30,6 +31,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
     {
         SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
         SimulatorObject sensor = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
+        ObjectStateLightSensor lightSensor = new ObjectStateLightSensor();
+        ObjectStateLightSource lightSource = new ObjectStateLightSource();
         
         Vector2D srcPosition = source.getPosition();
         Vector2D sensorPosition = sensor.getPosition();
@@ -45,7 +48,16 @@ public class SimulatorComponentLight implements SimulatorComponent {
         }
         if (Scene.isVisible(sensorPosition, srcPosition, polys))
         {
-            System.out.println("I see light");
+            
+            Point2D.Double srcPoint = new Point2D.Double(srcPosition.x, srcPosition.y);
+            Point2D.Double sensorPoint = new Point2D.Double(sensorPosition.x, sensorPosition.y);
+            
+            double lightDistance = srcPoint.distance(sensorPoint);
+            double intensity = lightSource.getIntensity();  
+            lightSensor.setLightSensorValue(intensity/(Math.pow(lightDistance,2.0)));
+            
+            
+            
         }
     }
 }

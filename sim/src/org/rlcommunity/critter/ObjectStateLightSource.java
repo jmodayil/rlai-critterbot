@@ -44,6 +44,7 @@ public class ObjectStateLightSource implements ObjectState
   }
 
 
+
   /** (Potentially) draw something about the state; may be null. This
     *  most likely should be moved out of here when we have time.
     *
