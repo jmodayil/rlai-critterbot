@@ -58,7 +58,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       
       if (agent != null)
       {
-        if (++aStateThrottle >= 100)
+        if (++aStateThrottle >= 20)
         {
           aDropInterface.sendDrop(makeStateDrop(agent));
           aStateThrottle = 0;
