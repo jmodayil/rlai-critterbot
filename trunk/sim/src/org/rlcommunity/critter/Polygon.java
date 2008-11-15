@@ -12,12 +12,29 @@ package org.rlcommunity.critter;
   */
 
 import java.util.LinkedList;
+import java.util.List;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
 public class Polygon
 {
+  /** Class encapsulating intersection information for efficient polygon
+    *  processing. Alpha and beta represent the same point in two different
+    *  polygons, in polygon-coordinates.
+    */
+  public class Intersection
+  {
+    public double alpha;
+    public double beta;
+
+    public Intersection(double a, double b)
+    {
+      alpha = a;
+      beta = b;
+    }
+  }
+
   /** The polygon's bounding box */
   protected double bx,by,bw,bh;
 
@@ -217,6 +234,7 @@ public class Polygon
 
   public Vector2D intersects(Polygon poly)
   {
+    // @@@ Call getIntersections() instead
     if(poly == null)
 	    return null;
 
@@ -278,6 +296,23 @@ public class Polygon
       pa1 = pa2;
     }
 
+    return null;
+  }
+
+  /** Returns up to num intersections found with the given polygon as a
+    *  list of pairs <alpha, beta> where alpha is the point of intersection,
+    *  in polygon coordinates, for this polygon and beta is the same point
+    *  in the other polygons' coordinate system. 
+    *
+    * @param pPoly The polygon to test for intersections
+    * @param num   The maximum number of intersections to return. If num is
+    *   0, all valid intersections are returned
+    * @return A list of up to num Intersection objects found between the 
+    *  two polygons
+    */
+  public List<Intersection> getIntersections (Polygon pPoly, int num)
+  {
+    // @@@ fix 
     return null;
   }
 

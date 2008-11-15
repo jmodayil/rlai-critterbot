@@ -6,10 +6,13 @@ package org.rlcommunity.critter;
   * Defines the basic properties and methods relevant to any simulator object,
   *  be it a wall, a tennis ball or a critterbot.
   *
-  * @author Marc G. Bellemare, Mike Sokolsky
+  * @author Marc G. Bellemare
+  * @author Mike Sokolsky
+  * @author Anna Koop
   */
 
 import java.util.LinkedList;
+import java.util.List;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -59,10 +62,52 @@ import java.util.TreeMap;
 
   }
 
+  /** Returns collision information, as a Collision class, if this object
+    *  is colliding with the given object. The returned Collision will be
+    *  null if no collision actually happened. The meaning of the Collision 
+    *  information is somewhat undefined in the case where the two objects'
+    *  polygons intersect at more than two points.
+    *
+    * @param compObj The object to be compared with
+    * @return Null if there is no collision between the two objects, or a
+    *  Collision object containing collision information otherwise.
+    */
+  public Collision collidesWith(SimulatorObject compObj)
+  {
+    Polygon compShape = compObj.getShape();
+    
+    // Get the first two intersections
+    List<Polygon.Intersection> isects = aShape.getIntersections(compShape, 2);
+
+    // No intersection, no collision
+    if (isects == null) 
+      return null;
+    else
+    {
+      Collision col = new Collision();
+      // @@@ Set the point of collision based on an interpolating between the
+      //  two points
+      col.point = new Vector2D(0,0);
+
+      // Keep the polygon coordinates of the collision point
+      //  @@@ make these an interpolation between the two points? Could be
+      //   wrong, e.g. pacman-style shapes
+      col.alpha = isects.get(0).alpha;
+      col.beta = isects.get(0).beta;
+
+      //  @@@ set the normal as the perpendicular of the line defined by
+      //  the two intersections
+      col.normal = new Vector2D(1,0);
+
+      return col;
+    }
+  }
+
     /**
      * Returns true of this objects' shape intersects the parameter objects'
      *
      * @returns True if the passed object intersects this object
+     * @obsolete
      **/
     public Vector2D intersects(SimulatorObject compObj) 
     {
