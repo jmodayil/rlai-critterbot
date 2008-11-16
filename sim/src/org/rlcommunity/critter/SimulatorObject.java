@@ -34,7 +34,7 @@ import java.util.TreeMap;
 
   /** A polygon describing the shape of the object; may be null if the
     *  object is an invisible source */
-  protected Polygon aShape=new Polygon();
+  protected Polygon aShape;
 
   /** List of state components for this object */
   //protected LinkedList<ObjectState> aStates;
@@ -76,29 +76,54 @@ import java.util.TreeMap;
   {
     Polygon compShape = compObj.getShape();
     
+    if (aShape == null || compShape == null)
+      return null;
+    
     // Get the first two intersections
     List<Polygon.Intersection> isects = aShape.getIntersections(compShape, 2);
 
     // No intersection, no collision
-    if (isects == null) 
+    if (isects.size() == 0) 
       return null;
+    else if (isects.size() == 1)
+    {
+      // @@@ the case when we have one intersection is incorrect, as in this
+      //  case it's not clear what the normal is
+      Collision col = new Collision();
+      Polygon.Intersection i1 = isects.get(0);
+      double alpha = i1.alpha; 
+      col.point = aShape.getPoint(alpha);
+      col.normal = aShape.getNormal(alpha);
+      col.alpha = i1.alpha;
+      col.beta = i1.beta;
+
+      return col;
+    }
     else
     {
       Collision col = new Collision();
-      // @@@ Set the point of collision based on an interpolating between the
-      //  two points
-      col.point = new Vector2D(0,0);
+      // Look at the two intersections that we have
+      Polygon.Intersection i1 = isects.get(0);
+      Polygon.Intersection i2 = isects.get(1);
+
+      Vector2D p1 = aShape.getPoint(i1.alpha);
+      Vector2D p2 = aShape.getPoint(i2.alpha);
 
       // Keep the polygon coordinates of the collision point
-      //  @@@ make these an interpolation between the two points? Could be
-      //   wrong, e.g. pacman-style shapes
-      col.alpha = isects.get(0).alpha;
-      col.beta = isects.get(0).beta;
+      //  This is an interpolation between the two points. Could be
+      //   very wrong, e.g. pacman-style shapes
+      col.alpha = (i1.alpha + i2.alpha) / 2; 
+      col.beta = (i1.beta + i2.beta) / 2; 
+     
+      // @@@ this is also wrong in general, e.g. if alpha1 = n-1 and alpha2 = 0,
+      //  this results in alpha = (n-1)/2 (when it should be n - 1/2)
+      col.point = aShape.getPoint(col.alpha);
 
-      //  @@@ set the normal as the perpendicular of the line defined by
-      //  the two intersections
-      col.normal = new Vector2D(1,0);
-
+      // The normal is the normal to p2-p1
+      // @@@ this might be the wrong direction
+      // @@@ normalize?
+      col.normal = p2.minus(p1).rotate(Math.PI / 2);
+      
       return col;
     }
   }
@@ -114,14 +139,23 @@ import java.util.TreeMap;
 	//@@todo find out why this was throwing a null
 	// pointer exception before I initialzed aShape
 	// in the constructor
-	return this.getShape().intersects(compObj.getShape());
+      if (aShape == null || compObj.getShape() == null) 
+        return null;
+      else
+      {
+        Polygon.Intersection isect =
+          aShape.intersects(compObj.getShape());
+        if (isect == null)
+          return null;
+        else 
+          return aShape.getPoint(isect.alpha);
+      }
     }
     
     public boolean corresponds(SimulatorObject o) {
         
-        if(this.aId == o.aId) return true;
-   
-        return false;
+        if (this.aId == o.aId) return true;
+        else return false;
     }
 
 

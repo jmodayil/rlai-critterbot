@@ -60,7 +60,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
            // System.out.println("distance is "+ lightDistance + "initial intensity is" + intensity);
            // System.out.println("computed light " + intensity/(lightDistance*lightDistance));
             
-            System.out.printf("light sensor reading = %f\n",lightSensor.getLightSensorValue());
+            //System.out.printf("light sensor reading = %f\n",lightSensor.getLightSensorValue());
             
         }
     }

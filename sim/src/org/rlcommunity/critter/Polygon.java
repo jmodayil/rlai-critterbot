@@ -232,17 +232,38 @@ public class Polygon
     *         null if none exist.
     */
 
-  public Vector2D intersects(Polygon poly)
+  public Intersection intersects(Polygon pPoly)
   {
-    // @@@ Call getIntersections() instead
-    if(poly == null)
-	    return null;
+    List<Intersection> isect = getIntersections(pPoly, 1);
+
+    if (isect.isEmpty()) return null;
+    else return isect.get(0);
+  }
+
+  /** Returns up to num intersections found with the given polygon as a
+    *  list of pairs <alpha, beta> where alpha is the point of intersection,
+    *  in polygon coordinates, for this polygon and beta is the same point
+    *  in the other polygons' coordinate system. 
+    *
+    * @param pPoly The polygon to test for intersections
+    * @param num   The maximum number of intersections to return. If num is
+    *   0, all valid intersections are returned
+    * @return A list of up to num Intersection objects found between the 
+    *  two polygons. The list is never null, but may be empty.
+    */
+  public List<Intersection> getIntersections (Polygon pPoly, int num)
+  {
+    LinkedList<Intersection> isects = new LinkedList<Intersection>();
+    if(pPoly == null)
+	    return isects;
 
     // Compare the bounding boxes first, and hope that they don't intersect
-    double l = poly.bx;
-    double r = poly.bx + poly.bw;
-    double t = poly.by;
-    double b = poly.by + poly.bh;
+    // @@@ this can be rewritten as we now only care about intersections 
+    //  at the edges, NOT whether the two polygons occupy the same space
+    double l = pPoly.bx;
+    double r = pPoly.bx + pPoly.bw;
+    double t = pPoly.by;
+    double b = pPoly.by + pPoly.bh;
     
     double br = bx + bw;
     double bb = by + bh;
@@ -253,17 +274,23 @@ public class Polygon
            (t < by && by < b) || (t < bb && bb < b)) &&
         ! ((bx < l && l < br) || (bx < r && r < br) ||
            (by < t && t < bb) || (by < b && b < bb)) )
-      return null;
+      return isects;
 
-    // Assume fully enclosed polygons do NOT intersect
+    boolean done = false;
+
+    // We keep track of the edge numbering to properly generate polygon
+    //  coordinates
+    int edge1 = 0;
 
     // Use brute force if the bounding box test fails, for lack of 
     //  programming time (all-edges comparison)
     Vector2D pa1 = this.points.getLast();
     for (Vector2D pa2 : this.points)
     {
-      Vector2D pb1 = poly.points.getLast();
-      for (Vector2D pb2 : poly.points)
+      int edge2 = 0;
+
+      Vector2D pb1 = pPoly.points.getLast();
+      for (Vector2D pb2 : pPoly.points)
       {
         // Test whether the line segment pa1-pa2 intersects pb1-pb2
         double denom = (pb2.y - pb1.y) * (pa2.x - pa1.x) -
@@ -272,6 +299,7 @@ public class Polygon
         // Assume general case and go on with your life 
         if (denom == 0)
         {
+          edge2++;
           pb1 = pb2;
           continue;
         }
@@ -284,37 +312,32 @@ public class Polygon
         double alpha = num1 / denom;
         double beta = num2 / denom;
 
+        // Are these two line segments intersecting?
         if (alpha > 0 && alpha < 1 && beta > 0 && beta < 1)
         {
-          return new Vector2D(pa1.x + alpha * (pa2.x - pa1.x),
-                              pa1.y + alpha * (pa2.y - pa1.y));
+          isects.add (new Intersection(alpha + edge1, beta + edge2));
+          if (num > 0)
+          {
+            num--;
+            // If we've reached the max. number of intersections that we
+            //  need, return what we've found
+            if (num == 0)
+              return isects;
+          }
         }
 
+        edge2++;
         pb1 = pb2;
       }
 
+      edge1++;
       pa1 = pa2;
     }
 
-    return null;
+    // Return a possibly empty or smaller-than-requested list
+    return isects;
   }
 
-  /** Returns up to num intersections found with the given polygon as a
-    *  list of pairs <alpha, beta> where alpha is the point of intersection,
-    *  in polygon coordinates, for this polygon and beta is the same point
-    *  in the other polygons' coordinate system. 
-    *
-    * @param pPoly The polygon to test for intersections
-    * @param num   The maximum number of intersections to return. If num is
-    *   0, all valid intersections are returned
-    * @return A list of up to num Intersection objects found between the 
-    *  two polygons
-    */
-  public List<Intersection> getIntersections (Polygon pPoly, int num)
-  {
-    // @@@ fix 
-    return null;
-  }
 
   /**
     * Determine whether the given ray interesects this polygon. Only 
@@ -370,6 +393,84 @@ public class Polygon
   }
 
 
+  /** Returns a point on the polygon in cartesian coordinates based on its 
+    *   polygon coordinates. The polygon coordinate is a single real number
+    *   in [0, n). The integer part represents which edge (out of n) is
+    *   being referenced, and the decimal part represents where on the
+    *   edge the point lies. If the decimal part is c, the integer part
+    *   i, and the i^th edge is represented by the points p1 and p2, then
+    *   this method returns (1 - c) p1 + c p2.
+    *
+    * @param alpha The polygon coordinate of the point of interest
+    * @return The requested point, in cartesian coordinates
+    */
+  public Vector2D getPoint (double alpha)
+  {
+    if (alpha < 0) return null;
+
+    int edgeNum = (int)alpha;
+    if (edgeNum >= points.size()) return null;
+   
+    double c = alpha - edgeNum;
+
+    // Find the edge of interest
+    Vector2D p1 = points.getLast();
+    for (Vector2D p2 : points)
+    {
+      if (edgeNum == 0)
+      {
+        // Interpolate to find the point of interest
+        return new Vector2D ((1.0 - c) * p1.x + c * p2.x, 
+                             (1.0 - c) * p1.y + c * p2.y);
+      }
+
+      edgeNum--;
+      p1 = p2;
+    }
+
+    // Oops? Something went wrong
+    //  @@@ possibly throw an exception?
+    return null;
+  }
+
+  /** Returns the normal to the polygon at a given point, in polygon
+    *  coordinates.
+    *
+    * @param alpha The polygon coordinate of the point of interest
+    * @return The normal to the polygon at the point of interest; this is
+    *   the vector perpendicular to the edge on which the point is 
+    */
+  public Vector2D getNormal (double alpha)
+  {
+    if (alpha < 0) return null;
+
+    int edgeNum = (int)alpha;
+    if (edgeNum >= points.size()) return null;
+   
+    double c = alpha - edgeNum;
+
+    // Find the edge that we want 
+    Vector2D p1 = points.getLast();
+    for (Vector2D p2 : points)
+    {
+      if (edgeNum == 0)
+      {
+        // Return the perpendicular to this edge
+        Vector2D edge = p2.minus(p1);
+        // If the Polygon points are in clockwise order, then the normal
+        //  is the edge rotated by pi/2. Otherwise, it's given by a 
+        //  rotation of -pi/2. 
+
+        return edge.rotate(Math.PI / 2);
+      }
+
+      p1 = p2;
+    }
+
+    // Oops? Something went wrong
+    //  @@@ possibly throw an exception?
+    return null;
+  }
   /** SimulatorObject interface **/
 
   /** Create a deep copy of this polygon
