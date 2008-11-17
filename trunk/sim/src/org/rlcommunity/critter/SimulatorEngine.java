@@ -157,7 +157,10 @@ public class SimulatorEngine
     w.setShape(wallShape);
 
     // Make the wall react to dynamics
-    w.addState(new ObjectStateDynamics(10000,10000));
+    ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000,10000);
+    // @todo: bad abstraction here
+    wallDyn.setMaxSpeed(0);
+    w.addState(wallDyn);
     aState.addObject(w);
 
     SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);

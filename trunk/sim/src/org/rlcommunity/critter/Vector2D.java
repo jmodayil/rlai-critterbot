@@ -140,10 +140,12 @@ public class Vector2D {
         }
     }
 
+    @Override
     public String toString() {
         return "<" + Double.toString(x) + "," + Double.toString(y) + ">";
     }
 
+    @Override
     public Object clone() {
         return new Vector2D(x, y);
     }
