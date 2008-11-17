@@ -112,9 +112,17 @@ import java.util.TreeMap;
       // Keep the polygon coordinates of the collision point
       //  This is an interpolation between the two points. Could be
       //   very wrong, e.g. pacman-style shapes
+      /*
+      This is wrong - need to view alpha's as between (-n/2, n/2]
       col.alpha = (i1.alpha + i2.alpha) / 2; 
       col.beta = (i1.beta + i2.beta) / 2; 
-     
+      */
+      // @@@ For now, we return a single intersection point - this is because
+      //  The interpolation of the two points might not be a good point of
+      //  contact at all
+      col.alpha = i1.alpha;
+      col.beta = i1.beta;
+
       // @@@ this is also wrong in general, e.g. if alpha1 = n-1 and alpha2 = 0,
       //  this results in alpha = (n-1)/2 (when it should be n - 1/2)
       col.point = aShape.getPoint(col.alpha);
