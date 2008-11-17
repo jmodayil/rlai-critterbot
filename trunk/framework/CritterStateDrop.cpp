@@ -109,7 +109,9 @@ void CritterStateDrop::writeArray(void *d) {
 void CritterStateDrop::readArray(void *d) {
 
   char *data = (char *)d;
-  
+ 
+  // DON'T CHANGE THIS WITHOUT CHANGING CritterStateDrop.java (Simulator-side)
+  //  Or I will come and cut your funding 
   memcpy(&power_source, data, sizeof(power_source));
   data += sizeof(power_source);
   

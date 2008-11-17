@@ -48,7 +48,7 @@ void SimulatorRobotInterfaceProc::clearReadData()
 
 char* SimulatorRobotInterfaceProc::readBuffer(int &size) {
   size = (int)(readData + MAX_ROBOT_INTERFACE_DATA_LENGTH - readPtr);
-  fprintf (stderr, "Size is %d\n", size);
+  // @@@ fprintf (stderr, "Size is %d\n", size);
 
   return readPtr;
 }
@@ -58,18 +58,17 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
 {
   // Keep track of partial drop data
   readPtr += size;
-  fprintf (stderr, "processRead, now %d left (%d)\n", 
+  /** @@@ fprintf (stderr, "processRead, now %d left (%d) read in %d\n", 
     readData + MAX_ROBOT_INTERFACE_DATA_LENGTH - readPtr,
-    readPtr - readData);
+    readPtr - readData, size); */
 
-  fprintf (stderr, "Read in %d bytes\n", size);
   int numBytes = 0;
 
   do
   {
     numBytes = processDrop();
 
-    fprintf(stderr, "\nNum bytes %d\n", numBytes);
+    // @@@ fprintf(stderr, "\nNum bytes %d\n", numBytes);
 
     if (numBytes > 0)
     {
@@ -84,9 +83,6 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
         // @@@ move out of loop
         int len = (int)(readPtr - unreadDataPtr);
 
-        fprintf (stderr, "Can I copy %x to %x, size %d?\n",
-          unreadDataPtr, readData, len); 
-
         memcpy (readData, unreadDataPtr, len); 
         // Reset the read pointers accordingly 
         readPtr = readPtr - len; 
@@ -95,6 +91,8 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
     }
   }
   while (numBytes > 0) ;
+
+  return 1;
 }
 
 int SimulatorRobotInterfaceProc::processDrop()
@@ -125,7 +123,7 @@ int SimulatorRobotInterfaceProc::processDrop()
     //  that the drop length needs to be read from the socket. The reason
     //  is that if we have variable length data, the other (Java) end needs
     //  to tell us the data size
-    dropLength = 328;
+    dropLength = 340;
   }
 
   if (dropLength < 0)
@@ -151,7 +149,7 @@ int SimulatorRobotInterfaceProc::processDrop()
   {
     CritterStateDrop * newDrop = 
       (CritterStateDrop*)lake->startWriteHead(stateWrite);
-    fprintf (stderr, "Size of drop is %d\n", newDrop->getSize());
+    // @@@ fprintf (stderr, "Size of drop is %d\n", newDrop->getSize());
 
     // Write a new drop to the lake and fill it with the data from the socket
     newDrop->readArray(data);
