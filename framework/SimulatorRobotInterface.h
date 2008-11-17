@@ -8,7 +8,7 @@
 
 using namespace std;
 
-#define MAX_ROBOT_INTERFACE_DATA_LENGTH 1024
+#define MAX_ROBOT_INTERFACE_DATA_LENGTH 4096
 
 class SimulatorRobotInterfaceProc : public SocketProtocol {
   private:
