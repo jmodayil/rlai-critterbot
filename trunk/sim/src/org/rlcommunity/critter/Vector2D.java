@@ -83,7 +83,12 @@ public class Vector2D {
     public Vector2D times(double d) {
         return new Vector2D(d*x, d*y);
     }
-    
+
+    public void timesEquals(double d) {
+        this.x = d*x;
+        this.y = d*y;
+    }
+
     public Vector2D minus(double d) {
         return new Vector2D(x-d, y-d);
     }

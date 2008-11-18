@@ -63,7 +63,7 @@ public class ObjectStateDynamics implements ObjectState {
         aVel = new Vector2D(0, 0);
         aAngVel = aTorque = 0;
         minSpeed = 0;
-        maxSpeed = 1;
+        maxSpeed = 10;
         collisions = new LinkedList<Collision>();
     }
 
@@ -228,10 +228,19 @@ public class ObjectStateDynamics implements ObjectState {
         setAngVelocity(0);
     }
 
+    /**
+     *
+     * @param f, the current
+     * @return
+     */
     public Vector2D subtractFriction(Force f) {
         return subtractFriction(f.vec);
     }
-    
+    /**
+     * Takes the velocity that is
+     * @param applied
+     * @return
+     */
     public Vector2D subtractFriction(Vector2D applied) {
         double mu = 0;
         // this is not complete, because if the force is sufficient to start
