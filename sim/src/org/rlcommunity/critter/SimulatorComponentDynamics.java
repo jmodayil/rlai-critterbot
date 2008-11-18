@@ -215,18 +215,16 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      * @param v - the vector to change the speed of
      * @param oDyn - the Dynamics state object that gives the max and min speed
      */
-    private void checkSpeed(Vector2D v, ObjectStateDynamics oDyn) {
-        System.out.println("Suggested velocity : "+v);
+    public void checkSpeed(Vector2D v, ObjectStateDynamics oDyn) {
         double speed = v.length();
         if(speed > oDyn.getMaxSpeed()) {
             v.normalize();
-            v.times(oDyn.getMaxSpeed());
+            v.timesEquals(oDyn.getMaxSpeed());
         }
         if(speed < oDyn.getMinSpeed()) {
             v.normalize();
-            v.times(oDyn.getMinSpeed());
+            v.timesEquals(oDyn.getMinSpeed());
         }
-        System.out.println("Legal velocity : "+v);
     }
 
     /** Added by MGB - remove at your leisure */
