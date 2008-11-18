@@ -150,6 +150,9 @@ public class SimulatorEngine
     wallShape.addPoint(500,500);
     wallShape.addPoint(500,0);
     wallShape.addPoint(0,0);
+    System.out.println("Wall");
+    wallShape.doneAddPoints();
+
     // Note that this polygon self-intersects at the duplicated edge
     //  (0,0)-(20,20)
     // This polygon is also evil because everything falls within its bounding
@@ -172,6 +175,8 @@ public class SimulatorEngine
     agentShape.addPoint (6,-40);
     agentShape.addPoint (6,-10);
     agentShape.addPoint (-10,-10);
+    System.out.println ("Agent");
+    agentShape.doneAddPoints();
 
     sa.setShape(agentShape);
 
@@ -200,6 +205,8 @@ public class SimulatorEngine
     hexShape.addPoint(8,-16);
     hexShape.addPoint(8,-6);
     hexShape.translate(new Vector2D(0, 11));
+    System.out.println("Hex");
+    hexShape.doneAddPoints();
 
     /*hexShape.addPoint(0,0);
     hexShape.addPoint(40,0);
@@ -229,6 +236,8 @@ public class SimulatorEngine
     shape.addPoint(0.0, 0.0);
     shape.addPoint(3.0, 3.0);
     shape.addPoint(6.0, 0.0);
+    System.out.println("Shape");
+    shape.doneAddPoints();
     lightSource.setShape(shape);
     lightSource.setPosition(new Vector2D(50.0, 50.0));
     
