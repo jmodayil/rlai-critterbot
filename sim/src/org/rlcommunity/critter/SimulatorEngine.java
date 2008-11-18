@@ -100,8 +100,6 @@ public class SimulatorEngine
 
     if (ms <= 0) return;
     
-    // Allow the agent to be manually controlled using the arrows
-    debugManualControl();
     // Provide some silly physics to convince other people to work on the
     //  simulator
     debugSillyPhysics();
@@ -176,6 +174,8 @@ public class SimulatorEngine
     agentShape.addPoint (6,-10);
     agentShape.addPoint (-10,-10);
     System.out.println ("Agent");
+    agentShape.rotate (-Math.PI/2, new Vector2D(0,0));
+
     agentShape.doneAddPoints();
 
     sa.setShape(agentShape);
@@ -271,30 +271,6 @@ public class SimulatorEngine
       last_time = time;
       return ms;
     }
-  }
-
-  public void debugManualControl()
-  {
-//	  SimulatorAgent agent = aState.getAgents().getFirst();
-//	  
-//	  double forceX, forceY, torque;
-//	 
-//    // If any of the visualizer keys are pressed, we override the omnidrive
-//    //  @@@ This needs to be moved somewhere else or ...
-//    if (vizHandler.up > 0 || vizHandler.down > 0 ||
-//        vizHandler.right > 0 || vizHandler.left > 0)
-//    {
-//	    forceX = (vizHandler.up * 8 - vizHandler.down * 8) * Math.sin(agent.aDir);
-//	    forceY = (vizHandler.up * 8 - vizHandler.down * 8) * Math.cos(agent.aDir);
-//	    torque = (vizHandler.right * -4  + vizHandler.left * 4);
-//
-//            
-//      // Modify the agent's omni drive data 
-//      ObjectStateOmnidrive driveData = 
-//        (ObjectStateOmnidrive)agent.getState(SimulatorComponentOmnidrive.NAME);
-//      driveData.setVelocity (new Vector2D(forceX, forceY));
-//      driveData.setAngVelocity (torque);
-//    }
   }
 
   public void debugSillyPhysics()

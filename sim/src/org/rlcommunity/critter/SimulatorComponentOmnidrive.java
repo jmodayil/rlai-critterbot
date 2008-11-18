@@ -27,6 +27,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     for (SimulatorObject thisObject : drivable)
     {
       // Small debug routine hidden in this code
+      // @@@ remove
       doDebug(thisObject, pCurrent);
 
       // We know they must contain a driveState
@@ -56,10 +57,10 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       double dir = thisObject.getDirection();
    
       // Produce a force to provide the required velocity (which is in m/s)
-      Vector2D localVel = kinState.getVelocity().rotate(-dir+Math.PI/2);
+      Vector2D localVel = kinState.getVelocity().rotate(-dir);
       Force fPID = simpleXYPid(driveState, kinState, localVel);
 
-      nextKinState.addForce (new Force(fPID.vec.rotate(dir-Math.PI/2)));
+      nextKinState.addForce (new Force(fPID.vec.rotate(dir)));
      
       // @@@ Should also be PID-driven
       double torquePID = simpleTPID(driveState, kinState);
@@ -148,7 +149,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     // Cast a ray from the agent and try to intersect it with everything
     double dir = agent.getDirection();
     // Unit vector in the direction the agent is facing
-    Vector2D dirVec = new Vector2D(Math.sin(dir), Math.cos(dir));
+    Vector2D dirVec = new Vector2D(Math.cos(dir), Math.sin(dir));
     Ray r = new Ray(agent.getPosition(), dirVec);
 
     /*System.out.println (agent.getLabel()+" shoots "+r.src+" + "+r.dir+

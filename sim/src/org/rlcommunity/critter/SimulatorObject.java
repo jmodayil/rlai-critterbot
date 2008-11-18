@@ -128,10 +128,9 @@ import java.util.TreeMap;
       col.point = aShape.getPoint(col.alpha);
 
       // The normal is the normal to p2-p1
-      // @@@ this might be the wrong direction
-      // @@@ normalize?
       col.normal = p2.minus(p1).rotate(Math.PI / 2);
-      
+      col.normal.normalize();
+
       return col;
     }
   }
@@ -259,7 +258,7 @@ import java.util.TreeMap;
   public void setDirection(double newDir) {
     // If we have a shape, also rotate it
     if (aShape != null)
-      aShape.rotate(aDir - newDir, aPos);
+      aShape.rotate(newDir - aDir, aPos);
   
     aDir = newDir;
   }
