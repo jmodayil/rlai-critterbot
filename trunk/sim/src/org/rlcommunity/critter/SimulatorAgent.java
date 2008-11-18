@@ -30,10 +30,11 @@ public class SimulatorAgent extends SimulatorObject
     if (true)
     {
       super.draw(g);
-	    Color tempC = g.getColor();
+      // Don't draw the label, currently broken
+/*	    Color tempC = g.getColor();
 	    g.setColor(Color.lightGray);
 	    g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
-	    g.setColor(tempC);
+	    g.setColor(tempC);*/
     }
     else
     {
@@ -41,7 +42,7 @@ public class SimulatorAgent extends SimulatorObject
 	    g.setColor(Color.black);
 	    g.drawOval((int)aPos.x - 10, (int)aPos.y - 10, 20, 20);
 	    g.setColor(Color.red);
-	    g.drawLine((int)aPos.x, (int)aPos.y, (int)(aPos.x + 10 * Math.sin(aDir)), (int)(aPos.y + 10 * Math.cos(aDir)));
+	    g.drawLine((int)aPos.x, (int)aPos.y, (int)(aPos.x + 10 * Math.cos(aDir)), (int)(aPos.y + 10 * Math.sin(aDir)));
 	    g.setColor(Color.lightGray);
 	    g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
 	    g.setColor(tempC);

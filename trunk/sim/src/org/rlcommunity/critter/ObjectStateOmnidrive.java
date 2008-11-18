@@ -149,8 +149,8 @@ public class ObjectStateOmnidrive implements ObjectState
 	      Color tempC = g.getColor();
 	      g.setColor(Color.red);
         // We're only drawing the x component here!
-        int endX = (int)(objPos.x + aVel.x * Math.sin(objDir));
-        int endY = (int)(objPos.y + aVel.x * Math.cos(objDir));
+        int endX = (int)(objPos.x + aVel.x * Math.cos(objDir));
+        int endY = (int)(objPos.y + aVel.x * Math.sin(objDir));
 
 	      g.drawLine((int)objPos.x, (int)objPos.y, endX, endY);
 	      g.setColor(tempC);

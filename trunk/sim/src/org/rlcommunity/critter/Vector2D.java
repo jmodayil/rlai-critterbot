@@ -103,8 +103,9 @@ public class Vector2D {
      * @return A rotated version of this vector
      */
     public Vector2D rotate(double angle) {
-        return new Vector2D(this.x * Math.cos(angle) + this.y * Math.sin(angle),
-                this.y * Math.cos(angle) - this.x * Math.sin(angle));
+        return new 
+          Vector2D(this.x * Math.cos(angle) - this.y * Math.sin(angle),
+                   this.y * Math.cos(angle) + this.x * Math.sin(angle));
     }
 
     /**
