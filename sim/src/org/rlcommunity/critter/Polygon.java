@@ -13,12 +13,18 @@ package org.rlcommunity.critter;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.ListIterator;
 
 import java.awt.Color;
 import java.awt.Graphics;
 
 public class Polygon
 {
+  /* Used for approximate methods; epsilon is the tolerance at which two
+   *   coordinates are considered the same.
+   */
+  public static final double EPSILON = 10E-6;
+
   /** Class encapsulating intersection information for efficient polygon
     *  processing. Alpha and beta represent the same point in two different
     *  polygons, in polygon-coordinates.
@@ -43,6 +49,11 @@ public class Polygon
   protected int[] aXPoints, aYPoints;
 
   public Polygon()
+  {
+    init();
+  }
+
+  public void init()
   {
     points = new LinkedList<Vector2D>();
     bx = by = Double.POSITIVE_INFINITY;
@@ -70,6 +81,84 @@ public class Polygon
 
     // Not quite efficient
     aXPoints = aYPoints = null;
+  }
+
+  /** 
+    * This method should be called after all points have been added to the
+    *  polygon.
+    */
+  public void doneAddPoints()
+  {
+    // If less than three points, things are bad
+    if (points.size() < 3) return;
+
+    // Find the clockwiseness of this Polygon
+    Vector2D p1 = points.getLast();
+
+    boolean isClockwise = false;
+    boolean resolved = false;
+
+    for (Vector2D p2 : points)
+    {
+      // Find out the handedness of the p2-p1 edge 
+      Vector2D center = 
+        new Vector2D(0.5 * p1.x + 0.5 * p2.x,
+                     0.5 * p1.y + 0.5 * p2.y);
+      Vector2D normal = p2.minus(p1).rotate(Math.PI / 2);
+      normal.normalize();
+
+      // Construct a point epsilon away from the edge along the normal,
+      //  outside of the polygon
+      Vector2D outPoint = normal.times(EPSILON).plus(center);
+      // Also cconstruct a point epsilon inside of the polygon
+      Vector2D inPoint = normal.times(-EPSILON).plus(center);
+
+      boolean containsInPoint = this.contains(inPoint);
+      boolean containsOutPoint = this.contains(outPoint);
+
+      // There are three cases, one of which (when neither point is contained)
+      //  is inconclusive
+      
+      // Case 1: The polygon is clockwise ordered
+      if (containsInPoint && !containsOutPoint)
+      {
+        isClockwise = true;
+        resolved = true;
+        break;
+      }
+      // Case 2: the polygon is anticlockwise ordered
+      else if (!containsInPoint && containsOutPoint)
+      {
+        isClockwise = false;
+        resolved = true;
+        break;
+      }
+      // Case 3: we picked an edge that is either surrounded by only inside,
+      //  or outside the polygon (unpleasant but possible cases)
+    }
+
+    if (!resolved) // We still don't know whether this polygon is clockwise!
+      // @@@ fixme; not the right type of exception
+      throw new IllegalArgumentException("Really ugly polygon");
+
+    // If the polygon is not clockwise, re-add the points backwards
+    if (!isClockwise)
+    {
+      System.err.println ("Not clockwise, recreating polygon");
+      LinkedList<Vector2D> oldPoints = points;
+
+      // Re-initialize the polygon, as if we had no points
+      init();
+      ListIterator<Vector2D> it = oldPoints.listIterator();
+
+      // Get the last element
+      while (it.hasNext())
+        it.next();
+      
+      // Add the points in reverse order
+      while (it.hasPrevious())
+        points.add(it.previous());
+    }
   }
 
   /** Translate this polygon with the given (dx,dy) vector
@@ -534,8 +623,15 @@ public class Polygon
 		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
 		g.setColor(tempC);
     
-    // Draw the bounding box (@@@ only for debugging, take me out)
-    /* int[] bbx = new int[5];
+    // Draw the edge normals (@@@ only for debugging)
+    drawEdgeNormals(g);
+    // Draw the bounding box
+    //drawBoundingBox(g);
+  }
+
+  public void drawBoundingBox (Graphics g)
+  {
+    int[] bbx = new int[5];
     int[] bby = new int[5];
 
 		bbx[0] = bbx[1] = bbx[4] = (int)Math.round(bx);
@@ -543,11 +639,37 @@ public class Polygon
     bby[0] = bby[3] = bby[4] = (int)Math.round(by);
     bby[1] = bby[2] = (int)Math.round(by + bh);
 
+    Color tempC = g.getColor();
     g.setColor(Color.cyan);
 		g.drawPolyline(bbx, bby, bbx.length);
-		g.setColor(tempC); */
+		g.setColor(tempC);
   }
 
+  public void drawEdgeNormals(Graphics g)
+  {
+    Vector2D p1 = points.getLast();
+
+    Color tempC = g.getColor();
+    g.setColor(Color.black);
+
+    // Walk through all edges, find their normal, draw it starting at the
+    //  center of the edge
+    for (Vector2D p2 : points)
+    {
+      Vector2D center = 
+        new Vector2D(0.5 * p1.x + 0.5 * p2.x,
+                     0.5 * p1.y + 0.5 * p2.y);
+      Vector2D normal = p2.minus(p1).rotate(Math.PI / 2);
+      normal.normalize();
+
+      Vector2D outPoint = normal.times(5).plus(center);
+		  g.drawLine((int)center.x, (int)center.y, 
+                 (int)outPoint.x, (int)outPoint.y);
+
+      p1 = p2;
+    }
+		g.setColor(tempC);
+  }
 
 
   /** A simple test routine
