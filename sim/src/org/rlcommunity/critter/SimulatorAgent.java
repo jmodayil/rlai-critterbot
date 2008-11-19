@@ -12,29 +12,57 @@ package org.rlcommunity.critter;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
+import java.awt.image.RescaleOp;
+import java.io.File;
+import java.net.URL;
+import java.io.IOException;
+import javax.imageio.ImageIO;
+import java.awt.geom.AffineTransform;
 
 public class SimulatorAgent extends SimulatorObject
 {
   /** Three values representing the current robot command */
   protected double aCmdX, aCmdY, aCmdTheta;
   
+  /** Robot Image (for now)*/
+  private Image robotop;
   /** Creates a new instance of a SimulatorAgent
     */
   public SimulatorAgent(String pLabel, int pId)
   {
     super(pLabel, pId);
     aCmdX = aCmdY = aCmdTheta;
+    try{ 
+      URL url = this.getClass().getResource("robotop.png");
+      System.out.println("Read image: " + url.toString());
+      robotop = ImageIO.read(url);
+      robotop = robotop.getScaledInstance(40,68,Image.SCALE_SMOOTH);
+    }
+    catch(IOException ioe) {
+      System.out.println(ioe.toString());
+    }
   }
   
   public void draw(Graphics g) {
     if (true)
     {
       super.draw(g);
-      // Don't draw the label, currently broken
-/*	    Color tempC = g.getColor();
+      Graphics2D g2 = (Graphics2D)g;
+      AffineTransform oldXform = g2.getTransform();
+      AffineTransform newXform = (AffineTransform)(oldXform.clone());
+      newXform.rotate(Math.PI / 2 + aDir, aPos.x, aPos.y);
+      g2.setTransform(newXform);
+      g2.drawImage(robotop, (int)aPos.x - 19, (int)aPos.y - 21, null);
+      g2.setTransform(oldXform);
+	    
+      Color tempC = g.getColor();
 	    g.setColor(Color.lightGray);
-	    g.drawString(aLabel, (int)aPos.x + 10, (int)aPos.y + 20);
-	    g.setColor(tempC);*/
+	    g.drawString(aLabel, (int)aPos.x + 20, (int)aPos.y + 20);
+	    g.setColor(tempC);
     }
     else
     {
