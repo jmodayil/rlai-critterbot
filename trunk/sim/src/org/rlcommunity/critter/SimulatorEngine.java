@@ -167,12 +167,29 @@ public class SimulatorEngine
     SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);
 
     Polygon agentShape = new Polygon();
-    agentShape.addPoint (-10,10);
-    agentShape.addPoint (10,10);
-    agentShape.addPoint (10,-40);
-    agentShape.addPoint (6,-40);
-    agentShape.addPoint (6,-10);
-    agentShape.addPoint (-10,-10);
+    agentShape.addPoint (-0,20);
+    agentShape.addPoint (-7.5,18.5);
+    agentShape.addPoint (-14,14);
+    agentShape.addPoint (-18.5,7.5);
+    agentShape.addPoint (-20,0);
+    agentShape.addPoint (-18.5,-6.5);
+    agentShape.addPoint (-16.5,-16);
+    agentShape.addPoint (-13,-26);
+    agentShape.addPoint (-8,-35.5);
+    agentShape.addPoint (-1,-47);
+    agentShape.addPoint (0,-48);
+    agentShape.addPoint (-2,-40.5);
+    agentShape.addPoint (-4,-32.5);
+    agentShape.addPoint (-4.5,-20);
+    agentShape.addPoint (-3,-20);
+    agentShape.addPoint (3.5,-16);
+    agentShape.addPoint (9,-16);
+    agentShape.addPoint (15.5,-12.5);
+    agentShape.addPoint (19,-6);
+    agentShape.addPoint (20,0);
+    agentShape.addPoint (18.5,7.5);
+    agentShape.addPoint (14,14);
+    agentShape.addPoint (7.5,18.5);
     System.out.println ("Agent");
     agentShape.rotate (-Math.PI/2, new Vector2D(0,0));
 
