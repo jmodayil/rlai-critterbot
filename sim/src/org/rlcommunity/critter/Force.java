@@ -49,4 +49,14 @@ public class Force
     source = src;
   }
 
+  public Vector2D getUnit() {
+    Vector2D v = new Vector2D(vec);
+    v.normalize();
+    return v;
+  }
+
+    double magnitude() {
+        return vec.length();
+    }
+
 }
