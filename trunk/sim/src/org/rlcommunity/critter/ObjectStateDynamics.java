@@ -20,7 +20,9 @@ public class ObjectStateDynamics implements ObjectState {
     public static final double MIN_MOMENT_INERTIA = MIN_MASS * 1; // 1 mg m^2
     public static final double MAX_MASS = Double.MAX_VALUE;
     public static final double MAX_MOMENT_INERTIA = Double.MAX_VALUE;
-        public static final double GRAVITY = 9.81; //@todo check units
+    // this can be the force of gravity if I want it to be
+        public static final double GRAVITY = 10; //@todo check units
+        public static final double TOL = 0.0000001; // just because I don't care if things are really 0
         
 
     /** Dynamics state */
@@ -40,8 +42,8 @@ public class ObjectStateDynamics implements ObjectState {
     /** Object moment of inertia, in kg m^2 */
     private double aMomI;
     /** @todo Object coefficient of friction against floor */
-    private double coefficientFrictionStatic = .2;
-    private double coefficientFrictionDyn = .1;
+    private double coefficientFrictionStatic = .5;
+    private double coefficientFrictionDyn = .4;
     /** Object coefficient of restitution with some imaginary median obj  */
     private double coefficientRestitution = 1;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
@@ -229,33 +231,30 @@ public class ObjectStateDynamics implements ObjectState {
     }
 
     /**
-     *
-     * @param f, the current
-     * @return
+     * Calculate the force of friction acting on the object based on its
+     *  current velocity
+     * @param The timestep length in seconds
+     * @return the component vector of the force of friction
      */
-    public Vector2D subtractFriction(Force f) {
-        return subtractFriction(f.vec);
-    }
-    /**
-     * Takes the velocity that is
-     * @param applied
-     * @return
-     */
-    public Vector2D subtractFriction(Vector2D applied) {
-        double mu = 0;
-        // this is not complete, because if the force is sufficient to start
-        // it moving then we should use the dynamic mu, but whatevs
-        if(aVel.equals(new Vector2D(0,0)))
-            mu = coefficientFrictionStatic;
-        else
-            mu = coefficientFrictionDyn;
-        Vector2D f = aVel.reverse();
+    public Vector2D calculateFriction(double dt) {
+        Vector2D f = new Vector2D(aVel);
+        // find the direction of the force of friction
         f.normalize();
-        // now we have the component ratio
-        f.times(mu*this.getMass()*ObjectStateDynamics.GRAVITY);
-        return applied.minus(f);
+        // calculate the force of friction
+        f.timesEquals(this.getCoefficientFriction()*this.getMass()*GRAVITY);
+        // calculate the stopping force
+        // this is approximate, but oh well
+        Vector2D fs = aVel.times(getMass()*dt);
+        if(f.length()>fs.length())
+            return fs;
+        else
+            return f;
     }
 
+    void applyLinearForce(Force thrust) {
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+    
     double getCoefficientRestitution(ObjectStateDynamics o2) {
         double e = getCoefficientRestitution() + o2.getCoefficientRestitution();
         e = Math.max(0, e);
@@ -289,6 +288,42 @@ public class ObjectStateDynamics implements ObjectState {
      */
     public void setMaxSpeed(double maxSpeed) {
         this.maxSpeed = maxSpeed;
+    }
+
+
+    double getCoefficientFrictionDyn() {
+        return coefficientFrictionDyn;
+    }
+
+    /**
+     * @return the coefficientFrictionStatic
+     */
+    public double getCoefficientFrictionStatic() {
+        return coefficientFrictionStatic;
+    }
+
+    public double getCoefficientFriction() {
+        if( aVel.length()<TOL )
+            return coefficientFrictionStatic;
+        else
+            return coefficientFrictionDyn;
+    }
+    /**
+     * @param coefficientFrictionStatic the coefficientFrictionStatic to set
+     */
+    public void setCoefficientFrictionStatic(double coefficientFrictionStatic) {
+        this.coefficientFrictionStatic = coefficientFrictionStatic;
+    }
+
+    /**
+     * @param coefficientFrictionDyn the coefficientFrictionDyn to set
+     */
+    public void setCoefficientFrictionDyn(double coefficientFrictionDyn) {
+        this.coefficientFrictionDyn = coefficientFrictionDyn;
+    }
+
+    public void setVelocity(int x, int y) {
+        setVelocity(new Vector2D(x, y));
     }
 
 

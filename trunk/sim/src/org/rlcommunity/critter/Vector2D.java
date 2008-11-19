@@ -146,6 +146,15 @@ public class Vector2D {
         }
     }
 
+    public boolean equalsTolerance(Vector2D v, double tol) {
+        if(Math.abs(x-v.x)>tol)
+            return false;
+        else if (Math.abs(y-v.y)>tol)
+            return false;
+        else
+            return true;
+    }
+
     @Override
     public String toString() {
         return "<" + Double.toString(x) + "," + Double.toString(y) + ">";
@@ -173,6 +182,12 @@ public class Vector2D {
             return this;
         else
             return v;
+    }
+
+    public Vector2D getUnit() {
+        Vector2D v = (Vector2D) this.clone();
+        v.normalize();
+        return v;
     }
 
 
