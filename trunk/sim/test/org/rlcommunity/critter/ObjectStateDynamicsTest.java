@@ -46,7 +46,7 @@ public class ObjectStateDynamicsTest {
         o1.setCoefficientFrictionDyn(.05);
         Vector2D f = o1.calculateFriction(1);
         assertTrue("Friction is not being calculated correctly", f.x==.5);
-        assertTrue("Friction is not in an opposing direction", f.getUnit().
+        assertTrue("Friction is not in an opposing direction", f.getUnit().reverse().
                 equalsTolerance(o1.getVelocity().getUnit(), 0.0001));
         o1.setCoefficientFrictionDyn(0.5);
         f = o1.calculateFriction(1);

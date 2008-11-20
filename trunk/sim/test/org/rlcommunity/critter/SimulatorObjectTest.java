@@ -17,6 +17,7 @@ public class SimulatorObjectTest {
 
     Wall w;
     SimulatorAgent sa;
+    SimulatorObject hex;
 
     public SimulatorObjectTest() {
         w = new Wall("Wall", 1);
@@ -54,7 +55,7 @@ public class SimulatorObjectTest {
         wallDyn.setMaxSpeed(0);
         w.addState(wallDyn);
 
-         sa = new SimulatorAgent("Bot", 2);
+        sa = new SimulatorAgent("Bot", 2);
 
         Polygon agentShape = new Polygon();
         agentShape.addPoint(-0, 20);
@@ -95,6 +96,28 @@ public class SimulatorObjectTest {
         sa.addState(new ObjectStateBumpSensor());
         sa.addState(new ObjectStateLightSensor());
 
+        // Add an hexagonal obstacle
+        hex = new SimulatorObject("Hex", 3);
+
+
+        // Create the hex polygon
+        Polygon hexShape = new Polygon();
+        hexShape.addPoint(0, 0);
+        hexShape.addPoint(-8, -6);
+        hexShape.addPoint(-8, -16);
+        hexShape.addPoint(0, -22);
+        hexShape.addPoint(8, -16);
+        hexShape.addPoint(8, -6);
+        hexShape.translate(new Vector2D(0, 11));
+        hexShape.doneAddPoints();
+
+        hex.setShape(hexShape);
+
+        // Important - set position after setting shape
+        hex.setPosition(new Vector2D(100, 100));
+
+        // Add dynamics to this object
+        hex.addState(new ObjectStateDynamics(0.5, 2));
     }
 
     @BeforeClass
@@ -127,13 +150,12 @@ public class SimulatorObjectTest {
 
     @Test
     public void testCollidesWith() {
-        Collision pt = sa.collidesWith(w);
-        assertTrue("Collision registered immediately", pt==null);
-        sa.setPosition(new Vector2D(50,50));
-        pt = sa.collidesWith(w);
-        assertTrue("Collision not discovered", pt!=null);
-
+        Collision pt = sa.collidesWith(hex);
+        assertTrue("Collision registered immediately", pt == null);
+        sa.setPosition(new Vector2D(100, 150));
+        pt = sa.collidesWith(hex);
+        assertTrue("Collision not discovered with setPosition", pt != null);
+        sa.setGeometry(hex);
+        
     }
-
-
 }
