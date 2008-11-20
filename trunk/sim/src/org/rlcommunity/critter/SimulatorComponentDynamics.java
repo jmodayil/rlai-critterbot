@@ -65,8 +65,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // need some way of making sure this is function doesn't exit
             // without setting the position correctly
             newDynData.clearAll();
-            //Force friction = new Force(dynData.calculateFriction(delta));
-            //dynData.addForce(friction);
+            Force friction = new Force(dynData.calculateFriction(delta));
+            dynData.addForce(friction);
 
             Force thrust = dynData.getForceSum();
             double torque = dynData.getTorque();
@@ -75,9 +75,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
 
             // A very sad attempt at friction
-            // but it works better than my attempt at "real" friction
-            thrust.vec.x -= vi.x * .1;
-            thrust.vec.y -= vi.y * .1;
+            //thrust.vec.x -= vi.x * .1;
+            //thrust.vec.y -= vi.y * .1;
             torque -= wi * .5;
 
             double mass = dynData.getMass();
@@ -158,7 +157,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             SimulatorObject compObjP = pCurrent.getObject(compObj);
                             
 
-
+                            //@TODO!!!
                             System.out.println("Collision at " + pt.point +
                                     "between " + obj + " and " + compObj + "!");
 
@@ -169,7 +168,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             obj.setGeometry(objP);
                             compObj.setGeometry(compObjP);
 
-                            //now check 
+                            //now double-check that collision has been resolved
+                            // this check should fail. Pt should be null.
                             pt = obj.collidesWith(compObj);
                             if (pt != null) {
                                 //should probably throw exception here
@@ -177,14 +177,14 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             }
 
                             // now get the thing we can actually modify
-                            // this is pretty ugly. I hope we change this
                             ObjectStateDynamics o1 = (ObjectStateDynamics) obj.getState(SimulatorComponentDynamics.NAME);
                             ObjectStateDynamics o2 = (ObjectStateDynamics) compObj.getState(SimulatorComponentDynamics.NAME);
-                            //ObjectStateDynamics o1p = (ObjectStateDynamics) objP.getState(SimulatorComponentDynamics.NAME);
-                            //ObjectStateDynamics o2p = (ObjectStateDynamics) compObjP.getState(SimulatorComponentDynamics.NAME);
+                            ObjectStateDynamics o1p = (ObjectStateDynamics) objP.getState(SimulatorComponentDynamics.NAME);
+                            ObjectStateDynamics o2p = (ObjectStateDynamics) compObjP.getState(SimulatorComponentDynamics.NAME);
 
                             /**
-                             * INSERT REAL PHYSICS HERE
+                             * TRYING OUT COLLISION FORCES
+                             *
                             // calculate forces
 
                             double ma = o1.getMass();
@@ -208,13 +208,16 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             checkSpeed(vbp,o2);
                             o1.setVelocity(vap);
                             o2.setVelocity(vbp);
-                             */
-
+                              */
+                            /**
+                             * COLLISIONS AS ENERGY SINKS
+                             *   */
                             // Collisions are energy sinks
                             o1.setVelocity(new Vector2D(0,0));
                             o1.setAngVelocity(0);
                             o2.setVelocity(new Vector2D(0,0));
                             o2.setAngVelocity(0);
+                           
                             System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
                         }
                     }
