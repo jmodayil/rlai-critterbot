@@ -42,8 +42,8 @@ public class ObjectStateDynamics implements ObjectState {
     /** Object moment of inertia, in kg m^2 */
     private double aMomI;
     /** @todo Object coefficient of friction against floor */
-    private double coefficientFrictionStatic = .5;
-    private double coefficientFrictionDyn = .4;
+    private double coefficientFrictionStatic = .2;
+    private double coefficientFrictionDyn = .05;
     /** Object coefficient of restitution with some imaginary median obj  */
     private double coefficientRestitution = 1;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
@@ -246,9 +246,9 @@ public class ObjectStateDynamics implements ObjectState {
         // this is approximate, but oh well
         Vector2D fs = aVel.times(getMass()*dt);
         if(f.length()>fs.length())
-            return fs;
+            return fs.reverse();
         else
-            return f;
+            return f.reverse();
     }
 
     void applyLinearForce(Force thrust) {
