@@ -69,10 +69,10 @@ public class SimulatorComponentLight implements SimulatorComponent {
         else
             lightSensor.setLightSensorValue(0.0);
     
-                           System.out.printf("light sensor reading %s = %f\n",
-            sensor.getLabel(), lightSensor.getLightSensorValue());        
+//                           System.out.printf("light sensor reading %s = %f\n",
+//            sensor.getLabel(), lightSensor.getLightSensorValue());        
         }
-        System.out.println("-----------");
+//        System.out.println("-----------");
     }
 
 }
