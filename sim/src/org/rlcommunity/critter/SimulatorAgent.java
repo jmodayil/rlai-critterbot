@@ -82,6 +82,13 @@ public class SimulatorAgent extends SimulatorObject
     SimulatorAgent sa = new SimulatorAgent(this.aLabel, this.aId);
     sa.copyFrom(this);
 
+    // Clone the object's children
+    for (SimulatorObject c : aChildren)
+    {
+      SimulatorObject childClone = (SimulatorObject)c.clone();
+      sa.addChild(childClone);
+    }
+
     return sa;
   }
 
