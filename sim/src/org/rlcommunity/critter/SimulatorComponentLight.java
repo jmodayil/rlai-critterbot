@@ -30,11 +30,17 @@ public class SimulatorComponentLight implements SimulatorComponent {
     public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) 
     {
         SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
-        SimulatorObject sensor = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
-        ObjectStateLightSensor lightSensor = (ObjectStateLightSensor)sensor.getState(ObjectStateLightSensor.NAME);
-        ObjectStateLightSource lightSource = (ObjectStateLightSource)source.getState(ObjectStateLightSource.NAME);
+        SimulatorObject sensor;// = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
+        int numSensors = pNext.getObjects(ObjectStateLightSensor.NAME).size();
 
-        Vector2D srcPosition = source.getPosition();
+        for (int sensorJ=0;sensorJ<numSensors;sensorJ++)
+        {
+              sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(sensorJ);
+                
+              ObjectStateLightSensor lightSensor = (ObjectStateLightSensor)sensor.getState(ObjectStateLightSensor.NAME);
+              ObjectStateLightSource lightSource = (ObjectStateLightSource)source.getState(ObjectStateLightSource.NAME);
+
+            Vector2D srcPosition = source.getPosition();
         Vector2D sensorPosition = sensor.getPosition();
         
         Set<Polygon> polys = new HashSet<Polygon>();
@@ -57,11 +63,17 @@ public class SimulatorComponentLight implements SimulatorComponent {
             double intensity = lightSource.getIntensity();  
             lightSensor.setLightSensorValue(intensity/(Math.pow(lightDistance,2.0)));
         
-           System.out.printf("light sensor reading %s = %f\n",
-            sensor.getLabel(), lightSensor.getLightSensorValue());
+
+
         }
         else
             lightSensor.setLightSensorValue(0.0);
+    
+                           System.out.printf("light sensor reading %s = %f\n",
+            sensor.getLabel(), lightSensor.getLightSensorValue());        
+        }
+        System.out.println("-----------");
     }
+
 }
 
