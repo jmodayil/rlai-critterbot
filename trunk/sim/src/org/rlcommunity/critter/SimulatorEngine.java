@@ -127,6 +127,8 @@ public class SimulatorEngine
 
   public void debugCreateStuff()
   {
+    Polygon shape;
+
     Wall w = new Wall("Wall", 1);
     w.addPoint(20,20);
     w.addPoint(20,480);
@@ -196,18 +198,40 @@ public class SimulatorEngine
 
     sa.setShape(agentShape);
 
-    sa.setPosition(new Vector2D(250,250));
     // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
     sa.addState(new ObjectStateDynamics(4,2));
     // Give the agent an omnidirectional drive
     sa.addState(new ObjectStateOmnidrive());
     sa.addState(new ObjectStateBumpSensor());
-    sa.addState(new ObjectStateLightSensor());
     
-    
-
     aState.addObject(sa);
-    
+   
+    // Create an external light sensor
+    SimulatorObject sensor = new SimulatorObject("LightSensor1", 5);
+    shape = new Polygon();
+
+    shape.addPoint(0.0, 0.0);
+    shape.addPoint(3.0, 3.0);
+    shape.addPoint(6.0, 0.0);
+    shape.doneAddPoints();
+
+    sensor.setShape(shape);
+    sensor.setPosition(new Vector2D(30,0));
+    sensor.addState(new ObjectStateLightSensor());
+
+    sa.addChild(sensor);
+   
+    // Create two more light sensors
+    sensor = sensor.makeCopy("LightSensor2", 6);
+    sensor.setPosition(new Vector2D(0,-30));
+    sa.addChild(sensor);
+
+    sensor = sensor.makeCopy("LightSensor3", 7);
+    sensor.setPosition(new Vector2D(0,30));
+    sa.addChild(sensor);
+
+    sa.setPosition(new Vector2D(250,250));
+
     // Add an hexagonal obstacle
     SimulatorObject hex = new SimulatorObject("Hex", 3);
     
@@ -247,7 +271,7 @@ public class SimulatorEngine
     SimulatorObject lightSource = new SimulatorObject("light", 4);
     
     
-    Polygon shape = new Polygon();
+    shape = new Polygon();
 
     shape.addPoint(0.0, 0.0);
     shape.addPoint(3.0, 3.0);

@@ -22,11 +22,7 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
-/**
- * 
- * 
- * @author anna
- */public class SimulatorObject
+public class SimulatorObject
 {
   /** Some properties of the object - position, velocity */
   protected Vector2D aPos;
@@ -40,7 +36,6 @@ import java.util.TreeMap;
   //protected LinkedList<ObjectState> aStates;
   protected Map<String, ObjectState> aStates=new TreeMap<String, ObjectState>();
   
-
   protected String aLabel;
 
   /** A unique identifier which is used to keep track of an object from state
@@ -48,7 +43,14 @@ import java.util.TreeMap;
     */
   protected int aId;
 
-  /** Creates a new object with a given label (e.g., "wall") and identifier.
+  /** Parent of this object, in the object hierarchy; may be null */
+  protected SimulatorObject aParent;
+  /** Children of this object, in the object hierarchy; list may be empty */
+  protected LinkedList<SimulatorObject> aChildren = 
+    new LinkedList<SimulatorObject>();
+
+  /** Creates a new object with a given label (e.g., "wall") and identifier,
+    *  with no parent.
     *
     * @param pLabel The object label
     * @param pId    The object's unique identifier
@@ -60,8 +62,93 @@ import java.util.TreeMap;
     aPos = new Vector2D(0,0);
     aDir = 0;
 
+    aParent = null;
   }
 
+  /** Adds an object as a child of this object, in the object hierarchy
+    *
+    * @param pChild The child to be added
+    * @throws IllegalArgumentException If
+    */
+  public void addChild(SimulatorObject pChild)
+  {
+    if (pChild == null)
+      throw new IllegalArgumentException("Illegal parameter: null");
+    else if (aChildren.contains(pChild))
+      throw new IllegalArgumentException ("Duplicate child");
+    else if (pChild.getParent() != null)
+      throw new IllegalArgumentException("Child to be added has a parent");
+    
+    aChildren.add(pChild);
+    pChild.setParent(this);
+  }
+
+  /** Removes an object from this object's children.
+    *
+    * @param pChild The object to be removed
+    * @return Whether the child was contained in the children list
+    */
+  public boolean removeChild(SimulatorObject pChild)
+  {
+    if (pChild == null)
+      throw new IllegalArgumentException("Illegal parameter: null");
+
+    // LinkedList.remove() tells us whether the list contains the removed 
+    //  element
+    boolean wasChild = aChildren.remove(pChild);
+    if (wasChild)
+      pChild.removeParent();
+    
+    return wasChild;
+  }
+
+  /** Returns a list of all nodes in this object's tree, in postorder traversal
+    *
+    * @return List<SimulatorObject> A list of all objects in this object's tree
+    */
+  public List<SimulatorObject> getChildren()
+  {
+    LinkedList<SimulatorObject> children = new LinkedList<SimulatorObject>();
+
+    // Add each child's children
+    for (SimulatorObject c : aChildren)
+    {
+      List<SimulatorObject> itsChildren = c.getChildren();
+      // Add all of them
+      children.addAll(itsChildren);
+    }
+
+    // To preserve postorder traversal, add the children after
+    children.addAll(aChildren);
+
+    return children;
+  }
+
+  /** Returns a list of all nodes in this object's tree, in postorder traversal,
+    *  containing a particular ObjectState as given by its label. 
+    *
+    * @param pLabel The label of the ObjectState of interest
+    * @return List<SimulatorObject> A list of objects from this object's tree
+    */
+  public List<SimulatorObject> getChildren(String pLabel) {
+    LinkedList<SimulatorObject> children = new LinkedList<SimulatorObject>();
+
+    // Add each child's children
+    for (SimulatorObject c : aChildren) {
+      List<SimulatorObject> itsChildren = c.getChildren(pLabel);
+      // Add all of them
+      children.addAll(itsChildren);
+    }
+
+    // Add only the children that containing the property of interest
+    // Preserve the postorder traversal! Do not merge these two 'for' loops
+    for (SimulatorObject c : aChildren) {
+      if (c.getState(pLabel) != null)
+        children.add(c);
+    }
+
+    return children;
+  }
   /** Returns collision information, as a Collision class, if this object
     *  is colliding with the given object. The returned Collision will be
     *  null if no collision actually happened. The meaning of the Collision 
@@ -209,6 +296,40 @@ import java.util.TreeMap;
     aStates.put(pState.getName(),pState);
   }
 
+  /**
+    * @return Returns the parent of this object, or null if it has no parent
+    */
+  public SimulatorObject getParent()
+  {
+    return aParent;
+  }
+
+  /** Set the parent of this object (as per the object hierarchy)
+    *  aParent should be null.
+    *
+    * @param pParent The parent-to-be of the object
+    * @throws IllegalArgumentException If pParent is null or aParent is not
+    *   null
+    */
+  public void setParent(SimulatorObject pParent)
+  {
+    if (aParent != null || pParent == null)
+      throw new IllegalArgumentException(aLabel+" already has a parent");
+
+    aParent = pParent;
+  }
+
+  /** Remove the parent of this object
+    *
+    * @throws IllegalArgumentException If this object has no paret 
+    */
+  public void removeParent()
+  {
+    if (aParent == null)
+      throw new IllegalArgumentException(aLabel+" has no parent");
+    aParent = null;
+  }
+
   private void loadObject() {
 	  // Open files, lookup plabel, etc???
   }
@@ -222,13 +343,17 @@ import java.util.TreeMap;
   {
 	  aShape.draw(g);
 
+    // Draw the children in postorder traversal
+    for (SimulatorObject c : aChildren)
+      c.draw(g);
+
     // Draw each ObjectState in turn
     Set<Entry<String, ObjectState>> theEntrySet = aStates.entrySet();
     
-      for (Entry<String, ObjectState> thisEntry : theEntrySet)
-      {
-        thisEntry.getValue().draw(g, this);
-      }
+    for (Entry<String, ObjectState> thisEntry : theEntrySet)
+    {
+      thisEntry.getValue().draw(g, this);
+    }
   }
   
   /**
@@ -247,25 +372,170 @@ import java.util.TreeMap;
     return aLabel;
   }
 
+  /** Sets this object's position, in global coordinates. When constructing
+    *   object trees, setLocalPosition should be used instead.
+    *
+    * @param newPos The new global position of the object
+    */
   public void setPosition(Vector2D newPos) {
-    // If we have a shape, also translate it by the difference
-    if (aShape != null)
-      aShape.translate(newPos.minus(aPos));
+    Vector2D newLocalPos;
 
-	  aPos = (Vector2D) newPos.clone();
+    // Find the local position of this object
+    if (aParent == null)
+      newLocalPos = newPos;
+    else {
+      // @@@ replace this by a proper global-to-local conversion
+      throw new UnsupportedOperationException(
+        "Not allowed to change the global position of a child object");
+    }
+
+    // If we have a shape, also translate it by the difference
+    updateShape(newLocalPos.minus(aPos), 0, Vector2D.ZERO); 
+    
+	  aPos = newLocalPos; 
   }
 
+  /** Sets the global direction of the object
+    *
+    * @param The new direction
+    */
   public void setDirection(double newDir) {
+    double newLocalDir;
+
+    if (aParent == null)
+      newLocalDir = newDir;
+    else {
+      throw new UnsupportedOperationException(
+        "Not allowed to change the global drection of a child object");
+    }
+
     // If we have a shape, also rotate it
     if (aShape != null)
-      aShape.rotate(newDir - aDir, aPos);
+      updateShape(Vector2D.ZERO, newLocalDir - aDir, getPosition());
   
-    aDir = newDir;
+    aDir = newLocalDir;
   }
 
-  public Vector2D getPosition() { return aPos; }
+  /** Returns this object's position (in global coordinates)
+    *
+    * @return The object's position
+    */
+  public Vector2D getPosition()
+  {
+    if (aParent == null) 
+      return aPos;
+    else
+    {
+      Vector2D parentPos = aParent.getPosition();
+      double parentDir = aParent.getDirection();
 
-  public double getDirection() { return aDir; }
+      // Compute our position based on our parent's
+      Vector2D pos = aPos.rotate(parentDir).plus(parentPos);
+
+      return pos;
+    }
+  }
+
+  /** Returns this object's direction, in the global frame of reference
+    *
+    * @return The object's direction
+    */
+  public double getDirection()
+  { 
+    if (aParent == null)
+      return aDir;
+    else 
+      return aDir + aParent.getDirection();
+  }
+
+  /** Sets the object's local position (with respect to its parent's
+    *  frame of reference)
+    *
+    * @param pPos The new local position of the object
+    */
+  public void setLocalPosition(Vector2D pPos)
+  {
+    // Simple!
+    // @@@ fix - update polygon
+    aPos = pPos;
+  }
+
+  /** Returns the object's local position (with respect to its parent's 
+    *  frame of reference)
+    *
+    * @return The object's local position
+    */
+  public Vector2D getLocalPosition()
+  {
+    return aPos;
+  }
+
+  /** Sets the object's direction in its parent's frame of reference
+    *
+    * @param pDir The object's local direction
+    */
+  public void setLocalDirection(double pDir)
+  {
+    aDir = pDir;
+  }
+
+  /** Returns the object's direction in its parent's frame of reference
+    *
+    * @return The object's local direction
+    */
+  public double getLocalDirection()
+  {
+    // @@@ fix - update polygon
+    return aDir;
+  }
+ 
+  /** Updates the shape with a translation (possibly 0) and a rotation (also
+    *  0), performed in this order. The center of rotation is provided, as
+    *  it should remain fixed as the object tree is traversed. Also updates 
+    *  the Polygon of this object's children.
+    *
+    * @@@ MGB: This is not quite clean - I don't like having to pass a 
+    *  center of rotation around. There should be a better way.
+    *
+    * @param pTranslation The translation to perform on the object
+    * @param pRotation    The rotation to perform on the object
+    * @param pRotCenter   The center of rotation, if needed 
+    */
+  public void updateShape(Vector2D pTranslation, double pRotation,
+    Vector2D pRotCenter)
+  {
+    if (aShape != null)
+    {
+      aShape.translate(pTranslation);
+      aShape.rotate(pRotation, pRotCenter);
+    }
+
+    for (SimulatorObject c : aChildren)
+    {
+      c.updateShape(pTranslation, pRotation, pRotCenter);
+    }
+  }
+
+  /** Makes a copy of this object and modifies the label and ID of the new
+    *  object. This should not be used for generating copies of the state,
+    *  but rather for generating copies of the same object within a given
+    *  state.
+    *
+    *  This method will fail if this object has any children, which would be
+    *   cloned (but not re-id'ed) by this method.
+    */
+  public SimulatorObject makeCopy(String pLabel, int pId)
+  {
+    if (!aChildren.isEmpty())
+      throw new UnsupportedOperationException 
+        ("Cannot make copy of an object with children");
+
+    SimulatorObject newObj = (SimulatorObject)this.clone();
+    newObj.aLabel = pLabel;
+    newObj.aId = pId;
+
+    return newObj;
+  }
 
   /** Makes a copy of this object. For cloning purposes, the Object id 
     *  remains identical. This method's purpose is to be used for copying
@@ -276,6 +546,14 @@ import java.util.TreeMap;
     SimulatorObject newObj = new SimulatorObject(this.aLabel, this.aId);
 
     newObj.copyFrom(this);
+
+    // Clone the children
+    for (SimulatorObject c : aChildren)
+    {
+      SimulatorObject childClone = (SimulatorObject)c.clone();
+      newObj.addChild(childClone);
+    }
+
     return newObj; 
   }
 
