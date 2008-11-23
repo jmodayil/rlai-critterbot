@@ -69,11 +69,13 @@ public class ObjectStateDynamics implements ObjectState {
         collisions = new LinkedList<Collision>();
     }
 
-    public void clear() {
+    // @@@ removed by MGB - most likely should not be needed anymore
+    /* public void clear() {
         aVel.x = 0;
         aVel.y = 0;
         aAngVel = 0;
-    }
+    } */
+
     /** Creates a nearly massless Dynamics state. Because a minimum mass 
      *  is recommended by classical physics, we use it here as well.
      *  Massless objects (e.g. invisible light, magnetic, etc, sources)
@@ -178,37 +180,6 @@ public class ObjectStateDynamics implements ObjectState {
 
     public double getMomentInertia() {
         return aMomI;
-    }
-
-    /** ObjectState interface */
-    public String getName() {
-        return SimulatorComponentDynamics.NAME;
-    }
-
-    public Object clone() {
-        ObjectStateDynamics newDyn = new ObjectStateDynamics();
-        newDyn.copyFrom(this);
-
-        return newDyn;
-    }
-
-    protected void copyFrom(ObjectState os) {
-        ObjectStateDynamics dyn = (ObjectStateDynamics) os;
-
-        this.aVel = (Vector2D) dyn.getVelocity().clone();
-        this.aAngVel = dyn.getAngVelocity();
-
-        this.setMass(dyn.getMass());
-        this.setMomentInertia(dyn.getMomentInertia());
-        this.setMinSpeed(dyn.getMinSpeed());
-        this.setMaxSpeed(dyn.getMaxSpeed());
-
-    // Should we copy the forces over? by definition we shouldn't carry
-    //  them from state to state, but...
-    }
-
-    public void draw(Graphics g, SimulatorObject o) {
-        // @@@ Draw forces here? Collisions!
     }
 
     public double getCoefficientRestitution() {
@@ -327,5 +298,45 @@ public class ObjectStateDynamics implements ObjectState {
     }
 
 
+
+    /** ObjectState interface */
+    public String getName() {
+        return SimulatorComponentDynamics.NAME;
+    }
+
+    public Object clone() {
+        ObjectStateDynamics newDyn = new ObjectStateDynamics();
+        newDyn.copyFrom(this);
+
+        return newDyn;
+    }
+
+    protected void copyFrom(ObjectState os) {
+        ObjectStateDynamics dyn = (ObjectStateDynamics) os;
+
+        this.aVel = (Vector2D) dyn.getVelocity().clone();
+        this.aAngVel = dyn.getAngVelocity();
+
+        this.setMass(dyn.getMass());
+        this.setMomentInertia(dyn.getMomentInertia());
+        this.setMinSpeed(dyn.getMinSpeed());
+        this.setMaxSpeed(dyn.getMaxSpeed());
+
+    // Should we copy the forces over? by definition we shouldn't carry
+    //  them from state to state, but...
+    }
+
+    public void draw(Graphics g, SimulatorObject o) {
+        // @@@ Draw forces here? Collisions!
+    }
+
+    /** Provides a mean of clearing whatever data this ObjectState contains
+      *  and resetting it to the default values. Meant to be used when 
+      *  re-initializing a state.
+      */
+    public void clear()
+    {
+      clearAll();
+    }
 }
 

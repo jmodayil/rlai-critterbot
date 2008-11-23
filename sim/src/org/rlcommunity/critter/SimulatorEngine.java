@@ -99,7 +99,10 @@ public class SimulatorEngine
     int ms = debugGetElapsedTime();
 
     if (ms <= 0) return;
-    
+  
+    // Re-initialize the next state to be filled with data
+    aNextState.clear();
+
     /** Begin new (real) simulator code - everything above has to be moved
       *  (more or less) */
     // Apply each component in turn (order matters!)

@@ -54,4 +54,12 @@ public class ObjectStateLightSource implements ObjectState
   public void draw(Graphics g, SimulatorObject parent)
   {
   }
+
+  /** Provides a mean of clearing whatever data this ObjectState contains
+    *  and resetting it to the default values. Meant to be used when 
+    *  re-initializing a state.
+    */
+  public void clear()
+  {
+  }
 }
