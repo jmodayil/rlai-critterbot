@@ -43,8 +43,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
         {
             if (o.corresponds(sensor) || o.corresponds(source)) continue;
             Polygon shape = o.getShape();
-            
-            polys.add(shape);
+           
+            if (shape != null)
+              polys.add(shape);
         }
         if (Scene.isVisible(sensorPosition, srcPosition, polys))
         {

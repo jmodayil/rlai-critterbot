@@ -100,10 +100,6 @@ public class SimulatorEngine
 
     if (ms <= 0) return;
     
-    // Provide some silly physics to convince other people to work on the
-    //  simulator
-    debugSillyPhysics();
-
     /** Begin new (real) simulator code - everything above has to be moved
       *  (more or less) */
     // Apply each component in turn (order matters!)
@@ -208,33 +204,33 @@ public class SimulatorEngine
    
     // Create an external light sensor
     SimulatorObject sensor = new SimulatorObject("LightSensor1", 5);
-    shape = new Polygon();
+    /*shape = new Polygon();
 
-    shape.addPoint(0.0, 0.0);
-    shape.addPoint(3.0, 3.0);
-    shape.addPoint(6.0, 0.0);
+    shape.addPoint(0.0, -1.0);
+    shape.addPoint(20.0, 0.0);
+    shape.addPoint(0.0, 1.0);
     shape.doneAddPoints();
 
-    sensor.setShape(shape);
-    sensor.setPosition(new Vector2D(30,0));
+    sensor.setShape(shape); */
+    // These three light sensors have no shape!
+    sensor.setPosition(new Vector2D(20.001,0));
     sensor.addState(new ObjectStateLightSensor());
 
     sa.addChild(sensor);
    
     // Create two more light sensors
     sensor = sensor.makeCopy("LightSensor2", 6);
-    sensor.setPosition(new Vector2D(0,-30));
+    sensor.setPosition(new Vector2D(0,-20.001));
     sa.addChild(sensor);
 
     sensor = sensor.makeCopy("LightSensor3", 7);
-    sensor.setPosition(new Vector2D(0,30));
+    sensor.setPosition(new Vector2D(0,20.001));
     sa.addChild(sensor);
 
     sa.setPosition(new Vector2D(250,250));
 
     // Add an hexagonal obstacle
     SimulatorObject hex = new SimulatorObject("Hex", 3);
-    
 
     // Create the hex polygon
     Polygon hexShape = new Polygon();
@@ -310,56 +306,6 @@ public class SimulatorEngine
       last_time = time;
       return ms;
     }
-  }
-
-  public void debugSillyPhysics()
-  {
-    SimulatorAgent agent = aState.getAgents().getFirst();
-
-    ObjectStateDynamics phys =
-      (ObjectStateDynamics)agent.getState(SimulatorComponentDynamics.NAME);
-
-    LinkedList<SimulatorObject> stuff = new LinkedList<SimulatorObject>();
-
-    /*
-    SimulatorObject hex = aState.getObject(3);
-    
-    stuff.add (agent);
-    stuff.add (hex);
-
-    // Ha ha ha.
-    for (SimulatorObject o : stuff)
-    {
-      if (o.getState(SimulatorComponentDynamics.NAME) == null) continue;
-
-      ObjectStateDynamics oPhys = (ObjectStateDynamics)
-        o.getState(SimulatorComponentDynamics.NAME);
-      
-      if (o.aPos.y >= 500)
-        oPhys.addForce(new Force(0, -1000));
-      else if (o.aPos.y < 0)
-        oPhys.addForce(new Force(0, 1000));
-      if (o.aPos.x >= 500)
-        oPhys.addForce(new Force(-1000, 0));
-      else if (o.aPos.x < 0)
-        oPhys.addForce(new Force(1000, 0));
-    }
-    // Anna: simple collision detection, take this out once your stuff is
-    //  in place (or in fact when you start working on it)
-    Vector2D iPoint = hex.getShape().intersects(agent.getShape());
-    if (iPoint != null)
-    {
-      System.err.println("Intersection at ("+iPoint.x+","+iPoint.y+")");
-      Vector2D fv = hex.getPosition().minus(iPoint);
-      fv.x = fv.x * 5;
-      fv.y = fv.y * 5; 
-
-      ObjectStateDynamics hexPhys =
-        (ObjectStateDynamics)hex.getState(SimulatorComponentDynamics.NAME);
-      hexPhys.addForce(new Force(fv,agent.getPosition()));
-    }
-    */
-
   }
 }
 
