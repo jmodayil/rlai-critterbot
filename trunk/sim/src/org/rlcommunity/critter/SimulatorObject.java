@@ -223,16 +223,15 @@ public class SimulatorObject
   }
 
     /**
-     * Returns true of this objects' shape intersects the parameter objects'
+     * Returns true of this object's shape intersects the parameter object's.
+     * This method is obsolete and should be removed at the earliest possible
+     *  time.
      *
      * @returns True if the passed object intersects this object
-     * @obsolete
+     * @obsolete - This method does not take the object hierarchy into account
      **/
     public Vector2D intersects(SimulatorObject compObj) 
     {
-	//@@todo find out why this was throwing a null
-	// pointer exception before I initialzed aShape
-	// in the constructor
       if (aShape == null || compObj.getShape() == null) 
         return null;
       else
@@ -341,7 +340,8 @@ public class SimulatorObject
    */
   public void draw(Graphics g)
   {
-	  aShape.draw(g);
+	  if (aShape != null)
+      aShape.draw(g);
 
     // Draw the children in postorder traversal
     for (SimulatorObject c : aChildren)
@@ -590,7 +590,10 @@ public class SimulatorObject
 
     // We must copy the shape around, because the polygons get modified
     //  by translations and rotations
-    this.aShape = (Polygon)org.aShape.clone();
+    if (org.aShape != null)
+      this.aShape = (Polygon)org.aShape.clone();
+    else
+      this.aShape = null;
 
     /* @@@ Copy the other attributes of the object, the actuator and sensor 
      * list */
