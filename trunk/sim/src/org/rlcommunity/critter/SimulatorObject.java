@@ -599,9 +599,25 @@ public class SimulatorObject
      * list */
     Set<Entry<String, ObjectState>> theEntrySet=org.aStates.entrySet();
     
-      for (Entry<String, ObjectState> thisEntry : theEntrySet) {
-          this.addState((ObjectState)thisEntry.getValue().clone());
-      }
-   }
+    for (Entry<String, ObjectState> thisEntry : theEntrySet) {
+      this.addState((ObjectState)thisEntry.getValue().clone());
+    }
+  }
 
+  /** This method clears this object's attributes, as well as all of its
+    *  children's. It is meant to be used to reset a state to its default
+    *  values.
+    */
+  public void clear()
+  {
+    // Postorder traversal, for no particular reason
+    for (SimulatorObject c : aChildren)
+      c.clear();
+
+    // For each of our ObjectState, clear its data
+    for (Entry<String, ObjectState> thisEntry : aStates.entrySet())
+    {
+      thisEntry.getValue().clear();
+    }
+  }
 }

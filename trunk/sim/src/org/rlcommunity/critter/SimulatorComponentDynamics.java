@@ -39,15 +39,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
         // Walk through all the objects in the current state that can be 
         //  affected by physics
         for (SimulatorObject obj : pCurrent.getObjects()) {
-            // @@@ Added by MGB - remove ASAP ---
-            SimulatorObject futureObj = pNext.getObject(obj);
-
-            if (futureObj.getState("bumpsensor") != null) {
-                ObjectStateBumpSensor bs = (ObjectStateBumpSensor) futureObj.getState("bumpsensor");
-                bs.clearForces();
-            }
-            // --- end MGB code
-
             // If no physics data, ignore this object
             ObjectState os = obj.getState(SimulatorComponentDynamics.NAME);
             if (os == null) {

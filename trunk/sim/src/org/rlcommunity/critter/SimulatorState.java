@@ -128,5 +128,20 @@ public class SimulatorState
     SimulatorObject getObject(SimulatorObject obj) {
        return this.getObject(obj.getId());
     }
+  
+  /** This method clears this SimulatorState so that it can be filled with
+    *  data from a new time step. It does not remove objects from the list,
+    *  but will remove any transient attributes and/or reset them to their
+    *  default values.
+    *
+    */
+  public void clear()
+  {
+    // Simply clear the attributes for all objects
+    for (SimulatorObject o : aObjList)
+    {
+      o.clear();
+    }
+  }
 }
 
