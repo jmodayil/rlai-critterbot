@@ -581,6 +581,7 @@ public class SimulatorObject
       this.setPosition(compObj.getPosition());
 	    this.setDirection(compObj.getDirection());
       if (compObj.getShape() != null)
+        // @@@ This fails - need to update the shape of object in our tree
         this.aShape = (Polygon)(compObj.getShape().clone());
     }
 
