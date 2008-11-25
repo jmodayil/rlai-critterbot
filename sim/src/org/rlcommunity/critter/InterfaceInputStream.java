@@ -40,7 +40,7 @@ public class InterfaceInputStream
   {
     if (aBuffer.capacity() < size)
     {
-      aBuffer.allocate(size);
+      aBuffer = ByteBuffer.allocate(size);
       aBuffer.order(INPUT_ENDIAN);
       // Copy over old buffer?
       System.err.println ("Setting buffer size to "+size);
