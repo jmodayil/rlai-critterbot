@@ -10,6 +10,9 @@ package org.rlcommunity.critter;
 public class Vector2D {
     
     public static final Vector2D ZERO = new Vector2D(0,0);
+    /** The tolerance under which we consider a coordinate to be 0; 
+      * most likely not the proper place for this */
+    public static final double ZERO_TOL = 10E-16;
 
     public double x;
     public double y;
@@ -135,6 +138,20 @@ public class Vector2D {
             x /= l;
             y /= l;
         }
+    }
+
+    /** Quantizes the vector so that its coordinates are set to 0 if they 
+      *  are below the ZERO_TOL threshold.
+      *
+      * @return This vector (not a copy)
+      */
+    public Vector2D zeroize() {
+      if (Math.abs(this.x) < ZERO_TOL)
+        this.x = 0;
+      if (Math.abs(this.y) < ZERO_TOL)
+        this.y = 0;
+
+      return this;
     }
 
     public boolean equals(Object o) {

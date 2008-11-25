@@ -157,7 +157,10 @@ public class Polygon
       
       // Add the points in reverse order
       while (it.hasPrevious())
-        points.add(it.previous());
+      {
+        Vector2D pt = it.previous();
+        addPoint(pt.x, pt.y);
+      }
     }
   }
 
@@ -588,6 +591,7 @@ public class Polygon
     //  that we will not be reusing the original Polygon's points
     for (Vector2D pt : org.points)
       this.addPoint(pt.x, pt.y);
+    this.doneAddPoints();
   }
 
   /** Draw the polygon on the provided canvas
@@ -671,6 +675,20 @@ public class Polygon
 		g.setColor(tempC);
   }
 
+
+  public String toStringList()
+  {
+    String s = "";
+
+    for (Vector2D p : points)
+      s += p.x + " " + p.y + "\n";  
+
+    Vector2D first = points.getFirst();
+
+    s += first.x + " " + first.y;
+
+    return s;
+  }
 
   /** A simple test routine
     * If you think my contains() algorithm is broken, use this by 
