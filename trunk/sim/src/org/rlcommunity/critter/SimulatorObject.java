@@ -196,7 +196,6 @@ public class SimulatorObject
       Vector2D p1 = aShape.getPoint(i1.alpha);
       Vector2D p2 = aShape.getPoint(i2.alpha);
 
-      System.out.println("BANG AT \n\t"+p1+" \n\t"+p2);
       // Keep the polygon coordinates of the collision point
       //  This is an interpolation between the two points. Could be
       //   very wrong, e.g. pacman-style shapes

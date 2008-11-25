@@ -13,6 +13,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import java.awt.Graphics;
+import java.awt.Color;
 
 public class ObjectStateDynamics implements ObjectState {
 
@@ -326,8 +327,22 @@ public class ObjectStateDynamics implements ObjectState {
     //  them from state to state, but...
     }
 
-    public void draw(Graphics g, SimulatorObject o) {
+    public void draw(Graphics g, SimulatorObject parent) {
         // @@@ Draw forces here? Collisions!
+      Vector2D objPos = parent.getPosition();
+
+      if (aVel.x != 0)
+      {
+	      Color tempC = g.getColor();
+	      g.setColor(Color.green);
+        Vector2D endV = (Vector2D) aVel.clone();
+        endV.normalize();
+        endV.timesEquals(50);
+        endV.plusEquals(objPos);
+
+	      g.drawLine((int)objPos.x, (int)objPos.y, (int)endV.x, (int)endV.y); 
+	      g.setColor(tempC);
+      }
     }
 
     /** Provides a mean of clearing whatever data this ObjectState contains
