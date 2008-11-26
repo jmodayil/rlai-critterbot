@@ -209,5 +209,18 @@ public class Vector2D {
         return v;
     }
 
+    public Vector2D divide(double d) {
+        Vector2D v = (Vector2D)this.clone();
+        v.x = v.x/d;
+        v.y = v.y/d;
+        return v;
+    }
+
+    public void divideEquals(double d) {
+        this.x = this.x/d;
+        this.y = this.y/d;
+    }
+
+
 
 }

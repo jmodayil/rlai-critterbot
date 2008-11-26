@@ -45,18 +45,23 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
+            //if(obj.getId()==2)
+            //    System.out.println(" Current velocity "+dynData.getVelocity());
 
             // Find the corresponding object in the next state
             SimulatorObject newObj = pNext.getObject(obj);
             ObjectStateDynamics newDynData =
                     (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
+            assert(newDynData.getVelocity().length()==0);
 
             // clean up any residue from before, the next state is solely 
             // determined by the current state and the forces acting on it
             // need some way of making sure this is function doesn't exit
             // without setting the position correctly
+            // this should no longer be necessary
             newDynData.clearAll();
-            Force friction = new Force(dynData.calculateFriction(delta));
+
+            Force friction = new Force(dynData.calculateFriction(delta/1000));
             dynData.addForce(friction);
 
             Force thrust = dynData.getForceSum();
@@ -78,9 +83,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // @todo pull the integration method into a separate function
 
             newDynData.setAngVelocity(wi + torque / dynData.getMomentInertia());
-            //newDynData.applyLinearForce(thrust);
-            newDynData.setVelocity(
-                    new Vector2D(vi.x + thrust.vec.x / mass, vi.y + thrust.vec.y / mass));
+            // don't know about this
+            newDynData.setVelocity((Vector2D)dynData.getVelocity().clone());
+            newDynData.applyLinearForce(thrust, delta/1000);
 
             double newDirect = obj.aDir + wi * delta / 1000;
             while (newDirect >= Math.PI) {
@@ -92,6 +97,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newObj.setDirection(newDirect);
             newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000,
                     obj.aPos.y + vi.y * delta / 1000));
+            //if(obj.getId()==2)
+            //    System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
+
         }
         // at this point, all the dyn objects in pNext should have their position
         // direction, ang velocity and  velocity set
