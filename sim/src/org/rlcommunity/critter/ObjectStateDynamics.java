@@ -217,7 +217,7 @@ public class ObjectStateDynamics implements ObjectState {
         // calculate the stopping force
         // this is approximate, but oh well
         // in fact, this should be /dt, but it is causing problems
-        Vector2D fs = aVel.times(-1*getMass()*dt);
+        Vector2D fs = aVel.times(-1*getMass()/dt);
         if(f.length()>=fs.length())
             return fs;
         else
