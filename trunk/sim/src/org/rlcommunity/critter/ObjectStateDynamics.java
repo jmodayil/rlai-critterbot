@@ -213,14 +213,15 @@ public class ObjectStateDynamics implements ObjectState {
         // find the direction of the force of friction
         f.normalize();
         // calculate the force of friction
-        f.timesEquals(this.getCoefficientFriction()*this.getMass()*GRAVITY);
+        f.timesEquals(-1*this.getCoefficientFriction()*this.getMass()*GRAVITY);
         // calculate the stopping force
         // this is approximate, but oh well
-        Vector2D fs = aVel.times(getMass()*dt);
+        // in fact, this should be /dt, but it is causing problems
+        Vector2D fs = aVel.times(-1*getMass()*dt);
         if(f.length()>=fs.length())
-            return fs.reverse();
+            return fs;
         else
-            return f.reverse();
+            return f;
     }
 
     void applyLinearForce(Force thrust, double timestep) {
@@ -228,11 +229,16 @@ public class ObjectStateDynamics implements ObjectState {
         // @TODO timestep is not being used so the force is much greater
         //   than it should be. But right now things stop moving if we
         //   properly use the timestep. So we're not going to
-        //Vector2D deltaV = thrust.vec.divide(this.getMass());
-        //aVel.plusEquals(deltaV);
-        aVel.x = aVel.x+thrust.vec.x/this.getMass();
-        aVel.y = aVel.y+thrust.vec.y/this.getMass();
-    }
+        assert(timestep>0);
+        timestep = 1;
+        //System.out.println("vi "+aVel);
+        //System.out.println("F/m*t "+thrust.vec+"/"+this.getMass()+" * "+timestep);
+        //Vector2D deltaV = thrust.vec.times(timestep*this.getMass());
+        aVel.plusEquals(thrust.vec.divide(this.getMass()).times(timestep));
+        //System.out.println("vf "+aVel);
+        //aVel.x = aVel.x+thrust.vec.x/this.getMass();
+        //aVel.y = aVel.y+thrust.vec.y/this.getMass();
+     }
     
     double getCoefficientRestitution(ObjectStateDynamics o2) {
         double e = getCoefficientRestitution() + o2.getCoefficientRestitution();
