@@ -13,6 +13,7 @@ package org.rlcommunity.critter;
 public class SimulatorComponentDynamics implements SimulatorComponent {
 
     public static final String NAME = "dynamics";
+    public static final boolean collisionEnergySink = true;
 
     public SimulatorComponentDynamics() {
     }
@@ -52,7 +53,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             SimulatorObject newObj = pNext.getObject(obj);
             ObjectStateDynamics newDynData =
                     (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
-            assert(newDynData.getVelocity().length()==0);
+            assert (newDynData.getVelocity().length() == 0);
 
             // clean up any residue from before, the next state is solely 
             // determined by the current state and the forces acting on it
@@ -61,7 +62,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // this should no longer be necessary
             newDynData.clearAll();
 
-            Force friction = new Force(dynData.calculateFriction(delta/1000));
+            Force friction = new Force(dynData.calculateFriction(delta / 1000));
             dynData.addForce(friction);
 
             Force thrust = dynData.getForceSum();
@@ -84,8 +85,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
             newDynData.setAngVelocity(wi + torque / dynData.getMomentInertia());
             // don't know about this
-            newDynData.setVelocity((Vector2D)dynData.getVelocity().clone());
-            newDynData.applyLinearForce(thrust, delta/1000);
+            newDynData.setVelocity((Vector2D) dynData.getVelocity().clone());
+            newDynData.applyLinearForce(thrust, delta / 1000);
 
             double newDirect = obj.aDir + wi * delta / 1000;
             while (newDirect >= Math.PI) {
@@ -97,8 +98,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newObj.setDirection(newDirect);
             newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000,
                     obj.aPos.y + vi.y * delta / 1000));
-            //if(obj.getId()==2)
-            //    System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
+        //if(obj.getId()==2)
+        //    System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
 
         }
         // at this point, all the dyn objects in pNext should have their position
@@ -154,14 +155,14 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             positionReset = true;
                             SimulatorObject objP = pCurrent.getObject(obj);
                             SimulatorObject compObjP = pCurrent.getObject(compObj);
-                            
+
 
                             //@TODO!!!
                             System.out.println("Collision at " + pt.point +
                                     "between " + obj + " and " + compObj + "!");
 
                             Collision checkP = objP.collidesWith(compObjP);
-                            if( checkP != null ) {
+                            if (checkP != null) {
                                 System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
                             }
                             obj.setGeometry(objP);
@@ -181,42 +182,40 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             ObjectStateDynamics o1p = (ObjectStateDynamics) objP.getState(SimulatorComponentDynamics.NAME);
                             ObjectStateDynamics o2p = (ObjectStateDynamics) compObjP.getState(SimulatorComponentDynamics.NAME);
 
-                            /**
-                             * TRYING OUT COLLISION FORCES
-                             *
-                            // calculate forces
+                            if (collisionEnergySink) {
+                                // Collisions are energy sinks
+                                o1.setVelocity(new Vector2D(0, 0));
+                                o1.setAngVelocity(0);
+                                o2.setVelocity(new Vector2D(0, 0));
+                                o2.setAngVelocity(0);
 
-                            double ma = o1.getMass();
-                            double mb = o2.getMass();
-                            double Ia = o1.getMomentInertia();
-                            double Ib = o2.getMomentInertia();
-                            double e = o1.getCoefficientRestitution(o2);
+                            } else {
+                                // calculate forces
 
-                            // this will have to be extended when I add angular motion
-                            Vector2D vab = o1p.getVelocity().minus(o2p.getVelocity());
+                                double ma = o1.getMass();
+                                double mb = o2.getMass();
+                                double Ia = o1.getMomentInertia();
+                                double Ib = o2.getMomentInertia();
+                                double e = o1.getCoefficientRestitution(o2);
 
-                            // might want to check here for infinite mass?
-                            // or just let it fall out of the math
-                            double impulse = (-(1 + e) * vab.dot(n)) /
-                                    n.dot(n) * (1 / ma + 1 / mb);
-                            // this means post-thrust velocities aren't used. hmm.
-                            Vector2D vap = o1.getVelocity().plus(n.times(impulse / ma));
-                            Vector2D vbp = o2.getVelocity().minus(n.times(impulse / mb));
+                                // this will have to be extended when I add angular motion
+                                Vector2D vab = o1p.getVelocity().minus(o2p.getVelocity());
 
-                            checkSpeed(vap,o1);
-                            checkSpeed(vbp,o2);
-                            o1.setVelocity(vap);
-                            o2.setVelocity(vbp);
-                              */
-                            /**
-                             * COLLISIONS AS ENERGY SINKS
-                             *   */
-                            // Collisions are energy sinks
-                            o1.setVelocity(new Vector2D(0,0));
-                            o1.setAngVelocity(0);
-                            o2.setVelocity(new Vector2D(0,0));
-                            o2.setAngVelocity(0);
-                           
+                                // might want to check here for infinite mass?
+                                // or just let it fall out of the math
+                                double impulse = (-(1 + e) * vab.dot(n)) /
+                                        n.dot(n) * (1 / ma + 1 / mb);
+                                // this means post-thrust velocities aren't used. hmm.
+                                Vector2D vap = o1.getVelocity().plus(n.times(impulse / ma));
+                                Vector2D vbp = o2.getVelocity().minus(n.times(impulse / mb));
+
+                                checkSpeed(vap, o1);
+                                checkSpeed(vbp, o2);
+                                o1.setVelocity(vap);
+                                o2.setVelocity(vbp);
+                            // angular velocity? Needs to be implemented
+                            }
+
                             System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
                         }
                     }
@@ -233,11 +232,11 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      */
     public void checkSpeed(Vector2D v, ObjectStateDynamics oDyn) {
         double speed = v.length();
-        if(speed > oDyn.getMaxSpeed()) {
+        if (speed > oDyn.getMaxSpeed()) {
             v.normalize();
             v.timesEquals(oDyn.getMaxSpeed());
         }
-        if(speed < oDyn.getMinSpeed()) {
+        if (speed < oDyn.getMinSpeed()) {
             v.normalize();
             v.timesEquals(oDyn.getMinSpeed());
         }
