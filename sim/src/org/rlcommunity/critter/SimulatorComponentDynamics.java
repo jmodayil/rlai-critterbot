@@ -46,8 +46,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
-            //if(obj.getId()==2)
-            //    System.out.println(" Current velocity "+dynData.getVelocity());
+            if(obj.getId()==2)
+                System.out.println("Current velocity "+dynData.getVelocity());
 
             // Find the corresponding object in the next state
             SimulatorObject newObj = pNext.getObject(obj);
@@ -63,17 +63,23 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newDynData.clearAll();
 
             Force friction = new Force(dynData.calculateFriction(delta / 1000));
-            dynData.addForce(friction);
 
+            if(obj.getId()==2) {
+                System.out.println(" Thrust "+dynData.getForceSum().vec);
+                System.out.println(" Friction "+friction.vec);
+            }
             Force thrust = dynData.getForceSum();
+            //thrust.vec.plusEquals(friction.vec);
             double torque = dynData.getTorque();
             double wi = dynData.getAngVelocity();
             Vector2D vi = dynData.getVelocity();
 
 
             // A very sad attempt at friction
-            //thrust.vec.x -= vi.x * .1;
-            //thrust.vec.y -= vi.y * .1;
+            // we're not using real friction because of a bug from interaction
+            // between the thrust and friction
+            thrust.vec.x -= vi.x * .1;
+            thrust.vec.y -= vi.y * .1;
             torque -= wi * .5;
 
             double mass = dynData.getMass();
@@ -98,8 +104,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newObj.setDirection(newDirect);
             newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000,
                     obj.aPos.y + vi.y * delta / 1000));
-        //if(obj.getId()==2)
-        //    System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
+            if(obj.getId()==2)
+                System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
 
         }
         // at this point, all the dyn objects in pNext should have their position
@@ -232,6 +238,10 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      */
     public void checkSpeed(Vector2D v, ObjectStateDynamics oDyn) {
         double speed = v.length();
+        if (speed < ObjectStateDynamics.TOL) {
+            speed = 0;
+            v.timesEquals(0);
+        }
         if (speed > oDyn.getMaxSpeed()) {
             v.normalize();
             v.timesEquals(oDyn.getMaxSpeed());
