@@ -217,14 +217,21 @@ public class ObjectStateDynamics implements ObjectState {
         // calculate the stopping force
         // this is approximate, but oh well
         Vector2D fs = aVel.times(getMass()*dt);
-        if(f.length()>fs.length())
+        if(f.length()>=fs.length())
             return fs.reverse();
         else
             return f.reverse();
     }
 
-    void applyLinearForce(Force thrust) {
-        throw new UnsupportedOperationException("Not yet implemented");
+    void applyLinearForce(Force thrust, double timestep) {
+        // @todo don't call member variables directly
+        // @TODO timestep is not being used so the force is much greater
+        //   than it should be. But right now things stop moving if we
+        //   properly use the timestep. So we're not going to
+        //Vector2D deltaV = thrust.vec.divide(this.getMass());
+        //aVel.plusEquals(deltaV);
+        aVel.x = aVel.x+thrust.vec.x/this.getMass();
+        aVel.y = aVel.y+thrust.vec.y/this.getMass();
     }
     
     double getCoefficientRestitution(ObjectStateDynamics o2) {
@@ -352,6 +359,10 @@ public class ObjectStateDynamics implements ObjectState {
     public void clear()
     {
       clearAll();
+    }
+
+    void setVelocity(double d, double d0) {
+        aVel = new Vector2D(d, d0);
     }
 }
 

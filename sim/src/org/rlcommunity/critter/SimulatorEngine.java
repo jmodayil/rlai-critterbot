@@ -198,7 +198,10 @@ public class SimulatorEngine
     sa.setShape(agentShape);
 
     // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
-    sa.addState(new ObjectStateDynamics(4,2));
+    ObjectStateDynamics osd = new ObjectStateDynamics(4,2);
+    osd.setCoefficientFrictionStatic(0.1);
+    sa.addState(osd);
+
     // Give the agent an omnidirectional drive
     sa.addState(new ObjectStateOmnidrive());
     sa.addState(new ObjectStateBumpSensor());
