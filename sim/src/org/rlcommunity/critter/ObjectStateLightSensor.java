@@ -15,10 +15,16 @@ public class ObjectStateLightSensor implements ObjectState
   public static final String NAME = SimulatorComponentLight.NAME + "sensor";
 
   protected double aData;
+  protected double aSensorWidth;
+  protected int aNumPixels;
+  protected double aSensorDepth; 
 
   public ObjectStateLightSensor()
   {
     aData = 0;
+    aSensorWidth = 0;
+    aNumPixels = 0;
+    aSensorDepth = 0;
   }
 
   /** ObjectState interface */
@@ -39,6 +45,10 @@ public class ObjectStateLightSensor implements ObjectState
     ObjectStateLightSensor sensor = (ObjectStateLightSensor)os;
   
     this.aData = sensor.aData;
+    this.aSensorWidth = sensor.aSensorWidth;
+    this.aNumPixels = sensor.aNumPixels;
+    this.aSensorDepth = sensor.aSensorDepth;
+    
   }
   
   protected void setLightSensorValue (double intensity)
@@ -51,8 +61,36 @@ public class ObjectStateLightSensor implements ObjectState
    return aData;   
       
   }
-
-
+  protected void setSensorWidth (double width)
+  {
+      aSensorWidth = width;
+  }
+  
+  protected double getSensorWidth ()
+  {
+   return aSensorWidth;   
+      
+  }
+    protected void setNumPixels (int pixels)
+  {
+      aNumPixels = pixels;
+  }
+  
+  protected double getNumPixels ()
+  {
+   return aNumPixels;   
+      
+  }
+  protected void setSensorDepth (double depth)
+  {
+      aSensorDepth = depth;
+  }
+  
+  protected double getSensorDepth ()
+  {
+   return aSensorDepth;   
+      
+  }
   /** (Potentially) draw something about the state; may be null. This
     *  most likely should be moved out of here when we have time.
     *
@@ -70,6 +108,9 @@ public class ObjectStateLightSensor implements ObjectState
   public void clear()
   {
     aData = 0;
+    aSensorWidth = 0;
+    aNumPixels = 0;
+    aSensorDepth = 0;
   }
 }
 
