@@ -11,8 +11,10 @@ package org.rlcommunity.critter;
   */
 
 import java.awt.geom.Line2D;
-import java.util.Set;
 
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 public class Scene
 {
@@ -83,5 +85,28 @@ public class Scene
     //  finds intersections s.t. iAlpha > 0 so we know p2 is visible if 
     //  the first intersection occurs after
     return (p2Alpha < iAlpha);
+  }
+
+  /** Creates the set of all the polygons in the given state
+    *
+    * @param pState The state of interest
+    * @return A set of all the Polygons present in the given state
+    */
+  public Set<Polygon> createFullSet(SimulatorState pState)
+  {
+    HashSet<Polygon> set = new HashSet<Polygon>();
+
+    // Get all the objects in the world
+    List<SimulatorObject> objects = pState.getObjects();
+
+    for (SimulatorObject o : objects)
+    {
+      // If this object has a shape, add it
+      Polygon poly = o.getShape();
+      if (poly != null)
+        set.add(poly);
+    }
+
+    return set;
   }
 }
