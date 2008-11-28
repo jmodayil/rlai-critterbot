@@ -81,38 +81,6 @@ public class ObjectStateOmnidrive implements ObjectState
 
   public double getPIDCoefficient() { return aPIDCoefficient; }
 
-  /** Copies over the relevant data from the given drop. Should probably
-    *  be moved somewhere else, e.g. into a separate object which transforms
-    *  drops into states.
-    *
-    *  IMPORTANT: If this gets removed, clearTime() should be called after
-    *   setting the drive values.
-    *
-    * @param pDrop The drop containing the data of interest
-    */
-  public void setFromDrop(CritterControlDrop pDrop)
-  {
-    // Clear the number of steps since the last command
-    clearTime();
-
-    // Based on the motor mode, set velocities appropriately
-    switch (pDrop.motor_mode)
-    {
-      case XYTHETA_SPACE:
-        // Units for the drop's x,y velocity are in cm/s, but for now 
-        //  I'm putting them in m/s - don't forget to change it!
-        aVel = new Vector2D(pDrop.x_vel, pDrop.y_vel);
-        // Units for the drop's angular velocity are in 1/(18PI) of a circle 
-        //  per second, which is 1/9th of a radian per second
-        aAngVel = pDrop.theta_vel/9.0;
-        break;
-      case WHEEL_SPACE:
-      default:
-        System.err.println ("Unimplemented motor mode: "+pDrop.motor_mode);
-        break;
-    }
-  }
-
 
   /** ObjectState interface */
   public String getName()

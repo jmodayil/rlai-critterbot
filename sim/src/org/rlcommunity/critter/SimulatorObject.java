@@ -455,8 +455,8 @@ public class SimulatorObject
     */
   public void setLocalPosition(Vector2D pPos)
   {
-    // Simple!
-    // @@@ fix - update polygon
+    // In this case we update this object polygon's and its children
+    updateShape(pPos.minus(aPos), 0, Vector2D.ZERO); 
     aPos = pPos;
   }
 
@@ -476,6 +476,7 @@ public class SimulatorObject
     */
   public void setLocalDirection(double pDir)
   {
+    updateShape(Vector2D.ZERO, pDir - aDir, getPosition()); 
     aDir = pDir;
   }
 
@@ -582,6 +583,8 @@ public class SimulatorObject
 	    this.setDirection(compObj.getDirection());
       if (compObj.getShape() != null)
         // @@@ This fails - need to update the shape of object in our tree
+        //  In theory setting the position and direction already reset the
+        //  polygon to some machine epsilon precision 
         this.aShape = (Polygon)(compObj.getShape().clone());
     }
 

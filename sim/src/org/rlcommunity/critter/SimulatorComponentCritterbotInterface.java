@@ -19,10 +19,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
   protected DropInterface aDropInterface; 
 
-  /** A simple method of slowing down the speed at which drops are sent;
-    * needs to be fixed */
-  public int aStateThrottle;
-
   public SimulatorComponentCritterbotInterface(DropInterface pInterface)
   {
     aDropInterface = pInterface;
@@ -33,40 +29,85 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     if (aDropInterface != null)
     {
       List<SimulatorDrop> drops = aDropInterface.receiveDrops();
-      List<SimulatorObject> drivable = 
-        pNext.getObjects(SimulatorComponentOmnidrive.NAME);
+      List<SimulatorObject> critters = 
+        pCurrent.getObjects(this.NAME);
 
-      for (SimulatorDrop drop : drops)
+      for (SimulatorObject obj : critters)
       {
-        // @@@ icky
-        if (drop instanceof CritterControlDrop)
+        ObjectStateCritterbotInterface iface = (ObjectStateCritterbotInterface)
+          obj.getState(ObjectStateCritterbotInterface.NAME);
+        
+        SimulatorObject nextObj = pNext.getObject(obj);
+        ObjectStateCritterbotInterface nextIface = 
+          (ObjectStateCritterbotInterface) 
+          nextObj.getState(ObjectStateCritterbotInterface.NAME);
+    
+        for (SimulatorDrop drop : drops)
         {
-          CritterControlDrop command = (CritterControlDrop)drop;
-          for (SimulatorObject obj : drivable)
+          // @@@ icky
+          if (drop instanceof CritterControlDrop)
           {
-            ObjectStateOmnidrive driveData = (ObjectStateOmnidrive)
-              obj.getState(SimulatorComponentOmnidrive.NAME);
-
-            driveData.setFromDrop(command);
+            CritterControlDrop command = (CritterControlDrop)drop;
+            
+            // Set the NEXT object's Omnidrive data
+            setFromDrop(nextObj, command);
           }
         }
+        
+        // Send the system state, if necessary
+        while (iface.needsStateUpdate())
+          aDropInterface.sendDrop(makeStateDrop(obj));
+        
+        // Increment the interface timer
+        nextIface.setLastStateUpdate (iface.getLastStateUpdate() + delta);
+
       }
       
-      // Send the system state
-      // Technically we should do this with each object which... ?
-      SimulatorAgent agent = pCurrent.getAgents().getFirst();
-      
-      if (agent != null)
-      {
-        if (++aStateThrottle >= 20)
-        {
-          aDropInterface.sendDrop(makeStateDrop(agent));
-          aStateThrottle = 0;
-        }
-      }
     }
   }
         
+  /** Copies over the relevant data from the given drop. Should probably
+    *  be moved somewhere else, e.g. into a separate object which transforms
+    *  drops into states.
+    *
+    *  IMPORTANT: If this gets removed, clearTime() should be called after
+    *   setting the drive values.
+    *
+    * @param pDrop The drop containing the data of interest
+    */
+  public void setFromDrop(SimulatorObject pObj, CritterControlDrop pDrop)
+  {
+    // Assume, for now, that this Critterbot has a Omnidrive; do nothing
+    //  otherwise
+    if (pObj.getState(SimulatorComponentOmnidrive.NAME) == null)
+      return;
+
+    ObjectStateOmnidrive driveData = (ObjectStateOmnidrive)
+      pObj.getState(SimulatorComponentOmnidrive.NAME);
+    
+    // Clear the number of steps since the last command
+    driveData.clearTime();
+
+    // Based on the motor mode, set velocities appropriately
+    switch (pDrop.motor_mode)
+    {
+      case XYTHETA_SPACE:
+        // Units for the drop's x,y velocity are in cm/s, but for now 
+        //  I'm putting them in m/s - don't forget to change it!
+        // @units
+        driveData.setVelocity(new Vector2D(pDrop.x_vel, pDrop.y_vel));
+        // Units for the drop's angular velocity are in 1/(18PI) of a circle 
+        //  per second, which is 1/9th of a radian per second
+        driveData.setAngVelocity(pDrop.theta_vel/9.0);
+        break;
+      case WHEEL_SPACE:
+      default:
+        System.err.println ("Unimplemented motor mode: "+pDrop.motor_mode);
+        break;
+    }
+  }
+
+
   public CritterStateDrop makeStateDrop(SimulatorObject pObject)
   {
     CritterStateDrop stateDrop = new CritterStateDrop();
