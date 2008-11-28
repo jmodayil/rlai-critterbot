@@ -125,11 +125,21 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       stateDrop.accel.x=(int) V.x;
       stateDrop.accel.y=(int) V.y;
     }
-    if (pObject.getState(ObjectStateLightSensor.NAME) != null)
+
+    // Get all of this object's light sensors
+    List<SimulatorObject> sensors = 
+      pObject.getChildren(ObjectStateLightSensor.NAME);
+
+    // Fill in the light data array
+    int idx = 0;
+    for (SimulatorObject sen : sensors)
     {
       ObjectStateLightSensor sData = (ObjectStateLightSensor)
-        pObject.getState(ObjectStateLightSensor.NAME);
-      stateDrop.light[0] = (int)(sData.getLightSensorValue() * 100);
+        sen.getState(ObjectStateLightSensor.NAME);
+      stateDrop.light[idx] = (int)(sData.getLightSensorValue() * 100);
+      
+      // Don't add more light data than we have space
+      if (++idx == stateDrop.light.length) break;
     }
 
     return stateDrop;
