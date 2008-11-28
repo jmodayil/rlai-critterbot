@@ -46,7 +46,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
-            if(obj.getId()==2)
+            if(false && obj.getId()==2)
                 System.out.println("Current velocity "+dynData.getVelocity());
 
             // Find the corresponding object in the next state
@@ -62,9 +62,10 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // this should no longer be necessary
             newDynData.clearAll();
 
-            Force friction = new Force(dynData.calculateFriction(delta / 1000));
+            Force friction = 
+              new Force(dynData.calculateFriction(delta / 1000.0));
 
-            if(obj.getId()==2) {
+            if(false && obj.getId()==2) {
                 System.out.println(" Thrust "+dynData.getForceSum().vec);
                 System.out.println(" Friction "+friction.vec);
             }
@@ -92,9 +93,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newDynData.setAngVelocity(wi + torque / dynData.getMomentInertia());
             // don't know about this
             newDynData.setVelocity((Vector2D) dynData.getVelocity().clone());
-            newDynData.applyLinearForce(thrust, delta / 1000);
+            newDynData.applyLinearForce(thrust, delta / 1000.0);
 
-            double newDirect = obj.aDir + wi * delta / 1000;
+            double newDirect = obj.aDir + wi * delta / 1000.0;
             while (newDirect >= Math.PI) {
                 newDirect -= Math.PI * 2;
             }
@@ -102,9 +103,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 newDirect += Math.PI * 2;
             }
             newObj.setDirection(newDirect);
-            newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000,
-                    obj.aPos.y + vi.y * delta / 1000));
-            if(obj.getId()==2)
+            newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000.0,
+                    obj.aPos.y + vi.y * delta / 1000.0));
+            if(false && obj.getId()==2)
                 System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
 
         }

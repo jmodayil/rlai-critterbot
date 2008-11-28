@@ -164,77 +164,7 @@ public class SimulatorEngine
     w.addState(wallDyn);
     aState.addObject(w);
 
-    SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);
-
-    Polygon agentShape = new Polygon();
-    agentShape.addPoint (-0,20);
-    agentShape.addPoint (-7.5,18.5);
-    agentShape.addPoint (-14,14);
-    agentShape.addPoint (-18.5,7.5);
-    agentShape.addPoint (-20,0);
-    agentShape.addPoint (-18.5,-6.5);
-    agentShape.addPoint (-16.5,-16);
-    agentShape.addPoint (-13,-26);
-    agentShape.addPoint (-8,-35.5);
-    agentShape.addPoint (-1,-47);
-    agentShape.addPoint (0,-48);
-    agentShape.addPoint (-2,-40.5);
-    agentShape.addPoint (-4,-32.5);
-    agentShape.addPoint (-4.5,-20);
-    agentShape.addPoint (-3,-20);
-    agentShape.addPoint (3.5,-16);
-    agentShape.addPoint (9,-16);
-    agentShape.addPoint (15.5,-12.5);
-    agentShape.addPoint (19,-6);
-    agentShape.addPoint (20,0);
-    agentShape.addPoint (18.5,7.5);
-    agentShape.addPoint (14,14);
-    agentShape.addPoint (7.5,18.5);
-    System.out.println ("Agent");
-    agentShape.rotate (-Math.PI/2, new Vector2D(0,0));
-
-    agentShape.doneAddPoints();
-
-    sa.setShape(agentShape);
-
-    // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
-    ObjectStateDynamics osd = new ObjectStateDynamics(4,2);
-    osd.setCoefficientFrictionStatic(0.1);
-    sa.addState(osd);
-
-    // Give the agent an omnidirectional drive
-    sa.addState(new ObjectStateOmnidrive());
-    sa.addState(new ObjectStateBumpSensor());
-    
-    aState.addObject(sa);
-   
-    // Create an external light sensor
-    SimulatorObject sensor = new SimulatorObject("LightSensor1", 5);
-    /*shape = new Polygon();
-
-    shape.addPoint(0.0, -1.0);
-    shape.addPoint(20.0, 0.0);
-    shape.addPoint(0.0, 1.0);
-    shape.doneAddPoints();
-
-    sensor.setShape(shape); */
-    // These three light sensors have no shape!
-    sensor.setPosition(new Vector2D(20.001,0));
-    sensor.addState(new ObjectStateLightSensor());
-
-    sa.addChild(sensor);
-   
-    // Create two more light sensors
-    sensor = sensor.makeCopy("LightSensor2", 6);
-    sensor.setPosition(new Vector2D(0,-20.001));
-    sa.addChild(sensor);
-
-    sensor = sensor.makeCopy("LightSensor3", 7);
-    sensor.setPosition(new Vector2D(0,20.001));
-    sa.addChild(sensor);
-
-    sa.setPosition(new Vector2D(250,250));
-
+    debugCreateRobot();
     // Add an hexagonal obstacle
     SimulatorObject hex = new SimulatorObject("Hex", 3);
 
@@ -292,6 +222,83 @@ public class SimulatorEngine
 
     aState.addObject(lightSource);
 
+  }
+
+  public void debugCreateRobot()
+  {
+    SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);
+
+    Polygon agentShape = new Polygon();
+    agentShape.addPoint (-0,20);
+    agentShape.addPoint (-7.5,18.5);
+    agentShape.addPoint (-14,14);
+    agentShape.addPoint (-18.5,7.5);
+    agentShape.addPoint (-20,0);
+    agentShape.addPoint (-18.5,-6.5);
+    agentShape.addPoint (-16.5,-16);
+    agentShape.addPoint (-13,-26);
+    agentShape.addPoint (-8,-35.5);
+    agentShape.addPoint (-1,-47);
+    agentShape.addPoint (0,-48);
+    agentShape.addPoint (-2,-40.5);
+    agentShape.addPoint (-4,-32.5);
+    agentShape.addPoint (-4.5,-20);
+    agentShape.addPoint (-3,-20);
+    agentShape.addPoint (3.5,-16);
+    agentShape.addPoint (9,-16);
+    agentShape.addPoint (15.5,-12.5);
+    agentShape.addPoint (19,-6);
+    agentShape.addPoint (20,0);
+    agentShape.addPoint (18.5,7.5);
+    agentShape.addPoint (14,14);
+    agentShape.addPoint (7.5,18.5);
+    System.out.println ("Agent");
+    agentShape.rotate (-Math.PI/2, new Vector2D(0,0));
+
+    agentShape.doneAddPoints();
+
+    sa.setShape(agentShape);
+
+    // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
+    ObjectStateDynamics osd = new ObjectStateDynamics(4,2);
+    osd.setCoefficientFrictionStatic(0.1);
+    sa.addState(osd);
+
+    // This agent is a Critterbot! 
+    sa.addState(new ObjectStateCritterbotInterface());
+
+    // Give the agent an omnidirectional drive
+    sa.addState(new ObjectStateOmnidrive());
+    sa.addState(new ObjectStateBumpSensor());
+    
+    aState.addObject(sa);
+   
+    // Create an external light sensor
+    SimulatorObject sensor = new SimulatorObject("LightSensor1", 5);
+    /*shape = new Polygon();
+
+    shape.addPoint(0.0, -1.0);
+    shape.addPoint(20.0, 0.0);
+    shape.addPoint(0.0, 1.0);
+    shape.doneAddPoints();
+
+    sensor.setShape(shape); */
+    // These three light sensors have no shape!
+    sensor.setPosition(new Vector2D(20.001,0));
+    sensor.addState(new ObjectStateLightSensor());
+
+    sa.addChild(sensor);
+   
+    // Create two more light sensors
+    sensor = sensor.makeCopy("LightSensor2", 6);
+    sensor.setPosition(new Vector2D(0,-20.001));
+    sa.addChild(sensor);
+
+    sensor = sensor.makeCopy("LightSensor3", 7);
+    sensor.setPosition(new Vector2D(0,20.001));
+    sa.addChild(sensor);
+
+    sa.setPosition(new Vector2D(250,250));
   }
 
   public int debugGetElapsedTime()
