@@ -303,6 +303,23 @@ public class SimulatorObject
     return aParent;
   }
 
+  /**
+    * Returns the root of the object tree for this object, defined to be
+    *  the ancestor of this object which has no parent, or the object itself
+    *  if it has no parent.
+    *
+    * @return The root of the object tree to which this object belongs
+    */
+  public SimulatorObject getRoot()
+  {
+    SimulatorObject root = this;
+
+    for (SimulatorObject parent = root.getParent(); parent != null;
+      root = parent) ;
+
+    return root;
+  }
+
   /** Set the parent of this object (as per the object hierarchy)
     *  aParent should be null.
     *
