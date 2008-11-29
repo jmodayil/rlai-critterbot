@@ -92,7 +92,7 @@ public class Scene
     * @param pState The state of interest
     * @return A set of all the Polygons present in the given state
     */
-  public Set<Polygon> createFullSet(SimulatorState pState)
+  public static Set<Polygon> createFullSet(SimulatorState pState)
   {
     HashSet<Polygon> set = new HashSet<Polygon>();
 

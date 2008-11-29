@@ -223,4 +223,11 @@ public class Vector2D {
 
 
 
+
+    /** Creates a unit vector in the given direction
+      */
+    public static Vector2D unitVector (double pDir)
+    {
+      return new Vector2D(Math.cos(pDir), Math.sin(pDir));
+    }
 }

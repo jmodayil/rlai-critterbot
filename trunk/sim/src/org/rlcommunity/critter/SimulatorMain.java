@@ -51,6 +51,7 @@ public class SimulatorMain
     engine.addComponent(new SimulatorComponentOmnidrive());
     engine.addComponent(
       new SimulatorComponentCritterbotInterface(dropInterface));
+    engine.addComponent(new SimulatorComponentIRDistance());
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {

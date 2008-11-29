@@ -142,6 +142,18 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       if (++idx == stateDrop.light.length) break;
     }
 
+    sensors = pObject.getChildren(ObjectStateIRDistanceSensor.NAME);
+
+    idx = 0;
+    for (SimulatorObject sen : sensors)
+    {
+      ObjectStateIRDistanceSensor sData = (ObjectStateIRDistanceSensor)
+        sen.getState(ObjectStateIRDistanceSensor.NAME);
+      stateDrop.ir_distance[idx] = (int)(sData.getSensorValue() * 100);
+      
+      // Don't add more light data than we have space
+      if (++idx == stateDrop.ir_distance.length) break;
+    }
     return stateDrop;
   }
 
