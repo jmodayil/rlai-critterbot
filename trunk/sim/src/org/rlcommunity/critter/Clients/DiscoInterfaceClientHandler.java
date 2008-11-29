@@ -28,6 +28,8 @@ public class DiscoInterfaceClientHandler extends Thread
   protected InterfaceInputStream aIn;
   protected InterfaceOutputStream aOut;
 
+  protected boolean aClosed = false;
+
   /** Creates a new client handler corresponding to the given Socket */
   public DiscoInterfaceClientHandler(Socket pClient)
   {
@@ -49,7 +51,7 @@ public class DiscoInterfaceClientHandler extends Thread
     @Override
   public void run()
   {
-    while (true)
+    while (!aClosed)
     {
       // Block and wait for new data
       // Read in a new drop (first its class name)
@@ -93,11 +95,20 @@ public class DiscoInterfaceClientHandler extends Thread
       catch (IOException e)
       {
         System.err.println ("IOException in ClientHandler.run - aborting.");
-        // Close socket and run away
-        try { aClient.close(); }
-        catch (Exception ee) {}
-        return;
+        // End this thread and the associated socket asap; we use close()
+        //  so that our owner (the server) knows to delete us
+        this.close(); 
       }
+    }
+
+    // We are closed, end the socket
+    try
+    {
+      aClient.close();
+    }
+    // Really, there is nothing to do if we fail to close the socket
+    catch (Exception ee)
+    {
     }
   }
 
@@ -132,4 +143,14 @@ public class DiscoInterfaceClientHandler extends Thread
       else return aInQueue.remove();
     }
   }
+
+  /** 'Lazy' close of the socket. This will cause the socket to be closed 
+    *  by the client thread.
+    */
+  private synchronized void close()
+  {
+    aClosed = true;
+  }
+
+  public boolean isClosed() { return aClosed; }
 }
