@@ -123,12 +123,13 @@ public class SimulatorEngine
 
 
   /** Temporary methods (used mainly until a proper replacement is written */
+  private int nextObjectId = 1; 
 
   public void debugCreateStuff()
   {
     Polygon shape;
 
-    Wall w = new Wall("Wall", 1);
+    Wall w = new Wall("Wall", nextObjectId++);
     w.addPoint(20,20);
     w.addPoint(20,480);
     w.addPoint(480,480);
@@ -166,7 +167,7 @@ public class SimulatorEngine
 
     debugCreateRobot();
     // Add an hexagonal obstacle
-    SimulatorObject hex = new SimulatorObject("Hex", 3);
+    SimulatorObject hex = new SimulatorObject("Hex", nextObjectId++);
 
     // Create the hex polygon
     Polygon hexShape = new Polygon();
@@ -200,7 +201,7 @@ public class SimulatorEngine
    
     aState.addObject(hex);
     
-    SimulatorObject lightSource = new SimulatorObject("light", 4);
+    SimulatorObject lightSource = new SimulatorObject("light", nextObjectId++);
     
     
     shape = new Polygon();
@@ -226,7 +227,7 @@ public class SimulatorEngine
 
   public void debugCreateRobot()
   {
-    SimulatorAgent sa = new SimulatorAgent("Motor Gabor", 2);
+    SimulatorAgent sa = new SimulatorAgent("Motor Gabor", nextObjectId++);
 
     Polygon agentShape = new Polygon();
     agentShape.addPoint (-0,20);
@@ -274,7 +275,8 @@ public class SimulatorEngine
     aState.addObject(sa);
    
     // Create an external light sensor
-    SimulatorObject sensor = new SimulatorObject("LightSensor1", 5);
+    SimulatorObject sensor = new SimulatorObject("LightSensor1", 
+      nextObjectId++);
     /*shape = new Polygon();
 
     shape.addPoint(0.0, -1.0);
@@ -290,15 +292,25 @@ public class SimulatorEngine
     sa.addChild(sensor);
    
     // Create two more light sensors
-    sensor = sensor.makeCopy("LightSensor2", 6);
+    sensor = sensor.makeCopy("LightSensor2", nextObjectId++);
     sensor.setPosition(new Vector2D(0,-20.001));
     sa.addChild(sensor);
 
-    sensor = sensor.makeCopy("LightSensor3", 7);
+    sensor = sensor.makeCopy("LightSensor3", nextObjectId++);
     sensor.setPosition(new Vector2D(0,20.001));
     sa.addChild(sensor);
 
     sa.setPosition(new Vector2D(250,250));
+
+   
+    // Now the IR distance sensors
+    sensor = new SimulatorObject("IRSensor1", nextObjectId++);
+    sensor.addState(new ObjectStateIRDistanceSensor(100));
+    
+    sensor.setPosition(new Vector2D(20.001,0));
+    sensor.setDirection(0);
+
+    sa.addChild(sensor);
   }
 
   public int debugGetElapsedTime()
