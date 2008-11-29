@@ -73,7 +73,6 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
           // The distance is capped by the range
           if (distance >= range) distance = range;
         }
-        System.out.println ("D: "+distance);
 
         sensor.setSensorValue(distance);
       }

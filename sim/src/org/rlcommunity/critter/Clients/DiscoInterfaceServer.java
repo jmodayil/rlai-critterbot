@@ -58,6 +58,8 @@ public class DiscoInterfaceServer extends Thread implements DropClient
     */
   public void send(SimulatorDrop pDrop)
   {
+    cleanupClients();
+
     // Simply call each client handler's send method
     for (DiscoInterfaceClientHandler ch : aClients)
       ch.send(pDrop);
@@ -69,6 +71,8 @@ public class DiscoInterfaceServer extends Thread implements DropClient
     */
   public List<SimulatorDrop> receive()
   {
+    cleanupClients();
+
     LinkedList<SimulatorDrop> drops = new LinkedList<SimulatorDrop>();
     // 1. Collect  drops into list from client handlers
     // 2. Clear the client handlers' lists
@@ -88,6 +92,24 @@ public class DiscoInterfaceServer extends Thread implements DropClient
     return drops;
   }
 
+  /** Method to get rid of sockets that have been closed */
+  public synchronized void cleanupClients()
+  {
+    LinkedList<DiscoInterfaceClientHandler> deaders = new
+      LinkedList<DiscoInterfaceClientHandler>();
+
+    // Find which clients are closed 
+    for (DiscoInterfaceClientHandler ch : aClients)
+    {
+      if (ch.isClosed())
+        deaders.add(ch);
+    }
+
+    // Remove them from the list
+    for (DiscoInterfaceClientHandler ch : deaders)
+      aClients.remove(ch);
+  }
+
   /** From the Thread class */
     @Override
   public void run()
@@ -96,6 +118,8 @@ public class DiscoInterfaceServer extends Thread implements DropClient
     {
       try
       {
+        cleanupClients();
+
         // Listen for a new connection (blocks here)
         Socket clientSocket = aSocket.accept();
         System.out.println ("New client!");
