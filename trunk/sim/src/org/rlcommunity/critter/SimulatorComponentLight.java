@@ -33,6 +33,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
         SimulatorObject sensor;// = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
         int numSensors = pNext.getObjects(ObjectStateLightSensor.NAME).size();
 
+        // MGB Create a Scene will all polygons
+        Scene scene = new Scene(pCurrent);
+
         for (int sensorJ=0;sensorJ<numSensors;sensorJ++)
         {
               sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(sensorJ);
@@ -45,30 +48,31 @@ public class SimulatorComponentLight implements SimulatorComponent {
         
         Set<Polygon> polys = new HashSet<Polygon>();
         
-        for (SimulatorObject o : pCurrent.getObjects())
+        // MGB: remove the sensor and source polygons - might want to use
+        //   Scene.removeSubtree and sensor.getRoot
+        scene.removeObject(sensor);
+        scene.removeObject(source);
+
+        if (scene.isVisible(sensorPosition, srcPosition))
         {
-            if (o.corresponds(sensor) || o.corresponds(source)) continue;
-            Polygon shape = o.getShape();
-           
-            if (shape != null)
-              polys.add(shape);
-        }
-        if (Scene.isVisible(sensorPosition, srcPosition, polys))
-        {
-            
-            Point2D.Double srcPoint = new Point2D.Double(srcPosition.x, srcPosition.y);
-            Point2D.Double sensorPoint = new Point2D.Double(sensorPosition.x, sensorPosition.y);
+            // Maybe use Vector2D's and take the length() / add a distance()
+            //  method to Vector2D? I.e. to avoid using both Point2D and
+            //  Vector2D
+            Point2D.Double srcPoint = 
+              new Point2D.Double(srcPosition.x, srcPosition.y);
+            Point2D.Double sensorPoint = 
+              new Point2D.Double(sensorPosition.x, sensorPosition.y);
             
             double lightDistance = srcPoint.distance(sensorPoint);
-            double intensity = lightSource.getIntensity();  
+
+            double intensity = lightSource.getIntensity();
             lightSensor.setLightSensorValue(intensity/(Math.pow(lightDistance,2.0)));
-        
-
-
         }
         else
             lightSensor.setLightSensorValue(0.0);
     
+        scene.addObject(sensor);
+        scene.addObject(source);
 //                           System.out.printf("light sensor reading %s = %f\n",
 //            sensor.getLabel(), lightSensor.getLightSensorValue());        
         }

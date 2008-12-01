@@ -315,7 +315,7 @@ public class SimulatorObject
     SimulatorObject root = this;
 
     for (SimulatorObject parent = root.getParent(); parent != null;
-      root = parent) ;
+      root = parent, parent = root.getParent()) ;
 
     return root;
   }
