@@ -138,18 +138,19 @@ public class SimulatorEngine
 
     // Make a polygon for the wall as well
     Polygon wallShape = new Polygon();
-    // Interior
-    wallShape.addPoint(20,20);
-    wallShape.addPoint(20,480);
-    wallShape.addPoint(480,480);
-    wallShape.addPoint(480,20);
-    wallShape.addPoint(20,20);
     // Exterior
     wallShape.addPoint(0,0);
     wallShape.addPoint(0,500);
     wallShape.addPoint(500,500);
     wallShape.addPoint(500,0);
     wallShape.addPoint(0,0);
+    // Interior (notice! the interior must be given in counter-clockwise
+    //   order)
+    wallShape.addPoint(20,20);
+    wallShape.addPoint(480,20);
+    wallShape.addPoint(480,480);
+    wallShape.addPoint(20,480);
+    wallShape.addPoint(20,20);
     System.out.println("Wall");
     wallShape.doneAddPoints();
 

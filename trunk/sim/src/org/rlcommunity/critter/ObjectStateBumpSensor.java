@@ -85,7 +85,7 @@ public class ObjectStateBumpSensor implements ObjectState
       int rad = (int)(f.vec.length() * 2);
 	    g.drawOval((int)f.source.x, (int)f.source.y, rad, rad); 
     }
-	  g.setColor(Color.red);
+	  g.setColor(tempC);
   }
   
   /** Provides a mean of clearing whatever data this ObjectState contains

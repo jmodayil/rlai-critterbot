@@ -9,6 +9,7 @@ package org.rlcommunity.critter;
   */
 
 import java.awt.Graphics;
+import java.awt.Color;
 
 public class ObjectStateIRDistanceSensor implements ObjectState
 {
@@ -68,7 +69,10 @@ public class ObjectStateIRDistanceSensor implements ObjectState
     // Redundant code, but here for sanity purposes 
     this.aRange = sensor.aRange;
   }
-  
+
+  /** only for debugging */
+  public RayIntersection intersection;
+
   /** (Potentially) draw something about the state; may be null. This
     *  most likely should be moved out of here when we have time.
     *
@@ -77,6 +81,22 @@ public class ObjectStateIRDistanceSensor implements ObjectState
     */
   public void draw(Graphics g, SimulatorObject parent)
   {
+    if (intersection != null)
+    {
+      Vector2D pt = intersection.point;
+
+	    Color tempC = g.getColor();
+	    g.setColor(Color.red);
+
+      int rad = 5; 
+	    g.drawOval((int)pt.x-rad, (int)pt.y-rad, 2*rad, 2*rad); 
+     
+      Vector2D outPoint = intersection.normal.times(2*rad).plus(pt);
+		  g.drawLine((int)pt.x, (int)pt.y, 
+                 (int)outPoint.x, (int)outPoint.y);
+      
+      g.setColor(tempC);
+    }
   }
 
   /** Provides a mean of clearing whatever data this ObjectState contains

@@ -22,7 +22,7 @@ public class SimulatorComponentBump implements SimulatorComponent {
     {
     }
 
-    /** Computes what light sensors should receive given the current state,
+    /** Computes what bump sensors should receive given the current state,
       *  and set the result in the next state.
       *
       * @param pCurrent The current state of the system (must not be modified)
