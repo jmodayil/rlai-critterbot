@@ -29,8 +29,8 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
       */
     public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) 
     {
-      // @@@ create a Scene
-      Set<Polygon> scene = Scene.createFullSet(pCurrent);
+      // create a Scene corresponding to the current state
+      Scene scene = new Scene(pCurrent);
 
       // Find out all the IR distance sensors
       List<SimulatorObject> sensorObjs = 
@@ -48,18 +48,19 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
 
         assert(sensor != null);
 
-        // Cast a ray
-        // @@@ remove parents
-        if (obj.getShape() != null)
-          scene.remove (obj.getShape());
+        SimulatorObject root = obj.getRoot();
+
+        // Remove this sensor's root's subtree (not necessarily a valid thing)
+        scene.removeSubtree(root);
 
         Vector2D objPos = obj.getPosition();
 
+        // Cast a ray
         Ray r = new Ray(objPos,
           Vector2D.unitVector(obj.getDirection())); 
 
         // Find the find intersection of the ray in the world
-        Vector2D intersection = Scene.traceRay(r, scene);
+        RayIntersection intersection = scene.traceRay(r);
 
         double range = sensor.getRange(); 
         double distance;
@@ -69,7 +70,8 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
           distance = range; 
         else
         {
-          distance = intersection.minus(objPos).length();
+          // Note - the distance is valid iff the ray uses a unit vector!
+          distance = intersection.rayAlpha; 
           // The distance is capped by the range
           if (distance >= range) distance = range;
         }

@@ -438,10 +438,10 @@ public class Polygon
     *  is also a point on the polygon.
     *
     * @param r The ray of interest
-    * @return The strictly positive alpha such that ray.getPoint(alpha) is
-    *   on the polygon. Returns < 0 if there is no intersection.
+    * @return A RayIntersection containing information, or null if there is
+    *   no intersection.
     */
-  public double intersect(Ray r)
+  public RayIntersection intersect(Ray r)
   {
     // For now, do an all edges comparison with the polygon
     //  I feel like there is a much easier way to do this...
@@ -473,15 +473,28 @@ public class Polygon
       // We only require that the ray be directed towards the polygon and
       //  that the ray interesct the line segment
       if (alpha > 0 && alpha < 1 && beta > 0)
-        // Return the 'alpha' corresponding to the ray (here, called beta)
-        return beta;
+      {
+        // Return some information of interest
+        RayIntersection isect = new RayIntersection();
+        isect.polygon = this;
+        isect.ray = r;
+
+        isect.polyAlpha = alpha;
+        isect.rayAlpha = beta;
+        
+        // Some extra information - maybe it's a bad idea to compute it
+        //  by default?
+        isect.normal = this.computeNormal(p1,p2);
+        isect.point = r.getPoint(beta);
+
+        return isect;
+      }
 
       p1 = p2;
     }
 
-    // No valid interesection, return -1 (we could also return 0, but this
-    //  is a bad idea).
-    return -1;
+    // No valid interesection, return null
+    return null;
   }
 
 
@@ -548,12 +561,7 @@ public class Polygon
       if (edgeNum == 0)
       {
         // Return the perpendicular to this edge
-        Vector2D edge = p2.minus(p1);
-        // If the Polygon points are in clockwise order, then the normal
-        //  is the edge rotated by pi/2. Otherwise, it's given by a 
-        //  rotation of -pi/2. 
-
-        return edge.rotate(Math.PI / 2);
+        return computeNormal(p1, p2);
       }
 
       p1 = p2;
@@ -563,6 +571,25 @@ public class Polygon
     //  @@@ possibly throw an exception?
     return null;
   }
+   
+  /** Computes the normal to a given edge p1-p2. The edge should be given in
+    *  clockwise order.
+    * 
+    * @param p1 The first point of the edge
+    * @param p2 The second point of the edge
+    * @return The normal to the edge, pointing outwards
+    */
+  public Vector2D computeNormal(Vector2D p1, Vector2D p2)
+  {
+    Vector2D edge = p2.minus(p1);
+    // If the Polygon points are in clockwise order, then the normal
+    //  is the edge rotated by pi/2. Otherwise, it's given by a 
+    //  rotation of -pi/2. 
+
+    return edge.rotate(Math.PI / 2);
+  }
+
+
   /** SimulatorObject interface **/
 
   /** Create a deep copy of this polygon
