@@ -62,6 +62,9 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
         // Find the find intersection of the ray in the world
         RayIntersection intersection = scene.traceRay(r);
 
+        // @@@ remove me, for debugging purposes
+        sensor.intersection = intersection;
+
         double range = sensor.getRange(); 
         double distance;
 

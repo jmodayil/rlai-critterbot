@@ -443,12 +443,15 @@ public class Polygon
     */
   public RayIntersection intersect(Ray r)
   {
+    RayIntersection isect = null;
+
     // For now, do an all edges comparison with the polygon
     //  I feel like there is a much easier way to do this...
     Vector2D r1 = r.src;
     Vector2D r2 = r.src.plus(r.dir);
 
     int edgeIdx = 0;
+    double minBeta = Double.POSITIVE_INFINITY;
 
     Vector2D p1 = points.getLast();
     for (Vector2D p2 : points)
@@ -474,10 +477,11 @@ public class Polygon
 
       // We only require that the ray be directed towards the polygon and
       //  that the ray interesct the line segment
-      if (alpha > 0 && alpha < 1 && beta > 0)
+      if (alpha > 0 && alpha < 1 && beta > 0 && beta < minBeta)
       {
-        // Return some information of interest
-        RayIntersection isect = new RayIntersection();
+        if (isect == null) isect = new RayIntersection();
+        minBeta = beta;
+
         isect.polygon = this;
         isect.ray = r;
 
@@ -486,18 +490,20 @@ public class Polygon
         
         // Some extra information - maybe it's a bad idea to compute it
         //  by default?
-        isect.normal = getNormal(isect.polyAlpha);//this.computeNormal(p1,p2);
+        isect.normal = this.computeNormal(p1,p2);
         isect.point = r.getPoint(beta);
-
-        return isect;
+        
+        // Because we are dealing with concave polygons, we cannot assume
+        //  a finite number of intersections with the ray, so we cannot
+        //  return this intersection now
       }
 
       p1 = p2;
       edgeIdx++;
     }
 
-    // No valid interesection, return null
-    return null;
+    // Return a potentially null intersection
+    return isect;
   }
 
 
