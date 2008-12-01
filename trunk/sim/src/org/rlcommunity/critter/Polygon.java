@@ -448,6 +448,8 @@ public class Polygon
     Vector2D r1 = r.src;
     Vector2D r2 = r.src.plus(r.dir);
 
+    int edgeIdx = 0;
+
     Vector2D p1 = points.getLast();
     for (Vector2D p2 : points)
     {
@@ -479,18 +481,19 @@ public class Polygon
         isect.polygon = this;
         isect.ray = r;
 
-        isect.polyAlpha = alpha;
+        isect.polyAlpha = edgeIdx + alpha;
         isect.rayAlpha = beta;
         
         // Some extra information - maybe it's a bad idea to compute it
         //  by default?
-        isect.normal = this.computeNormal(p1,p2);
+        isect.normal = getNormal(isect.polyAlpha);//this.computeNormal(p1,p2);
         isect.point = r.getPoint(beta);
 
         return isect;
       }
 
       p1 = p2;
+      edgeIdx++;
     }
 
     // No valid interesection, return null
@@ -565,6 +568,7 @@ public class Polygon
       }
 
       p1 = p2;
+      edgeNum--;
     }
 
     // Oops? Something went wrong
@@ -586,7 +590,10 @@ public class Polygon
     //  is the edge rotated by pi/2. Otherwise, it's given by a 
     //  rotation of -pi/2. 
 
-    return edge.rotate(Math.PI / 2);
+    Vector2D normal = edge.rotate(Math.PI / 2);
+    normal.normalize();
+
+    return normal;
   }
 
 
@@ -690,8 +697,7 @@ public class Polygon
       Vector2D center = 
         new Vector2D(0.5 * p1.x + 0.5 * p2.x,
                      0.5 * p1.y + 0.5 * p2.y);
-      Vector2D normal = p2.minus(p1).rotate(Math.PI / 2);
-      normal.normalize();
+      Vector2D normal = computeNormal(p1,p2);
 
       Vector2D outPoint = normal.times(5).plus(center);
 		  g.drawLine((int)center.x, (int)center.y, 
