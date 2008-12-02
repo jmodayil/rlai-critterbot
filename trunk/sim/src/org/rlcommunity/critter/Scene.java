@@ -15,6 +15,7 @@ package org.rlcommunity.critter;
 
 import java.util.Set;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 public class Scene
@@ -50,10 +51,12 @@ public class Scene
     * @param pRay The ray to be traced
     *
     * @return The intersection
-    */
+*/
   public RayIntersection traceRay(Ray pRay)
+
   {
     double minAlpha = Double.POSITIVE_INFINITY;
+
     RayIntersection minIsect = null;
 
     for (Polygon poly : aPolySet)
@@ -70,10 +73,11 @@ public class Scene
       }
     }
 
+
     if (minIsect == null) return null;
     else return minIsect;
   }
-
+ 
   /**
     * Returns p1 is visible from p2. This relation should be symmetric, but
     *  in practice might not.
@@ -92,11 +96,13 @@ public class Scene
 
     Ray r = new Ray(p1, vec);
     // Find the first intersection of the ray with the polygon set
+
     RayIntersection isect = traceRay(r);
 
     // In the lucky case where we simply don't intersect anything, we're done!
     if (isect == null) return true;
 
+   
     // Now, p2 is visible from p1 provided the intersect occurs after p2
     double iAlpha, p2Alpha;
     iAlpha = isect.rayAlpha;
@@ -109,7 +115,7 @@ public class Scene
     // By how we constructed the ray, we know p2Alpha > 0; the ray tracer
     //  finds intersections s.t. iAlpha > 0 so we know p2 is visible if 
     //  the first intersection occurs after
-    return (p2Alpha < iAlpha);
+    return (p2Alpha - Polygon.EPSILON < iAlpha);
   }
 
   /** Adds an object's polygon to this scene.
