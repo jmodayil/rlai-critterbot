@@ -476,7 +476,8 @@ public class Polygon
       double beta = num2 / denom;
 
       // We only require that the ray be directed towards the polygon and
-      //  that the ray interesct the line segment
+      //  that the ray interesct the line segment. Also, rays are assumed
+      //  to have a minimum length of EPSILON (to avoid rounding errors)
       if (alpha > 0 && alpha < 1 && beta > EPSILON && beta < minBeta)
       {
         if (isect == null) isect = new RayIntersection();
