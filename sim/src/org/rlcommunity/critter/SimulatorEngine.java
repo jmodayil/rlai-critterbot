@@ -308,8 +308,16 @@ public class SimulatorEngine
     sensor = new SimulatorObject("IRSensor1", nextObjectId++);
     sensor.addState(new ObjectStateIRDistanceSensor(100));
     
-    sensor.setPosition(new Vector2D(20.001,0));
+    sensor.setPosition(new Vector2D(0.001,0));
     sensor.setDirection(0);
+
+    sa.addChild(sensor);
+    
+    sensor = new SimulatorObject("IRSensor2", nextObjectId++);
+    sensor.addState(new ObjectStateIRDistanceSensor(100));
+    
+    sensor.setPosition(new Vector2D(0.001,0));
+    sensor.setDirection(Math.PI/2);
 
     sa.addChild(sensor);
   }
