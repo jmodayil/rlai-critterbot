@@ -477,7 +477,7 @@ public class Polygon
 
       // We only require that the ray be directed towards the polygon and
       //  that the ray interesct the line segment
-      if (alpha > 0 && alpha < 1 && beta > 0 && beta < minBeta)
+      if (alpha > 0 && alpha < 1 && beta > EPSILON && beta < minBeta)
       {
         if (isect == null) isect = new RayIntersection();
         minBeta = beta;
