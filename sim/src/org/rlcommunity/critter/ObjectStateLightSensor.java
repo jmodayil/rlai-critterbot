@@ -75,7 +75,7 @@ public class ObjectStateLightSensor implements ObjectState
     protected void setNumPixels (int pixels)
   {
       aNumPixels = pixels;
-      assert(pixels%2.0 != 0);
+      assert(pixels%2 != 0);
   }
   
   protected int getNumPixels ()
@@ -107,12 +107,9 @@ public class ObjectStateLightSensor implements ObjectState
     *  and resetting it to the default values. Meant to be used when 
     *  re-initializing a state.
     */
-  public void clear()
+  public void clearTransient()
   {
     aData = 0;
-    aSensorWidth = 0;
-    aNumPixels = 0;
-    aSensorDepth = 0;
   }
 }
 
