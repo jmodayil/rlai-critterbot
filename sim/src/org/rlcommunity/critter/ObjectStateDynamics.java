@@ -341,8 +341,8 @@ public class ObjectStateDynamics implements ObjectState {
     }
 
     public void draw(Graphics g, SimulatorObject parent) {
-        // @@@ Draw forces here? Collisions!
-      Vector2D objPos = parent.getPosition();
+      // Draw the current velocity
+      /* Vector2D objPos = parent.getPosition();
 
       if (aVel.x != 0)
       {
@@ -355,7 +355,7 @@ public class ObjectStateDynamics implements ObjectState {
 
 	      g.drawLine((int)objPos.x, (int)objPos.y, (int)endV.x, (int)endV.y); 
 	      g.setColor(tempC);
-      }
+      } */
     }
 
     /** Provides a mean of clearing whatever data this ObjectState contains

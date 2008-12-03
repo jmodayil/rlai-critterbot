@@ -77,7 +77,8 @@ public class ObjectStateBumpSensor implements ObjectState
   public void draw(Graphics g, SimulatorObject parent)
   {
     // Draw a little circle where each bobo is
-	  Color tempC = g.getColor();
+    // @@@ Evil! It wasn't synchronized and causing errors.
+	  /*Color tempC = g.getColor();
 	  g.setColor(Color.red);
 
     for (Force f : aForces)
@@ -85,7 +86,7 @@ public class ObjectStateBumpSensor implements ObjectState
       int rad = (int)(f.vec.length() * 2);
 	    g.drawOval((int)f.source.x, (int)f.source.y, rad, rad); 
     }
-	  g.setColor(tempC);
+	  g.setColor(tempC); */
   }
   
   /** Provides a mean of clearing whatever data this ObjectState contains
