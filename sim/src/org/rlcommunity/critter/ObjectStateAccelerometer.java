@@ -42,7 +42,7 @@ public class ObjectStateAccelerometer implements ObjectState
     */
   public void setAcceleration(Vector2D pAccel)
   {
-    aAccel = (Vector2D) pAccel.clone();
+    aAccel = new Vector2D(pAccel);
   }
  
   /** Returns the current acceleration data
@@ -60,7 +60,7 @@ public class ObjectStateAccelerometer implements ObjectState
     */
   public void setSensorValue(Vector2D pAccel)
   {
-    aAccel = (Vector2D)pAccel.clone();
+    aAccel = new Vector2D(pAccel); 
   }
 
   public double getZSensorValue()
@@ -83,7 +83,7 @@ public class ObjectStateAccelerometer implements ObjectState
     */
   public void setVelocitySample(Vector2D pVel)
   {
-    aVelSample = (Vector2D)pVel.clone();
+    aVelSample = new Vector2D(pVel); 
   }
 
   /** ObjectState interface */
@@ -103,9 +103,9 @@ public class ObjectStateAccelerometer implements ObjectState
   {
     ObjectStateAccelerometer sensor = (ObjectStateAccelerometer)os;
 
-    this.aAccel = (Vector2D)sensor.aAccel.clone();
+    this.aAccel = new Vector2D(sensor.aAccel);
     this.aZAccel = sensor.aZAccel;
-    this.aVelSample = (Vector2D)sensor.aVelSample.clone();
+    this.aVelSample = new Vector2D(sensor.aVelSample);
   }
 
 

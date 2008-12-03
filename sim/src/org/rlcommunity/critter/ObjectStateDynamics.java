@@ -70,13 +70,6 @@ public class ObjectStateDynamics implements ObjectState {
         collisions = new LinkedList<Collision>();
     }
 
-    // @@@ removed by MGB - most likely should not be needed anymore
-    /* public void clearTransient() {
-        aVel.x = 0;
-        aVel.y = 0;
-        aAngVel = 0;
-    } */
-
     /** Creates a nearly massless Dynamics state. Because a minimum mass 
      *  is recommended by classical physics, we use it here as well.
      *  Massless objects (e.g. invisible light, magnetic, etc, sources)
