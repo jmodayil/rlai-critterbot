@@ -42,6 +42,7 @@ public class ObjectStateLightSensor implements ObjectState
 
   protected void copyFrom(ObjectState os)
   {
+      
     ObjectStateLightSensor sensor = (ObjectStateLightSensor)os;
   
     this.aData = sensor.aData;
@@ -74,9 +75,10 @@ public class ObjectStateLightSensor implements ObjectState
     protected void setNumPixels (int pixels)
   {
       aNumPixels = pixels;
+      assert(pixels%2.0 != 0);
   }
   
-  protected double getNumPixels ()
+  protected int getNumPixels ()
   {
    return aNumPixels;   
       
