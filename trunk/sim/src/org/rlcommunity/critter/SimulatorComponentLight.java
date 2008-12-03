@@ -8,9 +8,6 @@ package org.rlcommunity.critter;
  *
  * @author Marc G. Bellamre
  */
-import java.awt.geom.Line2D;
-import java.awt.geom.Point2D;
-import java.util.*;
 
 public class SimulatorComponentLight implements SimulatorComponent {
 
@@ -49,10 +46,6 @@ public class SimulatorComponentLight implements SimulatorComponent {
             lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
             sensorPosition = sensor.getPosition();
 
-//        lightSensor.setNumPixels(3);
-//        lightSensor.setSensorWidth(0.1);
-//        lightSensor.setSensorDepth(50);
-
             oldSensor = pCurrent.getObject(sensor);
             oldLightSensor = (ObjectStateLightSensor) oldSensor.getState(ObjectStateLightSensor.NAME);
 
@@ -87,14 +80,12 @@ public class SimulatorComponentLight implements SimulatorComponent {
                 intersectData = scene.traceRay(r);
 
                 double angle1 = sensorPosition.minus(intersectData.point).direction();
-                double angle2 = intersectData.normal.direction();//.minus(temp).direction();
+                double angle2 = intersectData.normal.direction();
                 double angleOfIncidence = Math.abs(angle1) - Math.abs(angle2);
    
                 
                 scene.addSubtree(oldSensor.getRoot());
                 
-               // System.out.println("ray ("+Ipixel+") angle = " + currentRayAngle);
-
                 for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) {
                     source = pCurrent.getObjects(ObjectStateLightSource.NAME).get(Jsource);
                     lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
@@ -110,10 +101,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
                         //sum up light from multiple sources and from each pixel
                         sumIntensity += intensity;
-                       // System.out.println("light");
-                    } /*else {
-                        System.out.println("no intersection with source");
-                    }*/
+                    } 
                 }//loop over sources
 
                 currentRayAngle += angleBetweenRays; //next ray with increased angle
@@ -124,10 +112,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
             //sensor reading is average of pixel readings
             lightSensor.setLightSensorValue(sumIntensity / numPixels);
 
-            System.out.println("sensor("+Ksensor+") intensity = " + lightSensor.getLightSensorValue() );        
+            //System.out.println("sensor("+Ksensor+") intensity = " + lightSensor.getLightSensorValue() );        
         }
-            System.out.println("--------------");
-
     }
 }
 
