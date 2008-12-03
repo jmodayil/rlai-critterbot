@@ -128,7 +128,8 @@ public class DiscoInterfaceClientHandler extends Thread
       }
       catch (IOException e)
       {
-        System.err.println ("IOException in ClientHandler.send");
+        System.err.println ("IOException in ClientHandler.send :: quitting");
+        System.exit(1);
         throw new RuntimeException(e);
       }
     }

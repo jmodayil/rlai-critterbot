@@ -22,15 +22,11 @@ import java.util.List;
 import java.util.LinkedList;
 
 import org.rlcommunity.critter.Clients.DropClient;
-import org.rlcommunity.critter.Clients.KeyboardClient;
 import org.rlcommunity.critter.Drops.*;
-import org.rlcommunity.critter.ObjectStateOmnidrive;
-import org.rlcommunity.critter.SimulatorAgent;
 import org.rlcommunity.critter.SimulatorComponentCritterbotInterface;
 import org.rlcommunity.critter.SimulatorComponentDynamics;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorEngine;
-import org.rlcommunity.critter.SimulatorObject;
 import org.rlcommunity.critter.SimulatorViz;
 import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
