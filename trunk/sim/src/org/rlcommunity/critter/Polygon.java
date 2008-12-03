@@ -659,10 +659,10 @@ public class Polygon {
 		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
 		g.setColor(tempC);
 
-		// Draw the edge normals (@@@ only for debugging)
-		drawEdgeNormals(g);
+		// Draw the edge normals
+		//drawEdgeNormals(g);
 		// Draw the bounding box
-		// drawBoundingBox(g);
+		//drawBoundingBox(g);
 	}
 
 	public void drawBoundingBox(Graphics g) {

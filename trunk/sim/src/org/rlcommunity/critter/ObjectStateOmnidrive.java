@@ -55,7 +55,6 @@ public class ObjectStateOmnidrive implements ObjectState
     */
   public double getAngVelocity() { return aAngVel; }
 
-  // @@@ to copy pVel or not to copy?
   /** Sets the target velocity for this omni-drive
     * @param pVel New target velocity
     */
