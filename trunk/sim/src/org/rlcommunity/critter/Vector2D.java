@@ -102,6 +102,10 @@ public class Vector2D {
         return new Vector2D(x+d, y+d);
     }
     
+    public double distance(Vector2D v){
+        return Math.sqrt( Math.pow(this.x - v.x,2.0) + Math.pow(this.y - v.y, 2.0) );
+    }
+    
     /** Rotates this vector by a given angle, and returns it (as a new instance).
      *
      * @param dir The angle of rotation
