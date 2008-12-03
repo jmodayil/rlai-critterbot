@@ -262,7 +262,7 @@ public class SimulatorEngine {
 
 		sa.setShape(agentShape);
 
-		sa.setSVG("robot");
+		// sa.setSVG("robot");
 
 		// Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
 		ObjectStateDynamics osd = new ObjectStateDynamics(4, 2);
