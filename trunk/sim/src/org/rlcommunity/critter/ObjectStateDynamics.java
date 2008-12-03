@@ -71,7 +71,7 @@ public class ObjectStateDynamics implements ObjectState {
     }
 
     // @@@ removed by MGB - most likely should not be needed anymore
-    /* public void clear() {
+    /* public void clearTransient() {
         aVel.x = 0;
         aVel.y = 0;
         aAngVel = 0;
@@ -362,7 +362,7 @@ public class ObjectStateDynamics implements ObjectState {
       *  and resetting it to the default values. Meant to be used when 
       *  re-initializing a state.
       */
-    public void clear()
+    public void clearTransient()
     {
       clearAll();
     }

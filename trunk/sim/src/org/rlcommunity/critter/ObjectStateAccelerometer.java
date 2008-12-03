@@ -33,7 +33,7 @@ public class ObjectStateAccelerometer implements ObjectState
 
   public ObjectStateAccelerometer()
   {
-    clear();
+    clearTransient();
   }
 
   /** Sets the acceleration data to be the given vector 
@@ -123,7 +123,7 @@ public class ObjectStateAccelerometer implements ObjectState
     *  and resetting it to the default values. Meant to be used when 
     *  re-initializing a state.
     */
-  public void clear()
+  public void clearTransient()
   {
     // Assume the default acceleration vector is 0,0
     aAccel = new Vector2D(0.0, 0.0); 

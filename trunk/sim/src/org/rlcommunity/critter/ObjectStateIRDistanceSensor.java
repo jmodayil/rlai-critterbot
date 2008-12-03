@@ -103,7 +103,7 @@ public class ObjectStateIRDistanceSensor implements ObjectState
     *  and resetting it to the default values. Meant to be used when 
     *  re-initializing a state.
     */
-  public void clear()
+  public void clearTransient()
   {
     aData = 0;
   }

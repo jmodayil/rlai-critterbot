@@ -129,10 +129,10 @@ public class ObjectStateOmnidrive implements ObjectState
     *  and resetting it to the default values. Meant to be used when 
     *  re-initializing a state.
     * 
-    * For the Omnidrive, we do not clear the data per-se as we do want it 
+    * For the Omnidrive, we do not clearTransient the data per-se as we do want it 
     *  to be persistent across time steps.
     */
-  public void clear()
+  public void clearTransient()
   {
   }
 

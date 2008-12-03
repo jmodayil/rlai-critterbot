@@ -137,10 +137,10 @@ public class SimulatorState
     */
   public void clear()
   {
-    // Simply clear the attributes for all objects
+    // Simply clearTransient the attributes for all objects
     for (SimulatorObject o : aObjList)
     {
-      o.clear();
+      o.clearTransient();
     }
   }
 }

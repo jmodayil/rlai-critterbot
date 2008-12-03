@@ -186,7 +186,7 @@ public class SimulatorObject {
 		else if (isects.size() == 1) {
 			// @@@ the case when we have one intersection is incorrect, as in
 			// this
-			// case it's not clear what the normal is
+			// case it's not clearTransient what the normal is
 			Collision col = new Collision();
 			Polygon.Intersection i1 = isects.get(0);
 			double alpha = i1.alpha;
@@ -653,14 +653,14 @@ public class SimulatorObject {
 	 * children's. It is meant to be used to reset a state to its default
 	 * values.
 	 */
-	public void clear() {
+	public void clearTransient() {
 		// Postorder traversal, for no particular reason
 		for (SimulatorObject c : aChildren)
-			c.clear();
+			c.clearTransient();
 
-		// For each of our ObjectState, clear its data
+		// For each of our ObjectState, clearTransient its data
 		for (Entry<String, ObjectState> thisEntry : aStates.entrySet()) {
-			thisEntry.getValue().clear();
+			thisEntry.getValue().clearTransient();
 		}
 	}
 
