@@ -49,6 +49,7 @@ public class SimulatorMain
     engine.addComponent(new SimulatorComponentLight());
     engine.addComponent(new SimulatorComponentBump());
     engine.addComponent(new SimulatorComponentOmnidrive());
+    engine.addComponent(new SimulatorComponentAccelerometer());
     engine.addComponent(
       new SimulatorComponentCritterbotInterface(dropInterface));
     engine.addComponent(new SimulatorComponentIRDistance());
