@@ -14,6 +14,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = true;
+    boolean debugCollisions = false;
 
     public SimulatorComponentDynamics() {
     }
@@ -46,10 +47,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
-            if(false && obj.getId()==2)
-                System.out.println("Current velocity "+dynData.getVelocity());
-
-            // Find the corresponding object in the next state
+            if (false && obj.getId() == 2) {
+                System.out.println("Current velocity " + dynData.getVelocity());            // Find the corresponding object in the next state
+            }
             SimulatorObject newObj = pNext.getObject(obj);
             ObjectStateDynamics newDynData =
                     (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
@@ -62,12 +62,12 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // this should no longer be necessary
             newDynData.clearAll();
 
-            Force friction = 
-              new Force(dynData.calculateFriction(delta / 1000.0));
+            Force friction =
+                    new Force(dynData.calculateFriction(delta / 1000.0));
 
-            if(false && obj.getId()==2) {
-                System.out.println(" Thrust "+dynData.getForceSum().vec);
-                System.out.println(" Friction "+friction.vec);
+            if (false && obj.getId() == 2) {
+                System.out.println(" Thrust " + dynData.getForceSum().vec);
+                System.out.println(" Friction " + friction.vec);
             }
             Force thrust = dynData.getForceSum();
             //thrust.vec.plusEquals(friction.vec);
@@ -105,9 +105,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newObj.setDirection(newDirect);
             newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000.0,
                     obj.aPos.y + vi.y * delta / 1000.0));
-            if(false && obj.getId()==2)
-                System.out.println(" Pre-collision next velocity "+newDynData.getVelocity());
-
+            if (false && obj.getId() == 2) {
+                System.out.println(" Pre-collision next velocity " + newDynData.getVelocity());
+            }
         }
         // at this point, all the dyn objects in pNext should have their position
         // direction, ang velocity and  velocity set
@@ -165,14 +165,16 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
 
                             //@TODO!!!
-                            if (false)
-                              System.out.println("Collision at " + pt.point +
-                                    "between " + obj + " and " + compObj + "!");
+                            if (debugCollisions) {
+                                System.out.println("Collision at " + pt.point +
+                                        "between " + obj + " and " + compObj + "!");
+                            }
 
                             Collision checkP = objP.collidesWith(compObjP);
                             if (checkP != null) {
-                                if (false)
-                                  System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
+                                if (debugCollisions) {
+                                    System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
+                                }
                             }
                             obj.setGeometry(objP);
                             compObj.setGeometry(compObjP);
@@ -182,8 +184,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             pt = obj.collidesWith(compObj);
                             if (pt != null) {
                                 //should probably throw exception here
-                                if (false)
-                                  System.out.println("Still in collision at " + pt.point + "!!!");
+                                if (debugCollisions) {
+                                    System.out.println("Still in collision at " + pt.point + "!!!");
+                                }
                             }
 
                             // now get the thing we can actually modify
@@ -226,8 +229,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             // angular velocity? Needs to be implemented
                             }
 
-                            if (false)
-                              System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
+                            if(debugCollisions){
+                                System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
+                            }
                         }
                     }
                 }
