@@ -8,7 +8,7 @@ package org.rlcommunity.critter;
  *
  * @author Marc G. Bellamre
  */
-
+import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 import java.util.*;
 
@@ -20,64 +20,114 @@ public class SimulatorComponentLight implements SimulatorComponent {
     }
 
     /** Computes what light sensors should receive given the current state,
-      *  and set the result in the next state.
-      *
-      * @param pCurrent The current state of the system (must not be modified)
-      * @param pNext  The next state of the system (where results are stored)
-      * @param delta  The number of milliseconds elapsed between pCurrent
-      *   and pNext.
-      */
-    public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) 
-    {
-        SimulatorObject source = pCurrent.getObjects(ObjectStateLightSource.NAME).getFirst();
-        SimulatorObject sensor;// = pNext.getObjects(ObjectStateLightSensor.NAME).getFirst();
-        int numSensors = pNext.getObjects(ObjectStateLightSensor.NAME).size();
+     *  and set the result in the next state.
+     *
+     * @param pCurrent The current state of the system (must not be modified)
+     * @param pNext  The next state of the system (where results are stored)
+     * @param delta  The number of milliseconds elapsed between pCurrent
+     *   and pNext.
+     */
+    public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) {
 
-        // MGB Create a Scene will all polygons
         Scene scene = new Scene(pCurrent);
+        Vector2D rayDirection;
+        RayIntersection intersectData;
+        Ray r;
 
-        for (int sensorJ=0;sensorJ<numSensors;sensorJ++)
-        {
-              sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(sensorJ);
+        SimulatorObject sensor;
+        ObjectStateLightSensor lightSensor;
+        ObjectStateLightSensor oldLightSensor;
+        SimulatorObject oldSensor;
+        Vector2D sensorPosition;
+
+        SimulatorObject source;
+        ObjectStateLightSource lightSource;
+        Vector2D srcPosition;
+
+        for (int Ksensor = 0; Ksensor < pNext.getObjects(ObjectStateLightSensor.NAME).size(); Ksensor++) {            
+            sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(Ksensor);
+            lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
+            sensorPosition = sensor.getPosition();
+
+//        lightSensor.setNumPixels(3);
+//        lightSensor.setSensorWidth(0.1);
+//        lightSensor.setSensorDepth(50);
+
+            oldSensor = pCurrent.getObject(sensor);
+            oldLightSensor = (ObjectStateLightSensor) oldSensor.getState(ObjectStateLightSensor.NAME);
+
+            double sensorWidth = oldLightSensor.getSensorWidth();
+            int numPixels = oldLightSensor.getNumPixels();
+            double sensorDepth = oldLightSensor.getSensorDepth();
+
+            double angleBetweenRays = Math.atan((sensorWidth / numPixels) / sensorDepth);
+            if (sensor.getDirection() < 0.0) {
+                angleBetweenRays *= -1;
+            }
+            double currentRayAngle = sensor.getDirection() - (Math.floor(numPixels / 2)) * angleBetweenRays;
+
+            double sumIntensity = 0; //store total intensity of each pixel in the sensor
+            //for each pixel in the sensor
+            for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
+                //figure out direction of ray i
+                if (currentRayAngle > Math.PI) {
+                    currentRayAngle = -Math.PI + Math.abs(currentRayAngle - Math.PI);
+                }
+                if (currentRayAngle < -Math.PI) {
+                    currentRayAngle = Math.PI - Math.abs(currentRayAngle - Math.PI);
+                }
+                rayDirection = Vector2D.unitVector(currentRayAngle);
+                rayDirection.normalize();
+
+                r = new Ray(sensorPosition, rayDirection);
+
+                scene.removeSubtree(oldSensor.getRoot());
+
+                //find out first point (object) ray i intersects with
+                intersectData = scene.traceRay(r);
+
+                double angle1 = sensorPosition.minus(intersectData.point).direction();
+                double angle2 = intersectData.normal.direction();//.minus(temp).direction();
+                double angleOfIncidence = Math.abs(angle1) - Math.abs(angle2);
+   
                 
-              ObjectStateLightSensor lightSensor = (ObjectStateLightSensor)sensor.getState(ObjectStateLightSensor.NAME);
-              ObjectStateLightSource lightSource = (ObjectStateLightSource)source.getState(ObjectStateLightSource.NAME);
+                scene.addSubtree(oldSensor.getRoot());
+                
+               // System.out.println("ray ("+Ipixel+") angle = " + currentRayAngle);
 
-            Vector2D srcPosition = source.getPosition();
-        Vector2D sensorPosition = sensor.getPosition();
-        
-        Set<Polygon> polys = new HashSet<Polygon>();
-        
-        // MGB: remove the sensor and source polygons - might want to use
-        //   Scene.removeSubtree and sensor.getRoot
-        scene.removeObject(sensor);
-        scene.removeObject(source);
+                for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) {
+                    source = pCurrent.getObjects(ObjectStateLightSource.NAME).get(Jsource);
+                    lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
 
-        if (scene.isVisible(sensorPosition, srcPosition))
-        {
-            // Maybe use Vector2D's and take the length() / add a distance()
-            //  method to Vector2D? I.e. to avoid using both Point2D and
-            //  Vector2D
-            Point2D.Double srcPoint = 
-              new Point2D.Double(srcPosition.x, srcPosition.y);
-            Point2D.Double sensorPoint = 
-              new Point2D.Double(sensorPosition.x, sensorPosition.y);
-            
-            double lightDistance = srcPoint.distance(sensorPoint);
+                    srcPosition = source.getPosition();
+                    scene.removeSubtree(source.getRoot());
+                    
+                    angle1 = srcPosition.minus(intersectData.point).direction();
+                    double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);                    
 
-            double intensity = lightSource.getIntensity();
-            lightSensor.setLightSensorValue(intensity/(Math.pow(lightDistance,2.0)));
+                    if (scene.isVisible(srcPosition, intersectData.point)) {
+                        double intensity = lightSource.getIntensity() * (1.0 / Math.pow(srcPosition.distance(intersectData.point), 2)) + Math.abs(Math.cos(angleOfIncidence)*Math.cos(angleOfIncidence2)) * lightSource.getIntensity() * (1.0 / Math.pow(intersectData.point.distance(sensorPosition), 2));
+
+                        //sum up light from multiple sources and from each pixel
+                        sumIntensity += intensity;
+                       // System.out.println("light");
+                    } /*else {
+                        System.out.println("no intersection with source");
+                    }*/
+                }//loop over sources
+
+                currentRayAngle += angleBetweenRays; //next ray with increased angle
+
+            } //loop over pixels
+
+
+            //sensor reading is average of pixel readings
+            lightSensor.setLightSensorValue(sumIntensity / numPixels);
+
+            System.out.println("sensor("+Ksensor+") intensity = " + lightSensor.getLightSensorValue() );        
         }
-        else
-            lightSensor.setLightSensorValue(0.0);
-    
-        scene.addObject(sensor);
-        scene.addObject(source);
-//                           System.out.printf("light sensor reading %s = %f\n",
-//            sensor.getLabel(), lightSensor.getLightSensorValue());        
-        }
-//        System.out.println("-----------");
+            System.out.println("--------------");
+
     }
-
 }
 
