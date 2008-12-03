@@ -17,6 +17,14 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 {
   public static final String NAME = "critterbot_interface";
 
+  // Scales for the different drop values
+  /** Accelerometer data is in g / 1024 */ 
+  public static final double ACCEL_SCALE    = 
+    1024.0 / ObjectStateDynamics.GRAVITY;
+
+  public static final double LIGHT_SCALE    = 100.0;
+  public static final double IRDIST_SCALE   = 100.0;
+
   protected DropInterface aDropInterface; 
 
   public SimulatorComponentCritterbotInterface(DropInterface pInterface)
@@ -112,20 +120,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
   {
     CritterStateDrop stateDrop = new CritterStateDrop();
     
-    // Set the dynamics data
-    if (pObject.getState(SimulatorComponentDynamics.NAME) != null)
-    {
-      ObjectStateDynamics dynData = (ObjectStateDynamics)
-        pObject.getState(SimulatorComponentDynamics.NAME);
-      Force f = dynData.getForceSum();
-      // @@@ Needs to be converted into proper units (I believe in g's)
-//      stateDrop.accel.x = (int)(f.vec.x * 1000);
-//      stateDrop.accel.y = (int)(f.vec.y * 1000);
-      Vector2D V=dynData.getVelocity();
-      stateDrop.accel.x=(int) V.x;
-      stateDrop.accel.y=(int) V.y;
-    }
-
     // Get all of this object's light sensors
     List<SimulatorObject> sensors = 
       pObject.getChildren(ObjectStateLightSensor.NAME);
@@ -136,7 +130,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     {
       ObjectStateLightSensor sData = (ObjectStateLightSensor)
         sen.getState(ObjectStateLightSensor.NAME);
-      stateDrop.light[idx] = (int)(sData.getLightSensorValue() * 100);
+      stateDrop.light[idx] = (int)(sData.getLightSensorValue() * LIGHT_SCALE);
       
       // Don't add more light data than we have space
       if (++idx == stateDrop.light.length) break;
@@ -149,11 +143,26 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     {
       ObjectStateIRDistanceSensor sData = (ObjectStateIRDistanceSensor)
         sen.getState(ObjectStateIRDistanceSensor.NAME);
-      stateDrop.ir_distance[idx] = (int)(sData.getSensorValue() * 100);
+      stateDrop.ir_distance[idx] = (int)(sData.getSensorValue() * IRDIST_SCALE);
       
       // Don't add more light data than we have space
       if (++idx == stateDrop.ir_distance.length) break;
     }
+
+    // Add accelerometer data
+    ObjectState os = pObject.getState(ObjectStateAccelerometer.NAME);
+
+    if (os != null)
+    {
+      ObjectStateAccelerometer sData = (ObjectStateAccelerometer)os; 
+      Vector2D xyAccel = sData.getSensorValue();
+      double zAccel = sData.getZSensorValue();
+
+      stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE);
+      stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE);
+      stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE);
+    }
+
     return stateDrop;
   }
 

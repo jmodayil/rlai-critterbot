@@ -165,12 +165,14 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
 
                             //@TODO!!!
-                            System.out.println("Collision at " + pt.point +
+                            if (false)
+                              System.out.println("Collision at " + pt.point +
                                     "between " + obj + " and " + compObj + "!");
 
                             Collision checkP = objP.collidesWith(compObjP);
                             if (checkP != null) {
-                                System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
+                                if (false)
+                                  System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
                             }
                             obj.setGeometry(objP);
                             compObj.setGeometry(compObjP);
@@ -180,7 +182,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             pt = obj.collidesWith(compObj);
                             if (pt != null) {
                                 //should probably throw exception here
-                                System.out.println("Still in collision at " + pt.point + "!!!");
+                                if (false)
+                                  System.out.println("Still in collision at " + pt.point + "!!!");
                             }
 
                             // now get the thing we can actually modify
@@ -223,7 +226,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             // angular velocity? Needs to be implemented
                             }
 
-                            System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
+                            if (false)
+                              System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
                         }
                     }
                 }
