@@ -5,6 +5,7 @@
 #define KD 25 //50
 #define SLEW_STEPS 10
 #define P_LIMIT 800
+#define I_LIMIT 22
 #define P_SCALE 3
 #define E_SCALE 4
 #define I_HIST_SIZE 100
@@ -66,6 +67,29 @@ void set_speed(int8_t speed) {
 
 int8_t current_limit(int8_t setpoint) {
 	
+	int8_t sign;
+	static int8_t current_target;
+
+	if(setpoint == 0) {
+		current_target = 0;
+		return 0;
+	}
+
+	sign = setpoint > 0 ? 1 : -1;
+
+  	if(current > I_LIMIT) {
+		current_target -= sign * current / I_LIMIT;
+		if(current_target * sign < 0)
+			current_target = 0;
+	}
+    else if(current_target != setpoint)
+		current_target += sign;
+	
+	return current_target;
+}
+
+int8_t power_limit(int8_t setpoint) {
+	
 	uint8_t i, avg;
 	uint16_t sum;
 	int16_t p_error, correction;
@@ -93,8 +117,9 @@ int8_t current_limit(int8_t setpoint) {
 		decay--;
 		return 0;
 	}
-	else
+	else {
 		return setpoint;
+	}
 
 	p_error = p_avg - P_LIMIT;
 	

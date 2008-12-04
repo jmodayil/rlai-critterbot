@@ -53,7 +53,7 @@ void spi_init_slave( void ) {
 	cli();
 	DDRB = 0x10;
 	SPCR = _BV(SPE)|_BV(CPHA)|_BV(SPIE);
-	SPDR = 0x13;
+	SPDR = 0x00;
 	sei();
 }
 
@@ -71,12 +71,16 @@ int main(void) {
 	//DDRB = (1<<4);
 	//DDRD = 0x0C;
 	//PORTD = 0x00;
-	DDRC |= 0x01;
+	DDRC |= 0x03;
 	DDRD |= 0xAC;
 
 	//PORTD &= ~(_BV(4)|_BV(5)|_BV(6));
 
 	PORTC |= 0x01;
+	PORTD |= 0x80;
+	//PORTD |= 0x0C;
+	//for(i = 0; i < 10000; i++);
+	//PORTD &= ~0x0C;
 
 	spi_init_slave();
 	fan_init();
