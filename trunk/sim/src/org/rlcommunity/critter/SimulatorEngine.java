@@ -159,14 +159,7 @@ public class SimulatorEngine {
 		SimulatorObject lightSource = new SimulatorObject("light",
 				nextObjectId++);
 
-		shape = new Polygon();
-
-		shape.addPoint(0.0, 0.0);
-		shape.addPoint(3.0, 3.0);
-		shape.addPoint(6.0, 0.0);
-		System.out.println("Shape");
-		shape.doneAddPoints();
-		lightSource.setShape(shape);
+		lightSource.setShape(null);
 		lightSource.setPosition(new Vector2D(50.0, 50.0));
 		lightSource.setSVG("lightsource");
 
