@@ -66,7 +66,7 @@ public class ObjectStateDynamics implements ObjectState {
         aVel = new Vector2D(0, 0);
         aAngVel = aTorque = 0;
         minSpeed = 0;
-        maxSpeed = 10;
+        maxSpeed = 1000;
         collisions = new LinkedList<Collision>();
     }
 

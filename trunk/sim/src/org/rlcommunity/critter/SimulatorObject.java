@@ -186,7 +186,7 @@ public class SimulatorObject {
 		else if (isects.size() == 1) {
 			// @@@ the case when we have one intersection is incorrect, as in
 			// this
-			// case it's not clearTransient what the normal is
+			// case it's not clear what the normal is
 			Collision col = new Collision();
 			Polygon.Intersection i1 = isects.get(0);
 			double alpha = i1.alpha;
@@ -658,7 +658,7 @@ public class SimulatorObject {
 		for (SimulatorObject c : aChildren)
 			c.clearTransient();
 
-		// For each of our ObjectState, clearTransient its data
+		// For each of our ObjectState, clear its data
 		for (Entry<String, ObjectState> thisEntry : aStates.entrySet()) {
 			thisEntry.getValue().clearTransient();
 		}
