@@ -14,6 +14,7 @@ import java.awt.Color;
 public class ObjectStateIRDistanceSensor implements ObjectState
 {
   public static final String NAME = SimulatorComponentIRDistance.NAME;
+  public static final boolean debugDrawRays = false;
 
   protected double aData;
   protected double aRange;
@@ -95,6 +96,14 @@ public class ObjectStateIRDistanceSensor implements ObjectState
 		  g.drawLine((int)pt.x, (int)pt.y, 
                  (int)outPoint.x, (int)outPoint.y);
       
+      if (debugDrawRays)
+      {
+        Vector2D pos = parent.getPosition();
+
+        g.drawLine ((int)pos.x, (int)pos.y, 
+          (int)pt.x, (int)pt.y);
+      }
+
       g.setColor(tempC);
     }
   }
