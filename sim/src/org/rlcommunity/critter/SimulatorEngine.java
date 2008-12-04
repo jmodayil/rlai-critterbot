@@ -328,28 +328,30 @@ public class SimulatorEngine {
 
     double pi = Math.PI;
 
-    // Oops, why are these all hardcoded? - use robot length at least! 
+    // Oops, why are these all hardcoded? - use robot length at least!
+    // The sensors are slightly inside the robot so that they fall within the
+    //  robot polygon
     double[][] irDistancePos = new double[][]
       {
         // Sensor 0 forward
-        {  20.0 ,   0.0 ,   0.0     },
+        {  19.8 ,   0.0 ,   0.0     },
         // Sensor 1 45 ccw
-        {  14.14,  14.14,  pi/4     },
+        {  14.0 ,  14.0 ,  pi/4     },
         // Sensor 2 90 ccw
-        {   0.0 ,  20.0 ,  pi/2     },
+        {   0.0 ,  19.8 ,  pi/2     },
         // Sensor 3 135 ccw
-        { -14.14,  14.14,  3 * pi/4 },
+        { -14.0 ,  14.0 ,  3 * pi/4 },
         // Sensor 4 135 cw
-        { -14.14, -14.14, -3 * pi/4 },
+        { -14.0 , -14.0 , -3 * pi/4 },
         // Sensor 5 90 cw
-        {   0.0 , -20.0 , -pi/2     },
+        {   0.0 , -19.8 , -pi/2     },
         // Sensor 6 45 cw
-        {  14.14, -14.14, -pi/4     },
+        {  14.0 , -14.0 , -pi/4     },
         // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
         { -34.0 ,  0.0 ,   pi/2    },
         // Sensor 8 - faces directly back, next to 3, arranged to miss the tail
         //  (which is at (-48,0) here)
-        { -20.0 ,   1.0 ,  -pi      },
+        { -19.8 ,   1.0 ,  -pi      },
         // Sensor 9 - a bit further back on the tail than 7 (quantify this!)
         //  faces 105 cw. This value may be wrong. 
         { -38.0 ,  -5.5 ,  -pi / 2 - pi / 12 }, 
