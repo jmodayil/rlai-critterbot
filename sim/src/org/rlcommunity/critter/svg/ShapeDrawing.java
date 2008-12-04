@@ -25,10 +25,6 @@ public class ShapeDrawing {
 
 	private final Vector2D nativeTranslation = new Vector2D();
 
-    private Vector2D position = new Vector2D();
-
-    private double direction = 0;
-
 	public ShapeDrawing(String pictureName) {
 		rootUrl = Loader.load(pictureName);
 		if (rootUrl == null) {
@@ -56,23 +52,13 @@ public class ShapeDrawing {
 		if (diagram == null)
 			return;
 		try {
-            updatePosition(position, direction);
+			setTransform(position, direction);
 			diagram.render((Graphics2D) g);
 		} catch (SVGException e) {
 			e.printStackTrace();
 			return;
 		}
 	}
-
-    public void updatePosition(Vector2D position, double direction) {
-        if ((position.x != this.position.x) ||
-            (position.y != this.position.y) ||
-            (direction != this.direction)) {
-            this.position = position;
-            this.direction = direction;
-            setTransform(position, direction);
-        }
-    }
 
 	private void setTransform(Vector2D position, double direction) {
 		// Transformations are applied from right to left, cool isn't it ?
@@ -90,8 +76,10 @@ public class ShapeDrawing {
 			Loader.universe.updateTime();
 		} catch (SVGElementException e) {
 			e.printStackTrace();
+			return;
 		} catch (SVGException e) {
 			e.printStackTrace();
+			return;
 		}
 	}
 
