@@ -5,7 +5,7 @@ package org.rlcommunity.critter;
  *
  * This component computes the sensor readings for IR distance sensors 
  *
- * @author Marc G. Bellamre
+ * @author Marc G. Bellemare
  */
 
 import java.awt.geom.Point2D;

@@ -7,7 +7,7 @@ package org.rlcommunity.critter;
  *  as modifying data for the ObjectStateDynamics state of objects, 
  *  it also is in charge of modifying position.
  *
- * @author Marc G. Bellamre
+ * @author Marc G. Bellemare
  * @author Anna Koop
  */
 public class SimulatorComponentDynamics implements SimulatorComponent {
