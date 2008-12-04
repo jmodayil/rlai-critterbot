@@ -229,7 +229,7 @@ public class SimulatorEngine {
 	}
 
 	public void debugCreateRobot() {
-		SimulatorAgent sa = new SimulatorAgent("Motor Gabor", nextObjectId++);
+		SimulatorAgent sa = new SimulatorAgent("Critterbot", nextObjectId++);
 
 		Polygon agentShape = new Polygon();
 		agentShape.addPoint(-0, 20);
@@ -257,6 +257,7 @@ public class SimulatorEngine {
 		agentShape.addPoint(7.5, 18.5);
 		System.out.println("Agent");
 		agentShape.rotate(-Math.PI / 2, new Vector2D(0, 0));
+    double robotLength = 68; // Rough length estimate
 
 		agentShape.doneAddPoints();
 
@@ -318,22 +319,51 @@ public class SimulatorEngine {
 		sa.setPosition(new Vector2D(250, 250));
 
 		// Now the IR distance sensors
-		SimulatorObject sensor = new SimulatorObject("IRSensor1", nextObjectId++);
-		sensor.addState(new ObjectStateIRDistanceSensor(100));
+		double irRange = 3 * robotLength; 
 
-		sensor.setPosition(new Vector2D(0.001, 0));
-		sensor.setDirection(0);
+    // Make a dummy object that we will not actually add
+    SimulatorObject baseIrSensor = 
+      new SimulatorObject("IRSensor-base", -1); 
+		baseIrSensor.addState(new ObjectStateIRDistanceSensor(irRange));
 
-		sa.addChild(sensor);
+    double pi = Math.PI;
 
-		sensor = new SimulatorObject("IRSensor2", nextObjectId++);
-		sensor.addState(new ObjectStateIRDistanceSensor(100));
+    // Oops, why are these all hardcoded? - use robot length at least! 
+    double[][] irDistancePos = new double[][]
+      {
+        // Sensor 0 forward
+        {  20.0 ,   0.0 ,   0.0     },
+        // Sensor 1 45 ccw
+        {  14.14,  14.14,  pi/4     },
+        // Sensor 2 90 ccw
+        {   0.0 ,  20.0 ,  pi/2     },
+        // Sensor 3 135 ccw
+        { -14.14,  14.14,  3 * pi/4 },
+        // Sensor 4 135 cw
+        { -14.14, -14.14, -3 * pi/4 },
+        // Sensor 5 90 cw
+        {   0.0 , -20.0 , -pi/2     },
+        // Sensor 6 45 cw
+        {  14.14, -14.14, -pi/4     },
+        // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
+        { -34.0 ,  0.0 ,   pi/2    },
+        // Sensor 8 - faces directly back, next to 3, arranged to miss the tail
+        //  (which is at (-48,0) here)
+        { -20.0 ,   1.0 ,  -pi      },
+        // Sensor 9 - a bit further back on the tail than 7 (quantify this!)
+        //  faces 105 cw. This value may be wrong. 
+        { -38.0 ,  -5.5 ,  -pi / 2 - pi / 12 }, 
+      };
 
-		sensor.setPosition(new Vector2D(0.001, 0));
-		sensor.setDirection(Math.PI / 2);
-
-		sa.addChild(sensor);
-
+    for (int i = 0; i < irDistancePos.length; i++)
+    {
+		  SimulatorObject sensor =  
+        baseIrSensor.makeCopy("IRSensor"+i, nextObjectId++);
+		  sensor.setPosition(
+        new Vector2D(irDistancePos[i][0], irDistancePos[i][1]));
+		  sensor.setDirection(irDistancePos[i][2]);
+		  sa.addChild(sensor);
+    }
 	}
 
 	public int debugGetElapsedTime() {
