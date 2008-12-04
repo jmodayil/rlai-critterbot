@@ -217,8 +217,7 @@ public class SimulatorEngine {
 		// Note that this polygon self-intersects at the duplicated edge
 		// (0,0)-(20,20)
 		// This polygon is also evil because everything falls within its
-		// bounding
-		// box
+		// bounding box
 		w.setShape(wallShape);
 
 		// Make the wall react to dynamics
