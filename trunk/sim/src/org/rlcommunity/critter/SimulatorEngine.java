@@ -71,6 +71,20 @@ public class SimulatorEngine {
 		aComponents.add(pComponent);
 	}
 
+	public void step() 
+  {
+		// Determine how much time has elapsed
+		// @@@ Note: the step() function per se should not be called unless
+		// we DO want to take a time step (so the clocking mechanisms should be
+		// somewhere else, e.g. in a run()-like function)
+		int ms = debugGetElapsedTime();
+
+		if (ms <= 0)
+			return;
+
+    step(ms);
+  }
+
 	/**
 	 * Takes one 'step' in the simulation. The main part of the step() method is
 	 * to invoke each SimulatorComponent in turn, to do its job. The components
@@ -85,17 +99,11 @@ public class SimulatorEngine {
 	 * 
 	 * - Arrow-controlled driving of the robot - Silly physics involving crude
 	 * collision detection and force fields - A clock synchronization mechanism
+   *
+   * @param ms Time elapsed, in milliseconds, since the last step
 	 */
-	public void step() {
-		// Determine how much time has elapsed
-		// @@@ Note: the step() function per se should not be called unless
-		// we DO want to take a time step (so the clocking mechanisms should be
-		// somewhere else, e.g. in a run()-like function)
-		int ms = debugGetElapsedTime();
-
-		if (ms <= 0)
-			return;
-
+	public void step(int ms) 
+  {
 		// Re-initialize the next state to be filled with data
 		aNextState.clear();
 
