@@ -6,7 +6,7 @@ package org.rlcommunity.critter;
  * This component deals with light-emitting objects and light sensors,
  *  pairing the two into a happy match.
  *
- * @author Marc G. Bellamre
+ * @author Marc G. Bellemare
  */
 
 public class SimulatorComponentLight implements SimulatorComponent {

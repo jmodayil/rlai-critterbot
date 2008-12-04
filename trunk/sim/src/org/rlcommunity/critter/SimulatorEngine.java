@@ -275,7 +275,8 @@ public class SimulatorEngine {
 		// Give the agent an omnidirectional drive
 		sa.addState(new ObjectStateOmnidrive());
 		sa.addState(new ObjectStateBumpSensor());
-                //sa.addState(new ObjectStateAccelerometer());
+    sa.addState(new ObjectStateAccelerometer());
+    sa.addState(new ObjectStateGyroscope());
 
 		aState.addObject(sa);
 

@@ -5,7 +5,7 @@ package org.rlcommunity.critter;
  *
  * This component deals with accelerometer sensors
  *
- * @author Marc G. Bellamre
+ * @author Marc G. Bellmare
  */
 
 import java.util.LinkedList;
@@ -51,12 +51,11 @@ public class SimulatorComponentAccelerometer implements SimulatorComponent {
 
         ObjectStateDynamics dynData = (ObjectStateDynamics)os;
 
-        // Next: store current velcoity, take diference w/ old velocity,
-        //  div. by delta, smooth out?
         Vector2D oldVel = accelData.getVelocitySample();
         Vector2D curVel = dynData.getVelocity();
 
-        //  Compute a very rough estimate of the acceleration
+        //  Compute a very rough estimate of the acceleration as a 
+        //   difference in velocities
         Vector2D accelValue = curVel.minus(oldVel).times(1000.0 / delta);
         nextAccelData.setSensorValue(accelValue);
         // Store the current velocity for the next time step

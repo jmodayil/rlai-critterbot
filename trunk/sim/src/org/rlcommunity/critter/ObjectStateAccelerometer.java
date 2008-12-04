@@ -36,15 +36,6 @@ public class ObjectStateAccelerometer implements ObjectState
     clearTransient();
   }
 
-  /** Sets the acceleration data to be the given vector 
-    *
-    * @param pAccel The new acceleration data
-    */
-  public void setAcceleration(Vector2D pAccel)
-  {
-    aAccel = new Vector2D(pAccel);
-  }
- 
   /** Returns the current acceleration data
     *
     * @return The current acceleration data of this sensor

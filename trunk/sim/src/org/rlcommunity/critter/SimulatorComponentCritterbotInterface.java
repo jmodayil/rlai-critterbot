@@ -21,7 +21,10 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
   /** Accelerometer data is in g / 1024 */ 
   public static final double ACCEL_SCALE    = 
     1024.0 / ObjectStateDynamics.GRAVITY;
-
+  
+  // All of these need to be made proper
+  public static final double GYRO_SCALE     =
+    1024.0 / (Math.PI*2);
   public static final double LIGHT_SCALE    = 100.0;
   public static final double IRDIST_SCALE   = 100.0;
 
@@ -161,6 +164,16 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE);
       stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE);
       stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE);
+    }
+
+    os = pObject.getState(ObjectStateGyroscope.NAME);
+    
+    if (os != null)
+    {
+      ObjectStateGyroscope sData = (ObjectStateGyroscope)os; 
+      double angVel = sData.getSensorValue();
+
+      stateDrop.rotation = (int)(angVel * GYRO_SCALE);
     }
 
     return stateDrop;

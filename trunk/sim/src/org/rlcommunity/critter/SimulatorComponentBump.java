@@ -6,7 +6,7 @@ package org.rlcommunity.critter;
  * This component deals with bump sensors, and possibly in the future any
  *  response to contact between two objects.
  *
- * @author Marc G. Bellamre
+ * @author Marc G. Bellemare
  */
 
 import java.util.LinkedList;

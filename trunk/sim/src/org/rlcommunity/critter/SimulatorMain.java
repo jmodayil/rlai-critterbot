@@ -21,12 +21,12 @@ public class SimulatorMain
 
     // Read in some arguments
     if (args.length < 1)
-      objPort = 2123;
+      objPort = 2323;
     else
       objPort = Integer.parseInt(args[0]);
     
     if (args.length < 2)
-      subjPort = 2124;
+      subjPort = 2324;
     else
       subjPort = Integer.parseInt(args[1]);
     
@@ -50,6 +50,7 @@ public class SimulatorMain
     engine.addComponent(new SimulatorComponentBump());
     engine.addComponent(new SimulatorComponentOmnidrive());
     engine.addComponent(new SimulatorComponentAccelerometer());
+    engine.addComponent(new SimulatorComponentGyroscope());
     engine.addComponent(
       new SimulatorComponentCritterbotInterface(dropInterface));
     engine.addComponent(new SimulatorComponentIRDistance());
