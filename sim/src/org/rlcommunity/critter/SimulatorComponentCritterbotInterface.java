@@ -17,6 +17,10 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 {
   public static final String NAME = "critterbot_interface";
 
+  /** A temporary scale to produce accel data resembling the real robot's,
+    *  until the robot is sized down */
+  public static final double ROBOT_SCALE = 100.0;
+
   // Scales for the different drop values
   /** Accelerometer data is in g / 1024 */ 
   public static final double ACCEL_SCALE    = 
@@ -26,7 +30,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
   public static final double GYRO_SCALE     =
     1024.0 / (Math.PI*2);
   public static final double LIGHT_SCALE    = 100.0;
-  public static final double IRDIST_SCALE   = 100.0;
+  public static final double IRDIST_SCALE   = 255.0;
 
   protected DropInterface aDropInterface; 
 
@@ -146,7 +150,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     {
       ObjectStateIRDistanceSensor sData = (ObjectStateIRDistanceSensor)
         sen.getState(ObjectStateIRDistanceSensor.NAME);
-      stateDrop.ir_distance[idx] = (int)(sData.getSensorValue() * IRDIST_SCALE);
+      // The IR sensors are special: they produce a MAX value when the
+      //  distance read is 0, and a MIN value at max range
+      double dist = sData.getSensorValue();
+      double range = sData.getRange();
+
+      stateDrop.ir_distance[idx] = (int)((range - dist) * IRDIST_SCALE / range);
       
       // Don't add more light data than we have space
       if (++idx == stateDrop.ir_distance.length) break;
@@ -161,9 +170,9 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       Vector2D xyAccel = sData.getSensorValue();
       double zAccel = sData.getZSensorValue();
 
-      stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE);
-      stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE);
-      stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE);
+      stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE / ROBOT_SCALE);
+      stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE / ROBOT_SCALE);
+      stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE / ROBOT_SCALE);
     }
 
     os = pObject.getState(ObjectStateGyroscope.NAME);
