@@ -22,12 +22,13 @@ import org.rlcommunity.rlglue.codec.AgentInterface;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.util.AgentLoader;
+import rlVizLib.dynamicLoading.Unloadable;
 
 /**
  *
  * @author Brian Tanner
  */
-public class CritterAgent implements AgentInterface {
+public class CritterAgent implements AgentInterface, Unloadable {
 
     Action theAction = new Action(4, 0, 0);
 
