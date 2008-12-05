@@ -26,7 +26,8 @@ import java.net.URL;
 
 public class Loader {
 
-	final static protected SVGUniverse universe = new SVGUniverse();
+	static protected SVGUniverse universe = null;
+
 	private int id;
 	final private SimulatorState state;
 
@@ -41,6 +42,11 @@ public class Loader {
                 assert url!=null : "Could not load resource: "+resourceName+" from the jar.";
                 return universe.loadSVG(url);
 	}
+        
+        public static void initSVGUniverse() {
+                universe = new SVGUniverse();
+        }
+
 
 	static protected String getNativeTransformation(SVGElement element) {
 		try {

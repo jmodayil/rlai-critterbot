@@ -82,7 +82,6 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 //        robotServ.addClient(new KeyboardClient());
         robotServ.addClient(this);
 
-        System.out.println("Creating simulator engine...");
         engine = new SimulatorEngine();
 
         engine.addComponent(new SimulatorComponentDynamics());
@@ -101,7 +100,6 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 //                theSimulatorVizualizer = new SimulatorViz(engine, null);
 //            }
 //        });
-        System.out.println("Environment inited");
 
         TaskSpecVRLGLUE3 theTaskSpec = new TaskSpecVRLGLUE3();
         theTaskSpec.setDiscountFactor(.99);
@@ -130,12 +128,11 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
         lastAction = theAction;
         stepThings();
         double theReward = theObservation.intArray[40];
-//        theReward=
         return new Reward_observation_terminal(theReward, theObservation, false);
     }
 
-    private RenderedImage getRenderedImageOfWorld() {
-        BufferedImage theImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+     private BufferedImage theImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+     private RenderedImage getRenderedImageOfWorld() {
         Graphics2D G = theImage.createGraphics();
         if (engine != null) {
             for (SimulatorObject obj : engine.getObjectList()) {
@@ -148,21 +145,18 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 
     private void stepThings() {
         int stateThrottle = 0;
-        int maxThrottle = 25;
+        int maxThrottle = 10;
 
         for (stateThrottle = 0; stateThrottle <= maxThrottle; stateThrottle++) {
-            engine.step(10);
+            engine.step(25);
             try {
-                Thread.sleep(10);
+                Thread.sleep(1);
             } catch (Exception e) {
             }
         }
     }
 
     public void env_cleanup() {
-        System.out.println("Cleanup called");
-//        theSimulatorVizualizer.die();
-//        theSimulatorVizualizer = null;
         robotServ = null;
         engine = null;
     }
@@ -185,9 +179,8 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
             String theCustomType = theMessageObject.getPayLoad();
 
             if (theCustomType.equals("GETCRITTERSCREEN")) {
-                RenderedImage theImage = getRenderedImageOfWorld();
-                String theResponseString=new CritterScreenResponse(theImage).makeStringResponse();
-                System.out.println("The encoded string has length:"+theResponseString.length());
+                RenderedImage newImage = getRenderedImageOfWorld();
+                String theResponseString=new CritterScreenResponse(newImage).makeStringResponse();
                 return theResponseString;
             }
 
