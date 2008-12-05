@@ -23,13 +23,22 @@ import java.util.LinkedList;
 
 import org.rlcommunity.critter.Clients.DropClient;
 import org.rlcommunity.critter.Drops.*;
+import org.rlcommunity.critter.SimulatorComponentAccelerometer;
+import org.rlcommunity.critter.SimulatorComponentBump;
 import org.rlcommunity.critter.SimulatorComponentCritterbotInterface;
 import org.rlcommunity.critter.SimulatorComponentDynamics;
+import org.rlcommunity.critter.SimulatorComponentGyroscope;
+import org.rlcommunity.critter.SimulatorComponentIRDistance;
+import org.rlcommunity.critter.SimulatorComponentLight;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorEngine;
 import org.rlcommunity.critter.SimulatorViz;
 import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
+import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
+import org.rlcommunity.rlglue.codec.taskspec.TaskSpecVRLGLUE3;
+import org.rlcommunity.rlglue.codec.taskspec.ranges.DoubleRange;
+import org.rlcommunity.rlglue.codec.taskspec.ranges.IntRange;
 import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
@@ -43,7 +52,8 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
 
     DropInterface robotServ = null;
     SimulatorEngine engine = null;
-    Observation theObservation=new Observation(0,5,0);
+    SimulatorViz theSimulatorVizualizer=null;
+    Observation theObservation = new Observation(84, 0, 0);
 
     public String env_init() {
         int objPort, subjPort;
@@ -51,14 +61,11 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         objPort = 2323;
         subjPort = 2324;
 
-        System.out.println("Creating simulator engine...");
-        engine = new SimulatorEngine();
-        engine.addComponent(new SimulatorComponentDynamics());
-        engine.addComponent(new SimulatorComponentOmnidrive());
+
 
         // Get the first agent from the engine
         //SimulatorAgent agent = engine.getAgentList().getFirst();
-  
+
         // @@@ MGB: I've taken out the Disco client - to add it, look
         //  at SimulatorMain for the part that creates a DiscoInterfaceServer
         // Create a drop server to send and receive robot (subjective) data
@@ -66,19 +73,44 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
 //        robotServ.addClient(new KeyboardClient());
         robotServ.addClient(this);
 
+        System.out.println("Creating simulator engine...");
+        engine = new SimulatorEngine();
+
+        engine.addComponent(new SimulatorComponentDynamics());
+        engine.addComponent(new SimulatorComponentLight());
+        engine.addComponent(new SimulatorComponentBump());
+        engine.addComponent(new SimulatorComponentOmnidrive());
+        engine.addComponent(new SimulatorComponentAccelerometer());
+        engine.addComponent(new SimulatorComponentGyroscope());
         engine.addComponent(
-          new SimulatorComponentCritterbotInterface(robotServ));
+                new SimulatorComponentCritterbotInterface(robotServ));
+        engine.addComponent(new SimulatorComponentIRDistance());
 
         javax.swing.SwingUtilities.invokeLater(new Runnable() {
 
             public void run() {
-                new SimulatorViz(engine,null);
+                theSimulatorVizualizer=new SimulatorViz(engine, null);
             }
         });
         System.out.println("Environment inited");
 
-        int taskSpecVersion = 2;
-        return taskSpecVersion + ":e:5_[f,f,f,f,f]_[-300,300]_[-300,300]_[0,500]_[0,500]_[-"+Math.PI+","+Math.PI+"]:1_[i]_[0,3]:[-1,0]";
+        TaskSpecVRLGLUE3 theTaskSpec=new TaskSpecVRLGLUE3();
+        theTaskSpec.setDiscountFactor(.99);
+        IntRange theObsRange=new IntRange(80);
+        theObsRange.setMinUnspecified();
+        theObsRange.setMaxUnspecified();
+        theTaskSpec.addDiscreteObservation(theObsRange);
+        
+        IntRange theModeAction=new IntRange(1,1);
+        IntRange theActionRange=new IntRange(-100,100,3);
+        theTaskSpec.addDiscreteAction(theModeAction);
+        theTaskSpec.addDiscreteAction(theActionRange);
+        
+        theTaskSpec.setRewardRange(new DoubleRange(0,100));
+        theTaskSpec.setExtra("EnvName:ExpandedCritter");
+        TaskSpec.checkTaskSpec(theTaskSpec.toTaskSpec());
+        
+        return theTaskSpec.toTaskSpec();
     }
 
     public Observation env_start() {
@@ -86,34 +118,33 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
     }
 
     public Reward_observation_terminal env_step(Action theAction) {
-        lastAction=theAction;
+        lastAction = theAction;
         stepThings();
-        double theReward=theObservation.doubleArray[1]*theObservation.doubleArray[1];
-        return new Reward_observation_terminal(theReward,theObservation,false);
+        double theReward = theObservation.intArray[40];
+//        theReward=
+        return new Reward_observation_terminal(theReward, theObservation, false);
     }
 
     private void stepThings() {
         int stateThrottle = 0;
-        int maxThrottle=5;
+        int maxThrottle = 25;
 
         for (stateThrottle = 0; stateThrottle <= maxThrottle; stateThrottle++) {
-      engine.step();
-
-//      try {
-//		Thread.sleep(9);
-//      } catch (InterruptedException e) {
-//		// TODO Auto-generated catch block
-//		e.printStackTrace();
-//      }
-
-      }
-      //objServer.sendlastAction.intArray[0]date(engine.getState());
-      //subjServer.sendlastAction.intArray[0]date();
-      //subjServer.receiveData();
+            engine.step(10);
+            try{
+            Thread.sleep(10);
+            }catch(Exception e){
+                
+            }
+        }
     }
 
-
     public void env_cleanup() {
+        System.out.println("Cleanup called");
+        theSimulatorVizualizer.die();
+        theSimulatorVizualizer=null;
+        robotServ=null;
+        engine=null;
     }
 
     public String env_message(String arg0) {
@@ -125,51 +156,77 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         L.run();
     }
     Action lastAction = new Action(0, 4);
+    long lastDropTime = System.currentTimeMillis();
+    long keyboardDropInterval = 1;
 
-    long lastDropTime=System.currentTimeMillis();
-    long keyboardDropInterval=1;
+    /**
+     * This is where actions are received for the simulator
+     * @return
+     */
     public List<SimulatorDrop> receive() {
-        double velocityX,  torque;
-        int maxVel=25;
-        int maxTorque=10;
-       
         LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
 
-        if(System.currentTimeMillis()-lastDropTime >= keyboardDropInterval)
-        {
-          int up,down,left,right;
-          up=down=left=right=0;
-        
-          if(lastAction.intArray[0]==0)up=1;
-          if(lastAction.intArray[0]==1)down=1;
-          if(lastAction.intArray[0]==2)left=1;
-          if(lastAction.intArray[0]==3)right=1;
-        
-          velocityX = (up * maxVel - down * maxVel);
-          torque = (left * -maxTorque + right * maxTorque);
-          CritterControlDrop controlDrop = new CritterControlDrop();
-          controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-          controlDrop.x_vel = (int) velocityX;
-          controlDrop.y_vel = 0;
-          controlDrop.theta_vel = (int) torque;
-          lastDropTime=System.currentTimeMillis();
+        if (System.currentTimeMillis() - lastDropTime >= keyboardDropInterval) {
+            CritterControlDrop controlDrop = new CritterControlDrop();
+            controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
+            controlDrop.x_vel=lastAction.intArray[1];
+            controlDrop.y_vel=lastAction.intArray[2];
+            controlDrop.theta_vel=lastAction.intArray[3];
+            
+            lastDropTime = System.currentTimeMillis();
 
-          dropList.add(controlDrop);
+            dropList.add(controlDrop);
         }
 
-      return dropList;
+        return dropList;
     }
 
+    
+    /**
+     * This is to send away from the simulator
+     * @param pData
+     */
     public void send(SimulatorDrop pData) {
-        CritterStateDrop theStateDrop=(CritterStateDrop)pData;
-        theObservation.doubleArray[0]=theStateDrop.accel.x;
-        theObservation.doubleArray[1]=theStateDrop.accel.y;
-        Vector2D thePos=engine.getAgentList().get(0).getPosition();
-        theObservation.doubleArray[2]=thePos.x;
-        theObservation.doubleArray[3]=thePos.y;
-        theObservation.doubleArray[4]=engine.getAgentList().get(0).getDirection();
-        
-//        System.out.println(theObservation.doubleArray[0]);
-//        System.out.println(theObservation.doubleArray[1]);
+        CritterStateDrop theStateDrop = (CritterStateDrop) pData;
+        int place = 0;
+        int i = 0;
+        theObservation.intArray[place++] = theStateDrop.bus_voltage;
+        theObservation.intArray[place++] = theStateDrop.batv40;
+        theObservation.intArray[place++] = theStateDrop.batv160;
+        theObservation.intArray[place++] = theStateDrop.batv280;
+        theObservation.intArray[place++] = theStateDrop.motor100.velocity;
+        theObservation.intArray[place++] = theStateDrop.motor100.current;
+        theObservation.intArray[place++] = theStateDrop.motor100.temp;
+        theObservation.intArray[place++] = theStateDrop.motor220.velocity;
+        theObservation.intArray[place++] = theStateDrop.motor220.current;
+        theObservation.intArray[place++] = theStateDrop.motor220.temp;
+        theObservation.intArray[place++] = theStateDrop.motor340.velocity;
+        theObservation.intArray[place++] = theStateDrop.motor340.current;
+        theObservation.intArray[place++] = theStateDrop.motor340.temp;
+        theObservation.intArray[place++] = theStateDrop.mag.x;
+        theObservation.intArray[place++] = theStateDrop.mag.y;
+        theObservation.intArray[place++] = theStateDrop.mag.z;
+        theObservation.intArray[place++] = theStateDrop.accel.x;
+        theObservation.intArray[place++] = theStateDrop.accel.y;
+        theObservation.intArray[place++] = theStateDrop.accel.z;
+        theObservation.intArray[place++] = theStateDrop.rotation;
+        theObservation.intArray[place++] = theStateDrop.error_flags;
+        theObservation.intArray[place++] = theStateDrop.cycle_time;
+
+        for (i = 0; i < 10; i++) {
+            theObservation.intArray[place++] = theStateDrop.ir_distance[i];
+        }
+        for (i = 0; i < 8; i++) {
+            theObservation.intArray[place++] = theStateDrop.ir_light[i];
+        }
+        for (i = 0; i < 4; i++) {
+            theObservation.intArray[place++] = theStateDrop.light[i];
+        }
+        for (i = 0; i < 8; i++) {
+            theObservation.intArray[place++] = theStateDrop.thermal[i];
+        }
+        for (i = 0; i < 32; i++) {
+            theObservation.intArray[place++] = theStateDrop.bump[i];
+        }
     }
 }

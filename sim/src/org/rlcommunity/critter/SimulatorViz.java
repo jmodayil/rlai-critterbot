@@ -59,6 +59,10 @@ public final class SimulatorViz extends JFrame {
         setVisible(true);
     }
 
+    public void die() {
+        this.dispose();
+    }
+
 //    void addKeyListenerToWorld(KeyboardClient theKeyboardClient) {
 //        world.addKeyListener(theKeyboardClient);
 //    }

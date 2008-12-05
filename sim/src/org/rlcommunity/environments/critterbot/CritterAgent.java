@@ -46,6 +46,7 @@ public class CritterAgent implements AgentInterface {
 
     public Action agent_step(double theReward, Observation theObservation) {
         int[] theArray=theObservation.intArray;
+        System.out.print(""+theArray.length+" observations: ");
         for (int i : theArray) {
             System.out.print(i+" ");
         }
