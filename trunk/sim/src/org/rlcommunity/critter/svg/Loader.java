@@ -36,7 +36,7 @@ public class Loader {
 	}
 
 	static protected URI load(String pictureName) {
-		String resourceName = String.format("/data/%s.svg", pictureName);
+		String resourceName = String.format("/resources/%s.svg", pictureName);
                 URL url = Loader.class.getResource(resourceName);
                 assert url!=null : "Could not load resource: "+resourceName+" from the jar.";
                 return universe.loadSVG(url);
