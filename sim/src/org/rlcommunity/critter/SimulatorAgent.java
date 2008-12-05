@@ -34,8 +34,7 @@ public class SimulatorAgent extends SimulatorObject {
 		super(pLabel, pId);
 		aCmdX = aCmdY = aCmdTheta;
 		try {
-			URL url = this.getClass().getResource("robotop.png");
-			System.out.println("Read image: " + url.toString());
+			URL url = this.getClass().getResource("/data/robotop.png");
 			robotop = ImageIO.read(url);
 			robotop = robotop.getScaledInstance(40, 68, Image.SCALE_SMOOTH);
 		} catch (IOException ioe) {

@@ -22,6 +22,7 @@ import com.kitfox.svg.SVGException;
 import com.kitfox.svg.SVGUniverse;
 import com.kitfox.svg.ShapeElement;
 import com.kitfox.svg.animation.AnimationElement;
+import java.net.URL;
 
 public class Loader {
 
@@ -35,16 +36,10 @@ public class Loader {
 	}
 
 	static protected URI load(String pictureName) {
-		String svgFile = String.format("./data/%s.svg", pictureName);
-		try {
-			return universe.loadSVG(new FileInputStream(svgFile), pictureName);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-			return null;
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
+		String resourceName = String.format("/data/%s.svg", pictureName);
+                URL url = Loader.class.getResource(resourceName);
+                assert url!=null : "Could not load resource: "+resourceName+" from the jar.";
+                return universe.loadSVG(url);
 	}
 
 	static protected String getNativeTransformation(SVGElement element) {
