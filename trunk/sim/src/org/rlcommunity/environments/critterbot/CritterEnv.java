@@ -18,6 +18,9 @@
  */
 package org.rlcommunity.environments.critterbot;
 
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -32,8 +35,11 @@ import org.rlcommunity.critter.SimulatorComponentIRDistance;
 import org.rlcommunity.critter.SimulatorComponentLight;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorEngine;
+import org.rlcommunity.critter.SimulatorObject;
 import org.rlcommunity.critter.SimulatorViz;
 import org.rlcommunity.critter.Vector2D;
+import org.rlcommunity.environments.critterbot.messages.CritterScreenResponse;
+import org.rlcommunity.environments.critterbot.visualizer.CritterEnvVisualizer;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpecVRLGLUE3;
@@ -43,16 +49,19 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
+import rlVizLib.messaging.environment.EnvironmentMessageParser;
+import rlVizLib.messaging.environment.EnvironmentMessages;
+import rlVizLib.messaging.interfaces.HasAVisualizerInterface;
 
 /**
  *
  * @author Brian Tanner
  */
-public class CritterEnv implements EnvironmentInterface, DropClient {
+public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisualizerInterface {
 
     DropInterface robotServ = null;
     SimulatorEngine engine = null;
-    SimulatorViz theSimulatorVizualizer=null;
+//    SimulatorViz theSimulatorVizualizer = null;
     Observation theObservation = new Observation(84, 0, 0);
 
     public String env_init() {
@@ -86,30 +95,30 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
                 new SimulatorComponentCritterbotInterface(robotServ));
         engine.addComponent(new SimulatorComponentIRDistance());
 
-        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-
-            public void run() {
-                theSimulatorVizualizer=new SimulatorViz(engine, null);
-            }
-        });
+//        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+//
+//            public void run() {
+//                theSimulatorVizualizer = new SimulatorViz(engine, null);
+//            }
+//        });
         System.out.println("Environment inited");
 
-        TaskSpecVRLGLUE3 theTaskSpec=new TaskSpecVRLGLUE3();
+        TaskSpecVRLGLUE3 theTaskSpec = new TaskSpecVRLGLUE3();
         theTaskSpec.setDiscountFactor(.99);
-        IntRange theObsRange=new IntRange(80);
+        IntRange theObsRange = new IntRange(80);
         theObsRange.setMinUnspecified();
         theObsRange.setMaxUnspecified();
         theTaskSpec.addDiscreteObservation(theObsRange);
-        
-        IntRange theModeAction=new IntRange(1,1);
-        IntRange theActionRange=new IntRange(-100,100,3);
+
+        IntRange theModeAction = new IntRange(1, 1);
+        IntRange theActionRange = new IntRange(-100, 100, 3);
         theTaskSpec.addDiscreteAction(theModeAction);
         theTaskSpec.addDiscreteAction(theActionRange);
-        
-        theTaskSpec.setRewardRange(new DoubleRange(0,100));
+
+        theTaskSpec.setRewardRange(new DoubleRange(0, 100));
         theTaskSpec.setExtra("EnvName:ExpandedCritter");
         TaskSpec.checkTaskSpec(theTaskSpec.toTaskSpec());
-        
+
         return theTaskSpec.toTaskSpec();
     }
 
@@ -125,29 +134,72 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         return new Reward_observation_terminal(theReward, theObservation, false);
     }
 
+    private RenderedImage getRenderedImageOfWorld() {
+        BufferedImage theImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D G = theImage.createGraphics();
+        if (engine != null) {
+            for (SimulatorObject obj : engine.getObjectList()) {
+                obj.draw(G);
+            }
+        }
+        return theImage;
+
+    }
+
     private void stepThings() {
         int stateThrottle = 0;
         int maxThrottle = 25;
 
         for (stateThrottle = 0; stateThrottle <= maxThrottle; stateThrottle++) {
             engine.step(10);
-            try{
-            Thread.sleep(10);
-            }catch(Exception e){
-                
+            try {
+                Thread.sleep(10);
+            } catch (Exception e) {
             }
         }
     }
 
     public void env_cleanup() {
         System.out.println("Cleanup called");
-        theSimulatorVizualizer.die();
-        theSimulatorVizualizer=null;
-        robotServ=null;
-        engine=null;
+//        theSimulatorVizualizer.die();
+//        theSimulatorVizualizer = null;
+        robotServ = null;
+        engine = null;
     }
 
-    public String env_message(String arg0) {
+    public String env_message(String theMessage) {
+        EnvironmentMessages theMessageObject;
+        try {
+            theMessageObject = EnvironmentMessageParser.parseMessage(theMessage);
+        } catch (Exception e) {
+            System.err.println("Someone sent CritterEnv a message that wasn't RL-Viz compatible");
+            return "I only respond to RL-Viz messages!";
+        }
+
+        if (theMessageObject.canHandleAutomatically(this)) {
+            return theMessageObject.handleAutomatically(this);
+        }
+
+        if (theMessageObject.getTheMessageType() == rlVizLib.messaging.environment.EnvMessageType.kEnvCustom.id()) {
+
+            String theCustomType = theMessageObject.getPayLoad();
+
+            if (theCustomType.equals("GETCRITTERSCREEN")) {
+                RenderedImage theImage = getRenderedImageOfWorld();
+                String theResponseString=new CritterScreenResponse(theImage).makeStringResponse();
+                System.out.println("The encoded string has length:"+theResponseString.length());
+                return theResponseString;
+            }
+
+            System.out.println("We need some code written in Env Message for CritterEnv.. unknown custom message type received" + theMessage);
+            Thread.dumpStack();
+
+            return null;
+        }
+
+        System.out.println("We need some code written in Env Message for  Acrobot!");
+        Thread.dumpStack();
+
         return null;
     }
 
@@ -169,10 +221,10 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         if (System.currentTimeMillis() - lastDropTime >= keyboardDropInterval) {
             CritterControlDrop controlDrop = new CritterControlDrop();
             controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-            controlDrop.x_vel=lastAction.intArray[1];
-            controlDrop.y_vel=lastAction.intArray[2];
-            controlDrop.theta_vel=lastAction.intArray[3];
-            
+            controlDrop.x_vel = lastAction.intArray[1];
+            controlDrop.y_vel = lastAction.intArray[2];
+            controlDrop.theta_vel = lastAction.intArray[3];
+
             lastDropTime = System.currentTimeMillis();
 
             dropList.add(controlDrop);
@@ -181,7 +233,6 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         return dropList;
     }
 
-    
     /**
      * This is to send away from the simulator
      * @param pData
@@ -228,5 +279,9 @@ public class CritterEnv implements EnvironmentInterface, DropClient {
         for (i = 0; i < 32; i++) {
             theObservation.intArray[place++] = theStateDrop.bump[i];
         }
+    }
+
+    public String getVisualizerClassName() {
+        return CritterEnvVisualizer.class.getName();
     }
 }
