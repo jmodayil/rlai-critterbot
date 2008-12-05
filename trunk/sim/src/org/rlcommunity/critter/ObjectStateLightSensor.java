@@ -75,7 +75,6 @@ public class ObjectStateLightSensor implements ObjectState
     protected void setNumPixels (int pixels)
   {
       aNumPixels = pixels;
-      assert(pixels%2 != 0);
   }
   
   protected int getNumPixels ()
