@@ -41,62 +41,73 @@ public class SimulatorComponentLight implements SimulatorComponent {
         ObjectStateLightSource lightSource;
         Vector2D srcPosition;
 
-        for (int Ksensor = 0; Ksensor < pNext.getObjects(ObjectStateLightSensor.NAME).size(); Ksensor++) {            
+        for (int Ksensor = 0; Ksensor < pNext.getObjects(ObjectStateLightSensor.NAME).size(); Ksensor++) 
+        {            
             sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(Ksensor);
             lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
             sensorPosition = sensor.getPosition();
 
             oldSensor = pCurrent.getObject(sensor);
             oldLightSensor = (ObjectStateLightSensor) oldSensor.getState(ObjectStateLightSensor.NAME);
-
+           
             double sensorWidth = oldLightSensor.getSensorWidth();
             int numPixels = oldLightSensor.getNumPixels();
             double sensorDepth = oldLightSensor.getSensorDepth();
 
-            double angleBetweenRays = Math.atan((sensorWidth / numPixels) / sensorDepth);
-            if (sensor.getDirection() < 0.0) {
-                angleBetweenRays *= -1;
-            }
-            double currentRayAngle = sensor.getDirection() - (Math.floor(numPixels / 2)) * angleBetweenRays;
+            double angleBetweenRays = (Math.atan((sensorWidth / numPixels) / sensorDepth));
 
+            double currentRayAngle=0;
+            //even or odd number of pixels..compute orientation of first ray in sensor (counter clockwise rotation from orientation of sensor).
+            if(numPixels % 2 == 0) currentRayAngle = sensor.getDirection() - angleBetweenRays/2.0 + (Math.floor(numPixels / 2)) * angleBetweenRays; 
+            else currentRayAngle = oldSensor.getDirection() + (Math.floor(numPixels / 2)) * angleBetweenRays;                
+  
+            //correct if first ray rotates through PI -PI boarder
+            if(currentRayAngle > Math.PI) currentRayAngle = -Math.PI + currentRayAngle - Math.PI;
+           
             double sumIntensity = 0; //store total intensity of each pixel in the sensor
             //for each pixel in the sensor
-            for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
-                //figure out direction of ray i
-                if (currentRayAngle > Math.PI) {
-                    currentRayAngle = -Math.PI + Math.abs(currentRayAngle - Math.PI);
-                }
-                if (currentRayAngle < -Math.PI) {
-                    currentRayAngle = Math.PI - Math.abs(currentRayAngle - Math.PI);
-                }
+            for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) 
+            {
+                //as we rotate clockwise through pixels may cross PI -PI boarder
+                if (currentRayAngle < -Math.PI) currentRayAngle = Math.PI + currentRayAngle + Math.PI;
+                
+                //create ray                 
                 rayDirection = Vector2D.unitVector(currentRayAngle);
                 rayDirection.normalize();
-
                 r = new Ray(sensorPosition, rayDirection);
 
+                //remove robot so it doesn't block ray
                 scene.removeSubtree(oldSensor.getRoot());
 
                 //find out first point (object) ray i intersects with
                 intersectData = scene.traceRay(r);
 
+                //angle between robot's sensor ray and surface normal 
                 double angle1 = sensorPosition.minus(intersectData.point).direction();
                 double angle2 = intersectData.normal.direction();
                 double angleOfIncidence = Math.abs(angle1) - Math.abs(angle2);
-   
-                
+
+                //put robot back in...robot may block light on intersection point
                 scene.addSubtree(oldSensor.getRoot());
                 
-                for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) {
+                //for each light source sum up intensity at intersection point
+                for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) 
+                {
                     source = pCurrent.getObjects(ObjectStateLightSource.NAME).get(Jsource);
                     lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
 
                     srcPosition = source.getPosition();
+                    //light source should have no polygon...incase marc changes his name
                     scene.removeSubtree(source.getRoot());
                     
+                    //find angle between light source and surface normal
                     angle1 = srcPosition.minus(intersectData.point).direction();
-                    double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);                    
+                    double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);        
 
-                    if (scene.isVisible(srcPosition, intersectData.point)) {
+                    //is point illuminated?
+                    if (scene.isVisible(srcPosition, intersectData.point)) 
+                    {
+                        //intensity at sensor is function of distance and angles of incidence
                         double intensity = lightSource.getIntensity() * (1.0 / Math.pow(srcPosition.distance(intersectData.point), 2)) + Math.abs(Math.cos(angleOfIncidence)*Math.cos(angleOfIncidence2)) * lightSource.getIntensity() * (1.0 / Math.pow(intersectData.point.distance(sensorPosition), 2));
 
                         //sum up light from multiple sources and from each pixel
@@ -104,16 +115,19 @@ public class SimulatorComponentLight implements SimulatorComponent {
                     } 
                 }//loop over sources
 
-                currentRayAngle += angleBetweenRays; //next ray with increased angle
+                currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
 
             } //loop over pixels
 
 
             //sensor reading is average of pixel readings
             lightSensor.setLightSensorValue(sumIntensity / numPixels);
-
+            
             //System.out.println("sensor("+Ksensor+") intensity = " + lightSensor.getLightSensorValue() );        
-        }
+            
+        } //loop over sensors
+            //System.out.println("------");
+        
     }
 }
 

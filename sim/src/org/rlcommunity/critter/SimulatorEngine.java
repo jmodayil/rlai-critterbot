@@ -164,7 +164,7 @@ public class SimulatorEngine {
 
 		aState.addObject(hex);
 
-		SimulatorObject lightSource = new SimulatorObject("light",
+		SimulatorObject lightSource = new SimulatorObject("light1",
 				nextObjectId++);
 
 		lightSource.setShape(null);
@@ -176,6 +176,23 @@ public class SimulatorEngine {
 		lightSource.addState(specificLightSource);
 
 		aState.addObject(lightSource);
+                
+//                lightSource = new SimulatorObject("light2",
+//				nextObjectId++);
+//
+//		shape = new Polygon();
+//
+//		shape.addPoint(0.0, 0.0);
+//		shape.addPoint(3.0, 3.0);
+//		shape.addPoint(6.0, 0.0);
+//		System.out.println("Shape");
+//		shape.doneAddPoints();
+//		lightSource.setShape(shape);
+//		lightSource.setPosition(new Vector2D(400.0, 50.0));
+//		lightSource.setSVG("lightsource");
+//
+//		lightSource.addState(specificLightSource);
+//		aState.addObject(lightSource);                
 
 		Loader svgLoader = new Loader(aState, nextObjectId);
 		svgLoader.loadStaticObject("book", new Vector2D(345, 267), 5);
@@ -276,8 +293,9 @@ public class SimulatorEngine {
 		// Give the agent an omnidirectional drive
 		sa.addState(new ObjectStateOmnidrive());
 		sa.addState(new ObjectStateBumpSensor());
-    sa.addState(new ObjectStateAccelerometer());
-    sa.addState(new ObjectStateGyroscope());
+
+                sa.addState(new ObjectStateAccelerometer());
+                sa.addState(new ObjectStateGyroscope());
 
 		aState.addObject(sa);
 
@@ -294,11 +312,11 @@ public class SimulatorEngine {
 		 */
 		// These three light sensors have no shape!
 		lightSensor.setPosition(new Vector2D(20.001, 0));
-                lightSensor.setLocalDirection(0.0);
+              //  lightSensor.setLocalDirection(0.0);
                 ObjectStateLightSensor specificLightSensor = new ObjectStateLightSensor();
-                specificLightSensor.setNumPixels(21);
+                specificLightSensor.setNumPixels(11);
                 specificLightSensor.setSensorDepth(10.0);
-                specificLightSensor.setSensorWidth(20.0);
+                specificLightSensor.setSensorWidth(5.0);
 		lightSensor.addState(specificLightSensor);
 
 
@@ -306,15 +324,15 @@ public class SimulatorEngine {
 
 
 		// Create two more light sensors
-//		sensor = sensor.makeCopy("LightSensor2", nextObjectId++);
-//		sensor.setPosition(new Vector2D(0, -20.001));
-//                sensor.setLocalDirection(-Math.PI/2.0);
-//		sa.addChild(sensor);
-//
-//		sensor = sensor.makeCopy("LightSensor3", nextObjectId++);
-//		sensor.setPosition(new Vector2D(0, 20.001));
-//                sensor.setLocalDirection(-Math.PI);                
-//		sa.addChild(sensor);
+		lightSensor = lightSensor.makeCopy("LightSensor2", nextObjectId++);
+		lightSensor.setPosition(new Vector2D(0, -20.001));
+                lightSensor.setLocalDirection(-Math.PI/2.0);
+		sa.addChild(lightSensor);
+
+		lightSensor = lightSensor.makeCopy("LightSensor3", nextObjectId++);
+		lightSensor.setPosition(new Vector2D(0, 20.001));
+                lightSensor.setLocalDirection(-Math.PI);                
+		sa.addChild(lightSensor);
 
 		sa.setPosition(new Vector2D(250, 250));
 
