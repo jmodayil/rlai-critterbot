@@ -5,38 +5,28 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 
-import java.awt.geom.Ellipse2D;
-import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
-import java.util.Observable;
-import java.util.Observer;
 import org.rlcommunity.environments.critterbot.messages.CritterScreenRequest;
-import rlVizLib.visualization.SelfUpdatingVizComponent;
+import rlVizLib.visualization.PollingVizComponent;
 import rlVizLib.visualization.VizComponentChangeListener;
 
-public class CritterImageComponent implements SelfUpdatingVizComponent, Observer {
+public class CritterImageComponent implements PollingVizComponent {
 
-    private CritterEnvVisualizer critterViz;
-    RenderedImage nextImage=null;
-
-    int lastUpdateStep = -1;
+    RenderedImage nextImage = null;
 
     public CritterImageComponent(CritterEnvVisualizer acrobotVisualizer) {
-        critterViz = acrobotVisualizer;
-        acrobotVisualizer.getTheGlueState().addObserver(this);
     }
 
     public void render(Graphics2D g) {
-        RenderedImage thisImage=nextImage;
-        if(thisImage==null)return;
-        
+        RenderedImage thisImage = CritterScreenRequest.Execute().getImage();
+
         AffineTransform saveAT = g.getTransform();
         g.setColor(Color.WHITE);
         g.fill(new Rectangle(1, 1));
         g.scale(.002, .002);
 
         g.drawRenderedImage(thisImage, null);
-        
+
         g.setTransform(saveAT);
     }
     /**
@@ -48,15 +38,7 @@ public class CritterImageComponent implements SelfUpdatingVizComponent, Observer
         this.theChangeListener = theChangeListener;
     }
 
-    /**
-     * This will be called when TinyGlue steps.
-     * @param o
-     * @param arg
-     */
-    public void update(Observable o, Object arg) {
-        if (theChangeListener != null) {
-            nextImage=CritterScreenRequest.Execute().getImage();
-            theChangeListener.vizComponentChanged(this);
-        }
+    public boolean update() {
+        return true;
     }
 }

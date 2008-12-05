@@ -3,6 +3,7 @@ package org.rlcommunity.environments.critterbot.visualizer;
 import rlVizLib.general.TinyGlue;
 import rlVizLib.visualization.AbstractVisualizer;
 import rlVizLib.visualization.GenericScoreComponent;
+import rlVizLib.visualization.PollingVizComponent;
 import rlVizLib.visualization.SelfUpdatingVizComponent;
 import rlVizLib.visualization.interfaces.GlueStateProvider;
 
@@ -12,7 +13,7 @@ public class CritterEnvVisualizer extends AbstractVisualizer implements GlueStat
 	public CritterEnvVisualizer(TinyGlue theGlueState)  {
 		super();
                 this.theGlueState=theGlueState;
-		SelfUpdatingVizComponent theAcrobotVisualizer= new CritterImageComponent(this);
+		PollingVizComponent theAcrobotVisualizer= new CritterImageComponent(this);
 		SelfUpdatingVizComponent theAcrobotCounter = new GenericScoreComponent(this);
 		
 		addVizComponentAtPositionWithSize(theAcrobotVisualizer,0,0,1.0,1.0);

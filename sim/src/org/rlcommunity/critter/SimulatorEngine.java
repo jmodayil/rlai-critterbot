@@ -130,8 +130,12 @@ public class SimulatorEngine {
 
 	public void debugCreateStuff() {
 		Polygon shape;
-		debugCreateWall();
+                
+                Loader.initSVGUniverse();		
+                
+                debugCreateWall();
 		debugCreateRobot();
+
 		// Add an hexagonal obstacle
 		SimulatorObject hex = new SimulatorObject("Hex", nextObjectId++);
 

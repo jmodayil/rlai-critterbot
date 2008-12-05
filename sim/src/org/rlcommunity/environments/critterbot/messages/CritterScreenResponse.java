@@ -65,7 +65,7 @@ public class CritterScreenResponse extends AbstractResponse {
             theResponseBuffer.append(MessageValueType.kString.id());
             theResponseBuffer.append(" VALS=");
             ByteArrayOutputStream BOS = new ByteArrayOutputStream();
-            ImageIO.write(theImage, "PNG", new BufferedOutputStream(BOS));
+            ImageIO.write(theImage, "png", new BufferedOutputStream(BOS));
             BOS.close();
             byte[] theStringBytes = BOS.toByteArray();
             byte[] b64encoded=Base64.encodeBase64(theStringBytes);
