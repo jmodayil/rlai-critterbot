@@ -311,30 +311,35 @@ public class SimulatorEngine {
 		 * sensor.setShape(shape);
 		 */
 		// These three light sensors have no shape!
-		lightSensor.setPosition(new Vector2D(20.001, 0));
-              //  lightSensor.setLocalDirection(0.0);
-                ObjectStateLightSensor specificLightSensor = new ObjectStateLightSensor();
-                specificLightSensor.setNumPixels(11);
-                specificLightSensor.setSensorDepth(10.0);
-                specificLightSensor.setSensorWidth(5.0);
+		lightSensor.setPosition(new Vector2D(19.8, 0));
+    lightSensor.setDirection(0);
+    //  lightSensor.setLocalDirection(0.0);
+    ObjectStateLightSensor specificLightSensor = new ObjectStateLightSensor();
+    specificLightSensor.setNumPixels(11);
+    specificLightSensor.setSensorDepth(10.0);
+    specificLightSensor.setSensorWidth(5.0);
 		lightSensor.addState(specificLightSensor);
-
 
 		sa.addChild(lightSensor);
 
 
 		// Create two more light sensors
 		lightSensor = lightSensor.makeCopy("LightSensor2", nextObjectId++);
-		lightSensor.setPosition(new Vector2D(0, -20.001));
+		lightSensor.setPosition(new Vector2D(0, -19.8));
                 lightSensor.setLocalDirection(-Math.PI/2.0);
 		sa.addChild(lightSensor);
 
 		lightSensor = lightSensor.makeCopy("LightSensor3", nextObjectId++);
-		lightSensor.setPosition(new Vector2D(0, 20.001));
-                lightSensor.setLocalDirection(-Math.PI);                
+		lightSensor.setPosition(new Vector2D(0, 19.8));
+                lightSensor.setLocalDirection(-Math.PI/2.0); 
 		sa.addChild(lightSensor);
 
-		sa.setPosition(new Vector2D(250, 250));
+		lightSensor = lightSensor.makeCopy("LightSensor4", nextObjectId++);
+		lightSensor.setPosition(new Vector2D(-19.8, 0.0));
+                lightSensor.setLocalDirection(-Math.PI); 
+		sa.addChild(lightSensor);
+		
+    sa.setPosition(new Vector2D(250, 250));
 
 		// Now the IR distance sensors
 		double irRange = 3 * robotLength; 
