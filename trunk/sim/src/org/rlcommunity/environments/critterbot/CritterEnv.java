@@ -20,7 +20,7 @@ package org.rlcommunity.environments.critterbot;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
+import java.net.URL;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -36,8 +36,6 @@ import org.rlcommunity.critter.SimulatorComponentLight;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorEngine;
 import org.rlcommunity.critter.SimulatorObject;
-import org.rlcommunity.critter.SimulatorViz;
-import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.environments.critterbot.messages.CritterScreenResponse;
 import org.rlcommunity.environments.critterbot.visualizer.CritterEnvVisualizer;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
@@ -54,12 +52,13 @@ import rlVizLib.messaging.environment.EnvironmentMessageParser;
 import rlVizLib.messaging.environment.EnvironmentMessages;
 import rlVizLib.messaging.environmentShell.TaskSpecPayload;
 import rlVizLib.messaging.interfaces.HasAVisualizerInterface;
+import rlVizLib.messaging.interfaces.HasImageInterface;
 
 /**
  *
  * @author Brian Tanner
  */
-public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisualizerInterface {
+public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisualizerInterface,HasImageInterface {
 
     DropInterface robotServ = null;
     SimulatorEngine engine = null;
@@ -287,5 +286,9 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 
     public String getVisualizerClassName() {
         return CritterEnvVisualizer.class.getName();
+    }
+
+    public URL getImageURL() {
+        return this.getClass().getResource("/resources/crittersplash.png");
     }
 }
