@@ -13,11 +13,13 @@ public class CritterEnvVisualizer extends AbstractVisualizer implements GlueStat
 	public CritterEnvVisualizer(TinyGlue theGlueState)  {
 		super();
                 this.theGlueState=theGlueState;
-		PollingVizComponent theAcrobotVisualizer= new CritterImageComponent(this);
-		SelfUpdatingVizComponent theAcrobotCounter = new GenericScoreComponent(this);
+		PollingVizComponent theCritterImage= new CritterImageComponent(this);
+		SelfUpdatingVizComponent theScore = new GenericScoreComponent(this);
+                SelfUpdatingVizComponent theSensors = new CritterSensorComponent(this);
 		
-		addVizComponentAtPositionWithSize(theAcrobotVisualizer,0,0,1.0,1.0);
-		addVizComponentAtPositionWithSize(theAcrobotCounter,0,0,1.0,1.0);
+		addVizComponentAtPositionWithSize(theCritterImage,0,0,1.0,.5);
+		addVizComponentAtPositionWithSize(theSensors,0,.5,1.0,.5);
+		addVizComponentAtPositionWithSize(theScore,0,0,1.0,1.0);
 	}
 
     public TinyGlue getTheGlueState() {

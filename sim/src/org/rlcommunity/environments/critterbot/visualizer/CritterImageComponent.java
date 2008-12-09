@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import org.rlcommunity.environments.critterbot.messages.CritterScreenRequest;
 import rlVizLib.visualization.PollingVizComponent;
@@ -18,14 +19,15 @@ public class CritterImageComponent implements PollingVizComponent {
     }
 
     public void render(Graphics2D g) {
-        RenderedImage thisImage = CritterScreenRequest.Execute().getImage();
+        BufferedImage thisImage = CritterScreenRequest.Execute().getImage();
 
         AffineTransform saveAT = g.getTransform();
         g.setColor(Color.WHITE);
         g.fill(new Rectangle(1, 1));
         g.scale(.002, .002);
 
-        g.drawRenderedImage(thisImage, null);
+        g.drawImage(thisImage, null, null);
+ //       g.drawImage(thisImage.getScaledInstance(500, 500, Image.SCALE_SMOOTH), null, null);
 
         g.setTransform(saveAT);
     }

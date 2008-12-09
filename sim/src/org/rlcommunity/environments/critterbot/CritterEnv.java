@@ -132,7 +132,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
     }
 
      private BufferedImage theImage = new BufferedImage(500, 500, BufferedImage.TYPE_INT_ARGB);
-     private RenderedImage getRenderedImageOfWorld() {
+     private BufferedImage getBufferedImageFromWorld() {
         Graphics2D G = theImage.createGraphics();
         if (engine != null) {
             for (SimulatorObject obj : engine.getObjectList()) {
@@ -140,7 +140,6 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
             }
         }
         return theImage;
-
     }
 
     private void stepThings() {
@@ -179,7 +178,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
             String theCustomType = theMessageObject.getPayLoad();
 
             if (theCustomType.equals("GETCRITTERSCREEN")) {
-                RenderedImage newImage = getRenderedImageOfWorld();
+                BufferedImage newImage = getBufferedImageFromWorld();
                 String theResponseString=new CritterScreenResponse(newImage).makeStringResponse();
                 return theResponseString;
             }

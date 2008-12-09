@@ -16,16 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. */
 package org.rlcommunity.environments.critterbot.messages;
 
+import java.awt.image.BufferedImage;
 import java.awt.image.RenderedImage;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -39,9 +36,9 @@ import rlVizLib.messaging.NotAnRLVizMessageException;
 import rlVizLib.messaging.environment.EnvMessageType;
 
 public class CritterScreenResponse extends AbstractResponse {
-    RenderedImage theImage=null;
+    BufferedImage theImage=null;
 
-    public CritterScreenResponse(RenderedImage theImage) {
+    public CritterScreenResponse(BufferedImage theImage) {
         this.theImage=theImage;
     }
 
@@ -80,16 +77,16 @@ public class CritterScreenResponse extends AbstractResponse {
 
     }
 
-    public RenderedImage getImage(){
+    public BufferedImage getImage(){
         return theImage;
     }
 
-    private static RenderedImage readEncodedPayloadFromString(String thePayLoadString) {
+    private static BufferedImage readEncodedPayloadFromString(String thePayLoadString) {
         try {
-             byte[] encodedPayload=thePayLoadString.getBytes();
-            byte[] payLoadInBytes = Base64.decodeBase64(encodedPayload);
+           byte[] encodedPayload=thePayLoadString.getBytes();
+           byte[] payLoadInBytes = Base64.decodeBase64(encodedPayload);
            ByteArrayInputStream BIS = new ByteArrayInputStream(payLoadInBytes);
-           RenderedImage theImage=ImageIO.read(new BufferedInputStream(BIS));
+           BufferedImage theImage=ImageIO.read(new BufferedInputStream(BIS));
            BIS.close();
            return theImage;
         } catch (IOException ex) {
