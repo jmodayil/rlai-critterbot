@@ -49,8 +49,10 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
+import rlVizLib.general.ParameterHolder;
 import rlVizLib.messaging.environment.EnvironmentMessageParser;
 import rlVizLib.messaging.environment.EnvironmentMessages;
+import rlVizLib.messaging.environmentShell.TaskSpecPayload;
 import rlVizLib.messaging.interfaces.HasAVisualizerInterface;
 
 /**
@@ -94,32 +96,15 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
                 new SimulatorComponentCritterbotInterface(robotServ));
         engine.addComponent(new SimulatorComponentIRDistance());
 
-//        javax.swing.SwingUtilities.invokeLater(new Runnable() {
-//
-//            public void run() {
-//                theSimulatorVizualizer = new SimulatorViz(engine, null);
-//            }
-//        });
-
-        TaskSpecVRLGLUE3 theTaskSpec = new TaskSpecVRLGLUE3();
-        theTaskSpec.setDiscountFactor(.99);
-        IntRange theObsRange = new IntRange(80);
-        theObsRange.setMinUnspecified();
-        theObsRange.setMaxUnspecified();
-        theTaskSpec.addDiscreteObservation(theObsRange);
-
-        IntRange theModeAction = new IntRange(1, 1);
-        IntRange theActionRange = new IntRange(-100, 100, 3);
-        theTaskSpec.addDiscreteAction(theModeAction);
-        theTaskSpec.addDiscreteAction(theActionRange);
-
-        theTaskSpec.setRewardRange(new DoubleRange(0, 100));
-        theTaskSpec.setExtra("EnvName:ExpandedCritter");
-        TaskSpec.checkTaskSpec(theTaskSpec.toTaskSpec());
-
-        return theTaskSpec.toTaskSpec();
+        return makeTaskSpec();
+    }
+    public static TaskSpecPayload getTaskSpecPayload(ParameterHolder P) {
+        CritterEnv theWorld = new CritterEnv();
+        String taskSpec = theWorld.makeTaskSpec();
+        return new TaskSpecPayload(taskSpec, false, "");
     }
 
+    
     public Observation env_start() {
         return theObservation;
     }
@@ -140,6 +125,33 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
             }
         }
         return theImage;
+    }
+
+    private String makeTaskSpec() {
+
+//        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+//
+//            public void run() {
+//                theSimulatorVizualizer = new SimulatorViz(engine, null);
+//            }
+//        });
+        TaskSpecVRLGLUE3 theTaskSpec = new TaskSpecVRLGLUE3();
+        theTaskSpec.setDiscountFactor(.99);
+        IntRange theObsRange = new IntRange(80);
+        theObsRange.setMinUnspecified();
+        theObsRange.setMaxUnspecified();
+        theTaskSpec.addDiscreteObservation(theObsRange);
+
+        IntRange theModeAction = new IntRange(1, 1);
+        IntRange theActionRange = new IntRange(-100, 100, 3);
+        theTaskSpec.addDiscreteAction(theModeAction);
+        theTaskSpec.addDiscreteAction(theActionRange);
+
+        theTaskSpec.setRewardRange(new DoubleRange(0, 100));
+        theTaskSpec.setExtra("EnvName:ExpandedCritter");
+        TaskSpec.checkTaskSpec(theTaskSpec.toTaskSpec());
+
+        return theTaskSpec.toTaskSpec();
     }
 
     private void stepThings() {
