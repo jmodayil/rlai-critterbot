@@ -105,7 +105,7 @@ public class KeyboardClient implements DropClient, KeyListener {
           hasChange = false;
 
           velocityX = (up * maxVel - down * maxVel);
-          angVel = (right * -maxAngularVel + left * maxAngularVel);
+          angVel = (right * maxAngularVel + left * -maxAngularVel);
           CritterControlDrop controlDrop = new CritterControlDrop();
           controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
           controlDrop.x_vel = (int) velocityX;

@@ -19,7 +19,7 @@ public class ObjectStateCritterbotInterface implements ObjectState
 
   public ObjectStateCritterbotInterface()
   {
-    aStateDropFrequency = 500;
+    aStateDropFrequency = 50;
     aLastStateUpdate = 0;
   }
 

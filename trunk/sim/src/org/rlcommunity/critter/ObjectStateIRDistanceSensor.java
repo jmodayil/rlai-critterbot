@@ -14,7 +14,7 @@ import java.awt.Color;
 public class ObjectStateIRDistanceSensor implements ObjectState
 {
   public static final String NAME = SimulatorComponentIRDistance.NAME;
-  public static final boolean debugDrawRays = false;
+  public boolean debugDrawRays = true;
 
   protected double aData;
   protected double aRange;
@@ -87,7 +87,7 @@ public class ObjectStateIRDistanceSensor implements ObjectState
       Vector2D pt = intersection.point;
 
 	    Color tempC = g.getColor();
-	    g.setColor(Color.red);
+	    /*g.setColor(Color.red);
 
       int rad = 5; 
 	    g.drawOval((int)pt.x-rad, (int)pt.y-rad, 2*rad, 2*rad); 
@@ -95,13 +95,32 @@ public class ObjectStateIRDistanceSensor implements ObjectState
       Vector2D outPoint = intersection.normal.times(2*rad).plus(pt);
 		  g.drawLine((int)pt.x, (int)pt.y, 
                  (int)outPoint.x, (int)outPoint.y);
-      
+     */ 
       if (debugDrawRays)
       {
         Vector2D pos = parent.getPosition();
+        Double dir = parent.getDirection();
 
-        g.drawLine ((int)pos.x, (int)pos.y, 
-          (int)pt.x, (int)pt.y);
+        int rad = 3;
+        if( aData >= aRange ) {
+          g.setColor(new Color(230, 220, 220));
+          g.drawLine ((int)pos.x, (int)pos.y,
+            (int)(pos.x + aRange * Math.cos(dir)),
+            (int)(pos.y + aRange * Math.sin(dir)));
+          g.setColor(Color.orange);
+          g.drawOval((int)(pos.x + aRange * Math.cos(dir)) - rad,
+            (int)(pos.y + aRange * Math.sin(dir)) - rad,
+            2 * rad, 2 * rad);
+        }
+        else {
+          g.setColor(new Color(230, 220, 220));
+          g.drawLine ((int)pos.x, (int)pos.y, (int)pt.x, (int)pt.y);
+          g.setColor(Color.orange);
+          g.drawOval((int)pt.x-rad, (int)pt.y-rad, 2*rad, 2*rad); 
+          
+        }
+        //g.drawLine ((int)pos.x, (int)pos.y, 
+        //  (int)pt.x, (int)pt.y);
       }
 
       g.setColor(tempC);

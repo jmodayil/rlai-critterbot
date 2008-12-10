@@ -95,6 +95,7 @@ public class DiscoInterfaceClientHandler extends Thread
       catch (IOException e)
       {
         System.err.println ("IOException in ClientHandler.run - aborting.");
+        System.err.println (e.toString());
         // End this thread and the associated socket asap; we use close()
         //  so that our owner (the server) knows to delete us
         this.close(); 

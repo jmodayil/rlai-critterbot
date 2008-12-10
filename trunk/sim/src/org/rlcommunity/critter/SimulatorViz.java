@@ -27,9 +27,10 @@ public final class SimulatorViz extends JFrame {
     /**
      * 
      */
-    public SimulatorViz(SimulatorEngine engine, KeyboardClient theKeyboardClient){
+    public SimulatorViz(SimulatorEngine engine, KeyboardClient theKeyboardClient, KeyListener theKeyboardClient2){
         world = new SimulatorDrawWorld(engine);
         world.addKeyListener(theKeyboardClient);
+        world.addKeyListener(theKeyboardClient2);
         JScrollPane sPane = new JScrollPane(world);
 
         //sPane.setPreferredSize(new Dimension(500,500));

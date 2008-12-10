@@ -119,7 +119,7 @@ public class ObjectStateOmnidrive implements ObjectState
         int endX = (int)(objPos.x + aVel.x * Math.cos(objDir));
         int endY = (int)(objPos.y + aVel.x * Math.sin(objDir));
 
-	      g.drawLine((int)objPos.x, (int)objPos.y, endX, endY);
+	      //g.drawLine((int)objPos.x, (int)objPos.y, endX, endY);
 	      g.setColor(tempC);
       }
   }

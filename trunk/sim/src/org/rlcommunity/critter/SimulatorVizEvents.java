@@ -11,14 +11,16 @@ public class SimulatorVizEvents implements KeyListener {
 	public int down;
 	public int left;
 	public int right;
-	
+	public int debug;
+
 	public SimulatorVizEvents() {
-		up = down = left = right = 0;
+		debug = up = down = left = right = 0;
 	}
 	
 	public void keyTyped(KeyEvent e) {
-		
-	}
+	  if('d' == e.getKeyChar())
+      debug = 1;
+  }
 	
 	public void keyPressed(KeyEvent e) {
 		if(KeyEvent.VK_UP == e.getKeyCode()) {
@@ -28,10 +30,10 @@ public class SimulatorVizEvents implements KeyListener {
 			down = 1;
 		}
 		if(KeyEvent.VK_LEFT == e.getKeyCode()) {
-			left = 1;
+			right = 1;
 		}
 		if(KeyEvent.VK_RIGHT == e.getKeyCode()) {
-			right = 1;
+			left = 1;
 		}
 	}
 	
@@ -43,10 +45,10 @@ public class SimulatorVizEvents implements KeyListener {
 			down = 0;
 		}
 		if(KeyEvent.VK_LEFT == e.getKeyCode()) {
-			left = 0;
+			right = 0;
 		}
 		if(KeyEvent.VK_RIGHT == e.getKeyCode()) {
-			right = 0;
+			left = 0;
 		}
 	}
 	
