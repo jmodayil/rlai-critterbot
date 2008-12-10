@@ -83,6 +83,41 @@ public class SimulatorEngine {
 			return;
 
     step(ms);
+    // Hack.  Replace this once a better keyboard handler is introduced.
+    if(vizHandler.debug == 1) {
+      System.out.println("Toggling debug draw.");
+      vizHandler.debug = 0;
+      List<SimulatorObject> sensorObjs =
+        aNextState.getObjects(ObjectStateIRDistanceSensor.NAME);
+
+      for(SimulatorObject obj : sensorObjs) {
+        SimulatorObject nextObj = aNextState.getObject(obj);
+        if(nextObj == null)
+          continue;
+
+        ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor)
+          nextObj.getState(ObjectStateIRDistanceSensor.NAME);
+        if(sensor.debugDrawRays == true)
+          sensor.debugDrawRays = false;
+        else
+          sensor.debugDrawRays = true;
+      }
+      sensorObjs =
+        aState.getObjects(ObjectStateIRDistanceSensor.NAME);
+
+      for(SimulatorObject obj : sensorObjs) {
+        SimulatorObject nextObj = aState.getObject(obj);
+        if(nextObj == null)
+          continue;
+
+        ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor)
+          nextObj.getState(ObjectStateIRDistanceSensor.NAME);
+        if(sensor.debugDrawRays == true)
+          sensor.debugDrawRays = false;
+        else
+          sensor.debugDrawRays = true;
+      }
+    } 
   }
 
 	/**
@@ -203,6 +238,7 @@ public class SimulatorEngine {
 		svgLoader.loadStaticObject("table", new Vector2D(100, 220), 0.5);
 		svgLoader.loadStaticObject("chair", new Vector2D(320, 400), 3.64);
 		svgLoader.loadStaticObject("chair", new Vector2D(262, 500), 3.64);
+        svgLoader.loadStaticObject("boxen", new Vector2D(200, 50), 0);
 
 		nextObjectId = svgLoader.objectId();
 
@@ -268,7 +304,7 @@ public class SimulatorEngine {
 		agentShape.addPoint(-4, -32.5);
 		agentShape.addPoint(-4.5, -20);
 		agentShape.addPoint(-3, -20);
-		agentShape.addPoint(3.5, -16);
+		agentShape.addPoint(2.5, -16);
 		agentShape.addPoint(9, -16);
 		agentShape.addPoint(15.5, -12.5);
 		agentShape.addPoint(19, -6);
@@ -362,26 +398,26 @@ public class SimulatorEngine {
       {
         // Sensor 0 forward
         {  19.8 ,   0.0 ,   0.0     },
-        // Sensor 1 45 ccw
-        {  14.0 ,  14.0 ,  pi/4     },
-        // Sensor 2 90 ccw
-        {   0.0 ,  19.8 ,  pi/2     },
-        // Sensor 3 135 ccw
-        { -14.0 ,  14.0 ,  3 * pi/4 },
-        // Sensor 4 135 cw
-        { -14.0 , -14.0 , -3 * pi/4 },
-        // Sensor 5 90 cw
-        {   0.0 , -19.8 , -pi/2     },
         // Sensor 6 45 cw
         {  14.0 , -14.0 , -pi/4     },
-        // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
-        { -34.0 ,  0.0 ,   pi/2    },
-        // Sensor 8 - faces directly back, next to 3, arranged to miss the tail
-        //  (which is at (-48,0) here)
-        { -19.8 ,   1.0 ,  -pi      },
+        // Sensor 5 90 cw
+        {   0.0 , -19.8 , -pi/2     },
+        // Sensor 4 135 cw
+        { -14.0 , -14.0 , -3 * pi/4 },
+        // Sensor 3 135 ccw
+        { -14.0 ,  14.0 ,  3 * pi/4 },
+        // Sensor 2 90 ccw
+        {   0.0 ,  19.8 ,  pi/2     },
+        // Sensor 1 45 ccw
+        {  14.0 ,  14.0 ,  pi/4     },
         // Sensor 9 - a bit further back on the tail than 7 (quantify this!)
         //  faces 105 cw. This value may be wrong. 
-        { -38.0 ,  -5.5 ,  -pi / 2 - pi / 12 }, 
+        { -26.0 ,  5.5 ,  -pi / 2   }, 
+        // Sensor 8 - faces directly back, next to 3, arranged to miss the tail
+        //  (which is at (-48,0) here)
+        { -16 ,   -5.0 ,  -pi      },
+        // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
+        { -32.0 ,  9.0 ,   pi/2 + pi/8    },
       };
 
     for (int i = 0; i < irDistancePos.length; i++)

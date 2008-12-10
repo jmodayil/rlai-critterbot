@@ -371,7 +371,7 @@ public class SimulatorObject {
 		if (svgShapeDrawing != null)
 			svgShapeDrawing.draw(g, getPosition(), getDirection());
 		if (aShape != null)
-			aShape.draw(g);
+			//aShape.draw(g);
 
 		// Draw the children in postorder traversal
 		for (SimulatorObject c : aChildren)

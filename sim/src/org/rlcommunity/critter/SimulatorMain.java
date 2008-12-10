@@ -57,7 +57,7 @@ public class SimulatorMain
 
     javax.swing.SwingUtilities.invokeLater(new Runnable() {
         public void run() {
-        	new SimulatorViz(engine,theKeyboardClient);
+        	new SimulatorViz(engine,theKeyboardClient,engine.vizHandler);
         }
     });
 
