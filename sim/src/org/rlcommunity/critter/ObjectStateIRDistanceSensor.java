@@ -14,7 +14,7 @@ import java.awt.Color;
 public class ObjectStateIRDistanceSensor implements ObjectState
 {
   public static final String NAME = SimulatorComponentIRDistance.NAME;
-  public boolean debugDrawRays = true;
+  public boolean debugDrawRays = false;
 
   protected double aData;
   protected double aRange;

@@ -56,8 +56,6 @@ class CritterSensorComponent implements SelfUpdatingVizComponent, Observer {
         if(theSensorReadings==null)
             return;
         AffineTransform saveAT = g.getTransform();
-        AffineTransformOp op = new AffineTransformOp(
-            saveAT, AffineTransformOp.TYPE_BICUBIC);
         g.scale(.001, .001);
         g.setFont(new Font("Serif", Font.PLAIN, 50));
         int light[] = {0, 0, 0, 0};
@@ -99,11 +97,6 @@ class CritterSensorComponent implements SelfUpdatingVizComponent, Observer {
         g.drawArc(400, 600, 300, 300, 90, (int)(rot / 5));
         g.drawArc(404, 604, 292, 292, 90, (int)(rot / 5));
 
-        //Kernel kernel = createBlurKernel(scale);
-        //ConvolveOp op = new ConvolveOp(
-        //       kernel, ConvolveOp.EDGE_NO_OP, null);
-        //op.filter(image, tmp);
-        //op.filter(src, dst)
         g.setTransform(saveAT);
 
     }

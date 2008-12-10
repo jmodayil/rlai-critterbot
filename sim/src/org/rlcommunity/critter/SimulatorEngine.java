@@ -201,7 +201,7 @@ public class SimulatorEngine {
 		// Add dynamics to this object
 		hex.addState(new ObjectStateDynamics(0.5, 2));
 
-		aState.addObject(hex);
+		//aState.addObject(hex);
 
 		SimulatorObject lightSource = new SimulatorObject("light1",
 				nextObjectId++);
@@ -234,10 +234,10 @@ public class SimulatorEngine {
 //		aState.addObject(lightSource);                
 
 		Loader svgLoader = new Loader(aState, nextObjectId);
-		svgLoader.loadStaticObject("book", new Vector2D(345, 267), 5);
-		svgLoader.loadStaticObject("table", new Vector2D(100, 220), 0.5);
-		svgLoader.loadStaticObject("chair", new Vector2D(320, 400), 3.64);
-		svgLoader.loadStaticObject("chair", new Vector2D(262, 500), 3.64);
+		//svgLoader.loadStaticObject("book", new Vector2D(345, 377), 0);
+		svgLoader.loadStaticObject("table", new Vector2D(160, 100), 0.5);
+		svgLoader.loadStaticObject("chair", new Vector2D(250, 310), -2.6);
+		svgLoader.loadStaticObject("bookcase", new Vector2D(476, 200), Math.PI/2);
 
 		nextObjectId = svgLoader.objectId();
 
@@ -378,7 +378,7 @@ public class SimulatorEngine {
                 lightSensor.setLocalDirection(-Math.PI); 
 		sa.addChild(lightSensor);
 		
-    sa.setPosition(new Vector2D(250, 250));
+    sa.setPosition(new Vector2D(300, 400));
 
 		// Now the IR distance sensors
 		double irRange = 3 * robotLength; 
