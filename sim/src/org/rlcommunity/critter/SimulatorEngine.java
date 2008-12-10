@@ -207,6 +207,8 @@ public class SimulatorEngine {
 				nextObjectId++);
 
 		lightSource.setShape(null);
+
+                
 		lightSource.setPosition(new Vector2D(50.0, 50.0));
 		lightSource.setSVG("lightsource");
 
@@ -354,8 +356,8 @@ public class SimulatorEngine {
     lightSensor.setDirection(0);
     //  lightSensor.setLocalDirection(0.0);
     ObjectStateLightSensor specificLightSensor = new ObjectStateLightSensor();
-    specificLightSensor.setNumPixels(11);
-    specificLightSensor.setSensorDepth(10.0);
+    specificLightSensor.setNumPixels(5);
+    specificLightSensor.setSensorDepth(1.0);
     specificLightSensor.setSensorWidth(5.0);
 		lightSensor.addState(specificLightSensor);
 
