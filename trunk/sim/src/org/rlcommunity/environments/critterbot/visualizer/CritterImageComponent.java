@@ -15,13 +15,14 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 import rlVizLib.visualization.PollingVizComponent;
 import rlVizLib.visualization.SelfUpdatingVizComponent;
 import rlVizLib.visualization.VizComponentChangeListener;
+import rlVizLib.visualization.interfaces.GlueStateProvider;
 
 public class CritterImageComponent implements SelfUpdatingVizComponent,Observer {
 
     RenderedImage nextImage = null;
 
-    public CritterImageComponent(CritterEnvVisualizer acrobotVisualizer) {
-        acrobotVisualizer.getTheGlueState().addObserver(this);
+    public CritterImageComponent(GlueStateProvider theVisualizer) {
+        theVisualizer.getTheGlueState().addObserver(this);
     }
 
     public void render(Graphics2D g) {

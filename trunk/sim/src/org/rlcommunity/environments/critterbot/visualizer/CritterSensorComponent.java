@@ -30,6 +30,7 @@ import org.rlcommunity.rlglue.codec.types.Observation;
 import rlVizLib.general.TinyGlue;
 import rlVizLib.visualization.SelfUpdatingVizComponent;
 import rlVizLib.visualization.VizComponentChangeListener;
+import rlVizLib.visualization.interfaces.GlueStateProvider;
 
 /**
  *
@@ -40,8 +41,8 @@ class CritterSensorComponent implements SelfUpdatingVizComponent, Observer {
     VizComponentChangeListener theChangeListener = null;
     TinyGlue theTinyGlue = null;
 
-    public CritterSensorComponent(CritterEnvVisualizer aThis) {
-        theTinyGlue = aThis.getTheGlueState();
+    public CritterSensorComponent(GlueStateProvider theVisualizer) {
+        theTinyGlue=theVisualizer.getTheGlueState();
         theTinyGlue.addObserver(this);
     }
 
@@ -52,6 +53,8 @@ class CritterSensorComponent implements SelfUpdatingVizComponent, Observer {
     public void render(Graphics2D g) {
         //Draw things here
         Observation theSensorReadings = theTinyGlue.getLastObservation();
+        if(theSensorReadings==null)
+            return;
         AffineTransform saveAT = g.getTransform();
         AffineTransformOp op = new AffineTransformOp(
             saveAT, AffineTransformOp.TYPE_BICUBIC);
