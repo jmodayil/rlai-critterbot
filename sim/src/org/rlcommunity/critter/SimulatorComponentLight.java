@@ -81,7 +81,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
                 //find out first point (object) ray i intersects with
                 intersectData = scene.traceRay(r);
-
+                
                 //angle between robot's sensor ray and surface normal 
                 double angle1 = sensorPosition.minus(intersectData.point).direction();
                 double angle2 = intersectData.normal.direction();
@@ -93,26 +93,44 @@ public class SimulatorComponentLight implements SimulatorComponent {
                 //for each light source sum up intensity at intersection point
                 for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) 
                 {
+                    double intensity = 0;
+                    
                     source = pCurrent.getObjects(ObjectStateLightSource.NAME).get(Jsource);
                     lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
 
                     srcPosition = source.getPosition();
-                    //light source should have no polygon...incase marc changes his name
-                    scene.removeSubtree(source.getRoot());
                     
-                    //find angle between light source and surface normal
-                    angle1 = srcPosition.minus(intersectData.point).direction();
-                    double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);        
-
-                    //is point illuminated?
-                    if (scene.isVisible(srcPosition, intersectData.point)) 
+                    //unlikely case where ray intersects the light source directly
+                    double slope = (sensorPosition.x - srcPosition.x)/(sensorPosition.y - srcPosition.y);
+                    double tol = Math.pow(10,-15);
+                    if(Math.abs(slope - (rayDirection.x/rayDirection.y)) < tol)
                     {
-                        //intensity at sensor is function of distance and angles of incidence
-                        double intensity = lightSource.getIntensity() * (1.0 / Math.pow(srcPosition.distance(intersectData.point), 2)) + Math.abs(Math.cos(angleOfIncidence)*Math.cos(angleOfIncidence2)) * lightSource.getIntensity() * (1.0 / Math.pow(intersectData.point.distance(sensorPosition), 2));
+                        intensity = lightSource.getIntensity() * (1.0 / Math.pow(srcPosition.distance(sensorPosition), 2)); 
+                        sumIntensity += intensity;
+                    }
+                    else
+                    {
 
+                        //light source should have no polygon...incase marc changes his name
+                        scene.removeSubtree(source.getRoot());
+                    
+                        //find angle between light source and surface normal
+                        angle1 = srcPosition.minus(intersectData.point).direction();
+                        double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);        
+
+                        //is point illuminated?
+                        if (scene.isVisible(srcPosition, intersectData.point)) 
+                        {
+                            double totalDistance = srcPosition.distance(intersectData.point) + intersectData.point.distance(sensorPosition);
+                            double bouncePenalty = 1.0;
+                            //intensity at sensor is function of distance and angles of incidence
+                            intensity = bouncePenalty*lightSource.getIntensity() * (1.0 / Math.pow(totalDistance, 2)) + Math.abs(Math.cos(angleOfIncidence)*Math.cos(angleOfIncidence2));
                         //sum up light from multiple sources and from each pixel
                         sumIntensity += intensity;
-                    } 
+                            
+                        } 
+                    }
+                    
                 }//loop over sources
 
                 currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
