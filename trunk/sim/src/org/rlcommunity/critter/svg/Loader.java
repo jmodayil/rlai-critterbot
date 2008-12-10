@@ -37,10 +37,14 @@ public class Loader {
 	}
 
 	static protected URI load(String pictureName) {
+        System.out.println(pictureName);
+        try{
 		String resourceName = String.format("/resources/%s.svg", pictureName);
                 URL url = Loader.class.getResource(resourceName);
                 assert url!=null : "Could not load resource: "+resourceName+" from the jar.";
                 return universe.loadSVG(url);
+        } catch (Throwable t) {System.exit(1);}
+        return null;
 	}
         
         public static void initSVGUniverse() {
