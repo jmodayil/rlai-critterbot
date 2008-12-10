@@ -238,7 +238,6 @@ public class SimulatorEngine {
 		svgLoader.loadStaticObject("table", new Vector2D(100, 220), 0.5);
 		svgLoader.loadStaticObject("chair", new Vector2D(320, 400), 3.64);
 		svgLoader.loadStaticObject("chair", new Vector2D(262, 500), 3.64);
-        svgLoader.loadStaticObject("boxen", new Vector2D(200, 50), 0);
 
 		nextObjectId = svgLoader.objectId();
 
