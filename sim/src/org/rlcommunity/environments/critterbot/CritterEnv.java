@@ -48,6 +48,7 @@ import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
 import rlVizLib.general.ParameterHolder;
+import rlVizLib.general.hasVersionDetails;
 import rlVizLib.messaging.environment.EnvironmentMessageParser;
 import rlVizLib.messaging.environment.EnvironmentMessages;
 import rlVizLib.messaging.environmentShell.TaskSpecPayload;
@@ -101,6 +102,12 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
         CritterEnv theWorld = new CritterEnv();
         String taskSpec = theWorld.makeTaskSpec();
         return new TaskSpecPayload(taskSpec, false, "");
+    }
+    
+    public static ParameterHolder getDefaultParameters() {
+        ParameterHolder p = new ParameterHolder();
+        rlVizLib.utilities.UtilityShop.setVersionDetails(p, new DetailsProvider());
+        return p;
     }
 
     
@@ -292,3 +299,28 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
         return this.getClass().getResource("/resources/crittersplash.png");
     }
 }
+
+
+class DetailsProvider implements hasVersionDetails {
+
+    public String getName() {
+        return "CritterBot Simulator";
+    }
+
+    public String getShortName() {
+        return "Critter-Sim";
+    }
+
+    public String getAuthors() {
+        return "Marc Bellemare, Anna Koop, Mike Sokolsky";
+    }
+
+    public String getInfoUrl() {
+        return "http://rlai-critterbot.googlecode.com";
+    }
+
+    public String getDescription() {
+        return "Simulator Critter Bot Environment.";
+    }
+}
+
