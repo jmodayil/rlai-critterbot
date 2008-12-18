@@ -63,6 +63,7 @@ class CritterDriver : public Component {
     void initport();
     void closeport();
     void readPacket(unsigned char buf[]);
+    void publishData(uSeconds &now);
     
 };
 

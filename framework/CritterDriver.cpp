@@ -174,14 +174,20 @@ void CritterDriver::readPacket( unsigned char buf[]) {
 //	error("Receive a Corrupt Robot State Packet!");
 //	return;
   //    }
-      now = time(NULL);
-      fprintf(log, "%u: ", now);
+}
+
+void CritterDriver::publishData(uSeconds &now) {
+      
+      int i;
+
+      fprintf(log, "%s : ", now.toString());
       for(i = 0; i < STATE_LENGTH - 2; i++ ) {
         fprintf(log, "%d ", buf[i]);
       } 
       fprintf(log, "\n");
       (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
       lake->doneWriteHead(stateId);
+
 }
 
 unsigned short CritterDriver::calccrc(unsigned char* data, int size) {
@@ -269,6 +275,7 @@ int CritterDriver::sense(USeconds &wokeAt) {
 	break;
     }
   }
+
   return 1; 
 }
 
