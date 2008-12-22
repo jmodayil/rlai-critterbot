@@ -16,6 +16,7 @@ class CritterStateDrop : public DataDrop {
   unsigned int batv160;
   unsigned int batv280;
   struct {
+    int command;
     int velocity;
     int current;
     int temp;
