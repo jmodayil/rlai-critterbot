@@ -22,7 +22,7 @@ struct angleinfo {
 }ANGLEINFO[4];
 
 //States of leddrive_event()
-enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE};
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED,RED,GREEN,BLUE};
 
@@ -67,6 +67,11 @@ fade angle rgb values are displayed on neigbouring leds with diminished strenght
 void anglelight(int angle, unsigned char r,unsigned char g,unsigned char b);
 void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b);
 /*
+ * Display a rainbow pattern for good looks and cheer.
+ */
+void rainbow(void);
+
+/*
 displays the battery lvl 0-100
 */
 void battlvl(unsigned int lvl);
@@ -106,6 +111,8 @@ void leddrive_emerg(void);
 void leddrive_colordisplay(void);
 void leddrive_busy(void);
 void leddrive_byte(unsigned char *val);
+void leddrive_rainbow(void);
+
 /*
 cval is 0-4095, leddrive_grad1/2 decide what cval will represent.
 */

@@ -18,7 +18,7 @@ void putwcrc(unsigned char data);
 
 struct command_packet {
 
-  enum { WHEEL_SPACE, XYTHETA_SPACE } motor_mode;
+  enum { WHEEL_SPACE, XYTHETA_SPACE, MOTOR_EXIT = 0xA8 } motor_mode;
   union {
     int m100_vel;
     int x_vel;
@@ -32,7 +32,8 @@ struct command_packet {
     int theta_vel;
   };
 
-  enum { CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM } led_mode;
+  enum { CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0xB8 }
+   led_mode;
 };
 
 

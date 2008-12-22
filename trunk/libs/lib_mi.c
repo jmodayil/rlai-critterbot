@@ -15,7 +15,7 @@ unsigned short crc;
 unsigned char mi_test;
 
 void mi_start(void) {
-  leddrive_batstatus();
+  leddrive_rainbow();
   ui_set_handler(mi_event);
 }
 
@@ -48,6 +48,7 @@ void mi_send_status(void) {
   armputchar(MI_HEADER4);
   putwcrc(motor_get_voltage());
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+    putwcrc(motor_command(i));
     putwcrc(motor_clicks(i));
     putwcrc(motor_current(i));
     putwcrc(motor_temp(i));
@@ -108,6 +109,10 @@ void mi_get_commands(void) {
     case XYTHETA_SPACE:
       motor_set_speed_xytheta(m1, m2, m3);
       break;
+    case MOTOR_EXIT:
+      if(robot_command.led_mode == LED_EXIT)
+        mi_stop();
+      break;
     default:
       robot_command.motor_mode = WHEEL_SPACE;
       motor_set_speed(0, 0); 
@@ -115,10 +120,10 @@ void mi_get_commands(void) {
       motor_set_speed(2, 0);
       break;
   }
-  
-  switch(robot_command.led_mode) {
+ 
+  /*switch(robot_command.led_mode) {
     case CBATTERY:
-      leddrive_batstatus();
+      leddrive_rainbow();
       break;
     case CBALL:
       leddrive_ball();
@@ -132,6 +137,6 @@ void mi_get_commands(void) {
     default:
       leddrive_clear();
       break;
-  }
+  }*/
   return;
 }

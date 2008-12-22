@@ -86,7 +86,7 @@ int motor_event( void );
 /*
  * Returns number of clicks (speed) for the last cycle of the motor
  */
-char motor_clicks(int motor);
+signed char motor_clicks(int motor);
 
 /*
  * Returns raw current sense value for the last cycle of the motor
@@ -97,3 +97,8 @@ unsigned char motor_current(int motor);
  * Returns raw temperature sense value for the last cycle of the motor
  */
 unsigned char motor_temp(int motor);
+
+/*
+ * Returns the user commanded velocity of the motor
+ */
+signed char motor_command(int motor);
