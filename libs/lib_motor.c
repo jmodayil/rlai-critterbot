@@ -232,7 +232,7 @@ void motor_set_pwm(int motor, int pwm) {
   motor_tx_data[motor][2] = temp & 0xFF;
 }
 
-char motor_clicks(int motor) {
+signed char motor_clicks(int motor) {
 
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
@@ -253,5 +253,12 @@ unsigned char motor_temp(int motor) {
     return 0;
 
   return motor_rx_data[motor][2] & 0xFF;
+}
+
+signed char motor_command(int motor) {
+  if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
+    return 0;
+
+  return motor_speed_final[motor];
 }
 

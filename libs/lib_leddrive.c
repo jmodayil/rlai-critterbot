@@ -278,6 +278,32 @@ void gradient(unsigned char r1,unsigned char g1,unsigned char b1,unsigned char r
 	}
 }
 
+void rainbow(void) {
+  static unsigned char r, g, b;
+  int i;
+
+  if(r < 254 && g < 254 && b < 254)
+    r += 1;
+  else if(r == 254 && g < 254 && b == 0)
+    g += 1;
+  else if(r > 0 && g == 254 && b == 0)
+    r -= 1;
+  else if(r == 0 && g == 254 && b < 254)
+    b += 1;
+  else if(r == 0 && g > 0 && b == 254)
+    g -= 1;
+  else if(r < 254 && g == 0 && b == 254)
+    r += 1;
+  else if(r == 254 && g == 0 && b > 0)
+    b -= 1;
+
+  for(i = 0; i < 16; i++) {
+    LED[i].r = r;
+    LED[i].g = g;
+    LED[i].b = b;
+  }
+}
+
 void rotate(int rot){
 	static int a;
 	unsigned char r,g,b;
@@ -578,6 +604,8 @@ int leddrive_event(void) {
           break;
       }
 			break;
+    case RAINBOW:
+      rainbow();
 		case COLORDIS:
 				rotate(15);
 				a++;
@@ -643,6 +671,10 @@ void leddrive_clear(void){
 
 void leddrive_stop(void){
 	leddrive_state=STOP;
+}
+
+void leddrive_rainbow(void){
+  leddrive_state=RAINBOW;
 }
 
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2){
