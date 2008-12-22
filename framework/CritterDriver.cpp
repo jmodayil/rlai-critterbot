@@ -140,12 +140,15 @@ void CritterDriver::readPacket( unsigned char buf[]) {
 //}
 //i = 0;
       stateDrop.bus_voltage       = (int) buf[i++] * 25;
+      stateDrop.motor100.command  = (char) buf[i++];
       stateDrop.motor100.temp     = (int) buf[i++];
       stateDrop.motor100.velocity = (char) buf[i++];
       stateDrop.motor100.current  = (int) buf[i++];
+      stateDrop.motor220.command  = (char) buf[i++];
       stateDrop.motor220.temp     = (int) buf[i++];
       stateDrop.motor220.velocity = (char) buf[i++];
       stateDrop.motor220.current  = (int) buf[i++];
+      stateDrop.motor340.command  = (char) buf[i++];
       stateDrop.motor340.temp     = (int) buf[i++];
       stateDrop.motor340.velocity = (char) buf[i++];
       stateDrop.motor340.current  = (int) buf[i++];

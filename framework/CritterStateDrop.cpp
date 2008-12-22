@@ -14,12 +14,15 @@ CritterStateDrop::CritterStateDrop() {
   mag.x = 0;
   mag.y = 0;
   mag.z = 0;
+  motor100.command = 0;
   motor100.velocity = 0;
   motor100.current = 0;
   motor100.temp = 0;
+  motor220.command = 0;
   motor220.velocity = 0;
   motor220.current = 0;
   motor220.temp = 0;
+  motor340.command = 0;
   motor340.velocity = 0;
   motor340.current = 0;
   motor340.temp = 0;
@@ -200,14 +203,14 @@ string CritterStateDrop::toString(string offset) {
   value += buf;
   sprintf(buf, "Battery 280 Voltage: %u\n\n", batv280);
   value += buf;
-  sprintf(buf, "Motor100: %d, %u, %u\n", motor100.velocity,
-          motor100.current, motor100.temp);
+  sprintf(buf, "Motor100: %d, %d, %u, %u\n", motor100.command, 
+          motor100.velocity, motor100.current, motor100.temp);
   value += buf;
-  sprintf(buf, "Motor220: %d, %u, %u\n", motor220.velocity,
-          motor220.current, motor220.temp);
+  sprintf(buf, "Motor220: %d, %d, %u, %u\n", motor220.command,
+          motor220.velocity, motor220.current, motor220.temp);
   value += buf;
-  sprintf(buf, "Motor340: %d, %u, %u\n", motor340.velocity,
-          motor340.current, motor340.temp);
+  sprintf(buf, "Motor340: %d, %d, %u, %u\n", motor340.command,
+          motor340.velocity, motor340.current, motor340.temp);
   value += buf;
   sprintf(buf, "\nAccelerometer: %d %d %d\n", accel.x, accel.y, accel.z);
   value += buf;
