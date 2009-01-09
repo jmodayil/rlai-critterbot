@@ -20,6 +20,7 @@ void mi_start(void) {
 }
 
 void mi_stop(void) {
+  leddrive_ball();
   ui_clear_handler(mi_event);
 }
 
@@ -56,9 +57,9 @@ void mi_send_status(void) {
   putwcrc(accel_output[0] >> 4);
   putwcrc(accel_output[1] >> 4);
   putwcrc(accel_output[2] >> 4);
-  putwcrc(adc_output[0] >> 2);
-  putwcrc(adc_output[1] >> 2);
-  putwcrc(adc_output[3] >> 2);
+  //putwcrc(adc_output[0] >> 2);
+  //putwcrc(adc_output[1] >> 2);
+  //putwcrc(adc_output[3] >> 2);
   putwcrc((adcspi_get_output(3, 12) >> 2) - 128);
   for(i = 0; i < 10; i++)
     putwcrc(adcspi_get_output(0, i) >> 2);
