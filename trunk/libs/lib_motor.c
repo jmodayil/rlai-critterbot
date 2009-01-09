@@ -156,6 +156,8 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
 void motor_set_speed_slew(signed char speed100, signed char speed220,
    signed char speed340) {
 
+  motor_timeout_count = 0;
+  
   if(speed100 < -MOTOR_MAX_SPEED)
     speed100 = -MOTOR_MAX_SPEED;
   if(speed100 > MOTOR_MAX_SPEED)
@@ -170,7 +172,7 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
     speed340 = MOTOR_MAX_SPEED;
 
   if(speed100 == motor_speed_final[0] && speed220 == motor_speed_final[1] &&
-      speed340 == motor_speed_final[2])
+      speed340 == motor_speed_final[2]) 
     return;
 
   motor_slew_steps = ABS(speed100 - motor_speed[0]);
@@ -191,7 +193,6 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_speed_float[1] = motor_speed[1];
   motor_speed_float[2] = motor_speed[2];
   motor_slew_count = 0;
-  motor_timeout_count = 0;
 } 
 
 unsigned char motor_get_voltage() {
