@@ -60,7 +60,7 @@ public class SimulatorComponentBump implements SimulatorComponent {
           Vector2D newVec = 
             new Vector2D(f.vec.x * BUMP_DECAY, f.vec.y * BUMP_DECAY);
 
-          // @@@ Yuck, fixme
+          // @todo Yuck, fixme
           // For now, remove forces when they get small
           if (newVec.length() < 0.01)
             continue;

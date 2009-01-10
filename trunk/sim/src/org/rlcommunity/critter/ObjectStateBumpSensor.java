@@ -77,7 +77,7 @@ public class ObjectStateBumpSensor implements ObjectState
   public void draw(Graphics g, SimulatorObject parent)
   {
     // Draw a little circle where each bobo is
-    // @@@ Evil! It wasn't synchronized and causing errors.
+    // @todo Evil! It wasn't synchronized and causing errors.
 	  /*Color tempC = g.getColor();
 	  g.setColor(Color.red);
 

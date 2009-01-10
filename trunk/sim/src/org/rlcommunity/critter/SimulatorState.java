@@ -29,7 +29,7 @@ public class SimulatorState
 
   private SimulatorObject getObject(int pId)
   {
-    // @@@ this needs to be optimized, most likely by having getObjects()
+    // @todo this needs to be optimized, most likely by having getObjects()
     //  return the same list if the object structure is not modified
     List<SimulatorObject> allObjects = getObjects();
 
@@ -79,7 +79,7 @@ public class SimulatorState
 
     objs.addAll(aObjList);
 
-    // @@@ there is, of course, optimization to be done here; in particular,
+    // @todo there is, of course, optimization to be done here; in particular,
     //  we shouldn't be re-computing the full object list  everytime
     return objs;
   }

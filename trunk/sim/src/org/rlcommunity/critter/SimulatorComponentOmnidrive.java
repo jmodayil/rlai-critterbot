@@ -27,7 +27,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     for (SimulatorObject thisObject : drivable)
     {
       // Small debug routine hidden in this code
-      // @@@ remove
+      // @todo remove
       doDebug(thisObject, pCurrent);
 
       // We know they must contain a driveState
@@ -51,7 +51,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
       // The Omnidrive state contains target velocities, while the 
       //  dynamics state contains actual velocities
-      // @@@ properly deal with this
+      // @todo properly deal with this
       Vector2D v = driveState.getVelocity();
       // Convert v into object-space
       double dir = thisObject.getDirection();
@@ -62,7 +62,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
       nextKinState.addForce (new Force(fPID.vec.rotate(dir)));
      
-      // @@@ Should also be PID-driven
+      // @todo Should also be PID-driven
       double torquePID = simpleTPID(driveState, kinState);
       nextKinState.addTorque (torquePID);
 
@@ -82,7 +82,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       }
       else // Otherwise, copy over the target velocity and ang. velocity 
       {
-        // @@@ this may be taken out once copyFrom is actually used to copy
+        // @todo this may be taken out once copyFrom is actually used to copy
         //  from state to state
         nextDriveState.setVelocity((Vector2D)v.clone());
         nextDriveState.setAngVelocity(driveState.getAngVelocity());
@@ -101,14 +101,14 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     Vector2D targetVel = driveData.getVelocity();
     double coeff = driveData.getPIDCoefficient();
 
-    // @@@ include a last error, as in pid_control, to make things smoother
+    // @todo include a last error, as in pid_control, to make things smoother
     Vector2D err = targetVel.minus(curVel);
 
     err.x = err.x * coeff;
     err.y = err.y * coeff;
     
     // Assume we 'know' friction, and bump the resulting force up
-    // @@@ this is of course, terribly bad
+    // @todo this is of course, terribly bad
     err.x = err.x + curVel.x * 0.1;
     err.y = err.y + curVel.y * 0.1;
 
@@ -135,7 +135,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
     double res = err * coeff;
     // Compensate for 'friction'
-    // @@@ take this out, of course
+    // @todo take this out, of course
     res += curVel * 0.5;
 
     return res;

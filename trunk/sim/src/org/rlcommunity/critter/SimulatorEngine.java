@@ -74,7 +74,7 @@ public class SimulatorEngine {
 	public void step() 
   {
 		// Determine how much time has elapsed
-		// @@@ Note: the step() function per se should not be called unless
+		// @todo Note: the step() function per se should not be called unless
 		// we DO want to take a time step (so the clocking mechanisms should be
 		// somewhere else, e.g. in a run()-like function)
 		int ms = debugGetElapsedTime();

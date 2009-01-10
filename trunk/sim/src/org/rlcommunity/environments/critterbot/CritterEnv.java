@@ -77,7 +77,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
         // Get the first agent from the engine
         //SimulatorAgent agent = engine.getAgentList().getFirst();
 
-        // @@@ MGB: I've taken out the Disco client - to add it, look
+        // @todo MGB: I've taken out the Disco client - to add it, look
         //  at SimulatorMain for the part that creates a DiscoInterfaceServer
         // Create a drop server to send and receive robot (subjective) data
         robotServ = new DropInterface();

@@ -43,7 +43,7 @@ public class Wall extends SimulatorObject {
 
 	public Wall(String pLabel, int pId, ArrayList<Point2D.Double> newWalls) {
 		this(pLabel, pId);
-		// @@@ Add each point in turn?
+		// @todo Add each point in turn?
 		for (Point2D.Double pt : newWalls)
 			addPoint(pt);
 	}
