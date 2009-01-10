@@ -22,8 +22,8 @@ public class ObjectStateDynamics implements ObjectState {
     public static final double MAX_MASS = Double.MAX_VALUE;
     public static final double MAX_MOMENT_INERTIA = Double.MAX_VALUE;
     // this can be the force of gravity if I want it to be
-        public static final double GRAVITY = 10; //@todo check units
-        public static final double TOL = 0.0000001; // just because I don't care if things are really 0
+    public static final double GRAVITY = 10; //@todo check units
+    public static final double TOL = 0.0000001; // just because I don't care if things are really 0
         
 
     /** Dynamics state */

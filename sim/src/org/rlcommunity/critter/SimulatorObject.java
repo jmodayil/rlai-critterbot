@@ -184,7 +184,7 @@ public class SimulatorObject {
 		if (isects.size() == 0)
 			return null;
 		else if (isects.size() == 1) {
-			// @@@ the case when we have one intersection is incorrect, as in
+			// @todo the case when we have one intersection is incorrect, as in
 			// this
 			// case it's not clear what the normal is
 			Collision col = new Collision();
@@ -213,14 +213,14 @@ public class SimulatorObject {
 			 * col.alpha = (i1.alpha + i2.alpha) / 2; col.beta = (i1.beta +
 			 * i2.beta) / 2;
 			 */
-			// @@@ For now, we return a single intersection point - this is
+			// @todo For now, we return a single intersection point - this is
 			// because
 			// The interpolation of the two points might not be a good point of
 			// contact at all
 			col.alpha = i1.alpha;
 			col.beta = i1.beta;
 
-			// @@@ this is also wrong in general, e.g. if alpha1 = n-1 and
+			// @todo this is also wrong in general, e.g. if alpha1 = n-1 and
 			// alpha2 = 0,
 			// this results in alpha = (n-1)/2 (when it should be n - 1/2)
 			col.point = aShape.getPoint(col.alpha);
@@ -299,8 +299,8 @@ public class SimulatorObject {
 	 *            The new state component
 	 */
 	public void addState(ObjectState pState) {
-		// @@@ Automatically replaces duplicates.
-		// @@@ MGB - we probably don't want an assert here, but it is fine for
+		// @todo Automatically replaces duplicates.
+		// @todo MGB - we probably don't want an assert here, but it is fine for
 		// now; whether we should crash on duplicates is open to discussion
 		assert (!aStates.containsKey(pState.getName()));
 		aStates.put(pState.getName(), pState);
@@ -413,7 +413,7 @@ public class SimulatorObject {
 		if (aParent == null)
 			newLocalPos = newPos;
 		else {
-			// @@@ replace this by a proper global-to-local conversion
+			// @todo replace this by a proper global-to-local conversion
 			throw new UnsupportedOperationException("Not allowed to change the global position of a child object");
 		}
 
@@ -516,7 +516,6 @@ public class SimulatorObject {
 	 * @return The object's local direction
 	 */
 	public double getLocalDirection() {
-		// @@@ fix - update polygon
 		return aDir;
 	}
 
@@ -526,7 +525,7 @@ public class SimulatorObject {
 	 * should remain fixed as the object tree is traversed. Also updates the
 	 * Polygon of this object's children.
 	 * 
-	 * @@@ MGB: This is not quite clean - I don't like having to pass a center
+	 * @todo MGB: This is not quite clean - I don't like having to pass a center
 	 *     of rotation around. There should be a better way.
 	 * 
 	 * @param pTranslation
@@ -616,7 +615,7 @@ public class SimulatorObject {
 		this.setPosition(compObj.getPosition());
 		this.setDirection(compObj.getDirection());
 		if (compObj.getShape() != null)
-			// @@@ This fails - need to update the shape of object in our tree
+			// @todo This fails - need to update the shape of object in our tree
 			// In theory setting the position and direction already reset the
 			// polygon to some machine epsilon precision
 			this.aShape = (Polygon) (compObj.getShape().clone());
@@ -638,7 +637,7 @@ public class SimulatorObject {
 			this.aShape = null;
 		svgShapeDrawing = org.svgShapeDrawing;
 		/*
-		 * @@@ Copy the other attributes of the object, the actuator and sensor
+		 * @todo Copy the other attributes of the object, the actuator and sensor
 		 * list
 		 */
 		Set<Entry<String, ObjectState>> theEntrySet = org.aStates.entrySet();

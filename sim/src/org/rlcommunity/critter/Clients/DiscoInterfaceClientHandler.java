@@ -23,7 +23,7 @@ public class DiscoInterfaceClientHandler extends Thread
   protected Socket aClient;
 
   /** List of queue'd elements waiting to be parsed by our server */
-  protected LinkedList<SimulatorDrop> aInQueue;
+  protected final LinkedList<SimulatorDrop> aInQueue;
 
   protected InterfaceInputStream aIn;
   protected InterfaceOutputStream aOut;
@@ -31,8 +31,7 @@ public class DiscoInterfaceClientHandler extends Thread
   protected boolean aClosed = false;
 
   /** Creates a new client handler corresponding to the given Socket */
-  public DiscoInterfaceClientHandler(Socket pClient)
-  {
+  public DiscoInterfaceClientHandler(Socket pClient) {
     aClient = pClient;
     try
     {
@@ -77,14 +76,13 @@ public class DiscoInterfaceClientHandler extends Thread
           // Add the drop to the queue
           synchronized(aInQueue)
           {
-            // @@@ Add...
             aInQueue.add(newDrop);
           }
         }
         catch (ClassNotFoundException e)
         {
           System.err.println ("Invalid drop name: "+className);
-          // @@@ the data from then on is going to be garbage
+          // @todo the data from then on is going to be garbage
         }
         // Catch other ugly exceptions here, and throw them as Runtime
         catch (Exception e)

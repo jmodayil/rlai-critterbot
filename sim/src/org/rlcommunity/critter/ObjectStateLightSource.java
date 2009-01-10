@@ -12,7 +12,7 @@ public class ObjectStateLightSource implements ObjectState
 {
   public static final String NAME = SimulatorComponentLight.NAME + "source";
 
-  // A grayscale light value (@@@ this needs to be changed) 
+  // A grayscale light value (@todo this needs to be changed) 
   protected double aIntensity;
 
   public ObjectStateLightSource()

@@ -63,7 +63,7 @@ public class ObjectStateCritterbotInterface implements ObjectState
     */
   public boolean needsStateUpdate() 
   {
-    // @@@ this scheme breaks the convention that the current state is 
+    // @todo this scheme breaks the convention that the current state is 
     //  not modified
     if (aLastStateUpdate >= aStateDropFrequency)
     {

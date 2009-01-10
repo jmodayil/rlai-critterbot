@@ -59,7 +59,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     
         for (SimulatorDrop drop : drops)
         {
-          // @@@ icky
+          // @todo icky
           if (drop instanceof CritterControlDrop)
           {
             CritterControlDrop command = (CritterControlDrop)drop;
@@ -170,7 +170,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       Vector2D xyAccel = sData.getSensorValue();
       double zAccel = sData.getZSensorValue();
 
-      // @@@ ROBOT_SCALE should be removed
+      // @todo ROBOT_SCALE should be removed
       stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE / ROBOT_SCALE);
       stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE / ROBOT_SCALE);
       stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE);

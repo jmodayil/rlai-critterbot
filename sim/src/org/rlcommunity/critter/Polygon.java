@@ -131,7 +131,7 @@ public class Polygon {
 		}
 
 		if (!resolved) // We still don't know whether this polygon is clockwise!
-			// @@@ fixme; not the right type of exception
+			// @todo fixme; not the right type of exception
 			throw new IllegalArgumentException("Really ugly polygon");
 
 		// If the polygon is not clockwise, re-add the points backwards
@@ -343,7 +343,7 @@ public class Polygon {
 			return isects;
 
 		// Compare the bounding boxes first, and hope that they don't intersect
-		// @@@ this can be rewritten as we now only care about intersections
+		// @todo this can be rewritten as we now only care about intersections
 		// at the edges, NOT whether the two polygons occupy the same space
 		double l = pPoly.bx;
 		double r = pPoly.bx + pPoly.bw;
@@ -353,7 +353,7 @@ public class Polygon {
 		double br = bx + bw;
 		double bb = by + bh;
 
-		// @@@ this can be simplified to - assume no intersection if bb's
+		// @todo this can be simplified to - assume no intersection if bb's
 		// don't intersect
 		if (!((l < bx && bx < r) || (l < br && br < r) || (t < by && by < b) || (t < bb && bb < b))
 				&& !((bx < l && l < br) || (bx < r && r < br)
@@ -531,7 +531,7 @@ public class Polygon {
 		}
 
 		// Oops? Something went wrong
-		// @@@ possibly throw an exception?
+		// @todo possibly throw an exception?
 		return null;
 	}
 
@@ -567,7 +567,7 @@ public class Polygon {
 		}
 
 		// Oops? Something went wrong
-		// @@@ possibly throw an exception?
+		// @todo possibly throw an exception?
 		return null;
 	}
 
