@@ -76,34 +76,32 @@ int motor_event() {
 
   
   volt = motor_get_voltage();
-
+  
+  spi_send_packet(&power_packet); 
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     motor_tx_data[i][1] = (unsigned char) motor_speed[i];
     motor_tx_data[i][2] = volt;  
     spi_send_packet(&motor_packet[i]);
   }
-  spi_send_packet(&power_packet); 
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
-    if((motor_rx_data[i][4] & 0xFF) != MOTOR_PACKET_HEADER)
+    if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
       error_set(ERR_MOTOR_ALIGN);
   }
       /*armprintf("!Motor %d: %d %d %d %d\r", i, 
         motor_rx_data[i][1] & 0xFF, 
         motor_rx_data[i][2] & 0xFF, 
-        motor_rx_data[i][3] & 0xFF,
+  
         motor_rx_data[i][4] & 0xFF); 
   }
-  if(motor_event_s.event_count % 100 == 0) {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++)
-      armprintf("Motor %d: %d %d %d %d\r", i, 
+      armprintf("Motor %d: %d %d %d %d %d\r", i, 
+        motor_rx_data[i][0] & 0xFF,
         motor_rx_data[i][1] & 0xFF, 
         motor_rx_data[i][2] & 0xFF, 
         motor_rx_data[i][3] & 0xFF,
         motor_rx_data[i][4] & 0xFF); 
-    armprintf("\rPower: %d\r", power_rx_data & 0xFF);
-    motor_test++;
-  }*/
-  return 0; 
+    //armprintf("\rPower: %d\r", power_rx_data & 0xFF);
+  */return 0; 
 }
 
 void motor_set_speed(int motor, signed char speed) {
@@ -148,8 +146,12 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
     m340 = (m340 * MOTOR_MAX_SPEED) / max;
   }
 
-  motor_set_speed_slew((signed char)m100, (signed char)m220,
-      (signed char)m340);
+  motor_speed[0] = motor_speed_final[0] = m100;
+  motor_speed[1] = motor_speed_final[1] = m220;
+  motor_speed[2] = motor_speed_final[2] = m340;
+
+  //motor_set_speed_slew((signed char)m100, (signed char)m220,
+  //    (signed char)m340);
 
 }
 
@@ -238,7 +240,7 @@ signed char motor_clicks(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
 
-  return motor_rx_data[motor][0] & 0xFF;
+  return motor_rx_data[motor][1] & 0xFF;
 }
 
 unsigned char motor_current(int motor) {
@@ -246,14 +248,14 @@ unsigned char motor_current(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
 
-  return motor_rx_data[motor][1] & 0xFF;
+  return motor_rx_data[motor][2] & 0xFF;
 }
 
 unsigned char motor_temp(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
 
-  return motor_rx_data[motor][2] & 0xFF;
+  return motor_rx_data[motor][3] & 0xFF;
 }
 
 signed char motor_command(int motor) {
