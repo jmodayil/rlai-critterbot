@@ -18,6 +18,7 @@
 
 #define MOTOR_PACKET_HEADER 0x7F
 #define MOTOR_PWM_HEADER 0x7E
+#define MOTOR_SPI_PADDING 0xFE
 
 // Rate of slew to new speed (ratio based on one step per cycle)
 #define MOTOR_SLEW_RATE 1.0

@@ -121,6 +121,9 @@ void accel_write_reg (unsigned int address, unsigned int data)
     (unsigned char)((address & ACCEL_SPI_ADDR) | ACCEL_SPI_WRITE);
   accel_txdata[1] = (unsigned char)(data & 0xFF);
 
+  /*
+   * This will never get called.
+   */
   if(accel_spi_packet.finished != 1) {
     error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
