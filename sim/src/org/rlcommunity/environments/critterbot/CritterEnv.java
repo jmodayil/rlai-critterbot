@@ -36,6 +36,7 @@ import org.rlcommunity.critter.SimulatorComponentLight;
 import org.rlcommunity.critter.SimulatorComponentOmnidrive;
 import org.rlcommunity.critter.SimulatorEngine;
 import org.rlcommunity.critter.SimulatorObject;
+import org.rlcommunity.critter.environments.EmptyEnvironment;
 import org.rlcommunity.environments.critterbot.messages.CritterScreenResponse;
 import org.rlcommunity.environments.critterbot.visualizer.CritterEnvVisualizer;
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
@@ -84,7 +85,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 //        robotServ.addClient(new KeyboardClient());
         robotServ.addClient(this);
 
-        engine = new SimulatorEngine();
+        engine = new SimulatorEngine(new EmptyEnvironment());
 
         engine.addComponent(new SimulatorComponentDynamics());
         engine.addComponent(new SimulatorComponentLight());

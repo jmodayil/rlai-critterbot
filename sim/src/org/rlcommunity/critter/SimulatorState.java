@@ -15,18 +15,38 @@ import java.util.List;
 public class SimulatorState
 {
   // List of objects in this state
-  protected LinkedList<SimulatorObject> aObjList;
+  protected List<SimulatorObject> aObjList;
 
-  public SimulatorState()
-  {
-    aObjList = new LinkedList<SimulatorObject>();
+  /** Creates a new SimulatorState with a blank object list.
+   *
+   */
+  public SimulatorState() {
+    this(new LinkedList<SimulatorObject>());
   }
 
+  /** Create a new SimulatorState with a pre-provided object list. This
+   *  constructor does not clone the list.
+   * 
+   * @param pObjectList The list of objects present in this state.
+   */
+  public SimulatorState(List<SimulatorObject> pObjectList) {
+      aObjList = pObjectList;
+  }
+
+  /** Adds an object to this SimulatorState.
+   *
+   * @param pObj The object to be added to the state.
+   */
   public void addObject(SimulatorObject pObj)
   {
     aObjList.add(pObj);
   }
 
+  /** Returns the object corresponding to the given ID.
+   *
+   * @param pId The ID of interest.
+   * @return The object that corresponds to the given ID.
+   */
   private SimulatorObject getObject(int pId)
   {
     // @todo this needs to be optimized, most likely by having getObjects()

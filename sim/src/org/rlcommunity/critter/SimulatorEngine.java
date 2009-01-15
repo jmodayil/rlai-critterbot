@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.rlcommunity.critter.environments.EnvironmentDescription;
 import org.rlcommunity.critter.svg.Loader;
 
 public class SimulatorEngine {
@@ -24,19 +25,14 @@ public class SimulatorEngine {
 
 	protected SimulatorVizEvents vizHandler;
 
-	public SimulatorEngine() {
-		aState = new SimulatorState();
+    protected EnvironmentDescription aEnvDescription;
+    
+	public SimulatorEngine(EnvironmentDescription pDescription) {
 		aComponents = new LinkedList<SimulatorComponent>();
-
 		vizHandler = new SimulatorVizEvents();
+        aEnvDescription = pDescription;
 
-		// Construct the simulator state by adding objects to it
-		// MGB: I moved all of this code to debugCreateStuff because it was
-		// getting fairly bulky
-		debugCreateStuff();
-
-		// Clone the current state; we will use it to do state-state transitions
-		aNextState = (SimulatorState) aState.clone();
+        initState();
 	}
 
 	/** Returns a list of existing agents */
@@ -71,8 +67,20 @@ public class SimulatorEngine {
 		aComponents.add(pComponent);
 	}
 
-	public void step() 
-  {
+    public void initState() {
+        // @todo move somewhere else
+        Loader.initSVGUniverse();
+
+        List<SimulatorObject> objects = aEnvDescription.generateObjects();
+        aState = new SimulatorState(objects);
+
+        debugLoadSVG();
+        
+		// Clone the current state; we will use it to do state-state transitions
+		aNextState = (SimulatorState) aState.clone();
+    }
+    
+	public void step() {
 		// Determine how much time has elapsed
 		// @todo Note: the step() function per se should not be called unless
 		// we DO want to take a time step (so the clocking mechanisms should be
@@ -160,276 +168,18 @@ public class SimulatorEngine {
 		aNextState = tmpState;
 	}
 
-	/** Temporary methods (used mainly until a proper replacement is written */
-	private int nextObjectId = 1;
-
-	public void debugCreateStuff() {
-		Polygon shape;
-                
-                Loader.initSVGUniverse();		
-                
-                debugCreateWall();
-		debugCreateRobot();
-
-		// Add an hexagonal obstacle
-		SimulatorObject hex = new SimulatorObject("Hex", nextObjectId++);
-
-		// Create the hex polygon
-		Polygon hexShape = new Polygon();
-		hexShape.addPoint(0, 0);
-		hexShape.addPoint(-8, -6);
-		hexShape.addPoint(-8, -16);
-		hexShape.addPoint(0, -22);
-		hexShape.addPoint(8, -16);
-		hexShape.addPoint(8, -6);
-		hexShape.translate(new Vector2D(0, 11));
-		System.out.println("Hex");
-		hexShape.doneAddPoints();
-
-		/*
-		 * hexShape.addPoint(0,0); hexShape.addPoint(40,0);
-		 * hexShape.addPoint(40,40); hexShape.addPoint(0, 40);
-		 * hexShape.addPoint(0, 35); hexShape.addPoint(35,35);
-		 * hexShape.addPoint(35, 5); hexShape.addPoint(0, 5);
-		 */
-
-		hex.setShape(hexShape);
-
-		// Important - set position after setting shape
-		hex.setPosition(new Vector2D(100, 100));
-
-		// Add dynamics to this object
-		hex.addState(new ObjectStateDynamics(0.5, 2));
-
-		//aState.addObject(hex);
-
-		SimulatorObject lightSource = new SimulatorObject("light1",
-				nextObjectId++);
-
-		lightSource.setShape(null);
-
-                
-		lightSource.setPosition(new Vector2D(50.0, 50.0));
-		lightSource.setSVG("lightsource");
-
-		ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
-		specificLightSource.setIntensity(10000.0);
-		lightSource.addState(specificLightSource);
-
-		aState.addObject(lightSource);
-                
-//                lightSource = new SimulatorObject("light2",
-//				nextObjectId++);
-//
-//		shape = new Polygon();
-//
-//		shape.addPoint(0.0, 0.0);
-//		shape.addPoint(3.0, 3.0);
-//		shape.addPoint(6.0, 0.0);
-//		System.out.println("Shape");
-//		shape.doneAddPoints();
-//		lightSource.setShape(shape);
-//		lightSource.setPosition(new Vector2D(400.0, 50.0));
-//		lightSource.setSVG("lightsource");
-//
-//		lightSource.addState(specificLightSource);
-//		aState.addObject(lightSource);                
-
-		Loader svgLoader = new Loader(aState, nextObjectId);
+	public void debugLoadSVG() {
+        // @todo needs to be moved somewhere else
+        int nextObjectId = aState.getObjects().size();
+        
+		/* Loader svgLoader = new Loader(aState, nextObjectId);
 		//svgLoader.loadStaticObject("book", new Vector2D(345, 377), 0);
 		svgLoader.loadStaticObject("table", new Vector2D(160, 100), 0.5);
 		svgLoader.loadStaticObject("chair", new Vector2D(250, 310), -2.6);
 		svgLoader.loadStaticObject("bookcase", new Vector2D(476, 200), Math.PI/2);
-
+        
 		nextObjectId = svgLoader.objectId();
-
-	}
-
-	private void debugCreateWall() {
-		Wall w = new Wall("Wall", nextObjectId++);
-		w.setSVG("wall").resetNativeTranslation();
-
-		w.addPoint(20, 20);
-		w.addPoint(20, 480);
-		w.addPoint(480, 480);
-		w.addPoint(480, 20);
-		w.addPoint(20, 20);
-
-		// Make a polygon for the wall as well
-		Polygon wallShape = new Polygon();
-		// Exterior
-		wallShape.addPoint(0, 0);
-		wallShape.addPoint(0, 500);
-		wallShape.addPoint(500, 500);
-		wallShape.addPoint(500, 0);
-		wallShape.addPoint(0, 0);
-		// Interior (notice! the interior must be given in counter-clockwise
-		// order)
-		wallShape.addPoint(20, 20);
-		wallShape.addPoint(480, 20);
-		wallShape.addPoint(480, 480);
-		wallShape.addPoint(20, 480);
-		wallShape.addPoint(20, 20);
-		System.out.println("Wall");
-		wallShape.doneAddPoints();
-
-		// Note that this polygon self-intersects at the duplicated edge
-		// (0,0)-(20,20)
-		// This polygon is also evil because everything falls within its
-		// bounding box
-		w.setShape(wallShape);
-
-		// Make the wall react to dynamics
-		ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
-		wallDyn.setMaxSpeed(0);
-		w.addState(wallDyn);
-		aState.addObject(w);
-	}
-
-	public void debugCreateRobot() {
-		SimulatorAgent sa = new SimulatorAgent("Critterbot", nextObjectId++);
-
-		Polygon agentShape = new Polygon();
-		agentShape.addPoint(-0, 20);
-		agentShape.addPoint(-7.5, 18.5);
-		agentShape.addPoint(-14, 14);
-		agentShape.addPoint(-18.5, 7.5);
-		agentShape.addPoint(-20, 0);
-		agentShape.addPoint(-18.5, -6.5);
-		agentShape.addPoint(-16.5, -16);
-		agentShape.addPoint(-13, -26);
-		agentShape.addPoint(-8, -35.5);
-		agentShape.addPoint(-1, -47);
-		agentShape.addPoint(0, -48);
-		agentShape.addPoint(-2, -40.5);
-		agentShape.addPoint(-4, -32.5);
-		agentShape.addPoint(-4.5, -20);
-		agentShape.addPoint(-3, -20);
-		agentShape.addPoint(2.5, -16);
-		agentShape.addPoint(9, -16);
-		agentShape.addPoint(15.5, -12.5);
-		agentShape.addPoint(19, -6);
-		agentShape.addPoint(20, 0);
-		agentShape.addPoint(18.5, 7.5);
-		agentShape.addPoint(14, 14);
-		agentShape.addPoint(7.5, 18.5);
-		System.out.println("Agent");
-		agentShape.rotate(-Math.PI / 2, new Vector2D(0, 0));
-    double robotLength = 68; // Rough length estimate
-
-		agentShape.doneAddPoints();
-
-		sa.setShape(agentShape);
-
-		// sa.setSVG("robot");
-
-		// Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
-		ObjectStateDynamics osd = new ObjectStateDynamics(4, 2);
-		osd.setCoefficientFrictionStatic(0.1);
-		sa.addState(osd);
-
-		// This agent is a Critterbot!
-		sa.addState(new ObjectStateCritterbotInterface());
-
-		// Give the agent an omnidirectional drive
-		sa.addState(new ObjectStateOmnidrive());
-		sa.addState(new ObjectStateBumpSensor());
-
-                sa.addState(new ObjectStateAccelerometer());
-                sa.addState(new ObjectStateGyroscope());
-
-		aState.addObject(sa);
-
-		// Create an external light sensor
-		SimulatorObject lightSensor = new SimulatorObject("LightSensor1",
-				nextObjectId++);
-		/*
-		 * shape = new Polygon();
-		 * 
-		 * shape.addPoint(0.0, -1.0); shape.addPoint(20.0, 0.0);
-		 * shape.addPoint(0.0, 1.0); shape.doneAddPoints();
-		 * 
-		 * sensor.setShape(shape);
-		 */
-		// These three light sensors have no shape!
-		lightSensor.setPosition(new Vector2D(19.8, 0));
-    lightSensor.setDirection(0);
-    //  lightSensor.setLocalDirection(0.0);
-    ObjectStateLightSensor specificLightSensor = new ObjectStateLightSensor();
-    specificLightSensor.setNumPixels(5);
-    specificLightSensor.setSensorDepth(1.0);
-    specificLightSensor.setSensorWidth(5.0);
-		lightSensor.addState(specificLightSensor);
-
-		sa.addChild(lightSensor);
-
-
-		// Create two more light sensors
-		lightSensor = lightSensor.makeCopy("LightSensor2", nextObjectId++);
-		lightSensor.setPosition(new Vector2D(0, -19.8));
-                lightSensor.setLocalDirection(-Math.PI/2.0);
-		sa.addChild(lightSensor);
-
-		lightSensor = lightSensor.makeCopy("LightSensor3", nextObjectId++);
-		lightSensor.setPosition(new Vector2D(0, 19.8));
-                lightSensor.setLocalDirection(-Math.PI/2.0); 
-		sa.addChild(lightSensor);
-
-		lightSensor = lightSensor.makeCopy("LightSensor4", nextObjectId++);
-		lightSensor.setPosition(new Vector2D(-19.8, 0.0));
-                lightSensor.setLocalDirection(-Math.PI); 
-		sa.addChild(lightSensor);
-		
-    sa.setPosition(new Vector2D(300, 400));
-
-		// Now the IR distance sensors
-		double irRange = 3 * robotLength; 
-
-    // Make a dummy object that we will not actually add
-    SimulatorObject baseIrSensor = 
-      new SimulatorObject("IRSensor-base", -1); 
-		baseIrSensor.addState(new ObjectStateIRDistanceSensor(irRange));
-
-    double pi = Math.PI;
-
-    // Oops, why are these all hardcoded? - use robot length at least!
-    // The sensors are slightly inside the robot so that they fall within the
-    //  robot polygon
-    double[][] irDistancePos = new double[][]
-      {
-        // Sensor 0 forward
-        {  19.8 ,   0.0 ,   0.0     },
-        // Sensor 6 45 cw
-        {  14.0 , -14.0 , -pi/4     },
-        // Sensor 5 90 cw
-        {   0.0 , -19.8 , -pi/2     },
-        // Sensor 4 135 cw
-        { -14.0 , -14.0 , -3 * pi/4 },
-        // Sensor 3 135 ccw
-        { -14.0 ,  14.0 ,  3 * pi/4 },
-        // Sensor 2 90 ccw
-        {   0.0 ,  19.8 ,  pi/2     },
-        // Sensor 1 45 ccw
-        {  14.0 ,  14.0 ,  pi/4     },
-        // Sensor 9 - a bit further back on the tail than 7 (quantify this!)
-        //  faces 105 cw. This value may be wrong. 
-        { -26.0 ,  5.5 ,  -pi / 2   }, 
-        // Sensor 8 - faces directly back, next to 3, arranged to miss the tail
-        //  (which is at (-48,0) here)
-        { -16 ,   -5.0 ,  -pi      },
-        // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
-        { -32.0 ,  9.0 ,   pi/2 + pi/8    },
-      };
-
-    for (int i = 0; i < irDistancePos.length; i++)
-    {
-		  SimulatorObject sensor =  
-        baseIrSensor.makeCopy("IRSensor"+i, nextObjectId++);
-		  sensor.setPosition(
-        new Vector2D(irDistancePos[i][0], irDistancePos[i][1]));
-		  sensor.setDirection(irDistancePos[i][2]);
-		  sa.addChild(sensor);
-    }
+         */
 	}
 
 	public int debugGetElapsedTime() {
