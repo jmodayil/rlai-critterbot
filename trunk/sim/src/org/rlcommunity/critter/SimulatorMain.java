@@ -12,6 +12,7 @@ package org.rlcommunity.critter;
 
 import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
+import org.rlcommunity.critter.environments.OriginalEnvironment;
 
 public class SimulatorMain
 {
@@ -44,7 +45,7 @@ public class SimulatorMain
     dropInterface.addClient(theKeyboardClient);
 
     System.out.println ("Creating simulator engine...");
-    final SimulatorEngine engine = new SimulatorEngine();
+    final SimulatorEngine engine = new SimulatorEngine(new OriginalEnvironment());
     engine.addComponent(new SimulatorComponentDynamics());
     engine.addComponent(new SimulatorComponentLight());
     engine.addComponent(new SimulatorComponentBump());

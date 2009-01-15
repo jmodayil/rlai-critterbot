@@ -136,7 +136,6 @@ public class Polygon {
 
 		// If the polygon is not clockwise, re-add the points backwards
 		if (!isClockwise) {
-			System.err.println("Not clockwise, recreating polygon");
 			LinkedList<Vector2D> oldPoints = points;
 
 			// Re-initialize the polygon, as if we had no points

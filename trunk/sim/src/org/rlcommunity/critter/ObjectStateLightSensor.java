@@ -21,11 +21,16 @@ public class ObjectStateLightSensor implements ObjectState
 
   public ObjectStateLightSensor()
   {
-    aData = 0;
-    aSensorWidth = 0;
-    aNumPixels = 0;
-    aSensorDepth = 0;
+      this(0,0.0,0.0);
   }
+
+    public ObjectStateLightSensor(int pNumPixels, double pSensorDepth, 
+            double pSensorWidth) {
+    aData = 0;
+    aSensorWidth = pSensorWidth;
+    aNumPixels = pNumPixels;
+    aSensorDepth = pSensorDepth;
+    }
 
   /** ObjectState interface */
   
