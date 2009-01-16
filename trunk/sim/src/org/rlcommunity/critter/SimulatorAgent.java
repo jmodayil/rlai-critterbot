@@ -45,21 +45,23 @@ public class SimulatorAgent extends SimulatorObject {
 	}
 
 	@Override
-	public void draw(Graphics g) {
+	public void draw(SimulatorGraphics g) {
 		if (true) {
-			Graphics2D g2 = (Graphics2D) g;
-			AffineTransform oldXform = g2.getTransform();
+			AffineTransform oldXform = g.getTransform();
 			AffineTransform newXform = (AffineTransform) (oldXform.clone());
-			newXform.rotate(Math.PI / 2 + aDir, aPos.x, aPos.y);
-			g2.setTransform(newXform);
-			g2.drawImage(robotop, (int) aPos.x - 19, (int) aPos.y - 21, null);
-			g2.setTransform(oldXform);
+			newXform.rotate(Math.PI / 2 + aDir,
+                    g.scaleToDouble(aPos.x), g.scaleToDouble(aPos.y));
+			g.setTransform(newXform);
+			g.drawImage(robotop, aPos.x - 0.19, aPos.y - 0.21, null);
+			g.setTransform(oldXform);
 
 			Color tempC = g.getColor();
 			g.setColor(Color.lightGray);
-			g.drawString(aLabel, (int) aPos.x + 20, (int) aPos.y + 20);
+			g.drawString(aLabel, aPos.x + 0.2, aPos.y + 0.2);
 			g.setColor(tempC);
-		} else {
+		} else if (false) {
+            if (true)
+                throw new UnsupportedOperationException("Code has not been ported to use SimulatorGraphics.");
 			Color tempC = g.getColor();
 			g.setColor(Color.black);
 			g.drawOval((int) aPos.x - 10, (int) aPos.y - 10, 20, 20);

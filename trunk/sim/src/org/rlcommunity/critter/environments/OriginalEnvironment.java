@@ -23,14 +23,15 @@ public class OriginalEnvironment implements EnvironmentDescription {
         // Add a Critterbot
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateCritterbot("Crittebot", id),
-                new Vector2D(250,250), 0.0, id);
+                new Vector2D(2.50,2.50), 0.0, id);
 
         id = CommonObjects.addObject(objects,
-                CommonObjects.generateWall("Wall", id), id);
+                CommonObjects.generateWall("Wall", id),
+                new Vector2D(0.0, 0.0), 0.0, id);
 
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateLightSource("Light Source", id),
-                new Vector2D(50, 50), 0.0, id);
+                new Vector2D(0.50, 0.50), 0.0, id);
 
         return objects;
     }

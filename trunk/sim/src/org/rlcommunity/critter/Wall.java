@@ -65,18 +65,18 @@ public class Wall extends SimulatorObject {
 		return lines;
 	}
 
-	private int[] getXPoints() {
+	private double[] getXPoints() {
 
-		int points[] = new int[walls.size()];
+		double points[] = new double[walls.size()];
 		for (int i = 0; i < points.length; i++) {
-			points[i] = (int) walls.get(i).x;
+			points[i] = walls.get(i).x;
 		}
 		return points;
 	}
 
-	private int[] getYPoints() {
+	private double[] getYPoints() {
 
-		int points[] = new int[walls.size()];
+		double points[] = new double[walls.size()];
 		for (int i = 0; i < points.length; i++) {
 			points[i] = (int) walls.get(i).y;
 		}
@@ -84,8 +84,8 @@ public class Wall extends SimulatorObject {
 	}
 
 	@Override
-	public void draw(Graphics g) {
-		super.draw(g);
+	public void draw(SimulatorGraphics g) {
+		//super.draw(g);
 		Color tempC = g.getColor();
 		g.setColor(Color.green);
 		g.drawPolyline(getXPoints(), getYPoints(), walls.size());

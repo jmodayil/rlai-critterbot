@@ -44,7 +44,7 @@ public class Polygon {
 
 	protected LinkedList<Vector2D> points;
 
-	protected int[] aXPoints, aYPoints;
+	protected double[] aXPoints, aYPoints;
 
 	public Polygon() {
 		init();
@@ -177,16 +177,16 @@ public class Polygon {
 			p.y += delta.y;
 
 			if (aXPoints != null) {
-				aXPoints[idx] = (int) Math.round(p.x);
-				aYPoints[idx] = (int) Math.round(p.y);
+				aXPoints[idx] = p.x;
+				aYPoints[idx] = p.y;
 				idx++;
 			}
 		}
 
 		if (aXPoints != null && points.size() > 0) {
 			Vector2D first = points.getFirst();
-			aXPoints[idx] = (int) Math.round(first.x);
-			aYPoints[idx] = (int) Math.round(first.y);
+			aXPoints[idx] = first.x;
+			aYPoints[idx] = first.y;
 		}
 	}
 
@@ -251,16 +251,16 @@ public class Polygon {
 			firstPt = false;
 
 			if (aXPoints != null) {
-				aXPoints[idx] = (int) Math.round(p.x);
-				aYPoints[idx] = (int) Math.round(p.y);
+				aXPoints[idx] = p.x;
+				aYPoints[idx] = p.y;
 				idx++;
 			}
 		}
 
 		if (aXPoints != null && points.size() > 0) {
 			Vector2D first = points.getFirst();
-			aXPoints[idx] = (int) Math.round(first.x);
-			aYPoints[idx] = (int) Math.round(first.y);
+			aXPoints[idx] = first.x;
+			aYPoints[idx] = first.y;
 		}
 	}
 
@@ -631,26 +631,26 @@ public class Polygon {
 	 * @param g
 	 *            The main Graphics object to draw with
 	 */
-	public void draw(Graphics g) {
+	public void draw(SimulatorGraphics g) {
 		// If the point arrays are missing, re-create them
 		if (aXPoints == null || aYPoints == null) {
 			int num = points.size();
-			aXPoints = new int[num + 1];
-			aYPoints = new int[num + 1];
+			aXPoints = new double[num + 1];
+			aYPoints = new double[num + 1];
 
 			int idx = 0;
 			// Set the (x,y) coordinates of each point in turn
 			for (Vector2D pt : points) {
-				aXPoints[idx] = (int) Math.round(pt.x);
-				aYPoints[idx] = (int) Math.round(pt.y);
+				aXPoints[idx] = pt.x;
+				aYPoints[idx] = pt.y;
 
 				idx++;
 			}
 
 			// Re-iterate the first point to close the loop
 			Vector2D first = points.getFirst();
-			aXPoints[num] = (int) Math.round(first.x);
-			aYPoints[num] = (int) Math.round(first.y);
+			aXPoints[num] = first.x;
+			aYPoints[num] = first.y;
 		}
 
 		Color tempC = g.getColor();
@@ -664,14 +664,14 @@ public class Polygon {
 		//drawBoundingBox(g);
 	}
 
-	public void drawBoundingBox(Graphics g) {
-		int[] bbx = new int[5];
-		int[] bby = new int[5];
+	public void drawBoundingBox(SimulatorGraphics g) {
+		double[] bbx = new double[5];
+		double[] bby = new double[5];
 
-		bbx[0] = bbx[1] = bbx[4] = (int) Math.round(bx);
-		bbx[2] = bbx[3] = (int) Math.round(bx + bw);
-		bby[0] = bby[3] = bby[4] = (int) Math.round(by);
-		bby[1] = bby[2] = (int) Math.round(by + bh);
+		bbx[0] = bbx[1] = bbx[4] = bx;
+		bbx[2] = bbx[3] = (int) bx + bw;
+		bby[0] = bby[3] = bby[4] = by;
+		bby[1] = bby[2] = by + bh;
 
 		Color tempC = g.getColor();
 		g.setColor(Color.cyan);
@@ -680,6 +680,8 @@ public class Polygon {
 	}
 
 	public void drawEdgeNormals(Graphics g) {
+        if (true)
+            throw new UnsupportedOperationException ("Needs to be re-implemented.");
 		Vector2D p1 = points.getLast();
 
 		Color tempC = g.getColor();

@@ -14,7 +14,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = true;
+    // @todo clean up
     boolean debugCollisions = false;
+    boolean debugDynamicsData = false;
 
     public SimulatorComponentDynamics() {
     }
@@ -37,19 +39,24 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *  @param delta    The amount of time (in ms) between the current and
      *         next states.
      */
-    public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) {
+    public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) {        
         // Walk through all the objects in the current state that can be 
         //  affected by physics
         for (SimulatorObject obj : pCurrent.getObjects()) {
+            boolean debugDisplayData =
+                    (debugDynamicsData && obj.getLabel().equals("Critterbot"));
+
             // If no physics data, ignore this object
             ObjectState os = obj.getState(SimulatorComponentDynamics.NAME);
             if (os == null) {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
-            if (false && obj.getId() == 2) {
-                System.out.println("Current velocity " + dynData.getVelocity());            // Find the corresponding object in the next state
+            if (debugDisplayData) {
+                System.out.println("Current velocity " + dynData.getVelocity());
             }
+            
+            // Find the corresponding object in the next state
             SimulatorObject newObj = pNext.getObject(obj);
             ObjectStateDynamics newDynData =
                     (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
@@ -65,10 +72,13 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             Force friction =
                     new Force(dynData.calculateFriction(delta / 1000.0));
 
-            if (false && obj.getId() == 2) {
+            if (debugDisplayData) {
                 System.out.println(" Thrust " + dynData.getForceSum().vec);
                 System.out.println(" Friction " + friction.vec);
             }
+            double momI = dynData.getMomentInertia();
+            double mass = dynData.getMass();
+            
             Force thrust = dynData.getForceSum();
             //thrust.vec.plusEquals(friction.vec);
             double torque = dynData.getTorque();
@@ -79,39 +89,38 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             // A very sad attempt at friction
             // we're not using real friction because of a bug from interaction
             // between the thrust and friction
-            thrust.vec.x -= vi.x * .1;
-            thrust.vec.y -= vi.y * .1;
-            torque -= wi * .5;
+            double normalForce = dynData.getMass() * ObjectStateDynamics.GRAVITY;
+            double frictionCoeff = 2.5;
+            double frictionForce = normalForce * frictionCoeff;
+            double torqueFrictionCoeff = 5;
 
-            double mass = dynData.getMass();
-
+            // @todo fix again - make sure to set thrust -velocity * mass in
+            //  the worst case, never move the object 
+            thrust.vec.x -= frictionCoeff * vi.x * mass;// frictionForce;
+            thrust.vec.y -= frictionCoeff * vi.y * mass; // frictionForce;
+            torque -= wi * torqueFrictionCoeff * momI;
 
             // Apply Euler's method to the position, its derivative and second
             //  derivative
             // @todo pull the integration method into a separate function
 
-            newDynData.setAngVelocity(wi + torque / dynData.getMomentInertia());
+            newDynData.setAngVelocity(wi +
+                    delta * torque / momI / 1000);
             // don't know about this
             newDynData.setVelocity((Vector2D) dynData.getVelocity().clone());
             newDynData.applyLinearForce(thrust, delta / 1000.0);
 
             double newDirect = obj.aDir + wi * delta / 1000.0;
-            while (newDirect >= Math.PI) {
-                newDirect -= Math.PI * 2;
-            }
-            while (newDirect < -Math.PI) {
-                newDirect += Math.PI * 2;
-            }
             newObj.setDirection(newDirect);
+            
             newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000.0,
                     obj.aPos.y + vi.y * delta / 1000.0));
-            if (false && obj.getId() == 2) {
+            if (debugDisplayData) {
                 System.out.println(" Pre-collision next velocity " + newDynData.getVelocity());
             }
         }
         // at this point, all the dyn objects in pNext should have their position
         // direction, ang velocity and  velocity set
-
         checkForCollisions(pCurrent, pNext, delta);
 
     }

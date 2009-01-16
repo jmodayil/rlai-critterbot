@@ -20,7 +20,7 @@ public class RobotOnlyEnvironment implements EnvironmentDescription {
         // Add a Critterbot
         id = CommonObjects.addObject(objects, 
                 CommonObjects.generateCritterbot("Crittebot", id),
-                new Vector2D(250,250), 0.0, id);
+                new Vector2D(2.50,2.50), 0.0, id);
 
         return objects;
     }
