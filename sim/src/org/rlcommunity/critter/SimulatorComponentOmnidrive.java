@@ -19,6 +19,9 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
   
   public static int aCommandlessTimeThreshold = 500; 
 
+  public static final double torqueGain = 10;
+  public static final double thrustGain = 1;
+  
   public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta)
   {
     // Get all objects with an omni drive
@@ -59,12 +62,13 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       // Produce a force to provide the required velocity (which is in m/s)
       Vector2D localVel = kinState.getVelocity().rotate(-dir);
       Force fPID = simpleXYPid(driveState, kinState, localVel);
-
+      fPID.vec.timesEquals(thrustGain);
+      
       nextKinState.addForce (new Force(fPID.vec.rotate(dir)));
      
       // @todo Should also be PID-driven
       double torquePID = simpleTPID(driveState, kinState);
-      nextKinState.addTorque (torquePID);
+      nextKinState.addTorque (torquePID*torqueGain);
 
       // Rather than "consuming" the action, which leads to very saccaded
       //  movements when commands are issued slowly, we kill it if 500ms
@@ -98,6 +102,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
   public Force simpleXYPid(ObjectStateOmnidrive driveData, 
     ObjectStateDynamics dynData, Vector2D curVel)
   {
+    double maxForce = 10;
     Vector2D targetVel = driveData.getVelocity();
     double coeff = driveData.getPIDCoefficient();
 
@@ -113,10 +118,10 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     err.y = err.y + curVel.y * 0.1;
 
     // Finally, cap the maximum force this PID produces to 10
-    if (err.x > 10) err.x = 10;
-    else if (err.x < -10) err.x = -10;
-    if (err.y > 10) err.y = 10;
-    else if (err.y < -10) err.y = -10;
+    if (err.x > maxForce) err.x = maxForce;
+    else if (err.x < -maxForce) err.x = -maxForce;
+    if (err.y > maxForce) err.y = maxForce;
+    else if (err.y < -maxForce) err.y = -maxForce;
 
     return new Force(err);
   }

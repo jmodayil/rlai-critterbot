@@ -28,7 +28,7 @@ public interface ObjectState
     * @param g The canvas to draw on
     * @param parent The owner of this state
     */
-  public void draw(Graphics g, SimulatorObject parent);
+  public void draw(SimulatorGraphics g, SimulatorObject parent);
 
   /** Provides a mean of clearing whatever data this ObjectState contains
     *  and resetting it to the default values. Meant to be used when 

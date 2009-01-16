@@ -105,7 +105,7 @@ public class ObjectStateOmnidrive implements ObjectState
     this.aPIDCoefficient = org.aPIDCoefficient;
   }
 
-  public void draw(Graphics g, SimulatorObject parent)
+  public void draw(SimulatorGraphics g, SimulatorObject parent)
   {
       // protected Vector2D aVel;
       Vector2D objPos = parent.getPosition();

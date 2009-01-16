@@ -74,7 +74,7 @@ public class ObjectStateBumpSensor implements ObjectState
     * @param g The canvas to draw on
     * @param parent The owner of this state
     */
-  public void draw(Graphics g, SimulatorObject parent)
+  public void draw(SimulatorGraphics g, SimulatorObject parent)
   {
     // Draw a little circle where each bobo is
     // @todo Evil! It wasn't synchronized and causing errors.

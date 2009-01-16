@@ -19,6 +19,8 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.rlcommunity.critter.svg.ShapeDrawing;
 
 public class SimulatorObject {
@@ -367,11 +369,12 @@ public class SimulatorObject {
 	 * @param g
 	 *            The Graphics object used to draw
 	 */
-	public void draw(Graphics g) {
-		if (svgShapeDrawing != null)
-			svgShapeDrawing.draw(g, getPosition(), getDirection());
+	public void draw(SimulatorGraphics g) {
+		// @todo disabled until scaling is done properly
+        /* if (svgShapeDrawing != null)
+			svgShapeDrawing.draw(g, getPosition(), getDirection()); */
 		if (aShape != null)
-			//aShape.draw(g);
+			aShape.draw(g);
 
 		// Draw the children in postorder traversal
 		for (SimulatorObject c : aChildren)
@@ -430,6 +433,9 @@ public class SimulatorObject {
 	 *            new direction
 	 */
 	public void setDirection(double newDir) {
+        // First bound the direction
+        newDir = boundDirection(newDir);
+        
 		double newLocalDir;
 
 		if (aParent == null)
@@ -444,6 +450,25 @@ public class SimulatorObject {
 
 		aDir = newLocalDir;
 	}
+
+    /**
+     * Bounds a given direction so that it falls within a single period (between
+     *   -PI and PI).
+     *
+     * @param pDir The original direction.
+     * @return     The bounded direction (an equivalent angle between -PI and PI).
+     */
+    public double boundDirection(double pDir) {
+        // Very naively loop until the direction falls within the range
+        while (pDir >= Math.PI) {
+            pDir -= Math.PI * 2;
+        }
+        while (pDir < -Math.PI) {
+            pDir += Math.PI * 2;
+        }
+
+        return pDir;
+    }
 
 	/**
 	 * Returns this object's position (in global coordinates)

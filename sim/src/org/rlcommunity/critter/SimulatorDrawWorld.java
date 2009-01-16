@@ -20,7 +20,7 @@ public class SimulatorDrawWorld extends JPanel {
 	private static final int x_size = 500;
 	private static final int y_size = 500;
 
-	protected double pixelsPerMeter = 1;
+	protected double pixelsPerMeter = 100;
   
   private SimulatorEngine engine;
 	
@@ -51,19 +51,25 @@ public class SimulatorDrawWorld extends JPanel {
         return new Dimension(x_size, y_size);
     }
 
-	public void paintComponent(Graphics g) {
-		
-		super.paintComponent(g);
+    public void paintComponent(Graphics g) {
+        // Wrap the Graphics object in a SimulatorGraphics interface to provide
+        // scaling capabilities
+        SimulatorGraphics sg = new SimulatorGraphics(g, pixelsPerMeter);
+
+        super.paintComponent(sg);
+
+        /* We can't use the scale method because drawLine creates VERY thick lines
+        if (g instanceof Graphics2D)
+        ((Graphics2D)g).scale(pixelsPerMeter, pixelsPerMeter);
+         */
+
+        drawObjects(sg);
+
+    }
 	
-    if (g instanceof Graphics2D)
-      ((Graphics2D)g).scale(pixelsPerMeter, pixelsPerMeter);
-		
-    drawObjects(g);
-		
-	}
-	
-	private void drawObjects(Graphics g) {
-		for (SimulatorObject obj : engine.getObjectList())
-      obj.draw(g);
-	}
+    private void drawObjects(SimulatorGraphics g) {
+        for (SimulatorObject obj : engine.getObjectList()) {
+            obj.draw(g);
+        }
+    }
 }

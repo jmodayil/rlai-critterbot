@@ -145,7 +145,7 @@ public class SimulatorState
     return newState;
   }
 
-    SimulatorObject getObject(SimulatorObject obj) {
+    public SimulatorObject getObject(SimulatorObject obj) {
        return this.getObject(obj.getId());
     }
   

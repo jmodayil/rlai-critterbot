@@ -25,6 +25,11 @@ import org.rlcommunity.critter.Wall;
  */
 public class CommonObjects {
 
+    /** Robot length in meters */
+    public static final double ROBOT_LENGTH = 0.68;
+
+    public static final double CM_PER_METER = 100;
+
     /** Adds a generated object to the given list. This method also takes care of
      *   setting the position and the direction of the object. Returns the ID that
      *   the next object should receive.
@@ -86,32 +91,41 @@ public class CommonObjects {
     public static SimulatorObject generateCritterbot(String pName, int pId) {
         SimulatorAgent sa = new SimulatorAgent("Critterbot", pId++);
 
+        // Rough robot polygon, in cm
+        double[][] agentShapePoints = new double[][] {
+            new double[] {-0   , 20},
+            new double[] {-7.5 , 18.5},
+            new double[] {-14  , 14},
+            new double[] {-18.5, 7.5},
+            new double[] {-20  , 0},
+            new double[] {-18.5, -6.5},
+            new double[] {-16.5, -16},
+            new double[] {-13  , -26},
+            new double[] {-8   , -35.5},
+            new double[] {-1   , -47},
+            new double[] {0    , -48},
+            new double[] {-2   , -40.5},
+            new double[] {-4   , -32.5},
+            new double[] {-4.5 , -20},
+            new double[] {-3   , -20},
+            new double[] {2.5  , -16},
+            new double[] {9    , -16},
+            new double[] {15.5 , -12.5},
+            new double[] {19   , -6},
+            new double[] {20   , 0},
+            new double[] {18.5 , 7.5},
+            new double[] {14   , 14},
+            new double[] {7.5  , 18.5},
+            };
+
         Polygon agentShape = new Polygon();
-        agentShape.addPoint(-0, 20);
-        agentShape.addPoint(-7.5, 18.5);
-        agentShape.addPoint(-14, 14);
-        agentShape.addPoint(-18.5, 7.5);
-        agentShape.addPoint(-20, 0);
-        agentShape.addPoint(-18.5, -6.5);
-        agentShape.addPoint(-16.5, -16);
-        agentShape.addPoint(-13, -26);
-        agentShape.addPoint(-8, -35.5);
-        agentShape.addPoint(-1, -47);
-        agentShape.addPoint(0, -48);
-        agentShape.addPoint(-2, -40.5);
-        agentShape.addPoint(-4, -32.5);
-        agentShape.addPoint(-4.5, -20);
-        agentShape.addPoint(-3, -20);
-        agentShape.addPoint(2.5, -16);
-        agentShape.addPoint(9, -16);
-        agentShape.addPoint(15.5, -12.5);
-        agentShape.addPoint(19, -6);
-        agentShape.addPoint(20, 0);
-        agentShape.addPoint(18.5, 7.5);
-        agentShape.addPoint(14, 14);
-        agentShape.addPoint(7.5, 18.5);
+        for (double[] pt : agentShapePoints) {
+            // Convert the points to meters
+            agentShape.addPoint(pt[0]/CM_PER_METER, pt[1]/CM_PER_METER);
+        }
+        
         agentShape.rotate(-Math.PI / 2, new Vector2D(0, 0));
-        double robotLength = 68; // Rough length estimate
+        double robotLength = ROBOT_LENGTH; // Rough length estimate
 
         agentShape.doneAddPoints();
 
@@ -134,11 +148,11 @@ public class CommonObjects {
         sa.addState(new ObjectStateAccelerometer());
         sa.addState(new ObjectStateGyroscope());
 
-        // Create an external light sensor
+        /* // Create an external light sensor
         SimulatorObject lightSensor = new SimulatorObject("LightSensor1",
                 pId++);
         // These three light sensors have no shape!
-        lightSensor.setPosition(new Vector2D(19.8, 0));
+        lightSensor.setPosition(new Vector2D(0.198, 0));
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
@@ -150,19 +164,19 @@ public class CommonObjects {
 
         // Create three more light sensors
         lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
-        lightSensor.setPosition(new Vector2D(0, -19.8));
+        lightSensor.setPosition(new Vector2D(0, -0.198));
         lightSensor.setLocalDirection(-Math.PI / 2.0);
         sa.addChild(lightSensor);
 
         lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
-        lightSensor.setPosition(new Vector2D(0, 19.8));
+        lightSensor.setPosition(new Vector2D(0, 0.198));
         lightSensor.setLocalDirection(-Math.PI / 2.0);
         sa.addChild(lightSensor);
 
         lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
-        lightSensor.setPosition(new Vector2D(-19.8, 0.0));
+        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
         lightSensor.setLocalDirection(-Math.PI);
-        sa.addChild(lightSensor);
+        sa.addChild(lightSensor); */
 
         // Now the IR distance sensors
         double irRange = 3 * robotLength;
@@ -205,7 +219,8 @@ public class CommonObjects {
             SimulatorObject sensor =
                     baseIrSensor.makeCopy("IRSensor" + i, pId++);
             sensor.setPosition(
-                    new Vector2D(irDistancePos[i][0], irDistancePos[i][1]));
+                    new Vector2D(irDistancePos[i][0]/CM_PER_METER,
+                                 irDistancePos[i][1]/CM_PER_METER));
             sensor.setDirection(irDistancePos[i][2]);
             sa.addChild(sensor);
         }
@@ -227,28 +242,28 @@ public class CommonObjects {
 		Wall w = new Wall(pName, pId);
 		// @todo w.setSVG("wall").resetNativeTranslation();
 
-		w.addPoint(20, 20);
-		w.addPoint(20, 480);
-		w.addPoint(480, 480);
-		w.addPoint(480, 20);
-		w.addPoint(20, 20);
+		w.addPoint(0.20, 0.20);
+		w.addPoint(0.20, 4.80);
+		w.addPoint(4.80, 4.80);
+		w.addPoint(4.80, 0.20);
+		w.addPoint(0.20, 0.20);
 
 		// Make a polygon for the wall as well
 		Polygon wallShape = new Polygon();
         // @todo - build the wall from four convex objects
 		// Exterior
 		wallShape.addPoint(0, 0);
-		wallShape.addPoint(0, 500);
-		wallShape.addPoint(500, 500);
-		wallShape.addPoint(500, 0);
+		wallShape.addPoint(0, 5.00);
+		wallShape.addPoint(5.00, 5.00);
+		wallShape.addPoint(5.00, 0);
 		wallShape.addPoint(0, 0);
 		// Interior (notice! the interior must be given in counter-clockwise
 		// order)
-		wallShape.addPoint(20, 20);
-		wallShape.addPoint(480, 20);
-		wallShape.addPoint(480, 480);
-		wallShape.addPoint(20, 480);
-		wallShape.addPoint(20, 20);
+		wallShape.addPoint(0.20, 0.20);
+		wallShape.addPoint(4.80, 0.20);
+		wallShape.addPoint(4.80, 4.80);
+		wallShape.addPoint(0.20, 4.80);
+		wallShape.addPoint(0.20, 0.20);
 		wallShape.doneAddPoints();
 
 		// Note that this polygon self-intersects at the duplicated edge
@@ -280,11 +295,11 @@ public class CommonObjects {
 		// Create the hex polygon
 		Polygon hexShape = new Polygon();
 		hexShape.addPoint(0, 0);
-		hexShape.addPoint(-8, -6);
-		hexShape.addPoint(-8, -16);
-		hexShape.addPoint(0, -22);
-		hexShape.addPoint(8, -16);
-		hexShape.addPoint(8, -6);
+		hexShape.addPoint(-0.08, -0.06);
+		hexShape.addPoint(-0.08, -0.16);
+		hexShape.addPoint(0, -0.22);
+		hexShape.addPoint(0.08, -0.16);
+		hexShape.addPoint(0.08, -0.06);
 		hexShape.translate(new Vector2D(0, 11));
 		hexShape.doneAddPoints();
 

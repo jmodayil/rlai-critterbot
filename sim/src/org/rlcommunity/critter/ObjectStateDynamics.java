@@ -223,7 +223,6 @@ public class ObjectStateDynamics implements ObjectState {
         //   than it should be. But right now things stop moving if we
         //   properly use the timestep. So we're not going to
         assert(timestep>0);
-        timestep = 1;
         //System.out.println("vi "+aVel);
         //System.out.println("F/m*t "+thrust.vec+"/"+this.getMass()+" * "+timestep);
         //Vector2D deltaV = thrust.vec.times(timestep*this.getMass());
@@ -333,7 +332,7 @@ public class ObjectStateDynamics implements ObjectState {
     //  them from state to state, but...
     }
 
-    public void draw(Graphics g, SimulatorObject parent) {
+    public void draw(SimulatorGraphics g, SimulatorObject parent) {
       // Draw the current velocity
       /* Vector2D objPos = parent.getPosition();
 

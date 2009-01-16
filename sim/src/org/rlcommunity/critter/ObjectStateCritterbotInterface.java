@@ -104,7 +104,7 @@ public class ObjectStateCritterbotInterface implements ObjectState
     * @param g The canvas to draw on
     * @param parent The owner of this state
     */
-  public void draw(Graphics g, SimulatorObject parent)
+  public void draw(SimulatorGraphics g, SimulatorObject parent)
   {
   }
 

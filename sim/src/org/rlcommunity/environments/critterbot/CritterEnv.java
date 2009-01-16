@@ -128,7 +128,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
         Graphics2D G = theImage.createGraphics();
         if (engine != null) {
             for (SimulatorObject obj : engine.getObjectList()) {
-                obj.draw(G);
+                obj.draw(null);
             }
         }
         return theImage;

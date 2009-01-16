@@ -74,6 +74,7 @@ public class SimulatorEngine {
         List<SimulatorObject> objects = aEnvDescription.generateObjects();
         aState = new SimulatorState(objects);
 
+        // @todo Don't load the SVG stuff for now, because it is not properly scaled
         debugLoadSVG();
         
 		// Clone the current state; we will use it to do state-state transitions
