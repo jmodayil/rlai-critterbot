@@ -118,7 +118,6 @@ void spi_send_packet( struct spi_packet *packet ) {
       spi->SPI_IER = AT91C_SPI_RXBUFF;
     }
   }
-  
 }
 
 
@@ -148,7 +147,7 @@ ARM_CODE RAMFUNC void spi_isr() {
   
   if(spi_data_tail == NULL)
     return;
-  
+ 
   // Disable PDC transfers just to be safe
   old_reg = spi->SPI_PTSR;
   spi->SPI_PTCR = AT91C_PDC_RXTDIS | AT91C_PDC_TXTDIS;

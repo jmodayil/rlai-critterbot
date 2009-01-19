@@ -17,6 +17,7 @@ unsigned char mi_test;
 void mi_start(void) {
   leddrive_rainbow();
   ui_set_handler(mi_event);
+  error_clear(0xFFFFFFFF);
 }
 
 void mi_stop(void) {

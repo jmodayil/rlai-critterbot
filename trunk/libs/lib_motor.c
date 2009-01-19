@@ -48,6 +48,8 @@ int motor_init() {
   power_packet.data_to_write = &power_tx_data[0];
   power_packet.read_data = &power_rx_data[0];
   power_packet.finished = 1;
+  
+  power_init_packet();
 
   return 0;  
 }
@@ -59,6 +61,7 @@ int motor_event() {
 
   if(++motor_timeout_count == MOTOR_TIMEOUT) {
     motor_set_speed_slew(0,0,0);
+    motor_timeout_count = 0;
   }
 
   if(motor_slew_count < motor_slew_steps) {
@@ -87,6 +90,8 @@ int motor_event() {
     if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
       error_set(ERR_MOTOR_ALIGN);
   }
+  if((power_rx_data[2] & 0xFF) != MOTOR_SPI_PADDING)
+    error_set(ERR_MOTOR_ALIGN);
       /*armprintf("!Motor %d: %d %d %d %d\r", i, 
         motor_rx_data[i][1] & 0xFF, 
         motor_rx_data[i][2] & 0xFF, 
@@ -114,14 +119,6 @@ void motor_set_speed(int motor, signed char speed) {
   if(speed > MOTOR_MAX_SPEED) 
     speed = MOTOR_MAX_SPEED;
 
-  //if(motor_speed_final[motor] == speed)
-  //  return;
-
-  /*motor_slew_count = 0;
-  motor_speed_float[motor] = motor_speed[motor];
-  motor_speed_final[motor] = speed;
-  motor_slew_interval[motor] = (float)(speed - motor_speed[motor]) / 
-                                (float)MOTOR_SLEW_TIME;*/
   motor_speed[motor] = speed;
 }
 
@@ -146,12 +143,12 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
     m340 = (m340 * MOTOR_MAX_SPEED) / max;
   }
 
-  motor_speed[0] = motor_speed_final[0] = m100;
-  motor_speed[1] = motor_speed_final[1] = m220;
-  motor_speed[2] = motor_speed_final[2] = m340;
+  //motor_speed[0] = motor_speed_final[0] = m100;
+  //motor_speed[1] = motor_speed_final[1] = m220;
+  //motor_speed[2] = motor_speed_final[2] = m340;
 
-  //motor_set_speed_slew((signed char)m100, (signed char)m220,
-  //    (signed char)m340);
+  motor_set_speed_slew((signed char)m100, (signed char)m220,
+      (signed char)m340);
 
 }
 
@@ -201,10 +198,10 @@ unsigned char motor_get_voltage() {
   
   unsigned int temp;
  
-	if(0 == (power_rx_data[0] & 0xFF))
+	if(0 == (power_rx_data[1] & 0xFF))
 		return 255;
-  temp = power_rx_data[0] & 0xFF;
-  return ((temp + 148) * 7) / 27;
+  temp = power_rx_data[1] & 0xFF;
+  return (temp*100 + 14730) / 154;
 }
 
 void motor_init_packet(int motor) {
@@ -215,7 +212,16 @@ void motor_init_packet(int motor) {
   motor_tx_data[motor][0] = MOTOR_PACKET_HEADER;
   motor_tx_data[motor][1] = 0;
   motor_tx_data[motor][2] = 255;
+  motor_tx_data[motor][3] = 0;
+  motor_tx_data[motor][4] = 0;
 
+}
+
+void power_init_packet() {
+
+  power_tx_data[0] = MOTOR_PACKET_HEADER;
+  power_tx_data[1] = 0;
+  power_tx_data[2] = 0;
 }
 
 void motor_set_pwm(int motor, int pwm) {

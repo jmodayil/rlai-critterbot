@@ -201,6 +201,7 @@ void accel_read_reg (unsigned int address)
   */
 void accel_read (unsigned int address, unsigned int count)
 {
+
   if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
   {
     error_set(ERR_SPI_OVERFLOW);
