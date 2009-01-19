@@ -8,7 +8,6 @@
 
 #define MI_COMMAND_LENGTH 9
 
-
 void mi_send_status(void);
 void mi_get_commands(void);
 void mi_start(void);
@@ -18,7 +17,7 @@ void putwcrc(unsigned char data);
 
 struct command_packet {
 
-  enum { WHEEL_SPACE, XYTHETA_SPACE, MOTOR_EXIT = 0xA8 } motor_mode;
+  enum { WHEEL_SPACE, XYTHETA_SPACE, MOTOR_EXIT = 0x68} motor_mode;
   union {
     int m100_vel;
     int x_vel;
@@ -32,7 +31,7 @@ struct command_packet {
     int theta_vel;
   };
 
-  enum { CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0xB8 }
+  enum { CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0x67 }
    led_mode;
 };
 

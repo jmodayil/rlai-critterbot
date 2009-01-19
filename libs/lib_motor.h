@@ -14,11 +14,11 @@
 // Number of bytes in a motor packet (including header)
 #define MOTOR_NUM_BYTES 5
 // Number of bytes in a power packet (including header)
-#define MOTOR_PWR_BYTES 1
+#define MOTOR_PWR_BYTES 3
 
 #define MOTOR_PACKET_HEADER 0x7F
 #define MOTOR_PWM_HEADER 0x7E
-#define MOTOR_SPI_PADDING 0xFE
+#define MOTOR_SPI_PADDING 0x80
 
 // Rate of slew to new speed (ratio based on one step per cycle)
 #define MOTOR_SLEW_RATE 1.0
@@ -37,6 +37,8 @@
 #define TSC340 (1096) // 1.07 * 1024
 
 #define ABS(a) (((int)(a)) >= 0 ? (int)(a) : -(int)(a))
+
+extern unsigned int power_rx_data[MOTOR_PWR_BYTES];
 
 /*
  * Initialize motor driver
@@ -77,6 +79,11 @@ unsigned char motor_get_voltage();
  * Initialize a motor packet
  */
 void motor_init_packet(int motor);
+
+/*
+ * Initialize power packet
+ */
+void power_init_packet();
 
 /* 
  * Main motor event loop.  Sends speeds to motors and gets their status.
