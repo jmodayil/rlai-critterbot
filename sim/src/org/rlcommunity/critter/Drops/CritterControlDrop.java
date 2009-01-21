@@ -49,9 +49,8 @@ public class CritterControlDrop implements SimulatorDrop
     */
   public void writeData(InterfaceOutputStream pOut) throws IOException
   {
-    // Write modes
+    // Write motor mode
     pOut.writeInt(motor_mode.ordinal());
-    pOut.writeInt(led_mode.ordinal());
 
     // Write 3 velocities
     switch (motor_mode)
@@ -69,6 +68,9 @@ public class CritterControlDrop implements SimulatorDrop
       default:
         throw new IOException("Unknown motor mode.");
     }
+
+    // Write LED mode
+    pOut.writeInt(led_mode.ordinal());
   }
  
   /** Reverse of writeData; reads the drop from a DataInputStream

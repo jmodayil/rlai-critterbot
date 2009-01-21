@@ -92,8 +92,8 @@ public class DiscoInterfaceClientHandler extends Thread
       }
       catch (IOException e)
       {
-        System.err.println ("IOException in ClientHandler.run - aborting.");
-        System.err.println (e.toString());
+        System.err.println ("IOException in DiscoInterfaceClientHandler.run - aborting.");
+        System.err.println ("Type: "+e.toString());
         // End this thread and the associated socket asap; we use close()
         //  so that our owner (the server) knows to delete us
         this.close(); 
@@ -127,8 +127,7 @@ public class DiscoInterfaceClientHandler extends Thread
       }
       catch (IOException e)
       {
-        System.err.println ("IOException in ClientHandler.send :: quitting");
-        System.exit(1);
+        System.err.println ("IOException in DiscoInterfaceClientHandler.send :: quitting");
         throw new RuntimeException(e);
       }
     }
