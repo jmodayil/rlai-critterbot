@@ -36,6 +36,8 @@ public class DiscoAgent {
      */
     public SimulatorDrop act() {
         // Only send a new drop if we have received a new observation
+        aHasNewObservation = true;
+        
         if (aHasNewObservation) {
             aHasNewObservation = false;
 
@@ -44,6 +46,7 @@ public class DiscoAgent {
 
             // Set the action to be some fixed velocities
             actionDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
+            actionDrop.led_mode = CritterControlDrop.LedMode.THING1;
             actionDrop.x_vel = 20;
             actionDrop.y_vel = 0;
             actionDrop.theta_vel = 10;
@@ -124,14 +127,16 @@ public class DiscoAgent {
 
             // Pass them on to the agent (this may be an empty list)
             for (SimulatorDrop d : drops) {
+                System.out.println ("Receive: "+d.getClass().getSimpleName());
                 agent.observeDrop(d);
             }
 
             // Request an action from the agent (this may be null)
             SimulatorDrop actionDrop = agent.act();
-            if (actionDrop != null)
+            if (actionDrop != null && Math.random() < 0.01) {
                 dropInterface.sendDrop(actionDrop);
-
+            }
+            
             // Sleep for a little while to give the processor a break
             try {
                 Thread.sleep(10);
