@@ -30,8 +30,6 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     for (SimulatorObject thisObject : drivable)
     {
       // Small debug routine hidden in this code
-      // @todo remove
-      doDebug(thisObject, pCurrent);
 
       // We know they must contain a driveState
       ObjectStateOmnidrive driveState = 
@@ -51,6 +49,8 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
       if (os == null) continue;
       ObjectStateDynamics nextKinState = (ObjectStateDynamics)os;
+      ObjectStateOmnidrive nextDriveState =
+        (ObjectStateOmnidrive)futureObj.getState(NAME);
 
       // The Omnidrive state contains target velocities, while the 
       //  dynamics state contains actual velocities
@@ -62,6 +62,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       // Produce a force to provide the required velocity (which is in m/s)
       Vector2D localVel = kinState.getVelocity().rotate(-dir);
       Force fPID = simpleXYPid(driveState, kinState, localVel);
+      nextDriveState.setForce(fPID);
       fPID.vec.timesEquals(thrustGain);
       
       nextKinState.addForce (new Force(fPID.vec.rotate(dir)));
@@ -73,8 +74,6 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       // Rather than "consuming" the action, which leads to very saccaded
       //  movements when commands are issued slowly, we kill it if 500ms
       /// ( for now, 50 steps) have elapsed since the last command
-      ObjectStateOmnidrive nextDriveState = 
-        (ObjectStateOmnidrive)futureObj.getState(NAME);
       nextDriveState.setTime(driveState.getTime()+delta);
 
       // If enough steps have elapsed, reset data
@@ -102,9 +101,12 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
   public Force simpleXYPid(ObjectStateOmnidrive driveData, 
     ObjectStateDynamics dynData, Vector2D curVel)
   {
-    double maxForce = 10;
+    double maxForce = driveData.getMaxForce();
     Vector2D targetVel = driveData.getVelocity();
     double coeff = driveData.getPIDCoefficient();
+
+    Force lastForce = driveData.getForce();
+    Vector2D fVec = lastForce.vec;
 
     // @todo include a last error, as in pid_control, to make things smoother
     Vector2D err = targetVel.minus(curVel);
@@ -112,10 +114,10 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     err.x = err.x * coeff;
     err.y = err.y * coeff;
     
-    // Assume we 'know' friction, and bump the resulting force up
-    // @todo this is of course, terribly bad
-    err.x = err.x + curVel.x * 0.1;
-    err.y = err.y + curVel.y * 0.1;
+    // Add the previous force to the error velocity vector, but only if they
+    //  are pointing in the same directory
+    if (fVec.dot(err) > 0)
+        err.plusEquals(fVec);
 
     // Finally, cap the maximum force this PID produces to 10
     if (err.x > maxForce) err.x = maxForce;
@@ -144,34 +146,5 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     res += curVel * 0.5;
 
     return res;
-  }
-
-
-  /** Debug routine. Will be taken out. Ask Marc if it's still there when
-    *  you read this. */
-  public void doDebug(SimulatorObject agent, SimulatorState state)
-  {
-    // Cast a ray from the agent and try to intersect it with everything
-    double dir = agent.getDirection();
-    // Unit vector in the direction the agent is facing
-    Vector2D dirVec = new Vector2D(Math.cos(dir), Math.sin(dir));
-    Ray r = new Ray(agent.getPosition(), dirVec);
-
-    /*System.out.println (agent.getLabel()+" shoots "+r.src+" + "+r.dir+
-      " and interesects ("+dir+")"); */
-    for (SimulatorObject o : state.getObjects())
-    {
-      if (o.getId() == agent.getId()) // Avoid self-intersections
-        continue;
-
-//      double alpha = o.getShape().intersect(r);
-/*      if (alpha > 0)
-      {
-        System.out.println ("\t"+o.getLabel()+" at "+r.getPoint(alpha)+
-          " ("+alpha+")");
-      }
-      else
-        System.out.println ("\t"+o.getLabel()+" not"); */
-    }
   }
 }

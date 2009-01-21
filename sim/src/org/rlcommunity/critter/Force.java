@@ -16,6 +16,15 @@ public class Force
     *  force was transferred. */
   public Vector2D source;
 
+  /** Create a new force object as a clone of the given force.
+    *
+    * @param f The force to be cloned.
+    */
+  public Force (Force f)
+  {
+    this(new Vector2D(f.vec),f.source == null? null : new Vector2D(f.source));
+  }
+
   /** Create a new force object with no source.
     *
     * @param x The x copmonent of the force
