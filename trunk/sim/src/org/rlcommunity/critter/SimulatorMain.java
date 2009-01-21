@@ -20,31 +20,36 @@ public class SimulatorMain
 {
   public static void main(String[] args)
   {
-    int objPort, subjPort;
-
+    int discoServerPort;
+    boolean useGui;
+    int millisPerStep = 10;
+    
     // Read in some arguments
     if (args.length < 1)
-      objPort = 2323;
+      discoServerPort = 2324;
     else
-      objPort = Integer.parseInt(args[0]);
-    
-    if (args.length < 2)
-      subjPort = 2324;
+      discoServerPort = Integer.parseInt(args[0]);
+
+    if (args.length >= 2 && args[1].equals("-ng"))
+        useGui = false;
     else
-      subjPort = Integer.parseInt(args[1]);
+        useGui = true;
     
     final KeyboardClient theKeyboardClient=new KeyboardClient();
 
-    System.out.println ("Starting Disco server on port "+subjPort);
+    System.out.println ("Starting Disco server on port "+discoServerPort);
     // Create a drop server to send and receive robot (subjective) data
-    DiscoInterfaceServer discoServer = new DiscoInterfaceServer(subjPort);
+    DiscoInterfaceServer discoServer = new DiscoInterfaceServer(discoServerPort);
     discoServer.start();
 
     // Create the central drop interface
     DropInterface dropInterface = new DropInterface();
 
+    System.out.println ("Using GUI: "+useGui);
+
     dropInterface.addClient(discoServer);
-    dropInterface.addClient(theKeyboardClient);
+    if (useGui)
+        dropInterface.addClient(theKeyboardClient);
 
     System.out.println ("Creating simulator engine...");
     final SimulatorEngine engine = new SimulatorEngine(new RobotOnlyEnvironment());
@@ -58,26 +63,23 @@ public class SimulatorMain
       new SimulatorComponentCritterbotInterface(dropInterface));
     engine.addComponent(new SimulatorComponentIRDistance());
 
-    javax.swing.SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-        	new SimulatorViz(engine,theKeyboardClient,engine.vizHandler);
-        }
-    });
+    if (useGui) {
+        javax.swing.SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+                new SimulatorViz(engine,theKeyboardClient,engine.vizHandler);
+            }
+        });
+    }
 
     
     while (true)
     {
-      engine.step();
+      engine.step(millisPerStep);
 
       try {
-		Thread.sleep(9);
+		Thread.sleep(millisPerStep);
       } catch (InterruptedException e) {
-		// TODO Auto-generated catch block
-		e.printStackTrace();
       }
-      //objServer.sendUpdate(engine.getState());
-      //subjServer.sendUpdate();
-      //subjServer.receiveData();
     }
   }
 }

@@ -17,18 +17,16 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 {
   public static final String NAME = "critterbot_interface";
 
-  /** A temporary scale to produce accel data resembling the real robot's,
-    *  until the robot is sized down */
-  public static final double ROBOT_SCALE = 100.0;
-
   // Scales for the different drop values
   /** Accelerometer data is in g / 1024 */ 
   public static final double ACCEL_SCALE    = 
     1024.0 / ObjectStateDynamics.GRAVITY;
+
+  public static final double XY_VELOCITY_SCALE  = 100.0;
+  public static final double ANG_VELOCITY_SCALE = 9.0;
   
   // All of these need to be made proper
-  public static final double GYRO_SCALE     =
-    1024.0 / (Math.PI*2);
+  public static final double GYRO_SCALE     = 1024.0 / (Math.PI*2);
   public static final double LIGHT_SCALE    = 100.0;
   public static final double IRDIST_SCALE   = 255.0;
 
@@ -107,13 +105,14 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     switch (pDrop.motor_mode)
     {
       case XYTHETA_SPACE:
-        // Units for the drop's x,y velocity are in cm/s, but for now 
-        //  I'm putting them in m/s - don't forget to change it!
-        // @units
-        driveData.setVelocity(new Vector2D(pDrop.x_vel, pDrop.y_vel));
+        // The drop x,y velocity has units in cm/s
+        driveData.setVelocity(new Vector2D(
+                pDrop.x_vel/XY_VELOCITY_SCALE,
+                pDrop.y_vel/XY_VELOCITY_SCALE));
         // Units for the drop's angular velocity are in 1/(18PI) of a circle 
         //  per second, which is 1/9th of a radian per second
-        driveData.setAngVelocity(pDrop.theta_vel/9.0);
+        // @todo 9 -> constant
+        driveData.setAngVelocity(pDrop.theta_vel/ANG_VELOCITY_SCALE);
         break;
       case WHEEL_SPACE:
       default:
@@ -170,9 +169,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
       Vector2D xyAccel = sData.getSensorValue();
       double zAccel = sData.getZSensorValue();
 
-      // @todo ROBOT_SCALE should be removed
-      stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE / ROBOT_SCALE);
-      stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE / ROBOT_SCALE);
+      stateDrop.accel.x = (int)(xyAccel.x * ACCEL_SCALE);
+      stateDrop.accel.y = (int)(xyAccel.y * ACCEL_SCALE);
       stateDrop.accel.z = (int)(zAccel * ACCEL_SCALE);
     }
 
@@ -188,5 +186,4 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
     return stateDrop;
   }
-
 }
