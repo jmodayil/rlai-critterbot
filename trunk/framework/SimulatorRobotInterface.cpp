@@ -20,6 +20,7 @@ int SimulatorRobotInterfaceProc::readConfig() {
 
 int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
   stateWrite = lake->readyWriting(CritterStateDrop::name);
+  controlWrite = lake->readyWriting(CritterControlDrop::name);
   controlRead = lake->readyReading(CritterControlDrop::name);
 
   return readConfig();
@@ -113,6 +114,8 @@ int SimulatorRobotInterfaceProc::processDrop()
   if (newDataLength < nameLength) return -1;
 
   bool stateDrop = false;
+  bool controlDrop = false;
+
   int dropLength = -1;
 
   // @@@ Find a better way to do this - is there a classloader?
@@ -125,6 +128,14 @@ int SimulatorRobotInterfaceProc::processDrop()
     //  to tell us the data size
     dropLength = 340;
   }
+  if (strncmp(data, CritterControlDrop::name.c_str(), nameLength) == 0)
+  {
+    controlDrop = true;
+    fprintf (stderr, "This is a control drop!");
+    // @todo see above comment
+    dropLength = 20;
+  }
+
 
   if (dropLength < 0)
   {
@@ -132,7 +143,7 @@ int SimulatorRobotInterfaceProc::processDrop()
     data[nameLength] = 0;
     debug("ERROR: Unknown drop type %s\n", data);
     // Trash the data to avoid repeating
-    // @@@ this should happen in processRead
+    // @todo this should happen in processRead
     unreadDataPtr += nameLength;
     return -1;
   }
@@ -154,6 +165,16 @@ int SimulatorRobotInterfaceProc::processDrop()
     // Write a new drop to the lake and fill it with the data from the socket
     newDrop->readArray(data);
     lake->doneWriteHead(stateWrite);
+  }
+  else if (controlDrop)
+  {
+    fprintf (stderr, "Creating control drop");
+    CritterControlDrop * newDrop = 
+      (CritterControlDrop*)lake->startWriteHead(controlWrite);
+
+    // Write a new drop to the lake and fill it with the data from the socket
+    newDrop->readArray(data);
+    lake->doneWriteHead(controlWrite);
   }
 
   newDataLength -= dropLength;

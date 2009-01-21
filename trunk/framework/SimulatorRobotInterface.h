@@ -22,6 +22,7 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
 
     RiverRead controlRead;
     RiverWrite stateWrite;
+    RiverWrite controlWrite;
 
   protected:
     void clearWriteData();
