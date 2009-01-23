@@ -5,6 +5,7 @@
 
 #include "Socket.h"
 #include "Component.h"
+#include "CritterDrop.h"
 
 using namespace std;
 
@@ -20,9 +21,12 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
 
     int readConfig();
 
+    RiverRead stateRead;
     RiverRead controlRead;
+    RiverRead rewardRead;
     RiverWrite stateWrite;
     RiverWrite controlWrite;
+    RiverWrite rewardWrite;
 
   protected:
     void clearWriteData();
@@ -43,7 +47,7 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
     virtual int act(USeconds & wokeAt);
 
     // Additional methods specific to the SimulatorRobotInterface
-    void writeDrop(DataDrop * drop);
+    void writeDrop(CritterDrop * drop);
     // Attempts to read a drop from the read buffer (socket) and send it into 
     //  the Disco world
     int processDrop();
