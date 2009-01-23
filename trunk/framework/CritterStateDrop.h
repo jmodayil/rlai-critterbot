@@ -2,10 +2,11 @@
 #define CritterStateDrop_H
 
 #include "Drop.h"
+#include "CritterDrop.h"
 
 using namespace std;
 
-class CritterStateDrop : public DataDrop {
+class CritterStateDrop : public CritterDrop {
  public:
 	static string name;
   
@@ -45,6 +46,7 @@ class CritterStateDrop : public DataDrop {
 	virtual void readArray(void *d);
 	virtual string toString(string offset = "");
 
+  virtual string getName() { return name; }
 };
 
 #endif

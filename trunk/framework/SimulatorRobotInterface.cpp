@@ -1,6 +1,8 @@
 #include "SimulatorRobotInterface.h"
 #include "CritterControlDrop.h"
 #include "CritterStateDrop.h"
+#include "CritterRewardDrop.h"
+#include "CritterDrop.h"
 
 #include "XMLNode.h"
 #include <string.h>
@@ -21,7 +23,10 @@ int SimulatorRobotInterfaceProc::readConfig() {
 int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
   stateWrite = lake->readyWriting(CritterStateDrop::name);
   controlWrite = lake->readyWriting(CritterControlDrop::name);
+  rewardWrite = lake->readyWriting(CritterRewardDrop::name);
+  stateRead = lake->readyReading(CritterStateDrop::name);
   controlRead = lake->readyReading(CritterControlDrop::name);
+  rewardRead = lake->readyReading(CritterRewardDrop::name);
 
   return readConfig();
 }
@@ -115,6 +120,7 @@ int SimulatorRobotInterfaceProc::processDrop()
 
   bool stateDrop = false;
   bool controlDrop = false;
+  bool rewardDrop = false;
 
   int dropLength = -1;
 
@@ -128,14 +134,17 @@ int SimulatorRobotInterfaceProc::processDrop()
     //  to tell us the data size
     dropLength = 340;
   }
-  if (strncmp(data, CritterControlDrop::name.c_str(), nameLength) == 0)
+  else if (strncmp(data, CritterControlDrop::name.c_str(), nameLength) == 0)
   {
     controlDrop = true;
-    fprintf (stderr, "This is a control drop!");
     // @todo see above comment
     dropLength = 20;
   }
-
+  else if (strncmp(data, CritterRewardDrop::name.c_str(), nameLength) == 0)
+  {
+    rewardDrop = true;
+    dropLength = 8;
+  }
 
   if (dropLength < 0)
   {
@@ -168,7 +177,6 @@ int SimulatorRobotInterfaceProc::processDrop()
   }
   else if (controlDrop)
   {
-    fprintf (stderr, "Creating control drop");
     CritterControlDrop * newDrop = 
       (CritterControlDrop*)lake->startWriteHead(controlWrite);
 
@@ -176,6 +184,16 @@ int SimulatorRobotInterfaceProc::processDrop()
     newDrop->readArray(data);
     lake->doneWriteHead(controlWrite);
   }
+  else if (rewardDrop)
+  {
+    CritterRewardDrop * newDrop = 
+      (CritterRewardDrop*)lake->startWriteHead(rewardWrite);
+
+    // Write a new drop to the lake and fill it with the data from the socket
+    newDrop->readArray(data);
+    lake->doneWriteHead(rewardWrite);
+  }
+
 
   newDataLength -= dropLength;
 
@@ -202,6 +220,33 @@ int SimulatorRobotInterfaceProc::act(USeconds & wokeAt)
   //  matching number of doneRead's and readHead's
   lake->doneRead(controlRead);
 
+  // Repeat the process for state drops (ack)
+  CritterStateDrop * stateDrop = 
+    (CritterStateDrop*)lake->readHead(stateRead);
+
+  while (stateDrop != NULL)
+  {
+    writeDrop(stateDrop);
+    lake->doneRead(stateRead);
+
+    stateDrop = (CritterStateDrop*)lake->readHead(stateRead);
+  }
+
+  lake->doneRead(stateRead);
+  
+  // Repeat with reward drops 
+  CritterRewardDrop * rewardDrop = 
+    (CritterRewardDrop*)lake->readHead(rewardRead);
+
+  while (rewardDrop != NULL)
+  {
+    writeDrop(rewardDrop);
+    lake->doneRead(rewardRead);
+
+    rewardDrop = (CritterRewardDrop*)lake->readHead(rewardRead);
+  }
+
+  lake->doneRead(rewardRead);
   return 1;
 }
 
@@ -217,14 +262,10 @@ Socket* SimulatorRobotInterfaceProc::createClient(DataLake *lake,
   return new SimulatorRobotInterface(lake, config, name);
 }
 
-void SimulatorRobotInterfaceProc::writeDrop(DataDrop * drop)
+void SimulatorRobotInterfaceProc::writeDrop(CritterDrop * drop)
 {
-  // @@@ Oops - no easy to know what kind of drop this is? No problem, 
-  //  let's assume the programmer gave us a CritterControlDrop
-  // Of course, this is a terrible programming practice
-  CritterControlDrop * ctrlDrop = (CritterControlDrop*) drop;
   // First write the name of the drop to the buffer
-  const char * dropName = ctrlDrop->name.c_str();
+  const char * dropName = drop->getName().c_str();
   int len = strlen(dropName);
 
   char * bufferHead = writePtr;
@@ -240,9 +281,9 @@ void SimulatorRobotInterfaceProc::writeDrop(DataDrop * drop)
   
   writePtr += len;
   // Now write the drop data
-  ctrlDrop->writeArray(writePtr);
+  drop->writeArray(writePtr);
 
-  writePtr += ctrlDrop->getSize();
+  writePtr += drop->getSize();
 
   // Keep track of how many bytes we just added to the buffer
   writeSize += (int)(writePtr - bufferHead);
