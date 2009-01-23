@@ -19,6 +19,8 @@ import java.nio.ByteOrder;
 
 public class InterfaceInputStream
 {
+  protected final int DOUBLE_SIZE = 8;
+  protected final int FLOAT_SIZE  = 4;
   protected final int INT_SIZE    = 4;
   protected final int SHORT_SIZE  = 2;
   protected final int BYTE_SIZE   = 1;
@@ -48,6 +50,20 @@ public class InterfaceInputStream
     else
       // Clear the buffer if we did not allocate new space
       aBuffer.clear();
+  }
+
+  public double readDouble() throws IOException {
+      requireBufferSize(DOUBLE_SIZE);
+      aIn.readFully(aBuffer.array(), 0, DOUBLE_SIZE);
+
+      return aBuffer.getDouble();
+  }
+
+  public float readFloat() throws IOException {
+      requireBufferSize(FLOAT_SIZE);
+      aIn.readFully(aBuffer.array(), 0, FLOAT_SIZE);
+
+      return aBuffer.getFloat();
   }
 
   public int readInt() throws IOException

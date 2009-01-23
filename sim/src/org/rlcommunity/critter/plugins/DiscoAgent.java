@@ -19,6 +19,8 @@ import org.rlcommunity.critter.Drops.SimulatorDrop;
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
 public class DiscoAgent {
+    protected static final boolean debugPrintObservations = true;
+    protected static final boolean debugPrintActions      = true;
 
     /** The last observation received by the agent, as a real-valued vector */
     protected double[] aObservation;
@@ -36,8 +38,6 @@ public class DiscoAgent {
      */
     public SimulatorDrop act() {
         // Only send a new drop if we have received a new observation
-        aHasNewObservation = true;
-        
         if (aHasNewObservation) {
             aHasNewObservation = false;
 
@@ -51,6 +51,9 @@ public class DiscoAgent {
             actionDrop.y_vel = 0;
             actionDrop.theta_vel = 10;
 
+            if (debugPrintActions) {
+                System.out.println(actionDrop.toString());
+            }
             return actionDrop;
         }
         else
@@ -72,6 +75,11 @@ public class DiscoAgent {
         else if (pDrop instanceof CritterRewardDrop) {
             parseRewardDrop((CritterRewardDrop)pDrop);
         }
+        // An unfortunate side effect of the current Disco set up is that we
+        //  receive our own ControlDrop's
+        else if (pDrop instanceof CritterControlDrop) {
+
+        }
     }
 
     /** Method to parse the state drop. Here, we construct an observation vector
@@ -89,11 +97,18 @@ public class DiscoAgent {
             aObservation[i] = pDrop.light[i];
 
         // @todo this might be Java 1.6
-        System.out.println ("Observation: "+Arrays.toString(aObservation));
+        if (debugPrintObservations)
+            System.out.println ("Observation: "+Arrays.toString(aObservation));
+
+        aHasNewObservation = true;
     }
 
+    /** Parses a reward drop.
+     *
+     * @param pDrop A reward drop received from some reward source.
+     */
     public void parseRewardDrop(CritterRewardDrop pDrop) {
-        
+        System.out.println ("Reward: "+pDrop.reward);
     }
 
 
@@ -127,13 +142,12 @@ public class DiscoAgent {
 
             // Pass them on to the agent (this may be an empty list)
             for (SimulatorDrop d : drops) {
-                System.out.println ("Receive: "+d.getClass().getSimpleName());
                 agent.observeDrop(d);
             }
 
             // Request an action from the agent (this may be null)
             SimulatorDrop actionDrop = agent.act();
-            if (actionDrop != null && Math.random() < 0.01) {
+            if (actionDrop != null) {
                 dropInterface.sendDrop(actionDrop);
             }
             

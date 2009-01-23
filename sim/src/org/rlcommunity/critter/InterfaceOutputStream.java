@@ -19,6 +19,8 @@ import java.nio.ByteOrder;
 
 public class InterfaceOutputStream
 {
+  protected final int DOUBLE_SIZE = 8;
+  protected final int FLOAT_SIZE  = 4;
   protected final int INT_SIZE    = 4;
   protected final int SHORT_SIZE  = 2;
   protected final int BYTE_SIZE   = 1;
@@ -40,7 +42,8 @@ public class InterfaceOutputStream
   {
     if (aBuffer.capacity() < size)
     {
-      aBuffer.allocate(size);
+        // @todo verify this
+      aBuffer = ByteBuffer.allocate(size);
       aBuffer.order(OUTPUT_ENDIAN);
       // Copy over old buffer?
       System.err.println ("InterfaceOutputStream: Setting buffer size to "+
@@ -49,6 +52,18 @@ public class InterfaceOutputStream
     else
       // Clear the buffer if we did not allocate new space
       aBuffer.clear();
+  }
+
+  public void writeDouble(double v) throws IOException {
+      requireBufferSize(DOUBLE_SIZE);
+      aBuffer.putDouble(v);
+      aOut.write(aBuffer.array(), 0, DOUBLE_SIZE);
+  }
+
+  public void writeFloat(float v) throws IOException {
+      requireBufferSize(FLOAT_SIZE);
+      aBuffer.putFloat(v);
+      aOut.write(aBuffer.array(), 0, FLOAT_SIZE);
   }
 
   public void writeInt(int v) throws IOException
