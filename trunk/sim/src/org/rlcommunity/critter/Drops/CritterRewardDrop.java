@@ -13,15 +13,18 @@ import org.rlcommunity.critter.InterfaceOutputStream;
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
 public class CritterRewardDrop implements SimulatorDrop {
+    public double reward;
 
     public int getSize() {
-        return 1;
+        return (Double.SIZE) / 8;
     }
 
     public void writeData(InterfaceOutputStream pOut) throws IOException {
+        pOut.writeDouble(reward);
     }
 
     public void readData(InterfaceInputStream pIn) throws IOException {
+        reward = pIn.readDouble();
     }
 
 }
