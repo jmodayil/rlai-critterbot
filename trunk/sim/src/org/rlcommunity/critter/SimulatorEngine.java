@@ -74,9 +74,6 @@ public class SimulatorEngine {
         List<SimulatorObject> objects = aEnvDescription.generateObjects();
         aState = new SimulatorState(objects);
 
-        // @todo Don't load the SVG stuff for now, because it is not properly scaled
-        debugLoadSVG();
-        
 		// Clone the current state; we will use it to do state-state transitions
 		aNextState = (SimulatorState) aState.clone();
     }
@@ -167,20 +164,6 @@ public class SimulatorEngine {
 		// Be clever and reuse what was the current state as our next 'new
 		// state'
 		aNextState = tmpState;
-	}
-
-	public void debugLoadSVG() {
-        // @todo needs to be moved somewhere else
-        int nextObjectId = aState.getObjects().size();
-        
-		/* Loader svgLoader = new Loader(aState, nextObjectId);
-		//svgLoader.loadStaticObject("book", new Vector2D(345, 377), 0);
-		svgLoader.loadStaticObject("table", new Vector2D(160, 100), 0.5);
-		svgLoader.loadStaticObject("chair", new Vector2D(250, 310), -2.6);
-		svgLoader.loadStaticObject("bookcase", new Vector2D(476, 200), Math.PI/2);
-        
-		nextObjectId = svgLoader.objectId();
-         */
 	}
 
 	public int debugGetElapsedTime() {

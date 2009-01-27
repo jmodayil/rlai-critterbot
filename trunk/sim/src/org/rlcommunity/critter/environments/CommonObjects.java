@@ -13,8 +13,10 @@ import org.rlcommunity.critter.ObjectStateOmnidrive;
 import org.rlcommunity.critter.Polygon;
 import org.rlcommunity.critter.SimulatorAgent;
 import org.rlcommunity.critter.SimulatorObject;
+import org.rlcommunity.critter.SimulatorState;
 import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.critter.Wall;
+import org.rlcommunity.critter.svg.Loader;
 
 /**
  * This class defines a set of common objects that are used across environments.
@@ -27,7 +29,6 @@ public class CommonObjects {
 
     /** Robot length in meters */
     public static final double ROBOT_LENGTH = 0.68;
-
     public static final double CM_PER_METER = 100;
 
     /** Adds a generated object to the given list. This method also takes care of
@@ -67,7 +68,7 @@ public class CommonObjects {
         return CommonObjects.addObject(pList, pNewObject, pId);
     }
 
-   /** Generates (and returns) a standard issue Critterbot. The user may wish
+    /** Generates (and returns) a standard issue Critterbot. The user may wish
      *   to add additional sensors to the robot. The list of properties added
      *   to the Critterbot by default:
      *
@@ -92,38 +93,37 @@ public class CommonObjects {
         SimulatorAgent sa = new SimulatorAgent("Critterbot", pId++);
 
         // Rough robot polygon, in cm
-        double[][] agentShapePoints = new double[][] {
-            new double[] {-0   , 20},
-            new double[] {-7.5 , 18.5},
-            new double[] {-14  , 14},
-            new double[] {-18.5, 7.5},
-            new double[] {-20  , 0},
-            new double[] {-18.5, -6.5},
-            new double[] {-16.5, -16},
-            new double[] {-13  , -26},
-            new double[] {-8   , -35.5},
-            new double[] {-1   , -47},
-            new double[] {0    , -48},
-            new double[] {-2   , -40.5},
-            new double[] {-4   , -32.5},
-            new double[] {-4.5 , -20},
-            new double[] {-3   , -20},
-            new double[] {2.5  , -16},
-            new double[] {9    , -16},
-            new double[] {15.5 , -12.5},
-            new double[] {19   , -6},
-            new double[] {20   , 0},
-            new double[] {18.5 , 7.5},
-            new double[] {14   , 14},
-            new double[] {7.5  , 18.5},
-            };
+        double[][] agentShapePoints = new double[][]{
+            new double[]{-0, 20},
+            new double[]{-7.5, 18.5},
+            new double[]{-14, 14},
+            new double[]{-18.5, 7.5},
+            new double[]{-20, 0},
+            new double[]{-18.5, -6.5},
+            new double[]{-16.5, -16},
+            new double[]{-13, -26},
+            new double[]{-8, -35.5},
+            new double[]{-1, -47},
+            new double[]{0, -48},
+            new double[]{-2, -40.5},
+            new double[]{-4, -32.5},
+            new double[]{-4.5, -20},
+            new double[]{-3, -20},
+            new double[]{2.5, -16},
+            new double[]{9, -16},
+            new double[]{15.5, -12.5},
+            new double[]{19, -6},
+            new double[]{20, 0},
+            new double[]{18.5, 7.5},
+            new double[]{14, 14},
+            new double[]{7.5, 18.5},};
 
         Polygon agentShape = new Polygon();
         for (double[] pt : agentShapePoints) {
             // Convert the points to meters
-            agentShape.addPoint(pt[0]/CM_PER_METER, pt[1]/CM_PER_METER);
+            agentShape.addPoint(pt[0] / CM_PER_METER, pt[1] / CM_PER_METER);
         }
-        
+
         agentShape.rotate(-Math.PI / 2, new Vector2D(0, 0));
         double robotLength = ROBOT_LENGTH; // Rough length estimate
 
@@ -150,13 +150,13 @@ public class CommonObjects {
 
         /* // Create an external light sensor
         SimulatorObject lightSensor = new SimulatorObject("LightSensor1",
-                pId++);
+        pId++);
         // These three light sensors have no shape!
         lightSensor.setPosition(new Vector2D(0.198, 0));
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-                new ObjectStateLightSensor(5, 1.0, 5.0);
+        new ObjectStateLightSensor(5, 1.0, 5.0);
         lightSensor.addState(specificLightSensor);
 
         sa.addChild(lightSensor);
@@ -219,8 +219,8 @@ public class CommonObjects {
             SimulatorObject sensor =
                     baseIrSensor.makeCopy("IRSensor" + i, pId++);
             sensor.setPosition(
-                    new Vector2D(irDistancePos[i][0]/CM_PER_METER,
-                                 irDistancePos[i][1]/CM_PER_METER));
+                    new Vector2D(irDistancePos[i][0] / CM_PER_METER,
+                    irDistancePos[i][1] / CM_PER_METER));
             sensor.setDirection(irDistancePos[i][2]);
             sa.addChild(sensor);
         }
@@ -239,44 +239,44 @@ public class CommonObjects {
      * @return A new wall instance.
      */
     public static SimulatorObject generateWall(String pName, int pId) {
-		Wall w = new Wall(pName, pId);
-		// @todo w.setSVG("wall").resetNativeTranslation();
+        Wall w = new Wall(pName, pId);
+        // @todo w.setSVG("wall").resetNativeTranslation();
 
-		w.addPoint(0.20, 0.20);
-		w.addPoint(0.20, 4.80);
-		w.addPoint(4.80, 4.80);
-		w.addPoint(4.80, 0.20);
-		w.addPoint(0.20, 0.20);
+        w.addPoint(0.20, 0.20);
+        w.addPoint(0.20, 4.80);
+        w.addPoint(4.80, 4.80);
+        w.addPoint(4.80, 0.20);
+        w.addPoint(0.20, 0.20);
 
-		// Make a polygon for the wall as well
-		Polygon wallShape = new Polygon();
+        // Make a polygon for the wall as well
+        Polygon wallShape = new Polygon();
         // @todo - build the wall from four convex objects
-		// Exterior
-		wallShape.addPoint(0, 0);
-		wallShape.addPoint(0, 5.00);
-		wallShape.addPoint(5.00, 5.00);
-		wallShape.addPoint(5.00, 0);
-		wallShape.addPoint(0, 0);
-		// Interior (notice! the interior must be given in counter-clockwise
-		// order)
-		wallShape.addPoint(0.20, 0.20);
-		wallShape.addPoint(4.80, 0.20);
-		wallShape.addPoint(4.80, 4.80);
-		wallShape.addPoint(0.20, 4.80);
-		wallShape.addPoint(0.20, 0.20);
-		wallShape.doneAddPoints();
+        // Exterior
+        wallShape.addPoint(0, 0);
+        wallShape.addPoint(0, 5.00);
+        wallShape.addPoint(5.00, 5.00);
+        wallShape.addPoint(5.00, 0);
+        wallShape.addPoint(0, 0);
+        // Interior (notice! the interior must be given in counter-clockwise
+        // order)
+        wallShape.addPoint(0.20, 0.20);
+        wallShape.addPoint(4.80, 0.20);
+        wallShape.addPoint(4.80, 4.80);
+        wallShape.addPoint(0.20, 4.80);
+        wallShape.addPoint(0.20, 0.20);
+        wallShape.doneAddPoints();
 
-		// Note that this polygon self-intersects at the duplicated edge
-		// (0,0)-(20,20)
-		// This polygon is also evil because everything falls within its
-		// bounding box
-		w.setShape(wallShape);
+        // Note that this polygon self-intersects at the duplicated edge
+        // (0,0)-(20,20)
+        // This polygon is also evil because everything falls within its
+        // bounding box
+        w.setShape(wallShape);
 
-		// Make the wall react to dynamics
-		ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
-		wallDyn.setMaxSpeed(0);
-		w.addState(wallDyn);
-        
+        // Make the wall react to dynamics
+        ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
+        wallDyn.setMaxSpeed(0);
+        w.addState(wallDyn);
+
         return w;
     }
 
@@ -289,24 +289,24 @@ public class CommonObjects {
      * @return A hexagon-shaped object.
      */
     public static SimulatorObject generateHex(String pName, int pId) {
-        		// Add an hexagonal obstacle
-		SimulatorObject hex = new SimulatorObject(pName, pId);
+        // Add an hexagonal obstacle
+        SimulatorObject hex = new SimulatorObject(pName, pId);
 
-		// Create the hex polygon
-		Polygon hexShape = new Polygon();
-		hexShape.addPoint(0, 0);
-		hexShape.addPoint(-0.08, -0.06);
-		hexShape.addPoint(-0.08, -0.16);
-		hexShape.addPoint(0, -0.22);
-		hexShape.addPoint(0.08, -0.16);
-		hexShape.addPoint(0.08, -0.06);
-		hexShape.translate(new Vector2D(0, 11));
-		hexShape.doneAddPoints();
+        // Create the hex polygon
+        Polygon hexShape = new Polygon();
+        hexShape.addPoint(0, 0);
+        hexShape.addPoint(-0.08, -0.06);
+        hexShape.addPoint(-0.08, -0.16);
+        hexShape.addPoint(0, -0.22);
+        hexShape.addPoint(0.08, -0.16);
+        hexShape.addPoint(0.08, -0.06);
+        hexShape.translate(new Vector2D(0, 11));
+        hexShape.doneAddPoints();
 
-		hex.setShape(hexShape);
+        hex.setShape(hexShape);
 
-		// Add dynamics to this object
-		hex.addState(new ObjectStateDynamics(0.5, 2));
+        // Add dynamics to this object
+        hex.addState(new ObjectStateDynamics(0.5, 2));
 
         return hex;
     }
@@ -319,16 +319,31 @@ public class CommonObjects {
      * @return A new SimulatorObject with light source properties.
      */
     public static SimulatorObject generateLightSource(String pName, int pId) {
-		SimulatorObject lightSource = new SimulatorObject(pName, pId);
+        SimulatorObject lightSource = new SimulatorObject(pName, pId);
 
-		lightSource.setShape(null);
+        lightSource.setShape(null);
 
-		// @todo lightSource.setSVG("lightsource");
+        // @todo lightSource.setSVG("lightsource");
 
-		ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
-		specificLightSource.setIntensity(10000.0);
-		lightSource.addState(specificLightSource);
+        ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
+        specificLightSource.setIntensity(10000.0);
+        lightSource.addState(specificLightSource);
 
-		return lightSource;
+        return lightSource;
+    }
+
+    public static int generateSVGObjects(List<SimulatorObject> objects, int id) {
+        Loader svgLoader = new Loader(id);
+        objects.add(
+                svgLoader.loadStaticObject("book", new Vector2D(345, 377), 0));
+        objects.add(
+                svgLoader.loadStaticObject("table", new Vector2D(160, 100), 0.5));
+        objects.add(
+                svgLoader.loadStaticObject("chair", new Vector2D(250, 310), -2.6));
+        objects.add(
+                svgLoader.loadStaticObject("bookcase", new Vector2D(476, 200), Math.PI / 2));
+
+        return svgLoader.objectId();
+
     }
 }

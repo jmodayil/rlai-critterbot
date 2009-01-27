@@ -277,5 +277,7 @@ public class SimulatorGraphics extends Graphics {
         g2d.setTransform(pTransform);
     }
 
-
+    public Graphics2D g2d() {
+        return (Graphics2D) aGfx;
+    }
 }
