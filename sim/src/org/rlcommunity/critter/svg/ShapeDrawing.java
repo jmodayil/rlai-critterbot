@@ -12,6 +12,7 @@ import com.kitfox.svg.SVGElement;
 import com.kitfox.svg.SVGElementException;
 import com.kitfox.svg.SVGException;
 import com.kitfox.svg.animation.AnimationElement;
+import org.rlcommunity.critter.SimulatorGraphics;
 
 public class ShapeDrawing {
 
@@ -53,7 +54,7 @@ public class ShapeDrawing {
 			return;
 		try {
 			setTransform(position, direction);
-			diagram.render((Graphics2D) g);
+			diagram.render(((SimulatorGraphics) g).g2d());
 		} catch (SVGException e) {
 			e.printStackTrace();
 			return;

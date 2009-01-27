@@ -29,10 +29,8 @@ public class Loader {
 	static protected SVGUniverse universe = null;
 
 	private int id;
-	final private SimulatorState state;
 
-	public Loader(SimulatorState state, int id) {
-		this.state = state;
+	public Loader(int id) {
 		this.id = id;
 	}
 
@@ -76,7 +74,6 @@ public class Loader {
 				direction);
 		object.setPosition(position);
 		object.setDirection(direction);
-		state.addObject(object);
 		return object;
 	}
 
@@ -141,7 +138,6 @@ public class Loader {
 		shape.doneAddPoints();
 		object.setShape(shape);
 		object.addState(new ObjectStateDynamics(0.5, 2));
-		state.addObject(object);
 		object.setPosition(position);
 		object.setDirection(direction);
 	}

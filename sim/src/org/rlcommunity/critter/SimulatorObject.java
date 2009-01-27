@@ -11,7 +11,6 @@ package org.rlcommunity.critter;
  * @author Anna Koop
  */
 
-import java.awt.Graphics;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -19,11 +18,11 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.rlcommunity.critter.svg.ShapeDrawing;
 
 public class SimulatorObject {
+    static final private boolean svgDrawing = true;
+    
 	/** Some properties of the object - position, velocity */
 	protected Vector2D aPos;
 	protected double aDir;
@@ -371,8 +370,8 @@ public class SimulatorObject {
 	 */
 	public void draw(SimulatorGraphics g) {
 		// @todo disabled until scaling is done properly
-        /* if (svgShapeDrawing != null)
-			svgShapeDrawing.draw(g, getPosition(), getDirection()); */
+        if (svgDrawing && (svgShapeDrawing != null))
+			svgShapeDrawing.draw(g, getPosition(), getDirection());
 		if (aShape != null)
 			aShape.draw(g);
 
