@@ -10,17 +10,16 @@ import org.rlcommunity.critter.SimulatorObject;
 import org.rlcommunity.critter.Vector2D;
 
 /**
- * The original environment (with a robot, a wall, a hex and a light source)
- * 
+ * The environment that was presented at NIPS.
+ *
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
-public class OriginalEnvironment implements EnvironmentDescription {
-
+public class NIPSEnvironment implements EnvironmentDescription {
     public List<SimulatorObject> generateObjects() {
         LinkedList<SimulatorObject> objects = new LinkedList<SimulatorObject>();
 
-        int id = 0;
-        
+        int id = CommonObjects.generateSVGObjects(objects, 0);
+
         // Add a Critterbot
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateCritterbot("Crittebot", id),
@@ -31,19 +30,9 @@ public class OriginalEnvironment implements EnvironmentDescription {
                 new Vector2D(0.0, 0.0), 0.0, id);
 
         id = CommonObjects.addObject(objects,
-                CommonObjects.generateHex("Hex", id),
-                new Vector2D(1.0, 1.0), 0.0, id);
-
-        id = CommonObjects.addObject(objects,
-                CommonObjects.generateBar("Bar", id),
-                new Vector2D(1.8, 2.3), Math.PI/2, id);
-
-        id = CommonObjects.addObject(objects,
                 CommonObjects.generateLightSource("Light Source", id),
                 new Vector2D(0.50, 0.50), 0.0, id);
 
         return objects;
     }
-
-
 }

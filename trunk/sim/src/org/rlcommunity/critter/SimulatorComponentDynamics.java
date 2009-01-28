@@ -13,9 +13,9 @@ package org.rlcommunity.critter;
 public class SimulatorComponentDynamics implements SimulatorComponent {
 
     public static final String NAME = "dynamics";
-    public static final boolean collisionEnergySink = true;
+    public static final boolean collisionEnergySink = false;
     // @todo clean up
-    boolean debugCollisions = false;
+    boolean debugCollisions = true;
     boolean debugDynamicsData = false;
 
     public SimulatorComponentDynamics() {
@@ -53,7 +53,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
             if (debugDisplayData) {
-                System.out.println("Current velocity " + dynData.getVelocity());
+                System.out.println("Current velocity " + dynData.getVelocity() + " Position: "+obj.getPosition());
             }
             
             // Find the corresponding object in the next state
@@ -190,8 +190,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                             //now double-check that collision has been resolved
                             // this check should fail. Pt should be null.
-                            pt = obj.collidesWith(compObj);
-                            if (pt != null) {
+                            Collision testPt = obj.collidesWith(compObj);
+                            if (testPt != null) {
                                 //should probably throw exception here
                                 if (debugCollisions) {
                                     System.out.println("Still in collision at " + pt.point + "!!!");
@@ -213,28 +213,81 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                             } else {
                                 // calculate forces
-
                                 double ma = o1.getMass();
                                 double mb = o2.getMass();
                                 double Ia = o1.getMomentInertia();
                                 double Ib = o2.getMomentInertia();
                                 double e = o1.getCoefficientRestitution(o2);
+                                // For now, assume that the centers of mass c1 and c2 are the
+                                //  positions
+                                Vector2D ca = objP.getPosition();
+                                Vector2D cb = compObjP.getPosition();
+                                // Compute the moment arms
+                                Vector2D ra = pt.point.minus(ca);
+                                Vector2D rb = pt.point.minus(cb);
 
-                                // this will have to be extended when I add angular motion
-                                Vector2D vab = o1p.getVelocity().minus(o2p.getVelocity());
+                                Vector2D va = o1p.getVelocity();
+                                Vector2D vb = o2p.getVelocity();
 
+                                double wa = o1p.getAngVelocity();
+                                double wb = o2p.getAngVelocity();
+                                
+                                // The velocity of a at the point of collision, including angular
+                                //  velocity
+                                Vector2D vaPoint = new Vector2D(-ra.x * wa, ra.y * wa);
+                                vaPoint.plusEquals(va);
+                                Vector2D vbPoint = new Vector2D(-rb.x * wb, rb.y * wb);
+                                vbPoint.plusEquals(vb);
+
+                                // The relative velocities at the point of intersection
+                                Vector2D vab = vaPoint.minus(vbPoint);
+                                
+                                // Project v_ab onto the normal
+                                Vector2D projVab = n.times(vab.dot(n));
+
+                                // Compute the resulting impulse
+                                //  Taken from Physics for Game Developers
+                                double taua = ra.cross(n) / Ia;
+                                double taub = rb.cross(n) / Ib;
+
+                                Vector2D tmpa = new Vector2D(taua * ra.y, -taua * ra.x);
+                                Vector2D tmpb = new Vector2D(taub * rb.y, -taub * rb.x);
+
+                                double denom = 1.0 / ma + 1.0 / mb + n.dot(tmpa) + n.dot(tmpb);
+
+                                System.out.println("<--");
+                                System.out.printf ("W-: %.4g %.4g\n", wa, wb);
+                                System.out.println ("vPoint: "+vaPoint+" "+vbPoint);
+                                System.out.println ("Projection: "+projVab);
+                                System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
+                                System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
+                                Vector2D projImpulse = projVab.times(-(1 + e) / denom);
+                                System.out.println ("Impulse: "+projImpulse);
+                                Vector2D vap = o1.getVelocity().plus(projImpulse).times(1.0 / ma);
+                                Vector2D vbp = o2.getVelocity().plus(projImpulse).times(-1.0 / mb);
+                                double wap =
+                                        o1.getAngVelocity() + ra.cross(projImpulse) / Ia;
+                                double wbp =
+                                        o2.getAngVelocity() - rb.cross(projImpulse) / Ib;
+                                System.out.println("V: "+vap+" "+vbp);
+                                System.out.printf("W: %.4g %.4g\n", wap, wbp);
+                                System.out.println("-->");
+                                //System.exit(0);
                                 // might want to check here for infinite mass?
                                 // or just let it fall out of the math
-                                double impulse = (-(1 + e) * vab.dot(n)) /
-                                        n.dot(n) * (1 / ma + 1 / mb);
+                                /* double impulse = (-(1 + e) * vab.dot(n)) /
+                                        (1 / ma + 1 / mb);
+
                                 // this means post-thrust velocities aren't used. hmm.
                                 Vector2D vap = o1.getVelocity().plus(n.times(impulse / ma));
-                                Vector2D vbp = o2.getVelocity().minus(n.times(impulse / mb));
+                                Vector2D vbp = o2.getVelocity().minus(n.times(impulse / mb)); */
 
                                 checkSpeed(vap, o1);
                                 checkSpeed(vbp, o2);
                                 o1.setVelocity(vap);
                                 o2.setVelocity(vbp);
+                                o1.setAngVelocity(wap);
+                                o2.setAngVelocity(wbp);
                             // angular velocity? Needs to be implemented
                             }
 

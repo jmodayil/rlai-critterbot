@@ -22,7 +22,7 @@ public class SimulatorDrawWorld extends JPanel {
 
 	protected double pixelsPerMeter = 100;
   
-  private SimulatorEngine engine;
+  private final SimulatorEngine engine;
 	
 	public SimulatorDrawWorld(SimulatorEngine _engine) {
 		
@@ -68,8 +68,13 @@ public class SimulatorDrawWorld extends JPanel {
     }
 	
     private void drawObjects(SimulatorGraphics g) {
-        for (SimulatorObject obj : engine.getObjectList()) {
-            obj.draw(g);
+        // Java releases the semaphore on engine if it leaves the synchronized
+        //  block via an exception, so synchronizing on engine will not cause
+        //  the GUI to freeze if the main thread dies
+        synchronized (engine) {
+            for (SimulatorObject obj : engine.getObjectList()) {
+                obj.draw(g);
+            }
         }
     }
 }

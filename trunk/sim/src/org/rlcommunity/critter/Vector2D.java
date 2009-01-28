@@ -84,6 +84,16 @@ public class Vector2D {
     public double dot(Vector2D v) {
         return this.x*v.x+this.y*v.y;
     }
+
+    /** Returns the perpendicular component of the cross-product between
+     *   this vector and the argument.
+     *
+     * @param v The vector to be cross-producted
+     * @return The third component of the result
+     */
+    public double cross(Vector2D v) {
+        return this.x *v.y - this.y*v.x;
+    }
     
     public Vector2D times(double d) {
         return new Vector2D(d*x, d*y);
