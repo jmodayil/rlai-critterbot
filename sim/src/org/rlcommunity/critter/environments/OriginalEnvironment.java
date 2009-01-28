@@ -45,5 +45,9 @@ public class OriginalEnvironment implements EnvironmentDescription {
         return objects;
     }
 
+    public boolean usesSVG() {
+        return false;
+    }
+
 
 }

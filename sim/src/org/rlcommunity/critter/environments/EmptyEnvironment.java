@@ -19,4 +19,8 @@ public class EmptyEnvironment implements EnvironmentDescription {
         return new LinkedList<SimulatorObject>();
     }
 
+    public boolean usesSVG() {
+        return false;
+    }
+
 }

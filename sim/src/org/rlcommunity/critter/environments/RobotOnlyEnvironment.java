@@ -25,5 +25,9 @@ public class RobotOnlyEnvironment implements EnvironmentDescription {
         return objects;
     }
 
+    public boolean usesSVG() {
+        return false;
+    }
+
 
 }

@@ -32,6 +32,8 @@ public class SimulatorEngine {
 		vizHandler = new SimulatorVizEvents();
         aEnvDescription = pDescription;
 
+        SimulatorObject.svgDrawing = pDescription.usesSVG();
+
         initState();
 	}
 
@@ -69,7 +71,8 @@ public class SimulatorEngine {
 
     public void initState() {
         // @todo move somewhere else
-        Loader.initSVGUniverse();
+        if (aEnvDescription.usesSVG())
+            Loader.initSVGUniverse();
 
         List<SimulatorObject> objects = aEnvDescription.generateObjects();
         aState = new SimulatorState(objects);
