@@ -19,4 +19,11 @@ public interface EnvironmentDescription {
      * @return A list of objects that comprised in this environment.
      */
     public List<SimulatorObject> generateObjects();
+
+    /** Returns whether the environment uses SVG drawing. If false, the
+     *   environment is assumed to be drawn using PNG's and polygons.
+     *
+     * @return Whether the environment uses SVG drawing.
+     */
+    public boolean usesSVG();
 }

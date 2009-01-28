@@ -21,8 +21,10 @@ import java.util.Map.Entry;
 import org.rlcommunity.critter.svg.ShapeDrawing;
 
 public class SimulatorObject {
-    // @todo MGB - set to false for now, things are running too slow
-    static final private boolean svgDrawing = false;
+    /** Flag determining whether we should draw via SVG. Currently set by the
+     *   SimulatorEngine, which is a really bad thing to do.
+     */
+    static protected boolean svgDrawing = false;
     
 	/** Some properties of the object - position, velocity */
 	protected Vector2D aPos;

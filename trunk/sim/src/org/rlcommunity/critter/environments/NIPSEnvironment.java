@@ -35,4 +35,8 @@ public class NIPSEnvironment implements EnvironmentDescription {
 
         return objects;
     }
+
+    public boolean usesSVG() {
+        return true;
+    }
 }
