@@ -21,7 +21,8 @@ import java.util.Map.Entry;
 import org.rlcommunity.critter.svg.ShapeDrawing;
 
 public class SimulatorObject {
-    static final private boolean svgDrawing = true;
+    // @todo MGB - set to false for now, things are running too slow
+    static final private boolean svgDrawing = false;
     
 	/** Some properties of the object - position, velocity */
 	protected Vector2D aPos;
@@ -369,7 +370,6 @@ public class SimulatorObject {
 	 *            The Graphics object used to draw
 	 */
 	public void draw(SimulatorGraphics g) {
-		// @todo disabled until scaling is done properly
         if (svgDrawing && (svgShapeDrawing != null))
 			svgShapeDrawing.draw(g, getPosition(), getDirection());
 		if (aShape != null)

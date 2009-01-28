@@ -186,7 +186,6 @@ public class SimulatorGraphics extends Graphics {
     }
 
     public void drawOval(int x, int y, int width, int height) {
-        // @todo
         aGfx.drawOval(x, y, width, height);
     }
 
@@ -250,6 +249,10 @@ public class SimulatorGraphics extends Graphics {
     /*** Additional methods for better precision in scaling */
 
     
+    public void drawOval(double x, double y, double width, double height) {
+        aGfx.drawOval(scale(x), scale(y), scale(width), scale(height));
+    }
+
     public void drawPolyline(double[] xPoints, double[] yPoints, int nPoints) {
         scalePoints (xPoints, yPoints);
 

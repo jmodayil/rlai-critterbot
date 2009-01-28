@@ -78,7 +78,7 @@ public class Wall extends SimulatorObject {
 
 		double points[] = new double[walls.size()];
 		for (int i = 0; i < points.length; i++) {
-			points[i] = (int) walls.get(i).y;
+			points[i] = walls.get(i).y;
 		}
 		return points;
 	}

@@ -133,8 +133,9 @@ public class CommonObjects {
 
         // sa.setSVG("robot");
 
-        // Give the agent a 'physics' state, with mass 4 and mom. of inertia 2
-        ObjectStateDynamics osd = new ObjectStateDynamics(4, 2);
+        // Give the agent a 'physics' state, with mass 4 and mom. of inertia 0.64
+        //  0.64 taken from m r^2, assuming a radius of 0.4 (which is not quite right)
+        ObjectStateDynamics osd = new ObjectStateDynamics(4, 0.64);
         osd.setCoefficientFrictionStatic(0.1);
         sa.addState(osd);
 
@@ -289,7 +290,7 @@ public class CommonObjects {
      * @return A hexagon-shaped object.
      */
     public static SimulatorObject generateHex(String pName, int pId) {
-        // Add an hexagonal obstacle
+        // Create the object
         SimulatorObject hex = new SimulatorObject(pName, pId);
 
         // Create the hex polygon
@@ -300,17 +301,45 @@ public class CommonObjects {
         hexShape.addPoint(0, -0.22);
         hexShape.addPoint(0.08, -0.16);
         hexShape.addPoint(0.08, -0.06);
-        hexShape.translate(new Vector2D(0, 11));
+        hexShape.translate(new Vector2D(0, 0.11));
         hexShape.doneAddPoints();
 
         hex.setShape(hexShape);
 
         // Add dynamics to this object
-        hex.addState(new ObjectStateDynamics(0.5, 2));
+        hex.addState(new ObjectStateDynamics(0.5, 0.5));
 
         return hex;
     }
 
+        /** Creates some form of bar to be kicked around.
+     *
+     * @param pName The name of the object.
+     * @param pId The id of the object.
+     *
+     * @return A bar-shaped object.
+     */
+    public static SimulatorObject generateBar(String pName, int pId) {
+        SimulatorObject bar = new SimulatorObject(pName, pId);
+
+        // @todo needs to be implemented
+        // Create the hex polygon
+        Polygon barShape = new Polygon();
+        barShape.addPoint(-0.25, -0.02);
+        barShape.addPoint(-0.25, 0.02);
+        barShape.addPoint(0.25, 0.02);
+        barShape.addPoint(0.25, -0.02);
+
+        barShape.doneAddPoints();
+
+        bar.setShape(barShape);
+
+        // Add dynamics to this object
+        bar.addState(new ObjectStateDynamics(1, 0.25));
+
+        return bar;
+    }
+    
     /** Generates a light source.
      *
      * @param pName The name of the light source.

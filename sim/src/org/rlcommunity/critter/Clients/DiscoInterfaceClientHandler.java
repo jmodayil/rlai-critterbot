@@ -20,6 +20,9 @@ public class DiscoInterfaceClientHandler extends Thread
 {
   public final int MAX_CLASSNAME_LENGTH = 1024;
 
+  /** The maximum number of drops to keep in the queue */
+  protected final int aMaxQueuedDrops;
+  
   protected Socket aClient;
 
   /** List of queue'd elements waiting to be parsed by our server */
@@ -29,6 +32,9 @@ public class DiscoInterfaceClientHandler extends Thread
   protected InterfaceOutputStream aOut;
 
   protected boolean aClosed = false;
+
+
+  public static final int defaultMaxQueuedDrops = 20;
 
   /** Creates a new client handler corresponding to the given Socket */
   public DiscoInterfaceClientHandler(Socket pClient) {
@@ -44,6 +50,7 @@ public class DiscoInterfaceClientHandler extends Thread
     }
 
     aInQueue = new LinkedList<SimulatorDrop>();
+    aMaxQueuedDrops = defaultMaxQueuedDrops;
   }
 
   /** Main code for this Thread */
@@ -77,6 +84,12 @@ public class DiscoInterfaceClientHandler extends Thread
           synchronized(aInQueue)
           {
             aInQueue.add(newDrop);
+            // Remove old elements
+            while (aInQueue.size() > aMaxQueuedDrops) {
+                SimulatorDrop deadDrop = aInQueue.removeFirst();
+                System.err.println ("Warning: discarding old drop: "+
+                        deadDrop.getClass().getSimpleName());
+            }
           }
         }
         catch (ClassNotFoundException e)
