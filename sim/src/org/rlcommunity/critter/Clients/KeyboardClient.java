@@ -36,11 +36,15 @@ public class KeyboardClient implements DropClient, KeyListener {
     public int down;
     public int left;
     public int right;
+    private int motor100;
+    private int motor220;
+    private int motor340;
 
     public boolean hasChange;
 
     public KeyboardClient() {
         up = down = left = right = 0;
+        motor100 = motor220 = motor340 = 0;
         hasChange = false;
     }
 
@@ -62,6 +66,15 @@ public class KeyboardClient implements DropClient, KeyListener {
         if (KeyEvent.VK_RIGHT == e.getKeyCode()) {
             right = 1;
         }
+        if (KeyEvent.VK_Q == e.getKeyCode()) {
+            motor100 = 1;
+        }
+        if (KeyEvent.VK_W == e.getKeyCode()) {
+            motor220 = 1;
+        }
+        if (KeyEvent.VK_A == e.getKeyCode()) {
+            motor340 = 1;
+        }
     }
 
     public void keyReleased(KeyEvent e) {
@@ -79,6 +92,15 @@ public class KeyboardClient implements DropClient, KeyListener {
         if (KeyEvent.VK_RIGHT == e.getKeyCode()) {
             right = 0;
         }
+        if (KeyEvent.VK_Q == e.getKeyCode()) {
+            motor100 = 0;
+        }
+        if (KeyEvent.VK_W == e.getKeyCode()) {
+            motor220 = 0;
+        }
+        if (KeyEvent.VK_A == e.getKeyCode()) {
+            motor340 = 0;
+        }
     }
 
 
@@ -88,37 +110,47 @@ public class KeyboardClient implements DropClient, KeyListener {
      * This might be setting velocity to 0 when no command received.
      * @return
      */
-    public List<SimulatorDrop> receive() 
-    {
-      double velocityX,  angVel;
-      int maxVel=100; // 100m/s (or cm/s)
-      int maxAngularVel=27; // Roughly 1/2 a turn in a second
-
-      LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
-
-      // Produce a drop iff: a key is pressed, or was released, and enough 
-      //  time has elapsed
-      if (hasChange || up > 0 || down > 0 || right > 0 || left > 0) 
-      {
-        if(System.currentTimeMillis()-lastDropTime >= keyboardDropInterval)
-        {
-          hasChange = false;
-
-          velocityX = (up * maxVel - down * maxVel);
-          angVel = (right * maxAngularVel + left * -maxAngularVel);
-          CritterControlDrop controlDrop = new CritterControlDrop();
-          controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-          controlDrop.x_vel = (int) velocityX;
-          controlDrop.y_vel = 0;
-          controlDrop.theta_vel = (int) angVel;
-       
-          lastDropTime=System.currentTimeMillis();
-          dropList.add(controlDrop);
+    public List<SimulatorDrop> receive() {
+        LinkedList<SimulatorDrop> dropList = new LinkedList<SimulatorDrop>();
+        // Produce a drop iff: a key is pressed, or was released, and enough
+        // time has elapsed
+        if (!hasChange
+                && System.currentTimeMillis() - lastDropTime < keyboardDropInterval) {
+            return dropList;
         }
-      }
-    
-      
-      return dropList;
+
+        CritterControlDrop controlDrop = new CritterControlDrop();
+        hasChange = true;
+        if (hasChange) {
+            if (up > 0 || down > 0 || right > 0 || left > 0) {
+                setDropWithXYThetaSpace(controlDrop);
+            } else if (motor100 > 0 || motor220 > 0 || motor340 > 0) {
+                setDropWithMotorSpace(controlDrop);
+            }
+        }
+        hasChange = false;
+        dropList.add(controlDrop);
+        lastDropTime = System.currentTimeMillis();
+        return dropList;
+    }
+
+    private void setDropWithMotorSpace(CritterControlDrop controlDrop) {
+        controlDrop.motor_mode = CritterControlDrop.MotorMode.WHEEL_SPACE;
+        controlDrop.m100_vel = motor100;
+        controlDrop.m220_vel = motor220;
+        controlDrop.m340_vel = motor340;
+    }
+
+    private void setDropWithXYThetaSpace(CritterControlDrop controlDrop) {
+        double velocityX, angVel;
+        int maxVel = 100; // 100m/s (or cm/s)
+        int maxAngularVel = 27; // Roughly 1/2 a turn in a second
+        velocityX = (up * maxVel - down * maxVel);
+        angVel = (right * -maxAngularVel + left * maxAngularVel);
+        controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
+        controlDrop.x_vel = (int) velocityX;
+        controlDrop.y_vel = 0;
+        controlDrop.theta_vel = (int) angVel;
     }
 
     public void send(SimulatorDrop pData) {
