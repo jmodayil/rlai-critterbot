@@ -55,7 +55,7 @@ public class SimulatorMain {
         final SimulatorEngine engine = new SimulatorEngine(new OriginalEnvironment());
         engine.addComponent(new SimulatorComponentDynamics());
         engine.addComponent(new SimulatorComponentLight());
-        engine.addComponent(new SimulatorComponentBump());
+        engine.addComponent(new SimulatorComponentBumpSensor());
         engine.addComponent(new SimulatorComponentOmnidrive());
         engine.addComponent(new SimulatorComponentAccelerometer());
         engine.addComponent(new SimulatorComponentGyroscope());

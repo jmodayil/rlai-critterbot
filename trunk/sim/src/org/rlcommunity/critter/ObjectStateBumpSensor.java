@@ -19,8 +19,10 @@ import java.util.List;
 
 public class ObjectStateBumpSensor implements ObjectState
 {
+    public static final boolean drawBumpSensors = true;
+    
     public static final double BUMP_SENSOR_DRAW_SCALE = 10.0;
-    public static final String NAME = SimulatorComponentBump.NAME+"sensor";
+    public static final String NAME = SimulatorComponentBumpSensor.NAME;
 
   /** A list of forces being sensed by this bump sensor. The forces are
     *  normal to the underlying Polygon. */ 
@@ -80,14 +82,16 @@ public class ObjectStateBumpSensor implements ObjectState
       // Draw a little circle where each bobo is
       // The assumption is that drawing is synchronized with the main thread,
       //  so that this will not cause a ConcurrentModificationException
-      Color tempC = g.getColor();
-      /* g.setColor(Color.red);
+      if (drawBumpSensors) {
+        Color tempC = g.getColor();
+        g.setColor(Color.red);
 
-      for (Force f : aForces) {
-          double rad = (f.vec.length() * 2) / BUMP_SENSOR_DRAW_SCALE;
-          g.drawOval(f.source.x-rad/2, f.source.y-rad/2, rad, rad);
+        for (Force f : aForces) {
+            double rad = (f.vec.length() * 2) / BUMP_SENSOR_DRAW_SCALE;
+            g.drawOval(f.source.x-rad/2, f.source.y-rad/2, rad, rad);
+        }
+        g.setColor(tempC);
       }
-      g.setColor(tempC); */
   }
   
   /** Provides a mean of clearing whatever data this ObjectState contains
@@ -97,6 +101,19 @@ public class ObjectStateBumpSensor implements ObjectState
   public void clearTransient()
   {
     clearForces();
+  }
+
+  /** Returns the ObjectStateBumpSensor for this object, or null if it does not
+   *   exist.
+   *
+   * @param pObject The object being queried.
+   * @return The query's ObjectStateBumpSensor property, if it has one.
+   */
+  public static ObjectStateBumpSensor retrieve(SimulatorObject pObject) {
+      ObjectState os = pObject.getState(ObjectStateBumpSensor.NAME);
+
+      if (os == null) return null;
+      else return (ObjectStateBumpSensor)os;
   }
 }
 

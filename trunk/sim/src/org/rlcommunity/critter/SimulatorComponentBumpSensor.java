@@ -1,7 +1,7 @@
 package org.rlcommunity.critter;
 
 /**
- * SimulatorComponentBump
+ * SimulatorComponentBumpSensor
  *
  * This component deals with bump sensors, and possibly in the future any
  *  response to contact between two objects.
@@ -12,13 +12,13 @@ package org.rlcommunity.critter;
 import java.util.LinkedList;
 import java.util.List;
 
-public class SimulatorComponentBump implements SimulatorComponent {
+public class SimulatorComponentBumpSensor implements SimulatorComponent {
 
-    public static final String NAME = "bump";
+    public static final String NAME = "bump_sensor";
 
     public static final double BUMP_DECAY = 0.9;
 
-    public SimulatorComponentBump() 
+    public SimulatorComponentBumpSensor()
     {
     }
 
@@ -35,28 +35,22 @@ public class SimulatorComponentBump implements SimulatorComponent {
       List<SimulatorObject> objects = 
         pCurrent.getObjects(ObjectStateBumpSensor.NAME);
 
-      for (SimulatorObject o : objects)
+      for (SimulatorObject obj : objects)
       {
-        SimulatorObject nextObj = pNext.getObject(o);
+        SimulatorObject nextObj = pNext.getObject(obj);
 
-        ObjectStateBumpSensor bs = (ObjectStateBumpSensor)
-          o.getState(ObjectStateBumpSensor.NAME);
-        ObjectStateBumpSensor nextbs = (ObjectStateBumpSensor)
-          nextObj.getState(ObjectStateBumpSensor.NAME);
+        ObjectStateBumpSensor bs = ObjectStateBumpSensor.retrieve(obj);
+        ObjectStateBumpSensor nextbs = ObjectStateBumpSensor.retrieve(nextObj);
+        ObjectStateDynamics dynData = ObjectStateDynamics.retrieve(obj);
 
-        // Decay existing forces
+        // If this object is not subject to collisions, assume its bump sensor
+        //  will not pick up anything
+        if (dynData == null) continue;
+        
+        // Decay existing forces and add them to the next state
         List<Force> forces = bs.getForces();
 
-        // Assume that any force already in nextbs is NEW, so we should keep
-        //  it (i.e. we do NOT call nextbs.clearForces() here)
-        // MGB:
-        //  We should most likely NOT decay forces, because this will
-        //  result in duplicate measurements. In other words, the bump sensor
-        //  would measure 'twice the force' if it occured twice as long.
-        //  We probably want something smoother, maybe a time-dependent
-        //  sensor, some sort of decaying accumulator?
-        for (Force f : forces)
-        {
+        for (Force f : forces) {
           Vector2D newVec = 
             new Vector2D(f.vec.x * BUMP_DECAY, f.vec.y * BUMP_DECAY);
 
@@ -67,6 +61,12 @@ public class SimulatorComponentBump implements SimulatorComponent {
 
           Force newForce = new Force(newVec, f.source);
           nextbs.addForce(newForce);
+        }
+
+        // Add new collisions
+        for (Collision c : dynData.getCollisions()) {
+            Force newForce = new Force(c.normal, c.point);
+            nextbs.addForce(newForce);
         }
       }
     }

@@ -27,7 +27,7 @@ import java.util.LinkedList;
 import org.rlcommunity.critter.Clients.DropClient;
 import org.rlcommunity.critter.Drops.*;
 import org.rlcommunity.critter.SimulatorComponentAccelerometer;
-import org.rlcommunity.critter.SimulatorComponentBump;
+import org.rlcommunity.critter.SimulatorComponentBumpSensor;
 import org.rlcommunity.critter.SimulatorComponentCritterbotInterface;
 import org.rlcommunity.critter.SimulatorComponentDynamics;
 import org.rlcommunity.critter.SimulatorComponentGyroscope;
@@ -89,7 +89,7 @@ public class CritterEnv implements EnvironmentInterface, DropClient, HasAVisuali
 
         engine.addComponent(new SimulatorComponentDynamics());
         engine.addComponent(new SimulatorComponentLight());
-        engine.addComponent(new SimulatorComponentBump());
+        engine.addComponent(new SimulatorComponentBumpSensor());
         engine.addComponent(new SimulatorComponentOmnidrive());
         engine.addComponent(new SimulatorComponentAccelerometer());
         engine.addComponent(new SimulatorComponentGyroscope());

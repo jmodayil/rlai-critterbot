@@ -17,6 +17,8 @@ import java.awt.Color;
 
 public class ObjectStateDynamics implements ObjectState {
 
+    public static final String NAME = SimulatorComponentDynamics.NAME;
+    
     public static final double MIN_MASS = 0.000001; // 1 mg
     public static final double MIN_MOMENT_INERTIA = MIN_MASS * 1; // 1 mg m^2
     public static final double MAX_MASS = Double.MAX_VALUE;
@@ -307,7 +309,7 @@ public class ObjectStateDynamics implements ObjectState {
 
     /** ObjectState interface */
     public String getName() {
-        return SimulatorComponentDynamics.NAME;
+        return ObjectStateDynamics.NAME;
     }
 
     public Object clone() {
@@ -361,6 +363,20 @@ public class ObjectStateDynamics implements ObjectState {
 
     void setVelocity(double d, double d0) {
         aVel = new Vector2D(d, d0);
+    }
+
+
+    /** Returns null if the object does not have an ObjectStateDynamics,
+     *   or its ObjectStateDynamics otherwise.
+     *
+     * @param pObj The object from which we want the ObjectStateDynamics.
+     * @return The ObjectStateDynamics corresponding to the object.
+     */
+    public static ObjectStateDynamics retrieve(SimulatorObject pObject) {
+        ObjectState os = pObject.getState(ObjectStateDynamics.NAME);
+        if (os == null) return null;
+
+        else return (ObjectStateDynamics)os;
     }
 }
 
