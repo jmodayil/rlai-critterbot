@@ -160,12 +160,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         //check for a collision between these
                         Collision pt = obj.collidesWith(compObj);
                         if (pt != null) {
-                            // Added by MGB
-                            //  Anna, you can take this part out. I apologize
-                            //  for conflicts!
-                            debugAddBump(obj, pt.point);
-                            debugAddBump(compObj, pt.point);
-                            // End added by MGB
+                            // Store the collision information in the next state
+                            addCollision(pt, obj, compObj);
+
                             Vector2D n = pt.normal;
 
                             positionReset = true;
@@ -333,15 +330,24 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
         }
     }
 
-    /** Added by MGB - remove at your leisure */
-    public void debugAddBump(SimulatorObject obj, Vector2D pt) {
-        ObjectState os = obj.getState(ObjectStateBumpSensor.NAME);
+    /**
+     *  Store the collision information for the two objects involved in the
+     *   collision.
+     *
+     * @param pCol The collision information structure.
+     * @param pObj1 The first object involved.
+     * @param pObj2 The second object involved.
+     */
+    private void addCollision(final Collision pCol,
+            final SimulatorObject pObj1, final SimulatorObject pObj2) {
+        // Assume that both of these are non-null, otherwise we would not be 
+        //   calling this method
+        ObjectStateDynamics dynData1 = ObjectStateDynamics.retrieve(pObj1);
+        ObjectStateDynamics dynData2 = ObjectStateDynamics.retrieve(pObj2);
 
-        if (os == null) {
-            return;
-        }
-        ObjectStateBumpSensor bs = (ObjectStateBumpSensor) os;
-
-        bs.addForce(new Force(new Vector2D(5, 5), pt));
+        // Note - we're not cloning here! the two objects will share the
+        //  collision information
+        dynData1.addCollision(pCol);
+        dynData2.addCollision(pCol);
     }
 }
