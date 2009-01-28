@@ -15,7 +15,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
     // @todo clean up
-    boolean debugCollisions = true;
+    boolean debugCollisions = false;
     boolean debugDynamicsData = false;
 
     public SimulatorComponentDynamics() {
@@ -224,7 +224,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D cb = compObjP.getPosition();
                                 // Compute the moment arms
                                 Vector2D ra = pt.point.minus(ca);
+                                double raLen = ra.length();
                                 Vector2D rb = pt.point.minus(cb);
+                                double rbLen = rb.length();
 
                                 Vector2D va = o1p.getVelocity();
                                 Vector2D vb = o2p.getVelocity();
@@ -234,9 +236,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 
                                 // The velocity of a at the point of collision, including angular
                                 //  velocity
-                                Vector2D vaPoint = new Vector2D(-ra.x * wa, ra.y * wa);
+                                Vector2D vaPoint = new Vector2D(-ra.y * wa*raLen, ra.x * wa*raLen);
                                 vaPoint.plusEquals(va);
-                                Vector2D vbPoint = new Vector2D(-rb.x * wb, rb.y * wb);
+                                Vector2D vbPoint = new Vector2D(-rb.y * wb*rbLen, rb.x * wb*rbLen);
                                 vbPoint.plusEquals(vb);
 
                                 // The relative velocities at the point of intersection
@@ -253,26 +255,34 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D tmpa = new Vector2D(taua * ra.y, -taua * ra.x);
                                 Vector2D tmpb = new Vector2D(taub * rb.y, -taub * rb.x);
 
-                                double denom = 1.0 / ma + 1.0 / mb + n.dot(tmpa) + n.dot(tmpb);
+                                double denom = 1.0 / ma + 1.0 / mb + 
+                                        Math.abs(n.dot(tmpa)) + Math.abs(n.dot(tmpb));
 
-                                System.out.println("<--");
-                                System.out.printf ("W-: %.4g %.4g\n", wa, wb);
-                                System.out.println ("vPoint: "+vaPoint+" "+vbPoint);
-                                System.out.println ("Projection: "+projVab);
-                                System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
-                                System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
                                 Vector2D projImpulse = projVab.times(-(1 + e) / denom);
-                                System.out.println ("Impulse: "+projImpulse);
+
                                 Vector2D vap = o1.getVelocity().plus(projImpulse).times(1.0 / ma);
                                 Vector2D vbp = o2.getVelocity().plus(projImpulse).times(-1.0 / mb);
                                 double wap =
-                                        o1.getAngVelocity() + ra.cross(projImpulse) / Ia;
+                                        o1.getAngVelocity() + ra.cross(projImpulse) / Ia / raLen;
                                 double wbp =
-                                        o2.getAngVelocity() - rb.cross(projImpulse) / Ib;
-                                System.out.println("V: "+vap+" "+vbp);
-                                System.out.printf("W: %.4g %.4g\n", wap, wbp);
-                                System.out.println("-->");
-                                //System.exit(0);
+                                        o2.getAngVelocity() - rb.cross(projImpulse) / Ib / rbLen;
+                                if (debugCollisions) {
+                                    System.out.println("<--");
+                                    System.out.println ("R: "+ra+" "+rb);
+                                    System.out.println ("N: "+n);
+                                    System.out.println ("Dots: "+n.dot(tmpa)+" "+n.dot(tmpb));
+                                    System.out.println ("V-: "+va+" "+vb);
+                                    System.out.printf ("W-: %.4g %.4g\n", wa, wb);
+                                    System.out.println ("vPoint: "+vaPoint+" "+vbPoint);
+                                    System.out.println ("Projection: "+projVab);
+                                    System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
+                                    System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
+                                    System.out.println ("Impulse: "+projImpulse);
+                                    System.out.println("V: "+vap+" "+vbp);
+                                    System.out.printf("W: %.4g %.4g\n", wap, wbp);
+                                    System.out.println("-->");
+                                }
+                                
                                 // might want to check here for infinite mass?
                                 // or just let it fall out of the math
                                 /* double impulse = (-(1 + e) * vab.dot(n)) /
