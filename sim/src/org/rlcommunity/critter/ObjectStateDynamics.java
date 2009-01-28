@@ -46,7 +46,7 @@ public class ObjectStateDynamics implements ObjectState {
     private double coefficientFrictionStatic = .2;
     private double coefficientFrictionDyn = .05;
     /** Object coefficient of restitution with some imaginary median obj  */
-    private double coefficientRestitution = 1;
+    private double coefficientRestitution = 0.5;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
     private double minSpeed, maxSpeed;
     /** @todo Object center of mass (used as axis of rotation as well */
@@ -233,7 +233,7 @@ public class ObjectStateDynamics implements ObjectState {
      }
     
     double getCoefficientRestitution(ObjectStateDynamics o2) {
-        double e = getCoefficientRestitution() + o2.getCoefficientRestitution();
+        double e = (getCoefficientRestitution() + o2.getCoefficientRestitution())/2;
         e = Math.max(0, e);
         e = Math.min(e, 1);
         return e;
