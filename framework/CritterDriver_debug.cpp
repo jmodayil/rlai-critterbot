@@ -89,7 +89,7 @@ void CritterDriver_debug::readPacket() {
 }
 
 int CritterDriver_debug::think(USeconds &wokeAt) {
-  sense(wokeAt);
+  //sense(wokeAt);
   return 1;
 }
 

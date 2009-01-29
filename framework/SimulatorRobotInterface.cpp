@@ -315,3 +315,9 @@ int SimulatorRobotInterface::act(USeconds & wokeAt)
   wakeTime += wait - wokeAt - wakeTime;
 }
 
+BitMask SimulatorRobotInterface::type() {
+  BitMask mask;
+  mask.maskBit(Component::ComponentSense);
+  mask.maskBit(Component::ComponentAct);
+  return mask;
+}
