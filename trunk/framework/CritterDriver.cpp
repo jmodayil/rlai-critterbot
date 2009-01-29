@@ -310,3 +310,10 @@ int CritterDriver::act(USeconds &now) {
   }
   return 1;
 }
+
+BitMask CritterDriver::type() {
+  BitMask mask;
+  mask.maskBit(Component::ComponentSense);
+  mask.maskBit(Component::ComponentAct);
+  return mask;
+}

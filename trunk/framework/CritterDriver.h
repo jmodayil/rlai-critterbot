@@ -53,6 +53,7 @@ class CritterDriver : public Component {
     //virtual int think(USeconds &wokeAt);
     virtual int sense(USeconds &wokeAt);
     virtual int act(USeconds &wokeAt);
+    virtual BitMask type();
 
     //virtual int loadConfig(ComponentConfig *conf);
     int readConfig(ComponentConfig *conf, string &device, int &postWait);
