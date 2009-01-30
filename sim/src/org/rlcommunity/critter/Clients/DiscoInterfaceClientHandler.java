@@ -54,7 +54,6 @@ public class DiscoInterfaceClientHandler extends Thread
   }
 
   /** Main code for this Thread */
-    @Override
   public void run()
   {
     while (!aClosed)

@@ -160,9 +160,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         //check for a collision between these
                         Collision pt = obj.collidesWith(compObj);
                         if (pt != null) {
-                            // Store the collision information in the next state
-                            addCollision(pt, obj, compObj);
-
                             Vector2D n = pt.normal;
 
                             positionReset = true;
@@ -201,13 +198,17 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             ObjectStateDynamics o1p = (ObjectStateDynamics) objP.getState(SimulatorComponentDynamics.NAME);
                             ObjectStateDynamics o2p = (ObjectStateDynamics) compObjP.getState(SimulatorComponentDynamics.NAME);
 
+                            double colMagnitude;
+
                             if (collisionEnergySink) {
+                                // @todo Times masses?
+                                colMagnitude = o1.getVelocity().length() + o2.getVelocity().length();
+
                                 // Collisions are energy sinks
                                 o1.setVelocity(new Vector2D(0, 0));
                                 o1.setAngVelocity(0);
                                 o2.setVelocity(new Vector2D(0, 0));
                                 o2.setAngVelocity(0);
-
                             } else {
                                 // calculate forces
                                 double ma = o1.getMass();
@@ -295,8 +296,19 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 o2.setVelocity(vbp);
                                 o1.setAngVelocity(wap);
                                 o2.setAngVelocity(wbp);
+
+                                // @todo this magitude is bogus
+                                // Idea: store kinetic energy (other object's
+                                //   relative velocity times mass)?
+                                // @todo account for angular energy
+                                colMagnitude = (vap.minus(va).length() + vbp.minus(vb).length())
+                                        + (wap - wa + wbp - wb);
                             // angular velocity? Needs to be implemented
                             }
+
+                            // Store the collision information in the next state
+                            addCollision(pt, obj, colMagnitude);
+                            addCollision(pt, compObj, colMagnitude);
 
                             if(debugCollisions){
                                 System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());
@@ -335,19 +347,20 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *   collision.
      *
      * @param pCol The collision information structure.
-     * @param pObj1 The first object involved.
-     * @param pObj2 The second object involved.
+     * @param pObject The first object involved.
+     * @param pEnergy The kinetic energy of this collision
      */
     private void addCollision(final Collision pCol,
-            final SimulatorObject pObj1, final SimulatorObject pObj2) {
+            final SimulatorObject pObject, final double pEnergy) {
         // Assume that both of these are non-null, otherwise we would not be 
         //   calling this method
-        ObjectStateDynamics dynData1 = ObjectStateDynamics.retrieve(pObj1);
-        ObjectStateDynamics dynData2 = ObjectStateDynamics.retrieve(pObj2);
+        ObjectStateDynamics dynData = ObjectStateDynamics.retrieve(pObject);
 
+        Collision newCol = new Collision(pCol);
+        newCol.magnitude = pEnergy;
+        
         // Note - we're not cloning here! the two objects will share the
         //  collision information
-        dynData1.addCollision(pCol);
-        dynData2.addCollision(pCol);
+        dynData.addCollision(newCol);
     }
 }
