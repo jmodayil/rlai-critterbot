@@ -33,7 +33,10 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
     public static final double LIGHT_SCALE = 100.0;
     public static final double IRDIST_SCALE = 255.0;
+
     protected DropInterface aDropInterface;
+
+    public static final double BUMP_SENSOR_SCALE  = 1000.0;
 
     public SimulatorComponentCritterbotInterface(DropInterface pInterface) {
         aDropInterface = pInterface;
@@ -201,6 +204,22 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             double angVel = sData.getSensorValue();
 
             stateDrop.rotation = (int) (angVel * GYRO_SCALE);
+        }
+
+        ObjectStateBumpSensor bumpState = ObjectStateBumpSensor.retrieve(pObject);
+        // Assume stateDrop.bump is initialized to 0's
+        int numEdges = pObject.getShape().getPoints().size();
+        int numSensors = stateDrop.bump.length;
+
+        for (ObjectStateBumpSensor.BumpSensorData data : bumpState.getData()) {
+            double sensor = (data.alpha / numEdges) * numSensors;
+            // Interpolate between the two closest bump sensors
+            int lowSensor = (int) Math.floor(sensor);
+            int highSensor = (int) Math.ceil(sensor);
+
+            double alpha = sensor - lowSensor;
+            stateDrop.bump[lowSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
+            stateDrop.bump[highSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
         }
 
         return stateDrop;

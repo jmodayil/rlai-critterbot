@@ -18,12 +18,14 @@ public class CritterStateDrop implements SimulatorDrop
 {
   public class motor_struct
   {
+    public int command;
     public int velocity;
     public int current;
     public int temp;
 
     public void readData(InterfaceInputStream pIn) throws IOException
     {
+      command = pIn.readInt();
       velocity = pIn.readInt();
       current = pIn.readInt();
       temp = pIn.readInt();
@@ -31,6 +33,7 @@ public class CritterStateDrop implements SimulatorDrop
     
     public void writeData(InterfaceOutputStream pOut) throws IOException
     {
+      pOut.writeInt(command);
       pOut.writeInt(velocity);
       pOut.writeInt(current);
       pOut.writeInt(temp);
@@ -38,7 +41,7 @@ public class CritterStateDrop implements SimulatorDrop
 
     public int getSize()
     {
-      return 3 * Integer.SIZE;
+      return 4 * Integer.SIZE;
     }
   }
 

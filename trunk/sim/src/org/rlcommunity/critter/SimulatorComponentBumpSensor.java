@@ -16,7 +16,7 @@ public class SimulatorComponentBumpSensor implements SimulatorComponent {
 
     public static final String NAME = "bump_sensor";
 
-    public static final double BUMP_DECAY = 0.9;
+    public static final double BUMP_DECAY = 0.95;
 
     public SimulatorComponentBumpSensor()
     {
@@ -48,25 +48,20 @@ public class SimulatorComponentBumpSensor implements SimulatorComponent {
         if (dynData == null) continue;
         
         // Decay existing forces and add them to the next state
-        List<Force> forces = bs.getForces();
+        List<ObjectStateBumpSensor.BumpSensorData> forces = bs.getData();
 
-        for (Force f : forces) {
-          Vector2D newVec = 
-            new Vector2D(f.vec.x * BUMP_DECAY, f.vec.y * BUMP_DECAY);
+        for (ObjectStateBumpSensor.BumpSensorData f : forces) {
+            double newMagnitude = f.magnitude * BUMP_DECAY;
+            if (newMagnitude < 0.01)
+                continue;
 
-          // @todo Yuck, fixme
-          // For now, remove forces when they get small
-          if (newVec.length() < 0.01)
-            continue;
-
-          Force newForce = new Force(newVec, f.source);
-          nextbs.addForce(newForce);
+            nextbs.addData(newMagnitude, f.alpha, f.point);
         }
 
         // Add new collisions
         for (Collision c : dynData.getCollisions()) {
-            Force newForce = new Force(c.normal, c.point);
-            nextbs.addForce(newForce);
+            System.out.println ("Bump: "+c.magnitude);
+            nextbs.addCollision(c);
         }
       }
     }

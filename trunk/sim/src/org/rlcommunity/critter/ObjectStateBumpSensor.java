@@ -24,30 +24,49 @@ public class ObjectStateBumpSensor implements ObjectState
     public static final double BUMP_SENSOR_DRAW_SCALE = 10.0;
     public static final String NAME = SimulatorComponentBumpSensor.NAME;
 
-  /** A list of forces being sensed by this bump sensor. The forces are
-    *  normal to the underlying Polygon. */ 
-  protected LinkedList<Force> aForces = new LinkedList<Force>();
+    /** Class encapsulating relevant bump sensor data */
+    public class BumpSensorData {
+        // The magnitude of the sensed force
+        public double magnitude;
+        // The location, in Polygon coordinates, of the sensed force
+        public double alpha;
+        // The location, as a point, of the sensed force
+        public Vector2D point;
+
+        public BumpSensorData (double pMag, double pAlpha, Vector2D pPoint) {
+            magnitude = pMag;
+            alpha = pAlpha;
+            point = pPoint;
+        }
+    }
+
+    /** A list of forces sensed by this bump sensor */
+    protected LinkedList<BumpSensorData> aData = new LinkedList<BumpSensorData>();
 
   public ObjectStateBumpSensor()
   {
   }
 
   /** Clears the list of sensed forces */
-  public void clearForces() { aForces.clear(); }
+  public void clearData() { aData.clear(); }
 
-  /** Adds a force to the list of forces being sensed by the object
-    *
-    * @param f The new sensed force, assumed to be normal to the underlying
-    *   Polygon.
-    */
-  public void addForce(Force f) { aForces.add(f); }
+  // @todo - document
+  public void addCollision(Collision pCol) {
+      BumpSensorData newData = 
+              new BumpSensorData(pCol.magnitude, pCol.alpha, pCol.point);
+      aData.add(newData);
+  }
 
+  public void addData(double pMagnitude, double pAlpha, Vector2D pPoint) {
+      aData.add(new BumpSensorData(pMagnitude, pAlpha, pPoint));
+  }
+  
   /** Returns the list of forces being sensed
     *
     * @return A list of forces, normal to the polygon, being applied.
     *   Magnitude matters.
     */
-  public List<Force> getForces() { return aForces; }
+  public List<BumpSensorData> getData() { return aData; }
 
   /** ObjectState interface */
   
@@ -86,9 +105,14 @@ public class ObjectStateBumpSensor implements ObjectState
         Color tempC = g.getColor();
         g.setColor(Color.red);
 
-        for (Force f : aForces) {
-            double rad = (f.vec.length() * 2) / BUMP_SENSOR_DRAW_SCALE;
-            g.drawOval(f.source.x-rad/2, f.source.y-rad/2, rad, rad);
+        for (BumpSensorData f : aData) {
+            double rad = (f.magnitude * 2) / BUMP_SENSOR_DRAW_SCALE;
+            // Find out the current point of the sensor
+            Vector2D curPoint;
+            if (parent != null) curPoint = parent.aShape.getPoint(f.alpha);
+            else curPoint = f.point;
+            
+            g.drawOval(curPoint.x-rad/2, curPoint.y-rad/2, rad, rad);
         }
         g.setColor(tempC);
       }
@@ -100,7 +124,7 @@ public class ObjectStateBumpSensor implements ObjectState
     */
   public void clearTransient()
   {
-    clearForces();
+    clearData();
   }
 
   /** Returns the ObjectStateBumpSensor for this object, or null if it does not
