@@ -6,6 +6,7 @@
 
 #include <termios.h>
 
+#include "USeconds.h"
 #include "Component.h"
 #include "BitMask.h"
 #include "ErrorMessage.h"
@@ -64,7 +65,7 @@ class CritterDriver : public Component {
     void initport();
     void closeport();
     void readPacket(unsigned char buf[]);
-    void publishData(uSeconds &now);
+    void publishData(USeconds &now);
     
 };
 

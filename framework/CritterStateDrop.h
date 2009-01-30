@@ -4,6 +4,12 @@
 #include "Drop.h"
 #include "CritterDrop.h"
 
+#define IR_DISTANCE_SIZE 10
+#define IR_LIGHT_SIZE    8
+#define LIGHT_SIZE       4
+#define THERMAL_SIZE     8
+#define BUMP_SIZE        32
+
 using namespace std;
 
 class CritterStateDrop : public CritterDrop {
@@ -30,11 +36,11 @@ class CritterStateDrop : public CritterDrop {
   } accel, mag; // 15
 
   int rotation; // 16
-  unsigned int ir_distance[10]; // 26
-  unsigned int ir_light[8]; 
-  unsigned int light[4];  // 30
-  unsigned int thermal[8];
-  unsigned int bump[32];
+  unsigned int ir_distance[IR_DISTANCE_SIZE]; // 26
+  unsigned int ir_light[IR_LIGHT_SIZE]; 
+  unsigned int light[LIGHT_SIZE];  // 30
+  unsigned int thermal[THERMAL_SIZE];
+  unsigned int bump[BUMP_SIZE];
   unsigned int error_flags; // (4) 34
   unsigned int cycle_time;
 
