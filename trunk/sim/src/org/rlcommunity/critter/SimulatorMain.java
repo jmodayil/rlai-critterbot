@@ -19,8 +19,9 @@ public class SimulatorMain {
     public static void main(String[] args) {
         int discoServerPort;
         boolean useGui;
+        double timeScale;
         int millisPerStep = 10;
-
+        
         // Read in some arguments
         if (args.length < 1) {
             discoServerPort = 2324;
@@ -33,7 +34,12 @@ public class SimulatorMain {
         } else {
             useGui = true;
         }
-
+        if (args.length >= 3) {
+            timeScale = Double.parseDouble(args[2]);
+        }
+        else
+            timeScale = 1.0;
+        
         final KeyboardClient theKeyboardClient = new KeyboardClient();
 
         System.out.println("Starting Disco server on port " + discoServerPort);
@@ -72,14 +78,7 @@ public class SimulatorMain {
             });
         }
 
-
-        while (true) {
-            engine.step(millisPerStep);
-
-            try {
-                Thread.sleep(millisPerStep);
-            } catch (InterruptedException e) {
-            }
-        }
+        SimulatorScheduler scheduler = new SimulatorScheduler(engine, millisPerStep, timeScale);
+        scheduler.run();
     }
 }
