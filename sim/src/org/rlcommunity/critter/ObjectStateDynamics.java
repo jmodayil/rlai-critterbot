@@ -48,7 +48,7 @@ public class ObjectStateDynamics implements ObjectState {
     private double coefficientFrictionStatic = .2;
     private double coefficientFrictionDyn = .05;
     /** Object coefficient of restitution with some imaginary median obj  */
-    private double coefficientRestitution = 0.5;
+    private double coefficientRestitution = 1.0;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
     private double minSpeed, maxSpeed;
     /** @todo Object center of mass (used as axis of rotation as well */

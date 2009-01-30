@@ -15,7 +15,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
     // @todo clean up
-    boolean debugCollisions = false;
+    boolean debugCollisions = true;
     boolean debugDynamicsData = false;
 
     public SimulatorComponentDynamics() {
@@ -139,8 +139,12 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *  @param delta    The amount of time (in ms) between the current and
      *         next states.
      **/
+    private static int time = 0;
     private void checkForCollisions(SimulatorState pCurrent, SimulatorState pNext, int delta) {
         boolean positionReset = true;
+
+        time++;
+        
         while (positionReset) {
             positionReset = false;
 
@@ -160,6 +164,14 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         //check for a collision between these
                         Collision pt = obj.collidesWith(compObj);
                         if (pt != null) {
+
+                            // @todo remove
+/*                            if (obj.getId() < compObj.getId()) {
+                                SimulatorObject tmp = obj;
+                                obj = compObj;
+                                compObj = tmp;
+                            } */
+
                             Vector2D n = pt.normal;
 
                             positionReset = true;
@@ -255,19 +267,23 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                                 double denom = 1.0 / ma + 1.0 / mb + 
                                         Math.abs(n.dot(tmpa)) + Math.abs(n.dot(tmpb));
-
+                                double altValueA = n.x * ra.y - n.y * ra.x;
+                                altValueA = altValueA * altValueA;
+                                altValueA /= Ia;
+                                
                                 Vector2D projImpulse = projVab.times(-(1 + e) / denom);
 
-                                Vector2D vap = o1.getVelocity().plus(projImpulse).times(1.0 / ma);
-                                Vector2D vbp = o2.getVelocity().plus(projImpulse).times(-1.0 / mb);
+                                Vector2D vap = o1.getVelocity().plus(projImpulse.times(1.0/ma));
+                                Vector2D vbp = o2.getVelocity().plus(projImpulse.times(-1.0/mb));
                                 double wap =
                                         o1.getAngVelocity() + ra.cross(projImpulse) / Ia / raLen;
                                 double wbp =
                                         o2.getAngVelocity() - rb.cross(projImpulse) / Ib / rbLen;
                                 if (debugCollisions) {
                                     System.out.println("<--");
+                                    System.out.println ("Time: "+time);
                                     System.out.println ("R: "+ra+" "+rb);
-                                    System.out.println ("N: "+n);
+                                    System.out.println ("N, e: "+n+" "+e);
                                     System.out.println ("Dots: "+n.dot(tmpa)+" "+n.dot(tmpb));
                                     System.out.println ("V-: "+va+" "+vb);
                                     System.out.printf ("W-: %.4g %.4g\n", wa, wb);
@@ -275,6 +291,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.println ("Projection: "+projVab);
                                     System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
                                     System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
+                                    System.out.println ("Compare: "+altValueA+" "+n.dot(tmpa));
                                     System.out.println ("Impulse: "+projImpulse);
                                     System.out.println("V: "+vap+" "+vbp);
                                     System.out.printf("W: %.4g %.4g\n", wap, wbp);
