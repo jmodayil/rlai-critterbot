@@ -127,6 +127,8 @@ public class KeyboardClient implements DropClient, KeyListener {
             } else if (motor100 > 0 || motor220 > 0 || motor340 > 0) {
                 setDropWithMotorSpace(controlDrop);
             }
+            else // Send a zero drop (it MUST be sent)
+                setDropWithXYThetaSpace(controlDrop);
         }
         hasChange = false;
         dropList.add(controlDrop);
