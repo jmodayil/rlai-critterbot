@@ -132,7 +132,7 @@ int SimulatorRobotInterfaceProc::processDrop()
     //  that the drop length needs to be read from the socket. The reason
     //  is that if we have variable length data, the other (Java) end needs
     //  to tell us the data size
-    dropLength = 340;
+    dropLength = 352;
   }
   else if (strncmp(data, CritterControlDrop::name.c_str(), nameLength) == 0)
   {

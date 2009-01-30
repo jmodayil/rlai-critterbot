@@ -179,13 +179,13 @@ void CritterDriver::readPacket( unsigned char buf[]) {
   //    }
 }
 
-void CritterDriver::publishData(uSeconds &now) {
+void CritterDriver::publishData(USeconds &now) {
       
       int i;
 
-      fprintf(log, "%s : ", now.toString());
+      fprintf(log, "%s : ", now.toString().c_str());
       for(i = 0; i < STATE_LENGTH - 2; i++ ) {
-        fprintf(log, "%d ", buf[i]);
+        fprintf(log, "%d ", state_buf[i]);
       } 
       fprintf(log, "\n");
       (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  

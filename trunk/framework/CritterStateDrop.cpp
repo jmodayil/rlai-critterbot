@@ -126,7 +126,7 @@ void CritterStateDrop::readArray(void *d) {
   
   memcpy(&batv160, data, sizeof(batv160));
   data += sizeof(batv160);
-  
+ 
   memcpy(&batv280, data, sizeof(batv280));
   data += sizeof(batv280);
   
@@ -223,6 +223,16 @@ string CritterStateDrop::toString(string offset) {
     ir_distance[5], ir_distance[6], ir_distance[7], ir_distance[8],
     ir_distance[9]);
   value += buf;
+
+  value += "Bump Sensors:";
+
+  for (int i = 0; i < BUMP_SIZE; i++) {
+    sprintf (buf, " %u", bump[i]);
+    value += buf;
+  }
+
+  value += "\n";
+
   sprintf(buf, "Light Sensors: %u %u %u %u\n", light[0], light[1],
       light[2], light[3]);
   value += buf;
