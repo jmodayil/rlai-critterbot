@@ -12,14 +12,21 @@ public class SimulatorVizEvents implements KeyListener {
 	public int left;
 	public int right;
 	public int debug;
-
+    public int thrust, spin;
+    
 	public SimulatorVizEvents() {
-		debug = up = down = left = right = 0;
+		thrust = spin = 0;
+        debug = up = down = left = right = 0;
 	}
 	
 	public void keyTyped(KeyEvent e) {
-	  if('d' == e.getKeyChar())
-      debug = 1;
+        char key = e.getKeyChar();
+	  if('d' == key)
+          debug = 1;
+      else if('t' == key)
+        thrust = 1;
+      else if('s' == key)
+        spin = 1;
   }
 	
 	public void keyPressed(KeyEvent e) {

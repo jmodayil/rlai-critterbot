@@ -92,41 +92,6 @@ public class SimulatorEngine {
 			return;
 
     step(ms);
-    // Hack.  Replace this once a better keyboard handler is introduced.
-    if(vizHandler.debug == 1) {
-      System.out.println("Toggling debug draw.");
-      vizHandler.debug = 0;
-      List<SimulatorObject> sensorObjs =
-        aNextState.getObjects(ObjectStateIRDistanceSensor.NAME);
-
-      for(SimulatorObject obj : sensorObjs) {
-        SimulatorObject nextObj = aNextState.getObject(obj);
-        if(nextObj == null)
-          continue;
-
-        ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor)
-          nextObj.getState(ObjectStateIRDistanceSensor.NAME);
-        if(sensor.debugDrawRays == true)
-          sensor.debugDrawRays = false;
-        else
-          sensor.debugDrawRays = true;
-      }
-      sensorObjs =
-        aState.getObjects(ObjectStateIRDistanceSensor.NAME);
-
-      for(SimulatorObject obj : sensorObjs) {
-        SimulatorObject nextObj = aState.getObject(obj);
-        if(nextObj == null)
-          continue;
-
-        ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor)
-          nextObj.getState(ObjectStateIRDistanceSensor.NAME);
-        if(sensor.debugDrawRays == true)
-          sensor.debugDrawRays = false;
-        else
-          sensor.debugDrawRays = true;
-      }
-    } 
   }
 
 	/**
@@ -150,6 +115,7 @@ public class SimulatorEngine {
   {
 		// Re-initialize the next state to be filled with data
 		aNextState.clear();
+        debugHandleKeyboard();
 
 		/**
 		 * Begin new (real) simulator code - everything above has to be moved
@@ -167,8 +133,86 @@ public class SimulatorEngine {
 		// Be clever and reuse what was the current state as our next 'new
 		// state'
 		aNextState = tmpState;
-	}
+    }
 
+    public void debugHandleKeyboard() {
+        // Hack.  Replace this once a better keyboard handler is introduced.
+        if (vizHandler.debug == 1) {
+            System.out.println("Toggling debug draw.");
+            vizHandler.debug = 0;
+            List<SimulatorObject> sensorObjs =
+                    aNextState.getObjects(ObjectStateIRDistanceSensor.NAME);
+
+            for (SimulatorObject obj : sensorObjs) {
+                SimulatorObject nextObj = aNextState.getObject(obj);
+                if (nextObj == null) {
+                    continue;
+                }
+
+                ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor) nextObj.getState(ObjectStateIRDistanceSensor.NAME);
+                if (sensor.debugDrawRays == true) {
+                    sensor.debugDrawRays = false;
+                } else {
+                    sensor.debugDrawRays = true;
+                }
+            }
+            sensorObjs =
+                    aState.getObjects(ObjectStateIRDistanceSensor.NAME);
+
+            for (SimulatorObject obj : sensorObjs) {
+                SimulatorObject nextObj = aState.getObject(obj);
+                if (nextObj == null) {
+                    continue;
+                }
+
+                ObjectStateIRDistanceSensor sensor = (ObjectStateIRDistanceSensor) nextObj.getState(ObjectStateIRDistanceSensor.NAME);
+                if (sensor.debugDrawRays == true) {
+                    sensor.debugDrawRays = false;
+                } else {
+                    sensor.debugDrawRays = true;
+                }
+            }
+        }
+        if (vizHandler.thrust == 1) {
+            System.out.println("Moving bar");
+            vizHandler.thrust = 0;
+
+            SimulatorObject bar = null;
+            for (SimulatorObject o : aState.getObjects()) {
+                if (o.getLabel().equals("Bar")) {
+                    bar = o;
+                    break;
+                }
+            }
+
+            if (bar != null) {
+                ObjectStateDynamics dynData = ObjectStateDynamics.retrieve(bar);
+                if (dynData != null) {
+                    dynData.addForce(new Force(-50, 0));
+                }
+            }
+        }
+        if (vizHandler.spin == 1) {
+            System.out.println("Spinning bar");
+            vizHandler.spin = 0;
+
+            SimulatorObject bar = null;
+            for (SimulatorObject o : aState.getObjects()) {
+                if (o.getLabel().equals("Bar")) {
+                    bar = o;
+                    break;
+                }
+            }
+
+            if (bar != null) {
+                ObjectStateDynamics dynData = ObjectStateDynamics.retrieve(bar);
+                if (dynData != null) {
+                    dynData.addTorque(50.0);
+                }
+            }
+        }
+    }
+    
 	public int debugGetElapsedTime() {
 		// This needs to be turned into a proper clocking mechanism
 		long time = System.currentTimeMillis();
