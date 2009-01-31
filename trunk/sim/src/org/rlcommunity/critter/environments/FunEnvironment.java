@@ -14,7 +14,7 @@ import org.rlcommunity.critter.Vector2D;
  * 
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
-public class OriginalEnvironment implements EnvironmentDescription {
+public class FunEnvironment implements EnvironmentDescription {
 
     public List<SimulatorObject> generateObjects() {
         LinkedList<SimulatorObject> objects = new LinkedList<SimulatorObject>();
@@ -33,6 +33,18 @@ public class OriginalEnvironment implements EnvironmentDescription {
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateHex("Hex", id),
                 new Vector2D(1.0, 1.0), 0.0, id);
+
+        id = CommonObjects.addObject(objects,
+                CommonObjects.generateBar("Bar", id),
+                new Vector2D(3.0, 2.5), 0.0, id);
+
+        id = CommonObjects.addObject(objects,
+                CommonObjects.generateBall("Ball_1", id, 0.05),
+                new Vector2D(Math.random() * 4 + 1, Math.random() * 3 + 1), 0.0, id);
+
+        id = CommonObjects.addObject(objects,
+                CommonObjects.generateBall("Ball_2", id, 0.1),
+                new Vector2D(Math.random() * 4 + 1, Math.random() * 3 + 1), 0.0, id);
 
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateLightSource("Light Source", id),

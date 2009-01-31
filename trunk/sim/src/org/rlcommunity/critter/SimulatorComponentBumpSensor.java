@@ -60,7 +60,6 @@ public class SimulatorComponentBumpSensor implements SimulatorComponent {
 
         // Add new collisions
         for (Collision c : dynData.getCollisions()) {
-            System.out.println ("Bump: "+c.magnitude);
             nextbs.addCollision(c);
         }
       }
