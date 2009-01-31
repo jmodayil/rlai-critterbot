@@ -12,7 +12,7 @@ package org.rlcommunity.critter;
 import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
-import org.rlcommunity.critter.environments.OriginalEnvironment;
+import org.rlcommunity.critter.environments.FunEnvironment;
 
 public class SimulatorMain {
 
@@ -93,7 +93,7 @@ public class SimulatorMain {
 
         int millisPerStep = 10;
         final SimulatorEngine engine = createSimulatorEngine(dropInterface,
-                new OriginalEnvironment());
+                new FunEnvironment());
 
         if (useGui) {
             runGUI(engine, keyboardClient);

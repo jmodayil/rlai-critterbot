@@ -15,7 +15,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
     // @todo clean up
-    boolean debugCollisions = true;
+    boolean debugCollisions = false;
     boolean debugDynamicsData = false;
 
     public SimulatorComponentDynamics() {

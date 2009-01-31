@@ -340,6 +340,34 @@ public class CommonObjects {
         return bar;
     }
     
+    public static SimulatorObject generateBall(String pName, int pId, double pRadius) {
+        // Create the object
+        SimulatorObject ball = new SimulatorObject(pName, pId);
+
+        // Create its shape
+        Polygon shape = new Polygon();
+
+        int numPoints = 16;
+
+        for (int i = 0; i < numPoints; i++) {
+            double angle = i * 2 * Math.PI / numPoints;
+            Vector2D pt = new Vector2D(Math.cos(angle) * pRadius, Math.sin(angle) * pRadius);
+            pt.zeroize();
+
+            shape.addPoint(pt.x, pt.y);
+        }
+
+        shape.translate(new Vector2D(pRadius, pRadius));
+        shape.doneAddPoints();
+
+        ball.setShape(shape);
+
+        // Add dynamics to this object
+        ball.addState(new ObjectStateDynamics(0.5, 0.5));
+
+        return ball;
+    }
+
     /** Generates a light source.
      *
      * @param pName The name of the light source.
