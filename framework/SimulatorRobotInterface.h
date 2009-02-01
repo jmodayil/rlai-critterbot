@@ -68,7 +68,6 @@ class SimulatorRobotInterface : public Socket {
       ComponentConfig &config, string name);
     
     virtual int act(USeconds &wokeAt);
-    virtual BitMask type();
 };
 
 #endif
