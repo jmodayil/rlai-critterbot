@@ -1,5 +1,7 @@
 package org.rlcommunity.critter;
 
+import java.util.List;
+
 /**
  * SimulatorComponentDynamics
  *
@@ -15,6 +17,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
     // @todo clean up
+    boolean debugDetailedCollisions = false;
     boolean debugCollisions = false;
     boolean debugDynamicsData = false;
 
@@ -140,11 +143,36 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *         next states.
      **/
     private static int time = 0;
+    private static boolean hasCollision = false;
+    private static int ctime = 0;
+    
     private void checkForCollisions(SimulatorState pCurrent, SimulatorState pNext, int delta) {
         boolean positionReset = true;
 
         time++;
-        
+        if (false && hasCollision && time < ctime + 20) {
+            System.out.println ("\n");
+            System.err.println ("\n");
+            List<SimulatorObject> objects = pNext.getObjects();
+
+            Polygon robot, ball;
+            robot = ball = null;
+            
+            for (SimulatorObject o : objects) {
+                if (o.getLabel().equals("Critterbot")) {
+                    robot = o.getShape();
+                }
+                else if (o.getLabel().equals("Ball_1")) {
+                    ball = o.getShape();
+                }
+            }
+
+            for (Vector2D pt : robot.getPoints())
+                System.out.printf("%.4g %.4g\n", pt.x, pt.y);
+            for (Vector2D pt : ball.getPoints())
+                System.err.printf("%.4g %.4g\n", pt.x, pt.y);
+        }
+
         while (positionReset) {
             positionReset = false;
 
@@ -164,7 +192,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         //check for a collision between these
                         Collision pt = obj.collidesWith(compObj);
                         if (pt != null) {
-
+                            hasCollision = true;
+                            ctime = time;
+                            
                             // @todo remove
 /*                            if (obj.getId() < compObj.getId()) {
                                 SimulatorObject tmp = obj;
@@ -181,7 +211,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                             //@TODO!!!
                             if (debugCollisions) {
-                                System.out.println("Collision at " + pt.point +
+                                System.out.println("T"+time+":  Collision at " + pt.point +
                                         "between " + obj + " and " + compObj + "!");
                             }
 
@@ -191,20 +221,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.println(" ORIGINAL POSITION IN COLLISION AT " + checkP.point);
                                 }
                             }
-                            obj.setGeometry(objP);
-                            compObj.setGeometry(compObjP);
 
-                            //now double-check that collision has been resolved
-                            // this check should fail. Pt should be null.
-                            Collision testPt = obj.collidesWith(compObj);
-                            if (testPt != null) {
-                                //should probably throw exception here
-                                if (debugCollisions) {
-                                    System.out.println("Still in collision at " + pt.point + "!!!");
-                                }
-                            }
-
-                            // now get the thing we can actually modify
+                            // Get the dynamics data
                             ObjectStateDynamics o1 = (ObjectStateDynamics) obj.getState(SimulatorComponentDynamics.NAME);
                             ObjectStateDynamics o2 = (ObjectStateDynamics) compObj.getState(SimulatorComponentDynamics.NAME);
                             ObjectStateDynamics o1p = (ObjectStateDynamics) objP.getState(SimulatorComponentDynamics.NAME);
@@ -221,6 +239,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 o1.setAngVelocity(0);
                                 o2.setVelocity(new Vector2D(0, 0));
                                 o2.setAngVelocity(0);
+
+                                obj.setGeometry(objP);
+                                compObj.setGeometry(compObjP);
                             } else {
                                 // calculate forces
                                 double ma = o1.getMass();
@@ -246,10 +267,13 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 
                                 // The velocity of a at the point of collision, including angular
                                 //  velocity
-                                Vector2D vaPoint = new Vector2D(-ra.y * wa*raLen, ra.x * wa*raLen);
+                                Vector2D vaPoint = new Vector2D(-ra.y * wa, ra.x * wa);
                                 vaPoint.plusEquals(va);
-                                Vector2D vbPoint = new Vector2D(-rb.y * wb*rbLen, rb.x * wb*rbLen);
+                                Vector2D vbPoint = new Vector2D(-rb.y * wb, rb.x * wb);
                                 vbPoint.plusEquals(vb);
+
+                                obj.setGeometry(objP);
+                                compObj.setGeometry(compObjP);
 
                                 // The relative velocities at the point of intersection
                                 Vector2D vab = vaPoint.minus(vbPoint);
@@ -265,29 +289,36 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D tmpa = new Vector2D(taua * ra.y, -taua * ra.x);
                                 Vector2D tmpb = new Vector2D(taub * rb.y, -taub * rb.x);
 
-                                double denom = 1.0 / ma + 1.0 / mb + 
-                                        Math.abs(n.dot(tmpa)) + Math.abs(n.dot(tmpb));
+                                // @todo clean up
                                 double altValueA = n.x * ra.y - n.y * ra.x;
                                 altValueA = altValueA * altValueA;
                                 altValueA /= Ia;
+                                double altValueB = n.x * rb.y - n.y * rb.x;
+                                altValueB = altValueB * altValueB;
+                                altValueB /= Ib;
+
+                                double denom = 1.0 / ma + 1.0 / mb + 
+                                        altValueA + altValueB;
                                 
                                 Vector2D projImpulse = projVab.times(-(1 + e) / denom);
 
                                 Vector2D vap = o1.getVelocity().plus(projImpulse.times(1.0/ma));
                                 Vector2D vbp = o2.getVelocity().plus(projImpulse.times(-1.0/mb));
                                 double wap =
-                                        o1.getAngVelocity() + ra.cross(projImpulse) / Ia / raLen;
+                                        o1.getAngVelocity() + ra.cross(projImpulse) / Ia;
                                 double wbp =
-                                        o2.getAngVelocity() - rb.cross(projImpulse) / Ib / rbLen;
-                                if (debugCollisions) {
+                                        o2.getAngVelocity() - rb.cross(projImpulse) / Ib;
+                                if (debugDetailedCollisions) {
                                     System.out.println("<--");
                                     System.out.println ("Time: "+time);
+                                    System.out.println ("P: "+pt.point);
                                     System.out.println ("R: "+ra+" "+rb);
                                     System.out.println ("N, e: "+n+" "+e);
                                     System.out.println ("Dots: "+n.dot(tmpa)+" "+n.dot(tmpb));
                                     System.out.println ("V-: "+va+" "+vb);
                                     System.out.printf ("W-: %.4g %.4g\n", wa, wb);
                                     System.out.println ("vPoint: "+vaPoint+" "+vbPoint);
+                                    System.out.println ("v_ab: "+vab);
                                     System.out.println ("Projection: "+projVab);
                                     System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
                                     System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
@@ -297,15 +328,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.printf("W: %.4g %.4g\n", wap, wbp);
                                     System.out.println("-->");
                                 }
-                                
-                                // might want to check here for infinite mass?
-                                // or just let it fall out of the math
-                                /* double impulse = (-(1 + e) * vab.dot(n)) /
-                                        (1 / ma + 1 / mb);
-
-                                // this means post-thrust velocities aren't used. hmm.
-                                Vector2D vap = o1.getVelocity().plus(n.times(impulse / ma));
-                                Vector2D vbp = o2.getVelocity().minus(n.times(impulse / mb)); */
 
                                 checkSpeed(vap, o1);
                                 checkSpeed(vbp, o2);
@@ -318,14 +340,25 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 // Idea: store kinetic energy (other object's
                                 //   relative velocity times mass)?
                                 // @todo account for angular energy
-                                colMagnitude = (vap.minus(va).length() + vbp.minus(vb).length())
-                                        + (wap - wa + wbp - wb);
+                                colMagnitude = (vap.minus(va).length() + vbp.minus(vb).length());
+                                double deltaW = (wap - wa + wbp - wb);
+                                colMagnitude += deltaW*deltaW;
                             // angular velocity? Needs to be implemented
                             }
 
                             // Store the collision information in the next state
                             addCollision(pt, obj, colMagnitude);
                             addCollision(pt, compObj, colMagnitude);
+
+                            //now double-check that collision has been resolved
+                            // this check should fail. Pt should be null.
+                            Collision testPt = obj.collidesWith(compObj);
+                            if (testPt != null) {
+                                //should probably throw exception here
+                                if (debugCollisions) {
+                                    System.out.println("Still in collision at " + pt.point + "!!!");
+                                }
+                            }
 
                             if(debugCollisions){
                                 System.out.println("Post collision velocity " + o1.getVelocity() + " " + o2.getVelocity());

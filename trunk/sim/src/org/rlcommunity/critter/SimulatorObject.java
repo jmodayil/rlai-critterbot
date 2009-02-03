@@ -189,8 +189,8 @@ public class SimulatorObject {
 			return null;
 		else if (isects.size() == 1) {
 			// @todo the case when we have one intersection is incorrect, as in
-			// this
-			// case it's not clear what the normal is
+			// this case it's not clear what the normal is
+            System.err.println ("WARNING: Single-point intersection.");
 			Collision col = new Collision();
 			Polygon.Intersection i1 = isects.get(0);
 			double alpha = i1.alpha;
@@ -205,6 +205,14 @@ public class SimulatorObject {
 			// Look at the two intersections that we have
 			Polygon.Intersection i1 = isects.get(0);
 			Polygon.Intersection i2 = isects.get(1);
+
+            // @todo fixme - this is not the proper way, we should reorder the
+            //  intersections themselves (or something)
+            if (i1.alpha > i2.alpha) {
+                Polygon.Intersection tmp = i1;
+                i1 = i2;
+                i2 = tmp;
+            }
 
 			Vector2D p1 = aShape.getPoint(i1.alpha);
 			Vector2D p2 = aShape.getPoint(i2.alpha);
