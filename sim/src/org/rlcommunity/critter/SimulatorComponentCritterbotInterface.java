@@ -126,7 +126,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                         pDrop.y_vel / XY_VELOCITY_SCALE));
                 // Units for the drop's angular velocity are in 1/(18PI) of a circle
                 //  per second, which is 1/9th of a radian per second
-                // @todo 9 -> constant
                 driveData.setAngVelocity(pDrop.theta_vel / ANG_VELOCITY_SCALE);
                 break;
             case WHEEL_SPACE:
@@ -216,6 +215,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             // Interpolate between the two closest bump sensors
             int lowSensor = (int) Math.floor(sensor);
             int highSensor = (int) Math.ceil(sensor);
+
+            // If lowSensor >= numSensors, something is wrong
+            assert (lowSensor < numSensors);
+
+            if (highSensor >= numSensors)
+                highSensor -= numSensors;
 
             double alpha = sensor - lowSensor;
             stateDrop.bump[lowSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);

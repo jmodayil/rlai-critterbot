@@ -19,7 +19,11 @@ import org.rlcommunity.critter.Drops.SimulatorDrop;
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
 public class DiscoAgent {
+    /** If debugPrintObservations = true, the observation vector used by the
+     *   agent will be printed out. */
     protected static final boolean debugPrintObservations = true;
+    /** If debugPrintActions = true, the action returned by the agent will
+     *   be printed out. */
     protected static final boolean debugPrintActions      = true;
 
     /** The last observation received by the agent, as a real-valued vector */
@@ -27,11 +31,14 @@ public class DiscoAgent {
 
     /** Whether the agent has an un-processed observation */
     protected boolean aHasNewObservation;
-    
+
+    /**
+     * Create a new DiscoAgent.
+     */
     public DiscoAgent() {
     }
 
-    /** Method that determines what action the agent should do next and 
+    /** Method that determines which action the agent should do next and
      *    encapsulate it into an appropriate drop.
      *
      * @return A drop containing control information.
@@ -45,15 +52,24 @@ public class DiscoAgent {
             CritterControlDrop actionDrop = new CritterControlDrop();
 
             // Set the action to be some fixed velocities
+            // First, the motor mode (if using WHEEL_SPACE, the variables to
+            //  be set should be m*_vel, not x,y,theta_vel
             actionDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
-            actionDrop.led_mode = CritterControlDrop.LedMode.THING1;
+
+            // Set a forward velocity of 20 and a rotational velocity of 10
+            //  (these should be thought of as unitless quantities)
             actionDrop.x_vel = 20;
             actionDrop.y_vel = 0;
             actionDrop.theta_vel = 10;
 
+            // For completeness, set the LED mode, although it has no effect
+            actionDrop.led_mode = CritterControlDrop.LedMode.THING1;
+            
             if (debugPrintActions) {
                 System.out.println(actionDrop.toString());
             }
+
+            // Return the created action
             return actionDrop;
         }
         else
