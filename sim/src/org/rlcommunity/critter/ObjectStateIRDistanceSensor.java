@@ -101,26 +101,24 @@ public class ObjectStateIRDistanceSensor implements ObjectState
         Vector2D pos = parent.getPosition();
         Double dir = parent.getDirection();
 
-        int rad = 3;
+        double rad = 0.03;
         if( aData >= aRange ) {
           g.setColor(new Color(230, 220, 220));
-          g.drawLine ((int)pos.x, (int)pos.y,
-            (int)(pos.x + aRange * Math.cos(dir)),
-            (int)(pos.y + aRange * Math.sin(dir)));
+          g.drawLine (pos.x, pos.y,
+            (pos.x + aRange * Math.cos(dir)),
+            (pos.y + aRange * Math.sin(dir)));
           g.setColor(Color.orange);
-          g.drawOval((int)(pos.x + aRange * Math.cos(dir)) - rad,
-            (int)(pos.y + aRange * Math.sin(dir)) - rad,
+          g.drawOval((pos.x + aRange * Math.cos(dir)) - rad,
+            (pos.y + aRange * Math.sin(dir)) - rad,
             2 * rad, 2 * rad);
         }
         else {
           g.setColor(new Color(230, 220, 220));
-          g.drawLine ((int)pos.x, (int)pos.y, (int)pt.x, (int)pt.y);
+          g.drawLine (pos.x, pos.y, pt.x, pt.y);
           g.setColor(Color.orange);
-          g.drawOval((int)pt.x-rad, (int)pt.y-rad, 2*rad, 2*rad); 
+          g.drawOval(pt.x-rad, pt.y-rad, 2*rad, 2*rad); 
           
         }
-        //g.drawLine ((int)pos.x, (int)pos.y, 
-        //  (int)pt.x, (int)pt.y);
       }
 
       g.setColor(tempC);

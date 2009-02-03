@@ -253,6 +253,10 @@ public class SimulatorGraphics extends Graphics {
         aGfx.drawOval(scale(x), scale(y), scale(width), scale(height));
     }
 
+    public void drawLine(double x1, double y1, double x2, double y2) {
+        aGfx.drawLine(scale(x1), scale(y1), scale(x2), scale(y2));
+    }
+
     public void drawPolyline(double[] xPoints, double[] yPoints, int nPoints) {
         scalePoints (xPoints, yPoints);
 
