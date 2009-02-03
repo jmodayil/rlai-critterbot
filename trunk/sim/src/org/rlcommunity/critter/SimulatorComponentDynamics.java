@@ -255,9 +255,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D cb = compObjP.getPosition();
                                 // Compute the moment arms
                                 Vector2D ra = pt.point.minus(ca);
-                                double raLen = ra.length();
                                 Vector2D rb = pt.point.minus(cb);
-                                double rbLen = rb.length();
 
                                 Vector2D va = o1p.getVelocity();
                                 Vector2D vb = o2p.getVelocity();

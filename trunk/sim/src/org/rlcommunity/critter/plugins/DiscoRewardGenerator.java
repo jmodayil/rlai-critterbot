@@ -22,7 +22,7 @@ import org.rlcommunity.critter.Drops.SimulatorDrop;
  * @author Marc G. Bellemare (mg17 at cs ualberta ca)
  */
 public class DiscoRewardGenerator {
-    protected static final boolean debugPrintObservations = true;
+    /** If debugPrintActions = true, the reward generated will be printed out. */
     protected static final boolean debugPrintActions      = true;
 
     /** The next reward to be sent out */
@@ -43,8 +43,12 @@ public class DiscoRewardGenerator {
         if (aHasNewState) {
             aHasNewState = false;
 
+            // Create a new RewardDrop, set its reward value and return it
             CritterRewardDrop rewardDrop = new CritterRewardDrop();
             rewardDrop.reward = aReward;
+
+            if (debugPrintActions)
+                System.out.println ("R: "+rewardDrop.reward);
 
             return rewardDrop;
         }
@@ -66,6 +70,7 @@ public class DiscoRewardGenerator {
             // @todo Most likely this is our own reward drop
         }
         else if (pDrop instanceof CritterControlDrop) {
+            // This could be use to add motor costs to the reward function
         }
     }
 
@@ -77,9 +82,11 @@ public class DiscoRewardGenerator {
     public void parseStateDrop(CritterStateDrop pDrop) {
         assert (pDrop.light.length > 0);
 
-        // Give a reward based on the light intensity, up to 1.0
-        aReward = Math.min(pDrop.light[0] / 100, 1.0);
+        // Give a reward based on the light intensity, with no reward if too
+        //  far away, and up to 1.0
+        aReward = Math.max(0.0, Math.min((pDrop.light[0] - 100) / 100, 1.0));
 
+        // Notify the RewardDrop generating method to make a new reward drop
         aHasNewState = true;
     }
 
@@ -106,7 +113,7 @@ public class DiscoRewardGenerator {
         // Add the disco server to the central drop interface
         dropInterface.addClient(discoServer);
 
-        // Create a new agent
+        // Create a new reward generator
         DiscoRewardGenerator generator = new DiscoRewardGenerator();
         
         while (true) {
