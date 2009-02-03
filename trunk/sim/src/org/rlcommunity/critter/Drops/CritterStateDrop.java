@@ -89,11 +89,11 @@ public class CritterStateDrop implements SimulatorDrop
   public int error_flags;
   public int cycle_time;
 
-  public final int IR_DISTANCE_SIZE   = 10;
-  public final int IR_LIGHT_SIZE      = 8;
-  public final int LIGHT_SIZE         = 4;
-  public final int THERMAL_SIZE       = 8;
-  public final int BUMP_SIZE          = 32;
+  public static final int IR_DISTANCE_SIZE   = 10;
+  public static final int IR_LIGHT_SIZE      = 8;
+  public static final int LIGHT_SIZE         = 4;
+  public static final int THERMAL_SIZE       = 8;
+  public static final int BUMP_SIZE          = 32;
 
   /** Returns the size of the data contained in this Drop.
     * This value must correspond to the amount of data sent/received in

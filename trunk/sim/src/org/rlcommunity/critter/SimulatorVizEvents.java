@@ -25,7 +25,7 @@ public class SimulatorVizEvents implements KeyListener {
           debug = 1;
       else if('t' == key)
         thrust = 1;
-      else if('s' == key)
+      else if('p' == key)
         spin = 1;
   }
 	

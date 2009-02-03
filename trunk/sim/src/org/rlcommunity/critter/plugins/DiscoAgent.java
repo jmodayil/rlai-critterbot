@@ -26,16 +26,24 @@ public class DiscoAgent {
      *   be printed out. */
     protected static final boolean debugPrintActions      = true;
 
+    protected static final int numObservations =
+            CritterStateDrop.BUMP_SIZE +
+            CritterStateDrop.IR_DISTANCE_SIZE +
+            CritterStateDrop.LIGHT_SIZE;
+    
     /** The last observation received by the agent, as a real-valued vector */
     protected double[] aObservation;
 
     /** Whether the agent has an un-processed observation */
     protected boolean aHasNewObservation;
 
+    protected double aReward;
+    
     /**
      * Create a new DiscoAgent.
      */
     public DiscoAgent() {
+        aObservation = new double[numObservations];
     }
 
     /** Method that determines which action the agent should do next and
@@ -77,9 +85,9 @@ public class DiscoAgent {
 
     }
 
-    /** Receive a drop from the server, assumed to be an observation.
-     *   In our case we parse the drop depending on its type (it could be a reward
-     *   or state information/an observation).
+    /** Receive a drop from the server.
+     *  We parse the drop depending on its type (it could be a reward or state
+     *   information/an observation).
      * 
      * @param pDrop The received drop.
      */
@@ -106,11 +114,16 @@ public class DiscoAgent {
     public void parseStateDrop(CritterStateDrop pDrop) {
         // Construct some real-valued vector from the state drop (here, we only
         //  care about the light sensors)
-        aObservation = new double[pDrop.light.length];
+        aObservation = new double[numObservations];
 
         // Fill in the values
+        int idx = 0;
+        for (int i = 0; i < pDrop.bump.length; i++)
+            aObservation[idx++] = pDrop.bump[i];
         for (int i = 0; i < pDrop.light.length; i++)
-            aObservation[i] = pDrop.light[i];
+            aObservation[idx++] = pDrop.light[i];
+        for (int i = 0; i < pDrop.ir_distance.length; i++)
+            aObservation[idx++] = pDrop.ir_distance[i];
 
         // @todo this might be Java 1.6
         if (debugPrintObservations)
@@ -125,6 +138,7 @@ public class DiscoAgent {
      */
     public void parseRewardDrop(CritterRewardDrop pDrop) {
         System.out.println ("Reward: "+pDrop.reward);
+        aReward = pDrop.reward;
     }
 
 
