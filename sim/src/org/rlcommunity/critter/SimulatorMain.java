@@ -18,6 +18,7 @@ public class SimulatorMain {
 
     static private int discoServerPort = 2324;
     static private boolean useGui = true;
+    static private boolean useKeyboard = true;
     static private double timeScale = 1.0;
 
     private static SimulatorEngine createSimulatorEngine(DropInterface dropInterface, 
@@ -45,7 +46,7 @@ public class SimulatorMain {
 
     static private KeyboardClient createKeyboardClient(DropInterface dropInterface) {
         KeyboardClient theKeyboardClient = new KeyboardClient();
-        if (useGui) {
+        if (useKeyboard) {
             dropInterface.addClient(theKeyboardClient);
         }
         return theKeyboardClient;
@@ -66,8 +67,15 @@ public class SimulatorMain {
         if (args.length >= 1) {
             discoServerPort = Integer.parseInt(args[0]);
         }
-        if (args.length >= 2 && args[1].equals("-ng")) {
-            useGui = false;
+        if (args.length >= 2) {
+            if (args[1].equals("-ng")) {
+                useGui = false;
+                useKeyboard = false;
+            }
+            else if (args[1].equals("-nk")) {
+                useKeyboard = false;
+            }
+
         }
         System.out.println("Using GUI: " + useGui);
         if (args.length >= 3) {

@@ -120,7 +120,7 @@ public class KeyboardClient implements DropClient, KeyListener {
         }
 
         CritterControlDrop controlDrop = new CritterControlDrop();
-        hasChange = true;
+
         if (hasChange) {
             if (up > 0 || down > 0 || right > 0 || left > 0) {
                 setDropWithXYThetaSpace(controlDrop);
