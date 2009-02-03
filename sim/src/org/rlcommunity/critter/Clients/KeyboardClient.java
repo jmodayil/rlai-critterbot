@@ -121,6 +121,12 @@ public class KeyboardClient implements DropClient, KeyListener {
 
         CritterControlDrop controlDrop = new CritterControlDrop();
 
+        // We need to consider keypresses as 'changes' as keyPressed stops being
+        //  called after we release one of the keys (e.g. going forward and left
+        //  causes the robot to stop when left is released).
+        hasChange = hasChange || (up > 0 || down > 0 || left > 0 || right > 0 ||
+                motor100 > 0 || motor220 > 0 || motor340 > 0);
+        
         if (hasChange) {
             if (up > 0 || down > 0 || right > 0 || left > 0) {
                 setDropWithXYThetaSpace(controlDrop);

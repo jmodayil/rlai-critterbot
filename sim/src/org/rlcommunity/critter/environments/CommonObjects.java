@@ -149,7 +149,7 @@ public class CommonObjects {
         sa.addState(new ObjectStateAccelerometer());
         sa.addState(new ObjectStateGyroscope());
 
-        /* // Create an external light sensor
+        // Create an external light sensor
         SimulatorObject lightSensor = new SimulatorObject("LightSensor1",
         pId++);
         // These three light sensors have no shape!
@@ -177,7 +177,7 @@ public class CommonObjects {
         lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
         lightSensor.setPosition(new Vector2D(-0.198, 0.0));
         lightSensor.setLocalDirection(-Math.PI);
-        sa.addChild(lightSensor); */
+        sa.addChild(lightSensor);
 
         // Now the IR distance sensors
         double irRange = 3 * robotLength;

@@ -31,7 +31,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double ANG_VELOCITY_SCALE = 9.0;
     // All of these need to be made proper
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
-    public static final double LIGHT_SCALE = 100.0;
+    public static final double LIGHT_SCALE = 1.0;
     public static final double IRDIST_SCALE = 255.0;
 
     protected DropInterface aDropInterface;
