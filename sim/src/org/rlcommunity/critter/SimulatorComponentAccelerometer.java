@@ -8,15 +8,21 @@ package org.rlcommunity.critter;
  * @author Marc G. Bellmare
  */
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class SimulatorComponentAccelerometer implements SimulatorComponent {
 
     public static final String NAME = "accelerometer";
+    public final Random aRandom;
+    
+    public SimulatorComponentAccelerometer() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
 
-    public SimulatorComponentAccelerometer() 
-    {
+    public SimulatorComponentAccelerometer(Random pRandom) {
+        aRandom = pRandom;
     }
 
     /** Computes what accelerometers should receive given the current state,

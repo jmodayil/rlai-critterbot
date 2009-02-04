@@ -9,6 +9,7 @@ package org.rlcommunity.critter;
  *
  * @author Marc G. Bellemare
  */
+import java.util.Random;
 import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
@@ -26,15 +27,18 @@ public class SimulatorMain {
     private static SimulatorEngine createSimulatorEngine(DropInterface dropInterface, 
             EnvironmentDescription environmentDescription) {
         System.out.println("Creating simulator engine...");
-        final SimulatorEngine engine = new SimulatorEngine(environmentDescription);
-        engine.addComponent(new SimulatorComponentDynamics());
-        engine.addComponent(new SimulatorComponentLight());
-        engine.addComponent(new SimulatorComponentBumpSensor());
-        engine.addComponent(new SimulatorComponentOmnidrive());
-        engine.addComponent(new SimulatorComponentAccelerometer());
-        engine.addComponent(new SimulatorComponentGyroscope());
+
+        Random randomizer = new Random();
+        
+        final SimulatorEngine engine = new SimulatorEngine(environmentDescription, randomizer);
+        engine.addComponent(new SimulatorComponentDynamics(randomizer));
+        engine.addComponent(new SimulatorComponentLight(randomizer));
+        engine.addComponent(new SimulatorComponentBumpSensor(randomizer));
+        engine.addComponent(new SimulatorComponentOmnidrive(randomizer));
+        engine.addComponent(new SimulatorComponentAccelerometer(randomizer));
+        engine.addComponent(new SimulatorComponentGyroscope(randomizer));
         engine.addComponent(new SimulatorComponentCritterbotInterface(dropInterface));
-        engine.addComponent(new SimulatorComponentIRDistance());
+        engine.addComponent(new SimulatorComponentIRDistance(randomizer));
         return engine;
     }
 

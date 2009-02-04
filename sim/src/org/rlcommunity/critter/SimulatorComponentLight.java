@@ -1,5 +1,6 @@
 package org.rlcommunity.critter;
 
+import java.util.Random;
 import java.util.LinkedList;
 
 /**
@@ -14,7 +15,15 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
     public static final String NAME = "light";
 
+    protected Random aRandom;
+    
     public SimulatorComponentLight() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
+
+    public SimulatorComponentLight(Random pRandom) {
+        aRandom = pRandom;
     }
 
     /** Computes what light sensors should receive given the current state,

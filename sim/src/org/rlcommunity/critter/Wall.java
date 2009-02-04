@@ -98,6 +98,12 @@ public class Wall extends SimulatorObject {
 		Wall sw = new Wall(this.aLabel, this.aId, this.walls);
 		sw.copyFrom(this);
 
+		// Clone the children
+		for (SimulatorObject c : aChildren) {
+			SimulatorObject childClone = (SimulatorObject) c.clone();
+			sw.addChild(childClone);
+		}
+        
 		return sw;
 	}
 

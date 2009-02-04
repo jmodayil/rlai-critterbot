@@ -8,15 +8,22 @@ package org.rlcommunity.critter;
  * @author Marc G. Bellemare
  */
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class SimulatorComponentGyroscope implements SimulatorComponent {
 
     public static final String NAME = "gyroscope";
 
-    public SimulatorComponentGyroscope() 
-    {
+    protected Random aRandom;
+    
+    public SimulatorComponentGyroscope() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
+
+    public SimulatorComponentGyroscope(Random pRandom) {
+        aRandom = pRandom;
     }
 
     /** Computes what gyroscopes should receive given the current state,

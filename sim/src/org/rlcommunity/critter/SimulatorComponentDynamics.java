@@ -1,6 +1,7 @@
 package org.rlcommunity.critter;
 
 import java.util.List;
+import java.util.Random;
 
 /**
  * SimulatorComponentDynamics
@@ -17,11 +18,19 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
     // @todo clean up
-    boolean debugDetailedCollisions = false;
-    boolean debugCollisions = false;
-    boolean debugDynamicsData = false;
+    protected static boolean debugDetailedCollisions = false;
+    protected static boolean debugCollisions = false;
+    protected static boolean debugDynamicsData = false;
 
+    protected Random aRandom;
+    
     public SimulatorComponentDynamics() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
+
+    public SimulatorComponentDynamics(Random pRandom) {
+        aRandom = pRandom;
     }
 
     /** Applies physics to the current state to obtain the next state.
@@ -61,6 +70,15 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             
             // Find the corresponding object in the next state
             SimulatorObject newObj = pNext.getObject(obj);
+            if (newObj == null) {
+                System.err.println ("Failed to find next for: "+obj.getLabel());
+                List<SimulatorObject> objs = pNext.getObjects();
+                
+                for (SimulatorObject o : objs) {
+                    System.err.println ("Object "+o.getId()+"    "+o.getLabel());
+                }
+            }
+
             ObjectStateDynamics newDynData =
                     (ObjectStateDynamics) newObj.getState(SimulatorComponentDynamics.NAME);
             assert (newDynData.getVelocity().length() == 0);
@@ -113,11 +131,18 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             newDynData.setVelocity((Vector2D) dynData.getVelocity().clone());
             newDynData.applyLinearForce(thrust, delta / 1000.0);
 
-            double newDirect = obj.aDir + wi * delta / 1000.0;
-            newObj.setDirection(newDirect);
+            SimulatorObject root = obj.getRoot();
+            SimulatorObject newRoot = newObj.getRoot();
+
+            // Although slightly incorrect, we will assume that we have strictly
+            //  rigid bodies and that rotating or moving one part moves the whole
+            double newDirect = root.aDir + wi * delta / 1000.0;
+            newRoot.setDirection(newDirect);
+
+            Vector2D pos = root.getPosition();
             
-            newObj.setPosition(new Vector2D(obj.aPos.x + vi.x * delta / 1000.0,
-                    obj.aPos.y + vi.y * delta / 1000.0));
+            newRoot.setPosition(new Vector2D(pos.x + vi.x * delta / 1000.0,
+                    pos.y + vi.y * delta / 1000.0));
             if (debugDisplayData) {
                 System.out.println(" Pre-collision next velocity " + newDynData.getVelocity());
             }
@@ -142,36 +167,9 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *  @param delta    The amount of time (in ms) between the current and
      *         next states.
      **/
-    private static int time = 0;
-    private static boolean hasCollision = false;
-    private static int ctime = 0;
     
     private void checkForCollisions(SimulatorState pCurrent, SimulatorState pNext, int delta) {
         boolean positionReset = true;
-
-        time++;
-        if (false && hasCollision && time < ctime + 20) {
-            System.out.println ("\n");
-            System.err.println ("\n");
-            List<SimulatorObject> objects = pNext.getObjects();
-
-            Polygon robot, ball;
-            robot = ball = null;
-            
-            for (SimulatorObject o : objects) {
-                if (o.getLabel().equals("Critterbot")) {
-                    robot = o.getShape();
-                }
-                else if (o.getLabel().equals("Ball_1")) {
-                    ball = o.getShape();
-                }
-            }
-
-            for (Vector2D pt : robot.getPoints())
-                System.out.printf("%.4g %.4g\n", pt.x, pt.y);
-            for (Vector2D pt : ball.getPoints())
-                System.err.printf("%.4g %.4g\n", pt.x, pt.y);
-        }
 
         while (positionReset) {
             positionReset = false;
@@ -192,16 +190,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                         //check for a collision between these
                         Collision pt = obj.collidesWith(compObj);
                         if (pt != null) {
-                            hasCollision = true;
-                            ctime = time;
-                            
-                            // @todo remove
-/*                            if (obj.getId() < compObj.getId()) {
-                                SimulatorObject tmp = obj;
-                                obj = compObj;
-                                compObj = tmp;
-                            } */
-
                             Vector2D n = pt.normal;
 
                             positionReset = true;
@@ -211,7 +199,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                             //@TODO!!!
                             if (debugCollisions) {
-                                System.out.println("T"+time+":  Collision at " + pt.point +
+                                System.out.println("Collision at " + pt.point +
                                         "between " + obj + " and " + compObj + "!");
                             }
 
@@ -270,8 +258,13 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D vbPoint = new Vector2D(-rb.y * wb, rb.x * wb);
                                 vbPoint.plusEquals(vb);
 
-                                obj.setGeometry(objP);
-                                compObj.setGeometry(compObjP);
+                                SimulatorObject root, rootP;
+                                root = obj.getRoot(); rootP = objP.getRoot();
+                                SimulatorObject compRoot, compRootP;
+                                compRoot = compObj.getRoot(); compRootP = compObjP.getRoot();
+
+                                root.setGeometry(rootP);
+                                compRoot.setGeometry(compRootP);
 
                                 // The relative velocities at the point of intersection
                                 Vector2D vab = vaPoint.minus(vbPoint);
@@ -308,7 +301,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                         o2.getAngVelocity() - rb.cross(projImpulse) / Ib;
                                 if (debugDetailedCollisions) {
                                     System.out.println("<--");
-                                    System.out.println ("Time: "+time);
                                     System.out.println ("P: "+pt.point);
                                     System.out.println ("R: "+ra+" "+rb);
                                     System.out.println ("N, e: "+n+" "+e);

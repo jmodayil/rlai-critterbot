@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import java.util.Random;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
 import org.rlcommunity.critter.svg.Loader;
 
@@ -25,12 +26,20 @@ public class SimulatorEngine {
 
 	protected SimulatorVizEvents vizHandler;
 
-    protected EnvironmentDescription aEnvDescription;
+    protected final EnvironmentDescription aEnvDescription;
+    protected final Random aRandom;
     
 	public SimulatorEngine(EnvironmentDescription pDescription) {
+        this(pDescription, new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
+
+    public SimulatorEngine(EnvironmentDescription pDescription, Random pRandom) {
+        aRandom = pRandom;
+        aEnvDescription = pDescription;
+        
 		aComponents = new LinkedList<SimulatorComponent>();
 		vizHandler = new SimulatorVizEvents();
-        aEnvDescription = pDescription;
 
         SimulatorObject.svgDrawing = pDescription.usesSVG();
 
