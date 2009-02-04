@@ -1,5 +1,7 @@
 package org.rlcommunity.critter;
 
+import java.util.LinkedList;
+
 /**
  * SimulatorComponentLight
  *
@@ -40,8 +42,13 @@ public class SimulatorComponentLight implements SimulatorComponent {
         ObjectStateLightSource lightSource;
         Vector2D srcPosition;
 
-        for (int Ksensor = 0; Ksensor < pNext.getObjects(ObjectStateLightSensor.NAME).size(); Ksensor++) {
-            sensor = pNext.getObjects(ObjectStateLightSensor.NAME).get(Ksensor);
+        LinkedList<SimulatorObject> sensors = pNext.getObjects(ObjectStateLightSensor.NAME);
+        int numSensors = sensors.size();
+        LinkedList<SimulatorObject> sources = pCurrent.getObjects(ObjectStateLightSource.NAME);
+        int numSources = sources.size();
+        
+        for (int Ksensor = 0; Ksensor < numSensors; Ksensor++) {
+            sensor = sensors.get(Ksensor);
             lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
             sensorPosition = sensor.getPosition();
 
@@ -92,10 +99,10 @@ public class SimulatorComponentLight implements SimulatorComponent {
                     scene.addSubtree(oldSensor.getRoot());
 
                     //for each light source sum up intensity at intersection point
-                    for (int Jsource = 0; Jsource < pCurrent.getObjects(ObjectStateLightSource.NAME).size(); Jsource++) {
+                    for (int Jsource = 0; Jsource < numSources; Jsource++) {
                         double intensity = 0;
 
-                        source = pCurrent.getObjects(ObjectStateLightSource.NAME).get(Jsource);
+                        source = sources.get(Jsource);
                         lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
 
                         srcPosition = source.getPosition();
