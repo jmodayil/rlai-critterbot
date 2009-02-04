@@ -42,10 +42,20 @@ public class SimulatorEngine {
 		return Collections.unmodifiableList(aState.getAgents());
 	}
 
-	/** Returns a list of existing objects */
-	public List<SimulatorObject> getObjectList() {
+    /**
+     * Returns a list of ALL existing objects. This is in contrast to
+     *  getRootObjects() which only returns the highest level objects, and
+     *  not their children.
+     *
+     * @return
+     */
+	public List<SimulatorObject> getObjects() {
 		return Collections.unmodifiableList(aState.getObjects());
 	}
+
+    public List<SimulatorObject> getRootObjects() {
+		return Collections.unmodifiableList(aState.getRootObjects());
+    }
 
 	/**
 	 * Returns a list of objects influenced by the given component

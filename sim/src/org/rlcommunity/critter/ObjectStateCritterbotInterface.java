@@ -49,27 +49,19 @@ public class ObjectStateCritterbotInterface implements ObjectState
     */
   public int getLastStateUpdate() { return aLastStateUpdate; }
 
-  /** Returns whether a new state drop should be sent. When the function 
-    *  returns true, the timer (aLastStateUpdate) is also reset to 
-    *  the leftover time (e.g. the time elapsed since the last update, minus
-    *  the update frequency).
+  /** Returns whether a new state drop should be sent. Note that the interface
+    *  may somehow be behind (e.g. more than one state drop should be sent at this
+    *  time). This method does not provide the means of testing for this,
+    *  in order to avoid updating the data structure when needsStateUpdate is
+    *  called.
     *
-    * In the event that needsStateUpdate() has not been called for more than
-    *  one update period, aLastStateUpdate may still be greater than 
-    *  aStateUpdateFrequency, such that calling needsStateUpdate() immediately
-    *  after will again return true.
-    *
-    * @return Whether a new state drop should be sent
+    * @return Whether a new state drop should be sent. Returns true until
+    *   setLastStateUpdate is called with a time less than the frequency.
     */
   public boolean needsStateUpdate() 
   {
-    // @todo this scheme breaks the convention that the current state is 
-    //  not modified
     if (aLastStateUpdate >= aStateDropFrequency)
-    {
-      aLastStateUpdate -= aStateDropFrequency; 
       return true;
-    }
     else
       return false;
   }

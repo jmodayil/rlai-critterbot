@@ -94,7 +94,8 @@ public class DiscoInterfaceClientHandler extends Thread
         catch (ClassNotFoundException e)
         {
           System.err.println ("Invalid drop name: "+className);
-          // @todo the data from then on is going to be garbage
+          System.err.println ("Aborting - no synchronization mechanism.");
+          close();
         }
         // Catch other ugly exceptions here, and throw them as Runtime
         catch (Exception e)

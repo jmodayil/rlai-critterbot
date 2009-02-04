@@ -57,14 +57,7 @@ public class SimulatorDrawWorld extends JPanel {
         SimulatorGraphics sg = new SimulatorGraphics(g, pixelsPerMeter);
 
         super.paintComponent(sg);
-
-        /* We can't use the scale method because drawLine creates VERY thick lines
-        if (g instanceof Graphics2D)
-        ((Graphics2D)g).scale(pixelsPerMeter, pixelsPerMeter);
-         */
-
         drawObjects(sg);
-
     }
 	
     private void drawObjects(SimulatorGraphics g) {
@@ -72,7 +65,7 @@ public class SimulatorDrawWorld extends JPanel {
         //  block via an exception, so synchronizing on engine will not cause
         //  the GUI to freeze if the main thread dies
         synchronized (engine) {
-            for (SimulatorObject obj : engine.getObjectList()) {
+            for (SimulatorObject obj : engine.getRootObjects()) {
                 obj.draw(g);
             }
         }

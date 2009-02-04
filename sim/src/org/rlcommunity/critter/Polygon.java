@@ -131,8 +131,7 @@ public class Polygon {
 		}
 
 		if (!resolved) // We still don't know whether this polygon is clockwise!
-			// @todo fixme; not the right type of exception
-			throw new IllegalArgumentException("Really ugly polygon");
+			throw new UnsupportedOperationException("Really ugly polygon to be made clockwise.");
 
 		// If the polygon is not clockwise, re-add the points backwards
 		if (!isClockwise) {
@@ -152,8 +151,30 @@ public class Polygon {
 				addPoint(pt.x, pt.y);
 			}
 		}
-	}
 
+        createPointArrays();
+    }
+
+    private void createPointArrays() {
+        int num = points.size();
+        aXPoints = new double[num + 1];
+        aYPoints = new double[num + 1];
+
+        int idx = 0;
+        // Set the (x,y) coordinates of each point in turn
+        for (Vector2D pt : points) {
+            aXPoints[idx] = pt.x;
+            aYPoints[idx] = pt.y;
+
+            idx++;
+        }
+
+        // Re-iterate the first point to close the loop
+        Vector2D first = points.getFirst();
+        aXPoints[num] = first.x;
+        aYPoints[num] = first.y;
+    }
+    
 	/**
 	 * Translate this polygon with the given (dx,dy) vector
 	 * 
@@ -530,8 +551,7 @@ public class Polygon {
 		}
 
 		// Oops? Something went wrong
-		// @todo possibly throw an exception?
-		return null;
+        throw new UnsupportedOperationException("Polygon.getPoint(alpha) - unexpected result.");
 	}
 
 	/**
@@ -566,8 +586,7 @@ public class Polygon {
 		}
 
 		// Oops? Something went wrong
-		// @todo possibly throw an exception?
-		return null;
+        throw new UnsupportedOperationException("Polygon.getNormal(alpha) - unexpected result.");
 	}
 
 	/**
@@ -632,27 +651,10 @@ public class Polygon {
 	 *            The main Graphics object to draw with
 	 */
 	public void draw(SimulatorGraphics g) {
-		// If the point arrays are missing, re-create them
-		if (aXPoints == null || aYPoints == null) {
-			int num = points.size();
-			aXPoints = new double[num + 1];
-			aYPoints = new double[num + 1];
-
-			int idx = 0;
-			// Set the (x,y) coordinates of each point in turn
-			for (Vector2D pt : points) {
-				aXPoints[idx] = pt.x;
-				aYPoints[idx] = pt.y;
-
-				idx++;
-			}
-
-			// Re-iterate the first point to close the loop
-			Vector2D first = points.getFirst();
-			aXPoints[num] = first.x;
-			aYPoints[num] = first.y;
-		}
-
+        // @todo concurrency issue - we might redraw half-modified lists of
+        //  points
+        if (aXPoints == null || aYPoints == null) return;
+        
 		Color tempC = g.getColor();
 		g.setColor(Color.black);
 		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
