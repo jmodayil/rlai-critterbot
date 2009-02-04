@@ -28,7 +28,6 @@ public class DropFactory
     }
     catch (Exception e)
     {
-      // @todo change me - do proper exception handling?
       throw new RuntimeException(e);
     }
   }

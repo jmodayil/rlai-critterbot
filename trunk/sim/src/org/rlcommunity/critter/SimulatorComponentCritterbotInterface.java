@@ -67,12 +67,13 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 }
 
                 // Send the system state, if necessary
-                while (iface.needsStateUpdate()) {
+                if (iface.needsStateUpdate()) {
                     aDropInterface.sendDrop(makeStateDrop(obj));
                 }
 
                 // Increment the interface timer
-                nextIface.setLastStateUpdate(iface.getLastStateUpdate() + delta);
+                nextIface.setLastStateUpdate(iface.getLastStateUpdate() -
+                        iface.getStateDropFrequency() + delta);
 
             }
 

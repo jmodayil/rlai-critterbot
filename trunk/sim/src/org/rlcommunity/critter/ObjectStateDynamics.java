@@ -37,21 +37,20 @@ public class ObjectStateDynamics implements ObjectState {
     protected LinkedList<Collision> collisions;
     /** Angular velocity, in rad/s */
     private double aAngVel;
-    /** Torque, in ? */
-    //@todo make this part of the forces list
+    /** Torque, in SI torque units */
     protected double aTorque;
     /** Object mass, in kg */
     private double aMass;
     /** Object moment of inertia, in kg m^2 */
     private double aMomI;
-    /** @todo Object coefficient of friction against floor */
+    /** Object coefficient of static friction against floor */
     private double coefficientFrictionStatic = .2;
+    /** Object coefficient of dynamic friction against floor */
     private double coefficientFrictionDyn = .05;
     /** Object coefficient of restitution with some imaginary median obj  */
     private double coefficientRestitution = 1.0;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
     private double minSpeed, maxSpeed;
-    /** @todo Object center of mass (used as axis of rotation as well */
     
     /** Creates a new dynamics state component with a particular mass and 
      *  moment of inertia.
@@ -220,18 +219,8 @@ public class ObjectStateDynamics implements ObjectState {
     }
 
     void applyLinearForce(Force thrust, double timestep) {
-        // @todo don't call member variables directly
-        // @TODO timestep is not being used so the force is much greater
-        //   than it should be. But right now things stop moving if we
-        //   properly use the timestep. So we're not going to
-        assert(timestep>0);
-        //System.out.println("vi "+aVel);
-        //System.out.println("F/m*t "+thrust.vec+"/"+this.getMass()+" * "+timestep);
-        //Vector2D deltaV = thrust.vec.times(timestep*this.getMass());
-        aVel.plusEquals(thrust.vec.divide(this.getMass()).times(timestep));
-        //System.out.println("vf "+aVel);
-        //aVel.x = aVel.x+thrust.vec.x/this.getMass();
-        //aVel.y = aVel.y+thrust.vec.y/this.getMass();
+        // v = v + a (a = F/m * delta_t)
+        aVel.plusEquals(thrust.vec.times(timestep / this.getMass()));
      }
     
     double getCoefficientRestitution(ObjectStateDynamics o2) {

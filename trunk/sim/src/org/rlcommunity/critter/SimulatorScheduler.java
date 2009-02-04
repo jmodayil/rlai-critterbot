@@ -19,7 +19,7 @@ public class SimulatorScheduler {
     /** The scale at which the simulator engine is run */
     protected volatile double aScale;
     /** The engine that we run */
-    protected SimulatorEngine aEngine;
+    protected final SimulatorEngine aEngine;
     /** The base step rate, in milliseconds */
     protected long aStepLength;
 
@@ -61,7 +61,11 @@ public class SimulatorScheduler {
             // @todo take care of the case when aScale << 1
             // Run the simulator for a bit
             long startTime = System.nanoTime();
-            aEngine.step((int)aStepLength);
+            // Make sure no one else is modifying the engine's state before we
+            //  step through
+            synchronized(aEngine) {
+                aEngine.step((int)aStepLength);
+            }
             long computationTime = System.nanoTime() - startTime;
 
             averageTime += computationTime;

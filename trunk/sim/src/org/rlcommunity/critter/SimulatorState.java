@@ -132,6 +132,15 @@ public class SimulatorState
     return objs;
   }
 
+  /** Returns the list of root objects, e.g. SimulatorObjects that do not have
+   *   a parent.
+   *
+   * @return The list of root objects.
+   */
+  public List<SimulatorObject> getRootObjects() {
+      return aObjList;
+  }
+
   public Object clone()
   {
     SimulatorState newState = new SimulatorState();

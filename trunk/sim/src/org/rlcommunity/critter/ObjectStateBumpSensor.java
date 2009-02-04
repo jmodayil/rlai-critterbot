@@ -50,13 +50,23 @@ public class ObjectStateBumpSensor implements ObjectState
   /** Clears the list of sensed forces */
   public void clearData() { aData.clear(); }
 
-  // @todo - document
-  public void addCollision(Collision pCol) {
-      BumpSensorData newData = 
-              new BumpSensorData(pCol.magnitude, pCol.alpha, pCol.point);
-      aData.add(newData);
+  /** Adds collision information to this bump sensor. The Collision structure
+   *   itself is not kept by this method.
+   *
+   * @param pCol The Collision structure to be added.
+   */
+  public void addCollision(final Collision pCol) {
+      addData(pCol.magnitude, pCol.alpha, pCol.point);
   }
 
+  /**
+   * Adds collision information given as values of interest.
+   *
+   * @param pMagnitude The magnitude of the collision.
+   * @param pAlpha The point, in polygon coordinates, of the collision with
+   *   respect to the owner of this bump sensor.
+   * @param pPoint The point, in world coordinates, of the collision.
+   */
   public void addData(double pMagnitude, double pAlpha, Vector2D pPoint) {
       aData.add(new BumpSensorData(pMagnitude, pAlpha, pPoint));
   }

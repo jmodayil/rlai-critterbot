@@ -136,28 +136,25 @@ public class SimulatorGraphics extends Graphics {
     }
 
     public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-        // @todo
-        aGfx.fillRoundRect(x, y, width, height, arcWidth, arcHeight);
+        aGfx.fillRoundRect(scale(x), scale(y), scale(width), scale(height),
+                scale(arcWidth), scale(arcHeight));
     }
 
     public void fillRect(int x, int y, int width, int height) {
-        // @todo
-        aGfx.fillRect(x, y, width, height);
+        aGfx.fillRect(scale(x), scale(y), scale(width), scale(height));
     }
 
     public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-        // @todo
-        aGfx.fillPolygon(xPoints, yPoints, nPoints);
+        scalePoints(xPoints, yPoints);
+        aGfx.fillPolygon(aScaledXPoints, aScaledYPoints, nPoints);
     }
 
     public void fillOval(int x, int y, int width, int height) {
-        // @todo
-        aGfx.fillOval(x, y, width, height);
+        aGfx.fillOval(scale(x), scale(y), scale(width), scale(height));
     }
 
     public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-        // @todo
-        aGfx.fillArc(x, y, width, height, startAngle, arcAngle);
+        aGfx.fillArc(scale(x), scale(y), scale(width), scale(height), startAngle, arcAngle);
     }
 
     public void drawString(AttributedCharacterIterator iterator, int x, int y) {
@@ -169,8 +166,8 @@ public class SimulatorGraphics extends Graphics {
     }
 
     public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-        // @todo
-        aGfx.drawRoundRect(x, y, width, height, arcWidth, arcHeight);
+        aGfx.drawRoundRect(scale(x), scale(y), scale(width), scale(height),
+                scale(arcWidth), scale(arcHeight));
     }
 
     public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
@@ -251,6 +248,12 @@ public class SimulatorGraphics extends Graphics {
     
     public void drawOval(double x, double y, double width, double height) {
         aGfx.drawOval(scale(x), scale(y), scale(width), scale(height));
+    }
+
+    public void drawRoundRect(double x, double y, double width, double height,
+            double arcWidth, double arcHeight) {
+        aGfx.drawRoundRect(scale(x), scale(y), scale(width), scale(height),
+                scale(arcWidth), scale(arcHeight));
     }
 
     public void drawLine(double x1, double y1, double x2, double y2) {

@@ -42,7 +42,6 @@ public class InterfaceOutputStream
   {
     if (aBuffer.capacity() < size)
     {
-        // @todo verify this
       aBuffer = ByteBuffer.allocate(size);
       aBuffer.order(OUTPUT_ENDIAN);
       // Copy over old buffer?
