@@ -12,6 +12,7 @@ package org.rlcommunity.critter;
   */
 
 import java.util.LinkedList;
+import java.util.Random;
 
 public class SimulatorComponentOmnidrive implements SimulatorComponent
 {
@@ -21,7 +22,18 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
 
   public static final double torqueGain = 10;
   public static final double thrustGain = 1;
-  
+
+    protected Random aRandom;
+
+    public SimulatorComponentOmnidrive() {
+        this(new Random());
+        System.err.println("Deprecated: using local Random object.");
+    }
+
+    public SimulatorComponentOmnidrive(Random pRandom) {
+        aRandom = pRandom;
+    }
+
   public void apply (SimulatorState pCurrent, SimulatorState pNext, int delta)
   {
     // Get all objects with an omni drive
@@ -64,12 +76,22 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       Force fPID = simpleXYPid(driveState, kinState, localVel);
       nextDriveState.setForce(fPID);
       fPID.vec.timesEquals(thrustGain);
-      
-      nextKinState.addForce (new Force(fPID.vec.rotate(dir)));
-     
-      // @todo Should also be PID-driven
+
+      // Produce a torque to provide the required angular velocity
       double torquePID = simpleTPID(driveState, kinState);
-      nextKinState.addTorque (torquePID*torqueGain);
+
+      double thrustError = driveState.getThrustError();
+      double torqueError = driveState.getTorqueError();
+
+      Vector2D endForceVec = fPID.vec.rotate(dir);
+      double endTorque = torquePID * torqueGain;
+
+      // Add some relative Gaussian noise to the thrust and torque
+      endForceVec.plusEquals(endForceVec.times(aRandom.nextGaussian() * thrustError));
+      endTorque += endTorque * aRandom.nextGaussian() * torqueError;
+      
+      nextKinState.addForce (new Force(endForceVec));
+      nextKinState.addTorque (endTorque);
 
       // Rather than "consuming" the action, which leads to very saccaded
       //  movements when commands are issued slowly, we kill it if 500ms

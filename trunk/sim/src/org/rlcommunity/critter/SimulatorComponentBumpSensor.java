@@ -9,8 +9,8 @@ package org.rlcommunity.critter;
  * @author Marc G. Bellemare
  */
 
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Random;
 
 public class SimulatorComponentBumpSensor implements SimulatorComponent {
 
@@ -18,9 +18,17 @@ public class SimulatorComponentBumpSensor implements SimulatorComponent {
 
     public static final double BUMP_DECAY = 0.95;
 
-    public SimulatorComponentBumpSensor()
-    {
+    protected final Random aRandom;
+    
+    public SimulatorComponentBumpSensor() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
     }
+
+    public SimulatorComponentBumpSensor(Random pRandom) {
+        aRandom = pRandom;
+    }
+
 
     /** Computes what bump sensors should receive given the current state,
       *  and set the result in the next state.

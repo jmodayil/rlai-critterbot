@@ -46,11 +46,37 @@ public class Polygon {
 
 	protected double[] aXPoints, aYPoints;
 
+    /** Creates a new Polygon with no points.
+     *  In order to complete the construction of this polygon, the creator
+     *   should call doneAddPoints() after adding points.
+     * 
+     */
 	public Polygon() {
 		init();
 	}
 
-	public void init() {
+    /** Creates a new Polygon from the set of points. It is unecessary to call
+     *   the doneAddPoints() method in this case. Each element of the outer
+     *   array is a <x,y> pair. The provided array thus has size n x 2, where
+     *   n is the number of points. The first point does not need to be provided
+     *   twice, as the Polygon is assumed to be closed.
+     *
+     * @param pPoints The array of points of interest.
+     */
+	public Polygon(double[][] pPoints) {
+        // Create an empty Polygon
+		this();
+
+        // Add each point in turn
+        for (int i = 0; i < pPoints.length; i++) {
+            addPoint(pPoints[i][0], pPoints[i][1]);
+        }
+
+        // Complete adding points
+        doneAddPoints();
+	}
+
+    public void init() {
 		points = new LinkedList<Vector2D>();
 		bx = by = Double.POSITIVE_INFINITY;
 		bw = bh = 0;

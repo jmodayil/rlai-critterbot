@@ -241,7 +241,7 @@ public class CommonObjects {
      * @return A new wall instance.
      */
     public static SimulatorObject generateWall(String pName, int pId) {
-        Wall w = new Wall(pName, pId);
+        Wall w = new Wall(pName, pId++);
         // @todo w.setSVG("wall").resetNativeTranslation();
 
         w.addPoint(0.20, 0.20);
@@ -250,34 +250,52 @@ public class CommonObjects {
         w.addPoint(4.80, 0.20);
         w.addPoint(0.20, 0.20);
 
-        // Make a polygon for the wall as well
-        Polygon wallShape = new Polygon();
-        // @todo - build the wall from four convex objects
-        // Exterior
-        wallShape.addPoint(0, 0);
-        wallShape.addPoint(0, 5.00);
-        wallShape.addPoint(5.00, 5.00);
-        wallShape.addPoint(5.00, 0);
-        wallShape.addPoint(0, 0);
-        // Interior (notice! the interior must be given in counter-clockwise
-        // order)
-        wallShape.addPoint(0.20, 0.20);
-        wallShape.addPoint(4.80, 0.20);
-        wallShape.addPoint(4.80, 4.80);
-        wallShape.addPoint(0.20, 4.80);
-        wallShape.addPoint(0.20, 0.20);
-        wallShape.doneAddPoints();
+        double[][][] partPoints = new double[][][] {
+            { // North side
+                { 0.2, 0.0 },
+                { 5.0, 0.0 },
+                { 5.0, 0.2 },
+                { 0.2, 0.2 },
+            },
+            { // East side
+                { 5.0, 0.2 },
+                { 5.0, 5.0 },
+                { 4.8, 5.0 },
+                { 4.8, 0.2 },
+            },
+            { // South side
+                { 4.8, 5.0 },
+                { 0.0, 5.0 },
+                { 0.0, 4.8 },
+                { 4.8, 4.8 },
+            },
+            { // West side
+                { 0.0, 4.8 },
+                { 0.0, 0.0 },
+                { 0.2, 0.0 },
+                { 0.2, 4.8 },
+            }
+        };
 
-        // Note that this polygon self-intersects at the duplicated edge
-        // (0,0)-(20,20)
-        // This polygon is also evil because everything falls within its
-        // bounding box
-        w.setShape(wallShape);
+        // We break down this wall in four parts
+        int numParts = partPoints.length;
 
-        // Make the wall react to dynamics
-        ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
-        wallDyn.setMaxSpeed(0);
-        w.addState(wallDyn);
+        for (int p = 0; p < numParts; p++) {
+            SimulatorObject wallPart = new SimulatorObject(pName+p, pId++);
+            // Make a polygon for each part
+            Polygon wallShape = new Polygon(partPoints[p]);
+            wallPart.setShape(wallShape);
+
+            // Make the wall react to dynamics
+            ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
+            wallDyn.setMaxSpeed(0);
+            wallPart.addState(wallDyn);
+
+            w.addChild(wallPart);
+        }
+
+        // The parent wall has no shape
+        w.setShape(null);
 
         return w;
     }

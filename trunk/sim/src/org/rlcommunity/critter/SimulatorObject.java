@@ -450,7 +450,7 @@ public class SimulatorObject {
 		if (aParent == null)
 			newLocalDir = newDir;
 		else {
-			throw new UnsupportedOperationException("Not allowed to change the global drection of a child object");
+			throw new UnsupportedOperationException("Not allowed to change the global direction of a child object");
 		}
 
 		// If we have a shape, also rotate it
@@ -605,7 +605,6 @@ public class SimulatorObject {
 	 * identical. This method's purpose is to be used for copying objects
 	 * between states.
 	 */
-	@Override
 	public Object clone() {
 		SimulatorObject newObj = new SimulatorObject(this.aLabel, this.aId);
 

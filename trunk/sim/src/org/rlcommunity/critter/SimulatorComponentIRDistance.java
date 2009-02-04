@@ -15,8 +15,15 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
 
     public static final String NAME = "ir_distance";
 
-    public SimulatorComponentIRDistance() 
-    {
+    protected Random aRandom;
+    
+    public SimulatorComponentIRDistance() {
+        this(new Random());
+        System.err.println ("Deprecated: using local Random object.");
+    }
+
+    public SimulatorComponentIRDistance(Random pRandom) {
+        aRandom = pRandom;
     }
 
     /** Computes what IR distance sensors should receive given the current 

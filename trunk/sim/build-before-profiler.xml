@@ -5,7 +5,16 @@
 <project name="sim" default="default" basedir=".">
     <description>Builds, tests, and runs the project sim.</description>
     <import file="nbproject/build-impl.xml"/>
-    <!--
+
+    <import file="nbproject/profiler-build-impl.xml"/>    
+
+
+	<target name="-pre-jar">
+		<unzip src="libs/commons-codec-1.3.jar" dest="build/classes/"/>
+		<unzip src="libs/salamander/salamander.jar" dest="build/classes/"/>
+	</target>
+
+<!--
 
     There exist several targets which are by default empty and which can be 
     used for execution of your tasks. These targets are usually executed 
