@@ -46,6 +46,10 @@ public class SimulatorEngine {
         initState();
 	}
 
+    public SimulatorVizEvents getVizHandler() {
+        return vizHandler;
+    }
+    
 	/** Returns a list of existing agents */
 	public List<SimulatorAgent> getAgentList() {
 		return Collections.unmodifiableList(aState.getAgents());
