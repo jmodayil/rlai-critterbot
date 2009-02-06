@@ -149,6 +149,9 @@ public class SimulatorEngine {
 			comp.apply(aState, aNextState, ms);
 		}
 
+        // Set the time stamp on the next state
+        aNextState.setTime(aState.getTime() + ms);
+
 		SimulatorState tmpState = aState;
 
 		// Replace the current state by the new state

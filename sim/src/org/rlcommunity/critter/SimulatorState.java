@@ -14,14 +14,35 @@ import java.util.List;
 
 public class SimulatorState
 {
-  // List of objects in this state
+  /** List of objects in this state. */
   protected List<SimulatorObject> aObjList;
+
+  /** The time elapsed since the simulator was started. */
+  protected int aTime;
 
   /** Creates a new SimulatorState with a blank object list.
    *
    */
   public SimulatorState() {
     this(new LinkedList<SimulatorObject>());
+    aTime = 0;
+  }
+
+  /** Sets the time elapsed since the beginning of the simulator.
+   *
+   * @param pTime The amount of time, in milliseconds, since the simulator was
+   *  started.
+   */
+  public void setTime(int pTime) {
+      aTime = pTime;
+  }
+
+  /** Returns the time elapsed in the simulator, in milliseconds.
+   *
+   * @return The time elapsed in the simulator, in milliseconds.
+   */
+  public int getTime() {
+      return aTime;
   }
 
   /** Create a new SimulatorState with a pre-provided object list. This
