@@ -77,6 +77,7 @@ public class ObjectStateOmnidrive implements ObjectState {
      * @param pVel New target velocity
      */
     public void setVelocity(Vector2D pVel) {
+        assert (pVel != null);
         aVel = new Vector2D(pVel);
     }
 

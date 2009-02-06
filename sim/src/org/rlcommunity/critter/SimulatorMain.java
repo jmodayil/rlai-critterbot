@@ -93,12 +93,13 @@ public class SimulatorMain {
                 timeScale = Double.parseDouble(args[idx]);
                 idx++;
             }
+            else if (flag.startsWith("-d")) {
+                dumpFilePath = args[idx];
+                idx++;
+            }
             else if (flag.equals("-h") || flag.equals("--help")) {
                 doPrintHelp = true;
             }
-        }
-        if (args.length >= 4) {
-            dumpFilePath = args[3];
         }
     }
 
@@ -120,6 +121,7 @@ public class SimulatorMain {
         System.out.println ("  -ng                Disable the GUI");
         System.out.println ("  -nk                Disable the keyboard robot controller");
         System.out.println ("  -s [scale]         Set the simulator time scale, default=1.0");
+        System.out.println ("  -d [dumpfile]      Data are dumped in [dumpfile]");
     }
 
     public static void main(String[] args) {

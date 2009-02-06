@@ -14,13 +14,38 @@ import java.util.List;
 
 public class SimulatorComponentCritterbotInterface implements SimulatorComponent {
 
-    private static final double cos100 = Math.cos(Math.toRadians(100));
-    private static final double sin100 = Math.sin(Math.toRadians(100));
-    private static final double cos220 = Math.cos(Math.toRadians(220));
-    private static final double sin220 = Math.sin(Math.toRadians(220));
-    private static final double cos340 = Math.cos(Math.toRadians(340));
-    private static final double sin340 = Math.sin(Math.toRadians(340));
-    
+    private class MotorCommand {
+
+        public double motor100 = 0;
+        public double motor220 = 0;
+        public double motor340 = 0;
+
+        public void setCommandValue(Vector2D velocity, Double angleVelocity) {
+            double xvel = velocity.x;
+            double yvel = velocity.y;
+            double tvel = angleVelocity;
+
+            motor100 = xvel * XYT2MS[0][0] + yvel * XYT2MS[0][1] + tvel * XYT2MS[0][2];
+            motor220 = xvel * XYT2MS[1][0] + yvel * XYT2MS[1][1] + tvel * XYT2MS[1][2];
+            motor340 = xvel * XYT2MS[2][0] + yvel * XYT2MS[2][1] + tvel * XYT2MS[2][2];
+
+        }
+
+        @Override
+        public String toString() {
+            return String.format("100: %s; 220: %s; 340: %s",
+                    motor100, motor220, motor340);
+        }
+    }
+    private static final double[][] XYT2MS = {{-0.98, -0.17, 1.07},
+        {0.64, -0.76, 1.07},
+        {0.34, 0.93, 1.07}};
+    private static final double[][] MS2XYT = {{-0.65, 0.42, 0.22},
+        {-0.11, -0.51, 0.62},
+        {0.31, 0.31, 0.31}};
+    private static final double motorCommandFactor = 10;
+    private static final double motorSpeedFactor = 12;
+    private static final double motorIntensity = 5;
     public static final String NAME = "critterbot_interface";
 
     // Scales for the different drop values
@@ -31,12 +56,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double ANG_VELOCITY_SCALE = 9.0;
     // All of these need to be made proper
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
-    public static final double LIGHT_SCALE = 1.0;
+    public static final double LIGHT_SCALE = 0.18;
     public static final double IRDIST_SCALE = 255.0;
-
     protected DropInterface aDropInterface;
-
-    public static final double BUMP_SENSOR_SCALE  = 1000.0;
+    public static final double BUMP_SENSOR_SCALE = 1000.0;
+    final private MotorCommand command = new MotorCommand();
+    private int time  = 0;
 
     public SimulatorComponentCritterbotInterface(DropInterface pInterface) {
         aDropInterface = pInterface;
@@ -46,7 +71,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         if (aDropInterface != null) {
             List<SimulatorDrop> drops = aDropInterface.receiveDrops();
             List<SimulatorObject> critters =
-                    pCurrent.getObjects(this.NAME);
+                    pCurrent.getObjects(SimulatorComponentCritterbotInterface.NAME);
 
             for (SimulatorObject obj : critters) {
                 ObjectStateCritterbotInterface iface = (ObjectStateCritterbotInterface) obj.getState(ObjectStateCritterbotInterface.NAME);
@@ -61,8 +86,9 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                         CritterControlDrop command = (CritterControlDrop) drop;
 
                         // Set the NEXT object's Omnidrive data
-                        if (command != null)
+                        if (command != null) {
                             setFromDrop(nextObj, command);
+                        }
                     }
                 }
 
@@ -78,19 +104,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             }
 
         }
-    }
-
-    /* Fast approximation of the robot move */
-    public Vector2D computeVelocity(int m100Vel, int m220Vel, int m340Vel) {
-        Vector2D velocity = new Vector2D();
-        velocity.x += m100Vel * cos100;
-        velocity.y += m100Vel * sin100;
-        velocity.x += m220Vel * cos220;
-        velocity.y += m220Vel * sin220;
-        velocity.x += m340Vel * cos340;
-        velocity.y += m340Vel * sin340;
-        velocity.normalize();
-        return velocity;
     }
 
     /** Copies over the relevant data from the given drop. Should probably
@@ -118,37 +131,74 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         // Clear the number of steps since the last command
         driveData.clearTime();
 
+        Vector2D velocity = null;
+        Double angleVelocity = null;
+
         // Based on the motor mode, set velocities appropriately
         switch (pDrop.motor_mode) {
             case XYTHETA_SPACE:
                 // The drop x,y velocity has units in cm/s
-                driveData.setVelocity(new Vector2D(
+                velocity = new Vector2D(
                         pDrop.x_vel / XY_VELOCITY_SCALE,
-                        pDrop.y_vel / XY_VELOCITY_SCALE));
+                        pDrop.y_vel / XY_VELOCITY_SCALE);
                 // Units for the drop's angular velocity are in 1/(18PI) of a circle
                 //  per second, which is 1/9th of a radian per second
-                driveData.setAngVelocity(pDrop.theta_vel / ANG_VELOCITY_SCALE);
+                angleVelocity = pDrop.theta_vel / ANG_VELOCITY_SCALE;
                 break;
             case WHEEL_SPACE:
-                Vector2D aVel = computeVelocity(pDrop.m100_vel,
-                        pDrop.m220_vel,
-                        pDrop.m340_vel);
-                int engineSum = pDrop.m100_vel + pDrop.m220_vel + pDrop.m340_vel;
-                double speedFactor = 1.0;
-                aVel.x *= engineSum * speedFactor;
-                aVel.y *= engineSum * speedFactor;
-                driveData.setVelocity(aVel);
-                double aAngVel = engineSum * 2;
-                driveData.setAngVelocity(aAngVel);
+                double m100 = pDrop.m100_vel;
+                double m220 = pDrop.m220_vel;
+                double m340 = pDrop.m340_vel;
+
+                double xvel = m100 * MS2XYT[0][0] + m220 * MS2XYT[0][1] + m340 * MS2XYT[0][2];
+                double yvel = m100 * MS2XYT[1][0] + m220 * MS2XYT[1][1] + m340 * MS2XYT[1][2];
+                double tvel = m100 * MS2XYT[2][0] + m220 * MS2XYT[2][1] + m340 * MS2XYT[2][2];
+
+                velocity = new Vector2D(xvel, yvel);
+                angleVelocity = tvel;
                 break;
             default:
                 System.err.println("Unimplemented motor mode: " + pDrop.motor_mode);
                 break;
         }
+        driveData.setVelocity(velocity);
+        driveData.setAngVelocity(angleVelocity);
+        command.setCommandValue(velocity, angleVelocity);
+    }
+
+    private int computeIntensity(double command, double actual) {
+        double intensity = Math.abs(command) + Math.abs(command - actual);
+        return (int) (intensity * motorIntensity);
+    }
+
+    private int getTime() {
+        time++;
+        return time;
     }
 
     public CritterStateDrop makeStateDrop(SimulatorObject pObject) {
+
         CritterStateDrop stateDrop = new CritterStateDrop();
+
+        stateDrop.cycle_time = getTime();
+
+        // Set the command value
+        stateDrop.motor100.command = (int) (command.motor100 * motorCommandFactor);
+        stateDrop.motor220.command = (int) (command.motor220 * motorCommandFactor);
+        stateDrop.motor340.command = (int) (command.motor340 * motorCommandFactor);
+
+        // Compute fake intensity
+        ObjectStateDynamics driveData = (ObjectStateDynamics) pObject.getState(SimulatorComponentDynamics.NAME);
+        MotorCommand fakeCommand = new MotorCommand();
+        fakeCommand.setCommandValue(driveData.getVelocity(), driveData.getAngVelocity());
+
+        stateDrop.motor100.velocity = (int) (command.motor100 * motorSpeedFactor);
+        stateDrop.motor220.velocity = (int) (command.motor220 * motorSpeedFactor);
+        stateDrop.motor340.velocity = (int) (command.motor340 * motorSpeedFactor);
+
+        stateDrop.motor100.current = computeIntensity(command.motor100, fakeCommand.motor100);
+        stateDrop.motor220.current = computeIntensity(command.motor220, fakeCommand.motor220);
+        stateDrop.motor340.current = computeIntensity(command.motor340, fakeCommand.motor340);
 
         // Get all of this object's light sensors
         List<SimulatorObject> sensors =
@@ -220,8 +270,9 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             // If lowSensor >= numSensors, something is wrong
             assert (lowSensor < numSensors);
 
-            if (highSensor >= numSensors)
+            if (highSensor >= numSensors) {
                 highSensor -= numSensors;
+            }
 
             double alpha = sensor - lowSensor;
             stateDrop.bump[lowSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
