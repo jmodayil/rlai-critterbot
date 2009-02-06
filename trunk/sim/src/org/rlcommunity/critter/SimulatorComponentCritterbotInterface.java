@@ -61,7 +61,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     protected DropInterface aDropInterface;
     public static final double BUMP_SENSOR_SCALE = 1000.0;
     final private MotorCommand command = new MotorCommand();
-    private int time  = 0;
 
     public SimulatorComponentCritterbotInterface(DropInterface pInterface) {
         aDropInterface = pInterface;
