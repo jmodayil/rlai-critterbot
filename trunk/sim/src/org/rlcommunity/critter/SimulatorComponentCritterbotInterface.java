@@ -94,7 +94,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
                 // Send the system state, if necessary
                 if (iface.needsStateUpdate()) {
-                    aDropInterface.sendDrop(makeStateDrop(obj));
+                    aDropInterface.sendDrop(makeStateDrop(pCurrent, obj));
                     delta -= iface.getStateDropFrequency();
                 }
 
@@ -171,16 +171,11 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         return (int) (intensity * motorIntensity);
     }
 
-    private int getTime() {
-        time++;
-        return time;
-    }
-
-    public CritterStateDrop makeStateDrop(SimulatorObject pObject) {
+    public CritterStateDrop makeStateDrop(SimulatorState pState, SimulatorObject pObject) {
 
         CritterStateDrop stateDrop = new CritterStateDrop();
 
-        stateDrop.cycle_time = getTime();
+        stateDrop.cycle_time = pState.getTime();
 
         // Set the command value
         stateDrop.motor100.command = (int) (command.motor100 * motorCommandFactor);
