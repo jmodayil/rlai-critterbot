@@ -48,7 +48,8 @@ public class DropInterface
     {
       // Add all drops returned by the client to our list
       List<SimulatorDrop> clientDrops = ch.receive();
-
+      if (clientDrops == null)
+          continue;
       for (SimulatorDrop drop : clientDrops)
         drops.add(drop);
     }

@@ -23,6 +23,7 @@ public class SimulatorMain {
     static private boolean useKeyboard = true;
     static private boolean doPrintHelp = false;
     static private double timeScale = 1.0;
+    static private String dumpFilePath = null;
 
     private static SimulatorEngine createSimulatorEngine(DropInterface dropInterface, 
             EnvironmentDescription environmentDescription) {
@@ -61,6 +62,8 @@ public class SimulatorMain {
     static private DropInterface createCentralDropInterface(DiscoInterfaceServer discoServer) {
         DropInterface dropInterface = new DropInterface();
         dropInterface.addClient(discoServer);
+        if (dumpFilePath != null)
+            dropInterface.addClient(new DumpClient(dumpFilePath));
         return dropInterface;
     }
 
@@ -93,6 +96,9 @@ public class SimulatorMain {
             else if (flag.equals("-h") || flag.equals("--help")) {
                 doPrintHelp = true;
             }
+        }
+        if (args.length >= 4) {
+            dumpFilePath = args[3];
         }
     }
 
