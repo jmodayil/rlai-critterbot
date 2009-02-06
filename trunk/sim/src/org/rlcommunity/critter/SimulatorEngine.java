@@ -235,6 +235,10 @@ public class SimulatorEngine {
             }
         }
     }
+
+    public double getCurrentTime() {
+        return last_time;
+    }
     
 	public int debugGetElapsedTime() {
 		// This needs to be turned into a proper clocking mechanism
