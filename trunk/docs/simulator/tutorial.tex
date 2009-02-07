@@ -1,0 +1,133 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+
+\author{Marc G. Bellemare, Adam White}
+\title{The RLAI Robotic Simulator\\ A Tutorial}
+
+\begin{document}
+\maketitle
+
+\section{Requirements}
+
+\begin{itemize}
+\item{Java 1.5 (1.6?)}
+\end{itemize}
+
+I suggest running the simulator locally, at least initially, to be able
+to visualize the environment.
+
+\section{Installing the Simulator}
+
+Installing the simulator is a matter of a few steps. In order, you should:
+
+\begin{enumerate}
+\item{Download and build the DisCo framework}
+\item{Download and extract the RLAI Robotic Simulator package}
+\item{Copy relevant files into the Simulator package}
+\end{enumerate}
+
+Each step will be detailed in the following sections.
+
+
+\subsection{Building DisCo}
+
+According to its website, DisCo is a ``framework for developing and running 
+applications that must process data which is being produced in real time.'' 
+For now we will not
+concern with the details of what the framework does; you can learn more at
+\begin{verbatim}http://www.cs.ualberta.ca/~roberts/intro.html\end{verbatim}.
+
+Thankfully, you can download a pre-packaged version of DisCo, extended with
+Critterbot-specific files, at 
+
+\begin{verbatim}
+http://www.cs.ualberta.ca/~mg17/critterbot/files/DiscoExtension.tgz
+\end{verbatim}
+
+Next, you need to copy a file specifying some information about your operating
+system. The file in question is:
+
+\begin{itemize}
+\item{\textbf{Mac OS}: make/LIBSMAC.d}
+\item{\textbf{Unix}: make/LIBSMAC.d (untested)}
+\item{\textbf{Windows}: Out of luck.}
+\end{itemize}
+
+To copy the file, execute (from your disco directory): 
+
+\begin{verbatim}$> cp make/LIBSMAC.d make/LIBS.d \end{verbatim}
+
+We are now ready to build:
+\begin{verbatim}
+$> cd ../.. 
+$> make
+\end{verbatim}
+
+\subsection{Downloading and installing the RLAI Robotic Simulator package}
+
+The Simulator package can be downloaded from
+
+\begin{verbatim}
+http://www.cs.ualberta.ca/~mg17/critterbot/files/RLAIRobotSimulator.tgz
+\end{verbatim}
+
+You should be able to directly extract the directory, e.g.
+
+\begin{verbatim}$> tar -xvzf RLAIRobotSimulator.tgz \end{verbatim}
+
+under UNIX systems.
+
+\subsection{Copying relevant files to the RLAI Robotic Simulator package}
+
+There is a single file of interest in the DisCo directory, located in the
+\verb+bin+ directory and named \verb+Control.bin+. If you extracted the 
+DisCo code to its default directory, \verb+disco+, then the file should 
+be located at \verb+disco/bin/Control.bin+.
+
+All that is needed is to copy the file over into the Simulator directory.
+Assuming the installation directory for the Simulator is \verb+simulator+,
+then you can copy the file as follows:
+
+\begin{verbatim}$> cp disco/bin/Control.bin simulator/bin/Control.bin \end{verbatim}
+
+(For UNIX users, ln -s is recommended)
+
+\section{Running the Simulator}
+
+Provided you installed all the required files, you should now be able to
+run the Simulator out of the box:
+
+\begin{verbatim}$> cd simulator \end{verbatim}
+\begin{verbatim}$> ./run.sh \end{verbatim}
+
+The \verb+run.sh+ script will compile three Java files, namely
+
+\begin{itemize}
+\item{\verb+src/Simulator.java+}
+\item{\verb+src/Agent.java+}
+\item{\verb+src/RewardGenerator.java+}
+\end{itemize}
+
+These files respectively create the simulator, a simple agent and a reward
+generator. By default they open up ports 2324, 2325 and 2326. You can modify
+these ports (see Section \ref{sec:changingDefaults} for more information).
+
+After compiling the Java sources, the script will run the corresponding
+binaries and the DisCo binary \verb+Control.bin+. The latter is in charge
+of the communication between the three components. The script will then wait
+for any of the four processes to die, at which point it will attempt to 
+terminate all of them.
+
+Once you start \verb+run.sh+, you should see a GUI appear (provided you are
+running locally). By default the Agent will send commands at period intervals;
+you should see the robot performing some behavior which depends on the mood
+of the programmer at the time the simulator was packaged. You can also
+manually control the robot with the arrow keys within the GUI; however, this
+will result in the Agent and yourself competing for control, which is probably
+not the desired behavior. If you wish to play around the simulator without
+the Agent, you can run the \verb+Simulator+ process on its own (peek inside
+\verb+run.sh+ for more details).
+
+% @todo add GUI image
+\end{document}
