@@ -304,6 +304,19 @@ public class SimulatorObject {
 		return aStates.get(pLabel);
 	}
 
+    /** Removes the corresponding partial state from this object. Returns null
+     *   if the object did not have the requested ObjectState, and the removed
+     *   ObjectState otherwise.
+     * 
+     * @param pLabel The identifier used by the SimulatorComponent and the 
+     *      corresponding ObjectState.
+	 * @return The removed ObjectState or null if this object does not
+	 *         store this state information.
+     */
+    public ObjectState removeState(String pLabel) {
+        return aStates.remove(pLabel);
+    }
+
 	/**
 	 * Add a new state component to the object; duplicates are not allowed!
 	 * 
