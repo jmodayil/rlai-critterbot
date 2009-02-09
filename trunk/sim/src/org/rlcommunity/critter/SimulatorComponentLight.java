@@ -56,11 +56,18 @@ public class SimulatorComponentLight implements SimulatorComponent {
         int numSensors = sensors.size();
         LinkedList<SimulatorObject> sources = pCurrent.getObjects(ObjectStateLightSource.NAME);
         int numSources = sources.size();
-        
+
+// source = sources.get(0);
+// lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
+// srcPosition = source.getLocalPosition();
+// System.err.println("pos = "+srcPosition.x+","+srcPosition.y);
+                        
         for (int Ksensor = 0; Ksensor < numSensors; Ksensor++) {
             sensor = sensors.get(Ksensor);
             lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
             sensorPosition = sensor.getPosition();
+// System.err.println("rob pos = "+sensorPosition.x+","+sensorPosition.y);
+            
 
             oldSensor = pCurrent.getObject(sensor);
             oldLightSensor = (ObjectStateLightSensor) oldSensor.getState(ObjectStateLightSensor.NAME);
@@ -142,13 +149,13 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                 double dist2 = intersectData.point.distance(sensorPosition);
                                 srcPosition.normalize();
                                 intersectData.point.normalize();
-                                int distancePower = 1;
+                                int distancePower = 2;
                                 
                                 //old calc
-                                //intensity = bouncePenalty * lightSource.getIntensity() * (1.0 / Math.pow(dist1, 2)) * (1.0 / Math.pow(dist1, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
+                                //intensity =   lightSource.getIntensity() * (1.0 / Math.pow(dist1, 2)) * (1.0 / Math.pow(dist1, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
                                 
                                 //Lambertian reflectance model -- distance seems odd
-                                intensity = lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)* Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
+                               intensity = lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1, distancePower)*(1.0 / Math.pow(dist2, distancePower)));
                                 
                                 //sum up light from multiple sources and from each pixel
                                 sumIntensity += intensity;
@@ -163,13 +170,16 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
 
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
-            if(sumIntensity / numPixels > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
-            else lightSensor.setLightSensorValue((int)(sumIntensity / numPixels + aRandom.nextGaussian()));
+            double noise = aRandom.nextGaussian();
+            int reading = (int)(sumIntensity / numPixels + noise);
+            if(reading<0) reading =0;
+            if(reading > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
+            else lightSensor.setLightSensorValue(reading);
 
-            //System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
+// System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
             
         } //loop over sensors
-         //System.out.println("------");
+// System.out.println("------");
 
     }
 }

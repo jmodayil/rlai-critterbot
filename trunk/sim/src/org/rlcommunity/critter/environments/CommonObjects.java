@@ -159,28 +159,28 @@ public class CommonObjects {
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-        new ObjectStateLightSensor(5, 0.005, 0.01); //get real numbers from mike
+        new ObjectStateLightSensor(5, 0.005, 0.1); //get real numbers from mike
         //->->pixels, depth(m), width(m)
         lightSensor.addState(specificLightSensor);
 
         sa.addChild(lightSensor);
 
-
-        // Create three more light sensors
-        lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
-        lightSensor.setPosition(new Vector2D(0, -0.198));
-        lightSensor.setLocalDirection(-Math.PI / 2.0);
-        sa.addChild(lightSensor);
-
-        lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
-        lightSensor.setPosition(new Vector2D(0, 0.198));
-        lightSensor.setLocalDirection(-Math.PI / 2.0);
-        sa.addChild(lightSensor);
-
-        lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
-        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
-        lightSensor.setLocalDirection(-Math.PI);
-        sa.addChild(lightSensor); 
+//
+//        // Create three more light sensors
+//        lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
+//        lightSensor.setPosition(new Vector2D(0, -0.198));
+//        lightSensor.setLocalDirection(-Math.PI / 2.0);
+//        sa.addChild(lightSensor);
+//
+//        lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
+//        lightSensor.setPosition(new Vector2D(0, 0.198));
+//        lightSensor.setLocalDirection(-Math.PI / 2.0);
+//        sa.addChild(lightSensor);
+//
+//        lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
+//        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
+//        lightSensor.setLocalDirection(-Math.PI);
+//        sa.addChild(lightSensor); 
 
         SimulatorObject battery = new SimulatorObject("battery",
         pId++);
@@ -316,6 +316,34 @@ public class CommonObjects {
         return w;
     }
 
+        public static SimulatorObject generateBasket(String pName, int pId) {
+        // @todo w.setSVG("wall").resetNativeTranslation();
+           SimulatorObject basket = new SimulatorObject(pName, pId);
+
+        // Create the hex polygon
+        Polygon basketShape = new Polygon();
+        basketShape.addPoint(0, 0);
+        basketShape.addPoint(0, 1.0);
+        basketShape.addPoint(1.0, 1.0);
+        basketShape.addPoint(1.0, 0.0);
+        basketShape.addPoint(0.9, 0.0);
+        basketShape.addPoint(0.9, 0.9);
+        basketShape.addPoint(0.1, 0.9);
+        basketShape.addPoint(0.1, 0.0);        
+        
+        basketShape.doneAddPoints();
+
+        basket.setShape(basketShape);
+        
+            ObjectStateDynamics baskeyDyn = new ObjectStateDynamics(10000, 10000);
+            baskeyDyn.setMaxSpeed(0);
+            basket.addState(baskeyDyn);
+
+
+
+        return basket;
+    }
+    
     /** Creates a hexagon-shaped object. The object has physical properties
      *   (e.g. ObjectStateDynamics) so that it can be moved around.
      *
@@ -410,16 +438,31 @@ public class CommonObjects {
      * 
      * @return A new SimulatorObject with light source properties.
      */
-    public static SimulatorObject generateLightSource(String pName, int pId) {
+    public static SimulatorObject generateLightSource(String pName, int pId, int intensity) {
         SimulatorObject lightSource = new SimulatorObject(pName, pId);
 
-        //lightSource.setShape(null);
+        double pRadius = 0.1;
+        Polygon shape = new Polygon();
 
+        int numPoints = 16;
+
+        for (int i = 0; i < numPoints; i++) {
+            double angle = i * 2 * Math.PI / numPoints;
+            Vector2D pt = new Vector2D(Math.cos(angle) * pRadius, Math.sin(angle) * pRadius);
+            pt.zeroize();
+
+            shape.addPoint(pt.x, pt.y);
+        }
+
+        shape.translate(new Vector2D(pRadius, pRadius));
+        shape.doneAddPoints();
+
+        lightSource.setShape(shape);
 
         ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
-        specificLightSource.setIntensity(600); //talk to mike
+        specificLightSource.setIntensity(intensity); //talk to mike
         lightSource.addState(specificLightSource);
-
+                        
         return lightSource;
     }
     
