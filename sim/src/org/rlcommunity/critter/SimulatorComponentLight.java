@@ -41,6 +41,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
         RayIntersection intersectData;
         Ray r;
 
+        double dist =0;
         SimulatorObject sensor;
         ObjectStateLightSensor lightSensor;
         ObjectStateLightSensor oldLightSensor;
@@ -81,6 +82,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
                 currentRayAngle = -Math.PI + currentRayAngle - Math.PI;
             }
             double sumIntensity = 0; //store total intensity of each pixel in the sensor
+            double maxIntensity=0;
+                    
             //for each pixel in the sensor
             for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
                 //as we rotate clockwise through pixels may cross PI -PI boarder
@@ -99,23 +102,25 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
                 if (intersectData != null) {//if the ray hits nothing then intensity is zero. We probably have no walls
 
-                    //angle between robot's sensor ray and surface normal 
-                    double angle1 = sensorPosition.minus(intersectData.point).direction();
+                    //angle between robot's sensor ray and surface normal -- old model (not used)
+                    //double angle1 = sensorPosition.minus(intersectData.point).direction();
+                    
                     double angle2 = intersectData.normal.direction();
-                    double angleOfIncidence = Math.abs(angle1) - Math.abs(angle2);
+                    //double angleOfIncidence = Math.abs(angle1) - Math.abs(angle2);
 
                     //put robot back in...robot may block light on intersection point
                     scene.addSubtree(oldSensor.getRoot());
 
                     //for each light source sum up intensity at intersection point
+
                     for (int Jsource = 0; Jsource < numSources; Jsource++) {
                         double intensity = 0;
 
                         source = sources.get(Jsource);
                         lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
-
                         srcPosition = source.getPosition();
 
+                        if(Ipixel == 0)maxIntensity +=lightSource.getIntensity();
                         //unlikely case where ray intersects the light source directly
                         double slope = (sensorPosition.x - srcPosition.x) / (sensorPosition.y - srcPosition.y);
                         double tol = Math.pow(10, -15);
@@ -128,21 +133,29 @@ public class SimulatorComponentLight implements SimulatorComponent {
                             scene.removeSubtree(source.getRoot());
 
                             //find angle between light source and surface normal
-                            angle1 = srcPosition.minus(intersectData.point).direction();
+                            double angle1 = srcPosition.minus(intersectData.point).direction();
                             double angleOfIncidence2 = Math.abs(angle1) - Math.abs(angle2);
 
                             //is point illuminated?
                             if (scene.isVisible(srcPosition, intersectData.point)) {
-                                double totalDistance = srcPosition.distance(intersectData.point) + intersectData.point.distance(sensorPosition);
-                                double bouncePenalty = 1.0;
-                                //intensity at sensor is function of distance and angles of incidence
-                                intensity = bouncePenalty * lightSource.getIntensity() * (1.0 / Math.pow(totalDistance, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
+                                double dist1 = srcPosition.distance(intersectData.point); 
+                                double dist2 = intersectData.point.distance(sensorPosition);
+                                srcPosition.normalize();
+                                intersectData.point.normalize();
+                                int distancePower = 1;
+                                
+                                //old calc
+                                //intensity = bouncePenalty * lightSource.getIntensity() * (1.0 / Math.pow(dist1, 2)) * (1.0 / Math.pow(dist1, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
+                                
+                                //Lambertian reflectance model -- distance seems odd
+                                intensity = lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)* Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
+                                
                                 //sum up light from multiple sources and from each pixel
                                 sumIntensity += intensity;
 
                             }
                         }
-
+                            dist = srcPosition.distance(sensorPosition);
                     }//loop over sources
                 }//test for object intersection
                 currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
@@ -150,13 +163,14 @@ public class SimulatorComponentLight implements SimulatorComponent {
             } //loop over pixels
 
 
-            //sensor reading is average of pixel readings
-            lightSensor.setLightSensorValue(sumIntensity / numPixels);
+            //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
+            if(sumIntensity / numPixels > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
+            else lightSensor.setLightSensorValue(sumIntensity / numPixels);
 
-            //System.out.println("sensor(" + Ksensor + ") intensity = " + lightSensor.getLightSensorValue());
-
+            //System.out.println("sensor(" + Ksensor + "|dist = "+dist+") intensity = " + lightSensor.getLightSensorValue());
+            
         } //loop over sensors
-        // System.out.println("------");
+         //System.out.println("------");
 
     }
 }

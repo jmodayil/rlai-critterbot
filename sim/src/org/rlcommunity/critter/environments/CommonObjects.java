@@ -2,6 +2,8 @@ package org.rlcommunity.critter.environments;
 
 import java.util.List;
 import org.rlcommunity.critter.ObjectStateAccelerometer;
+import org.rlcommunity.critter.ObjectStateBattery;
+import org.rlcommunity.critter.ObjectStateBatteryCharger;
 import org.rlcommunity.critter.ObjectStateBumpSensor;
 import org.rlcommunity.critter.ObjectStateCritterbotInterface;
 import org.rlcommunity.critter.ObjectStateDynamics;
@@ -157,7 +159,8 @@ public class CommonObjects {
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-        new ObjectStateLightSensor(5, 1.0, 5.0);
+        new ObjectStateLightSensor(5, 0.005, 0.01); //get real numbers from mike
+        //->->pixels, depth(m), width(m)
         lightSensor.addState(specificLightSensor);
 
         sa.addChild(lightSensor);
@@ -179,6 +182,20 @@ public class CommonObjects {
         lightSensor.setLocalDirection(-Math.PI);
         sa.addChild(lightSensor); 
 
+        SimulatorObject battery = new SimulatorObject("battery",
+        pId++);
+        // These three light sensors have no shape!
+        battery.setPosition(new Vector2D(0.198, 0));
+        battery.setDirection(0);
+        //  lightSensor.setLocalDirection(0.0);
+        ObjectStateBattery specificBattery = new ObjectStateBattery(4000.0,5.0,0.10);
+        //->->capacity(Coulomb), chargeRate(Ampere), idleDepletionRate(Ampere)
+        specificBattery.setCurrentCharge(4000.0);
+        battery.addState(specificBattery);
+
+        sa.addChild(battery);
+
+        
 
         // Now the IR distance sensors
         double irRange = 3 * robotLength;
@@ -397,16 +414,29 @@ public class CommonObjects {
     public static SimulatorObject generateLightSource(String pName, int pId) {
         SimulatorObject lightSource = new SimulatorObject(pName, pId);
 
-        lightSource.setShape(null);
+        //lightSource.setShape(null);
 
-        // @todo lightSource.setSVG("lightsource");
 
         ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
-        specificLightSource.setIntensity(10000.0);
+        specificLightSource.setIntensity(600.0); //talk to mike
         lightSource.addState(specificLightSource);
 
         return lightSource;
     }
+    
+    public static SimulatorObject generateBatteryCharger(String pName, int pId) {
+        SimulatorObject batteryCharger = new SimulatorObject(pName, pId);
+
+        batteryCharger.setShape(null);
+
+        // @todo lightSource.setSVG("lightsource");
+
+        ObjectStateBatteryCharger specificCharger = new ObjectStateBatteryCharger(0.5,50.0); 
+        //->->range(m),charge rate (Ampere)
+        batteryCharger.addState(specificCharger);
+
+        return batteryCharger;
+    }    
 
     public static int generateSVGObjects(List<SimulatorObject> objects, int id) {
         Loader svgLoader = new Loader(id);

@@ -6,6 +6,7 @@ package org.rlcommunity.critter;
   * State component for a light-emitting object
   */
 
+import java.awt.Color;
 import java.awt.Graphics;
 
 public class ObjectStateLightSource implements ObjectState
@@ -13,7 +14,7 @@ public class ObjectStateLightSource implements ObjectState
   public static final String NAME = SimulatorComponentLight.NAME + "source";
 
   // A grayscale light value (@todo this needs to be changed) 
-  protected double aIntensity;
+  protected double aIntensity; //in Candela
 
   public ObjectStateLightSource()
   {
@@ -53,6 +54,10 @@ public class ObjectStateLightSource implements ObjectState
     */
   public void draw(SimulatorGraphics g, SimulatorObject parent)
   {
+//        Vector2D pos = parent.getPosition();
+//        g.setColor(Color.BLACK);
+//        g.drawString("Light",(double)pos.x, (double)pos.y);  
+      
   }
 
   /** Provides a mean of clearing whatever data this ObjectState contains
