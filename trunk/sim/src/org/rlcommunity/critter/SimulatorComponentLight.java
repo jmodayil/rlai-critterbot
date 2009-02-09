@@ -164,9 +164,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
             if(sumIntensity / numPixels > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
-            else lightSensor.setLightSensorValue((int)(sumIntensity / numPixels));
+            else lightSensor.setLightSensorValue((int)(sumIntensity / numPixels + aRandom.nextGaussian()));
 
-            System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
+            //System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
             
         } //loop over sensors
          //System.out.println("------");
