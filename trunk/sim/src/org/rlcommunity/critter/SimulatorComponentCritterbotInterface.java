@@ -57,6 +57,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     // All of these need to be made proper
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
     public static final double LIGHT_SCALE = 0.18;
+    public static final double BATTERY_SCALE = 1.0;
     public static final double IRDIST_SCALE = 255.0;
     protected DropInterface aDropInterface;
     public static final double BUMP_SENSOR_SCALE = 1000.0;
@@ -209,7 +210,17 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 break;
             }
         }
-
+        
+         sensors = pObject.getChildren(ObjectStateBattery.NAME);
+        idx = 0;
+        for (SimulatorObject sen : sensors) {        
+            ObjectStateBattery bData = (ObjectStateBattery)sen.getState(ObjectStateBattery.NAME);
+            stateDrop.battery[idx] = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+            // Don't add more light data than we have space
+            if (++idx == stateDrop.light.length) {
+                break;
+            }            
+        }
         sensors = pObject.getChildren(ObjectStateIRDistanceSensor.NAME);
 
         idx = 0;

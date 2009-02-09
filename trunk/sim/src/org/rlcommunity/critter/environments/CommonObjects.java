@@ -188,9 +188,8 @@ public class CommonObjects {
         battery.setPosition(new Vector2D(0.198, 0));
         battery.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
-        ObjectStateBattery specificBattery = new ObjectStateBattery(4000.0,5.0,0.10);
+        ObjectStateBattery specificBattery = new ObjectStateBattery(10000,5,1);
         //->->capacity(Coulomb), chargeRate(Ampere), idleDepletionRate(Ampere)
-        specificBattery.setCurrentCharge(4000.0);
         battery.addState(specificBattery);
 
         sa.addChild(battery);
@@ -418,7 +417,7 @@ public class CommonObjects {
 
 
         ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
-        specificLightSource.setIntensity(600.0); //talk to mike
+        specificLightSource.setIntensity(600); //talk to mike
         lightSource.addState(specificLightSource);
 
         return lightSource;
@@ -431,7 +430,7 @@ public class CommonObjects {
 
         // @todo lightSource.setSVG("lightsource");
 
-        ObjectStateBatteryCharger specificCharger = new ObjectStateBatteryCharger(0.5,50.0); 
+        ObjectStateBatteryCharger specificCharger = new ObjectStateBatteryCharger(0.5,50); 
         //->->range(m),charge rate (Ampere)
         batteryCharger.addState(specificCharger);
 

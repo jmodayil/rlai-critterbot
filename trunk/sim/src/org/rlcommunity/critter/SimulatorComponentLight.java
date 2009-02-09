@@ -81,8 +81,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
             if (currentRayAngle > Math.PI) {
                 currentRayAngle = -Math.PI + currentRayAngle - Math.PI;
             }
-            double sumIntensity = 0; //store total intensity of each pixel in the sensor
-            double maxIntensity=0;
+            double sumIntensity = 0.0; //store total intensity of each pixel in the sensor
+            int maxIntensity=0;
                     
             //for each pixel in the sensor
             for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
@@ -155,7 +155,6 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
                             }
                         }
-                            dist = srcPosition.distance(sensorPosition);
                     }//loop over sources
                 }//test for object intersection
                 currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
@@ -165,9 +164,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
             if(sumIntensity / numPixels > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
-            else lightSensor.setLightSensorValue(sumIntensity / numPixels);
+            else lightSensor.setLightSensorValue((int)(sumIntensity / numPixels));
 
-            //System.out.println("sensor(" + Ksensor + "|dist = "+dist+") intensity = " + lightSensor.getLightSensorValue());
+            System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
             
         } //loop over sensors
          //System.out.println("------");

@@ -15,9 +15,9 @@ public class ObjectStateBatteryCharger implements ObjectState {
 
       public static final String NAME = SimulatorComponentBattery.NAME + "charger";
       private double aRange = 0.0; //in Meters
-      private double aChargeRate = 0.0; //in Ampere
+      private int aChargeRate = 0; //in Ampere
       
-      public ObjectStateBatteryCharger(double pRange, double pChargeRate)
+      public ObjectStateBatteryCharger(double pRange, int pChargeRate)
       {
           aRange = pRange;
           aChargeRate = pChargeRate;        
@@ -43,7 +43,7 @@ public class ObjectStateBatteryCharger implements ObjectState {
     {
         return aRange;
     }
-    public double getChargeRate()
+    public int getChargeRate()
     {
         return aChargeRate;
     }
