@@ -40,6 +40,7 @@ public class SimulatorMain {
         engine.addComponent(new SimulatorComponentGyroscope(randomizer));
         engine.addComponent(new SimulatorComponentCritterbotInterface(dropInterface));
         engine.addComponent(new SimulatorComponentIRDistance(randomizer));
+        engine.addComponent(new SimulatorComponentBattery());
         return engine;
     }
 

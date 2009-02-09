@@ -47,8 +47,16 @@ public class FunEnvironment implements EnvironmentDescription {
                 new Vector2D(Math.random() * 4 + 1, Math.random() * 3 + 1), 0.0, id);
 
         id = CommonObjects.addObject(objects,
-                CommonObjects.generateLightSource("Light Source", id),
-                new Vector2D(0.50, 0.50), 0.0, id);
+                CommonObjects.generateLightSource("Light Source1", id),
+                new Vector2D(0.5, 0.5), 0.0, id); //something funnie going on with positions
+ 
+        
+
+         
+        id = CommonObjects.addObject(objects,
+                CommonObjects.generateBatteryCharger("batteryCharger", id),
+                new Vector2D(3.0, 0.25), 0.0, id);       
+        
 
         return objects;
     }
