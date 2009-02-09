@@ -41,7 +41,7 @@ public class SimulatorComponentBattery implements SimulatorComponent {
             int newCharge = currentCharge;
             int capacity = oldRobotBattery.getChargeCapacity();
 
-            System.out.println("level = "+ currentCharge);
+            //System.out.println("level = "+ currentCharge);
             
             if (dist < batteryCharger.getRange()) {
                 //System.out.println("charging");
