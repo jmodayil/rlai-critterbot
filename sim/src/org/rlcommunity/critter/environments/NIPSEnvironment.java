@@ -30,7 +30,7 @@ public class NIPSEnvironment implements EnvironmentDescription {
                 new Vector2D(0.0, 0.0), 0.0, id);
 
         id = CommonObjects.addObject(objects,
-                CommonObjects.generateLightSource("Light Source", id),
+                CommonObjects.generateLightSource("Light Source", id,600),
                 new Vector2D(0.50, 0.50), 0.0, id);
 
         return objects;

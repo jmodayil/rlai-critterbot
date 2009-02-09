@@ -56,7 +56,7 @@ public class ObjectStateLightSource implements ObjectState
   {
 //        Vector2D pos = parent.getPosition();
 //        g.setColor(Color.BLACK);
-//        g.drawString("Light",(double)pos.x, (double)pos.y);  
+//        g.drawString("Light",pos.x, pos.y);  
       
   }
 

@@ -12,8 +12,10 @@ package org.rlcommunity.critter;
 import java.util.Random;
 import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
+import org.rlcommunity.critter.environments.BasketBallEnvironment;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
 import org.rlcommunity.critter.environments.FunEnvironment;
+import org.rlcommunity.critter.environments.LightBatteryEnvironment;
 
 public class SimulatorMain {
 
@@ -24,6 +26,7 @@ public class SimulatorMain {
     static private boolean doPrintHelp = false;
     static private double timeScale = 1.0;
     static private String dumpFilePath = null;
+
 
     private static SimulatorEngine createSimulatorEngine(DropInterface dropInterface, 
             EnvironmentDescription environmentDescription) {
@@ -139,7 +142,9 @@ public class SimulatorMain {
         int millisPerStep = 10;
         final SimulatorEngine engine = createSimulatorEngine(dropInterface,
                 new FunEnvironment());
-
+//        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new BasketBallEnvironment());
+//        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new LightBatteryEnvironment());
+        
         if (useGui) {
             runGUI(engine, keyboardClient);
         }
