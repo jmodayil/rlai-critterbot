@@ -14,7 +14,7 @@ public class ObjectStateLightSensor implements ObjectState
 {
   public static final String NAME = SimulatorComponentLight.NAME + "sensor";
 
-  protected double aData; //in candela
+  protected int aData; //in candela
   protected double aSensorWidth; //in Meters
   protected int aNumPixels;     
   protected double aSensorDepth; //in Meters 
@@ -57,12 +57,12 @@ public class ObjectStateLightSensor implements ObjectState
     
   }
   
-  protected void setLightSensorValue (double intensity)
+  protected void setLightSensorValue (int intensity)
   {
       aData = intensity;
   }
   
-  protected double getLightSensorValue ()
+  protected int getLightSensorValue ()
   {
    return aData;   
       

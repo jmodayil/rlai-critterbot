@@ -14,17 +14,18 @@ public class ObjectStateBattery implements ObjectState {
 
         
         private boolean aFullyCharged = false;
-        private double aCurrentCharge = 0.0; //in Coulomb
-        private double aChargeCapacity = 0.0; //in Coulomb
-        private double aMaxChargeRate = 0.0; //in Ampere
-        private double aIdleDepletionRate = 0.0; //in Ampere
+        private int aCurrentCharge = 0; //in Coulomb
+        private int aChargeCapacity = 0; //in Coulomb
+        private int aMaxChargeRate = 0; //in Ampere
+        private int aIdleDepletionRate = 0; //in Ampere
 
         public static final String NAME = SimulatorComponentBattery.NAME;        
     
-    public ObjectStateBattery(double pChargeCapacity, double pMaxChargeRate, double pIdleDepletionRate){
+    public ObjectStateBattery(int pChargeCapacity, int pMaxChargeRate, int pIdleDepletionRate){
         aChargeCapacity = pChargeCapacity;
         aMaxChargeRate = pMaxChargeRate;
         aIdleDepletionRate = pIdleDepletionRate;
+        aCurrentCharge = pChargeCapacity;
         
     }
 
@@ -36,18 +37,18 @@ public class ObjectStateBattery implements ObjectState {
         this.aIdleDepletionRate = battery2Copy.aIdleDepletionRate;
     }
     
-    public double getCurrentCharge(){
+    public int getCurrentCharge(){
         return aCurrentCharge;
     }
 
-    public double getMaxChargeRate(){
+    public int getMaxChargeRate(){
         return aMaxChargeRate;
     }    
 
-    public double getIdleDepletionRate(){
+    public int getIdleDepletionRate(){
         return aIdleDepletionRate;
     }
-    public double getChargeCapacity(){
+    public int getChargeCapacity(){
         return aChargeCapacity;
     }
    
@@ -56,7 +57,7 @@ public class ObjectStateBattery implements ObjectState {
     }
    
     
-    public void setCurrentCharge(double pCurrentCharge){
+    public void setCurrentCharge(int pCurrentCharge){
         aCurrentCharge = pCurrentCharge;
     }
 
@@ -65,7 +66,7 @@ public class ObjectStateBattery implements ObjectState {
     }
     public boolean isBatteryDepleted()
     {
-        return (aCurrentCharge <= 0.0 );
+        return (aCurrentCharge <= 0 );
     }
      public void requestCurrent(double pCurrent)
      {

@@ -37,15 +37,17 @@ public class SimulatorComponentBattery implements SimulatorComponent {
             newRobotBattery.setFullyCharged(false);
 
             double dist = robotPosition.distance(chargerPosition);
-            double currentCharge = oldRobotBattery.getCurrentCharge();
-            double newCharge = currentCharge;
-            double capacity = oldRobotBattery.getChargeCapacity();
+            int currentCharge = oldRobotBattery.getCurrentCharge();
+            int newCharge = currentCharge;
+            int capacity = oldRobotBattery.getChargeCapacity();
 
+            System.out.println("level = "+ currentCharge);
+            
             if (dist < batteryCharger.getRange()) {
                 //System.out.println("charging");
-                double chargerRate = batteryCharger.getChargeRate();
-                double batteryChargeRate = newRobotBattery.getMaxChargeRate();
-                double rate;
+                int chargerRate = batteryCharger.getChargeRate();
+                int batteryChargeRate = newRobotBattery.getMaxChargeRate();
+                int rate;
                 if(chargerRate > batteryChargeRate)
                     rate = batteryChargeRate; //damage battery??
                 else

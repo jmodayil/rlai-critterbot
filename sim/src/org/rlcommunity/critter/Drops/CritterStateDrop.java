@@ -83,6 +83,7 @@ public class CritterStateDrop implements SimulatorDrop
   public int[] ir_distance;
   public int[] ir_light;
   public int[] light;
+  public int [] battery;
   public int[] thermal;
   public int[] bump;
 
@@ -92,6 +93,7 @@ public class CritterStateDrop implements SimulatorDrop
   public static final int IR_DISTANCE_SIZE   = 10;
   public static final int IR_LIGHT_SIZE      = 8;
   public static final int LIGHT_SIZE         = 4;
+  public static final int BATTERY_SIZE       = 1;
   public static final int THERMAL_SIZE       = 8;
   public static final int BUMP_SIZE          = 32;
 
@@ -115,6 +117,7 @@ public class CritterStateDrop implements SimulatorDrop
            IR_DISTANCE_SIZE * Integer.SIZE +
            IR_LIGHT_SIZE * Integer.SIZE +
            LIGHT_SIZE * Integer.SIZE +
+           BATTERY_SIZE * Integer.SIZE +
            THERMAL_SIZE * Integer.SIZE +
            BUMP_SIZE * Integer.SIZE +
            Integer.SIZE + // error_flags
@@ -129,6 +132,7 @@ public class CritterStateDrop implements SimulatorDrop
     ir_distance = new int[IR_DISTANCE_SIZE];
     ir_light    = new int[IR_LIGHT_SIZE];
     light       = new int[LIGHT_SIZE];
+    battery     = new int[BATTERY_SIZE];
     thermal     = new int[THERMAL_SIZE];
     bump        = new int[BUMP_SIZE];
 
@@ -161,6 +165,8 @@ public class CritterStateDrop implements SimulatorDrop
       pOut.writeInt(ir_light[i]);
     for (int i = 0; i < light.length; i++)
       pOut.writeInt(light[i]);
+    for (int i = 0; i < battery.length; i++)
+      pOut.writeInt(battery[i]);    
     for (int i = 0; i < thermal.length; i++)
       pOut.writeInt(thermal[i]);
     for (int i = 0; i < bump.length; i++)
@@ -194,6 +200,8 @@ public class CritterStateDrop implements SimulatorDrop
       ir_light[i] = pIn.readInt();
     for (int i = 0; i < light.length; i++)
       light[i] = pIn.readInt();
+    for (int i = 0; i < battery.length; i++)
+      battery[i] = pIn.readInt();    
     for (int i = 0; i < thermal.length; i++)
       thermal[i] = pIn.readInt();
     for (int i = 0; i < bump.length; i++)
