@@ -46,28 +46,22 @@ public class SimulatorComponentLight implements SimulatorComponent {
         ObjectStateLightSensor lightSensor;
         ObjectStateLightSensor oldLightSensor;
         SimulatorObject oldSensor;
-        Vector2D sensorPosition;
+        Vector2D sensorPosition = null;
 
         SimulatorObject source;
         ObjectStateLightSource lightSource;
-        Vector2D srcPosition;
+        Vector2D srcPosition = null;
 
         LinkedList<SimulatorObject> sensors = pNext.getObjects(ObjectStateLightSensor.NAME);
         int numSensors = sensors.size();
         LinkedList<SimulatorObject> sources = pCurrent.getObjects(ObjectStateLightSource.NAME);
         int numSources = sources.size();
-
-// source = sources.get(0);
-// lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
-// srcPosition = source.getLocalPosition();
-// System.err.println("pos = "+srcPosition.x+","+srcPosition.y);
                         
         for (int Ksensor = 0; Ksensor < numSensors; Ksensor++) {
             sensor = sensors.get(Ksensor);
             lightSensor = (ObjectStateLightSensor) sensor.getState(ObjectStateLightSensor.NAME);
             sensorPosition = sensor.getPosition();
-// System.err.println("rob pos = "+sensorPosition.x+","+sensorPosition.y);
-            
+
 
             oldSensor = pCurrent.getObject(sensor);
             oldLightSensor = (ObjectStateLightSensor) oldSensor.getState(ObjectStateLightSensor.NAME);
@@ -119,13 +113,13 @@ public class SimulatorComponentLight implements SimulatorComponent {
                     scene.addSubtree(oldSensor.getRoot());
 
                     //for each light source sum up intensity at intersection point
-
                     for (int Jsource = 0; Jsource < numSources; Jsource++) {
                         double intensity = 0;
 
                         source = sources.get(Jsource);
                         lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
-                        srcPosition = source.getPosition();
+                        srcPosition=source.getPosition();
+                        
 
                         if(Ipixel == 0)maxIntensity +=lightSource.getIntensity();
                         //unlikely case where ray intersects the light source directly
@@ -147,21 +141,21 @@ public class SimulatorComponentLight implements SimulatorComponent {
                             if (scene.isVisible(srcPosition, intersectData.point)) {
                                 double dist1 = srcPosition.distance(intersectData.point); 
                                 double dist2 = intersectData.point.distance(sensorPosition);
-                                srcPosition.normalize();
-                                intersectData.point.normalize();
+
                                 int distancePower = 2;
                                 
                                 //old calc
                                 //intensity =   lightSource.getIntensity() * (1.0 / Math.pow(dist1, 2)) * (1.0 / Math.pow(dist1, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
                                 
                                 //Lambertian reflectance model -- distance seems odd
-                               intensity = lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1, distancePower)*(1.0 / Math.pow(dist2, distancePower)));
+                               intensity = lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
                                 
                                 //sum up light from multiple sources and from each pixel
                                 sumIntensity += intensity;
 
                             }
-                        }
+                     }
+                                
                     }//loop over sources
                 }//test for object intersection
                 currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
@@ -176,10 +170,10 @@ public class SimulatorComponentLight implements SimulatorComponent {
             if(reading > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
             else lightSensor.setLightSensorValue(reading);
 
-// System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
+ //System.out.println("sensor(" + Ksensor +") intensity = " + lightSensor.getLightSensorValue());
             
         } //loop over sensors
-// System.out.println("------");
+ //System.out.println("------");
 
     }
 }
