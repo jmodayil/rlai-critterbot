@@ -60,11 +60,11 @@ public class SimulatorComponentBattery implements SimulatorComponent {
                 double dist = robotPosition.distance(chargerPosition);
 
 
-                System.out.println("level = "+ currentCharge);
+              //  System.out.println("level = "+ currentCharge);
             
                 if (dist < batteryCharger.getRange()) 
                 {
-                System.out.println("charging");
+               // System.out.println("charging");
                     int chargerRate = batteryCharger.getChargeRate();
                     int batteryChargeRate = newRobotBattery.getMaxChargeRate();
                     int rate;
