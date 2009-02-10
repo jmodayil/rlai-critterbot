@@ -159,28 +159,29 @@ public class CommonObjects {
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-        new ObjectStateLightSensor(5, 0.005, 0.1); //get real numbers from mike
+        new ObjectStateLightSensor(10, 0.005, 0.01); //get real numbers from mike                
+        //new ObjectStateLightSensor(5, 0.005, 0.1); //get real numbers from mike
         //->->pixels, depth(m), width(m)
         lightSensor.addState(specificLightSensor);
 
         sa.addChild(lightSensor);
 
-//
-//        // Create three more light sensors
-//        lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
-//        lightSensor.setPosition(new Vector2D(0, -0.198));
-//        lightSensor.setLocalDirection(-Math.PI / 2.0);
-//        sa.addChild(lightSensor);
-//
-//        lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
-//        lightSensor.setPosition(new Vector2D(0, 0.198));
-//        lightSensor.setLocalDirection(-Math.PI / 2.0);
-//        sa.addChild(lightSensor);
-//
-//        lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
-//        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
-//        lightSensor.setLocalDirection(-Math.PI);
-//        sa.addChild(lightSensor); 
+
+        // Create three more light sensors
+        lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
+        lightSensor.setPosition(new Vector2D(0, -0.198));
+        lightSensor.setLocalDirection(-Math.PI / 2.0);
+        sa.addChild(lightSensor);
+
+        lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
+        lightSensor.setPosition(new Vector2D(0, 0.198));
+        lightSensor.setLocalDirection(-Math.PI / 2.0);
+        sa.addChild(lightSensor);
+
+        lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
+        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
+        lightSensor.setLocalDirection(-Math.PI);
+        sa.addChild(lightSensor); 
 
         SimulatorObject battery = new SimulatorObject("battery",
         pId++);
@@ -441,23 +442,23 @@ public class CommonObjects {
     public static SimulatorObject generateLightSource(String pName, int pId, int intensity) {
         SimulatorObject lightSource = new SimulatorObject(pName, pId);
 
-        double pRadius = 0.1;
-        Polygon shape = new Polygon();
+//        double pRadius = 0.1;
+//        Polygon shape = new Polygon();
+//
+//        int numPoints = 16;
+//
+//        for (int i = 0; i < numPoints; i++) {
+//            double angle = i * 2 * Math.PI / numPoints;
+//            Vector2D pt = new Vector2D(Math.cos(angle) * pRadius, Math.sin(angle) * pRadius);
+//            pt.zeroize();
+//
+//            shape.addPoint(pt.x, pt.y);
+//        }
+//
+//        shape.translate(new Vector2D(pRadius, pRadius));
+//        shape.doneAddPoints();
 
-        int numPoints = 16;
-
-        for (int i = 0; i < numPoints; i++) {
-            double angle = i * 2 * Math.PI / numPoints;
-            Vector2D pt = new Vector2D(Math.cos(angle) * pRadius, Math.sin(angle) * pRadius);
-            pt.zeroize();
-
-            shape.addPoint(pt.x, pt.y);
-        }
-
-        shape.translate(new Vector2D(pRadius, pRadius));
-        shape.doneAddPoints();
-
-        lightSource.setShape(shape);
+        lightSource.setShape(null);
 
         ObjectStateLightSource specificLightSource = new ObjectStateLightSource();
         specificLightSource.setIntensity(intensity); //talk to mike
