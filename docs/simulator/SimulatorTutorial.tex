@@ -27,7 +27,8 @@ Installing the simulator is a matter of a few steps. In order, you should:
 \item{Copy relevant files into the Simulator package}
 \end{enumerate}
 
-Each step will be detailed in the following sections.
+Each step will be detailed in the following sections with instructions for
+UNIX systems.
 
 
 \subsection{Building DisCo}
@@ -45,23 +46,36 @@ Critterbot-specific files, at
 http://www.cs.ualberta.ca/~mg17/critterbot/files/DiscoExtension.tgz
 \end{verbatim}
 
-Next, you need to copy a file specifying some information about your operating
-system. The file in question is:
+For the remaining of this tutorial, I will assume that you are downloading
+files to a directory called robots.
+
+First, extract the files from \verb+DiscoExtension.tgz+:
+
+\begin{verbatim}robots> tar -xvzf DiscoExtension.tgz \end{verbatim}
+
+This will create a directory \verb+disco+. Next, you need to copy a file 
+specifying some information about your operating system. The file in question 
+is:
 
 \begin{itemize}
-\item{\textbf{Mac OS}: make/LIBSMAC.d}
-\item{\textbf{Unix}: make/LIBSMAC.d (untested)}
+\item{\textbf{Linux}: LIBSEXAMPLE.d}
+% UNIX?
+\item{\textbf{Mac OS}: LIBSMAC.d}
 \item{\textbf{Windows}: Out of luck.}
 \end{itemize}
 
-To copy the file, execute (from your disco directory): 
+Assuming a Linux machine, execute the following:
 
-\begin{verbatim}$> cp make/LIBSMAC.d make/LIBS.d \end{verbatim}
+\begin{verbatim}
+robots> cd disco
+robots/disco> cp make/LIBSMAC.d make/LIBS.d
+\end{verbatim}
 
 We are now ready to build:
 \begin{verbatim}
-$> cd ../.. 
-$> make
+robots/disco> make
+robots/disco> cd ..
+robots>
 \end{verbatim}
 
 \subsection{Downloading and installing the RLAI Robotic Simulator package}
@@ -72,11 +86,12 @@ The Simulator package can be downloaded from
 http://www.cs.ualberta.ca/~mg17/critterbot/files/RLAIRobotSimulator.tgz
 \end{verbatim}
 
-You should be able to directly extract the directory, e.g.
+Again assuming that you have downloaded \verb+RLAIRobotSimulator.tgz+ to
+the directory \verb+robots+, extract files from the tarball:
 
-\begin{verbatim}$> tar -xvzf RLAIRobotSimulator.tgz \end{verbatim}
+\begin{verbatim}robots> tar -xvzf RLAIRobotSimulator.tgz \end{verbatim}
 
-under UNIX systems.
+That's all - nothing to compile here.
 
 \subsection{Copying relevant files to the RLAI Robotic Simulator package}
 
@@ -89,17 +104,21 @@ All that is needed is to copy the file over into the Simulator directory.
 Assuming the installation directory for the Simulator is \verb+simulator+,
 then you can copy the file as follows:
 
-\begin{verbatim}$> cp disco/bin/Control.bin simulator/bin/Control.bin \end{verbatim}
+\begin{verbatim}
+robots> cp disco/bin/Control.bin simulator/bin/Control.bin
+\end{verbatim}
 
 (For UNIX users, ln -s is recommended)
 
 \section{Running the Simulator}
 
-Provided you installed all the required files, you should now be able to
+Provided that you installed all the required files, you should now be able to
 run the Simulator out of the box:
 
-\begin{verbatim}$> cd simulator \end{verbatim}
-\begin{verbatim}$> ./run.sh \end{verbatim}
+\begin{verbatim}
+robots> cd simulator 
+robots/simulator> ./run.sh
+\end{verbatim}
 
 The \verb+run.sh+ script will compile three Java files, namely
 
