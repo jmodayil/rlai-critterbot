@@ -703,7 +703,7 @@ public class Polygon {
 		double[] bby = new double[5];
 
 		bbx[0] = bbx[1] = bbx[4] = bx;
-		bbx[2] = bbx[3] = (int) bx + bw;
+		bbx[2] = bbx[3] = bx + bw;
 		bby[0] = bby[3] = bby[4] = by;
 		bby[1] = bby[2] = by + bh;
 

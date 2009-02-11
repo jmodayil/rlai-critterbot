@@ -50,12 +50,64 @@ public class CommonObjects {
         return pId + pNewObject.getChildren().size() + 1;
     }
 
+    private static final int xIndex = 0;
+    private static final int yIndex = 1;
+    private static final int dIndex = 2;
+    /** Adds a generated object to the given list. This method also finds a
+     *   random position and direction within the given ranges for the object. 
+     *   Returns the ID that the next object should receive.
+     *
+     * @param pList The list to which the object should be added
+     * @param pNewObject The object to be added.
+     * @param pRanges Three pairs of <min, max> values defining the allowed
+     *    position and direction. The pairs respectively correspond to the x
+     *    coordinate, the y coordinate and the direction of the object.
+     * @param pId The first available object ID.
+     *
+     * @return The next available object ID, after the given object has been added.
+     */
+    public static int addObjectRandomPosition(List<SimulatorObject> pList,
+            SimulatorObject pNewObject, double[][] pRanges, int pId) {
+
+        boolean done = false;
+        double xRange = pRanges[xIndex][1] - pRanges[xIndex][0];
+        double yRange = pRanges[yIndex][1] - pRanges[yIndex][0];
+        double dRange = pRanges[dIndex][1] - pRanges[dIndex][0];
+
+        while (!done) {
+          Vector2D pos = new Vector2D(Math.random() * xRange + pRanges[xIndex][0],
+                  Math.random() * yRange + pRanges[yIndex][0]);
+          double dir = Math.random() * dRange + pRanges[dIndex][0];
+
+          // Set the object to a random valid position
+          pNewObject.setPosition(pos);
+          pNewObject.setDirection(dir);
+
+          boolean invalidPosition = false;
+
+          // Determine whether any of the existing objects intersect with us
+          for (SimulatorObject o : pList) {
+            if (pNewObject.collidesWith(o) != null) {
+              invalidPosition = true;
+              break;
+            }
+          }
+
+          done = !invalidPosition;
+        }
+
+        // Add the object to the list
+        pList.add(pNewObject);
+
+        return pId + pNewObject.getChildren().size() + 1;
+    }
+
     /** Adds a generated object to the given list. This method also takes care of
      *   setting the position and the direction of the object. Returns the ID that
      *   the next object should receive.
      *
      * @param pList The list to which the object should be added
-     * @param newObject The object to be added.
+     * @param pNewObject The object to be added.
      * @param pPosition The new position of the object.
      * @param pDirection The new direction of the object.
      * @param pId The first available object ID.
