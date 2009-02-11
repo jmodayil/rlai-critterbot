@@ -151,10 +151,13 @@ public class KeyboardClient implements DropClient, KeyListener {
 
     private void setDropWithXYThetaSpace(CritterControlDrop controlDrop) {
         double velocityX, angVel;
-        int maxVel = 100; // 100m/s (or cm/s)
+        int maxVel = 100; // 100 cm/s
         int maxAngularVel = 27; // Roughly 1/2 a turn in a second
         velocityX = (up * maxVel - down * maxVel);
-        angVel = (right * -maxAngularVel + left * maxAngularVel);
+        // @todo MGB: The angle here LOOKS wrong (right is positive). The idea
+        //  is that the world is drawn inverted around the x axis, resulting in
+        //  a left turn looking like a right turn.
+        angVel = (right * maxAngularVel + left * -maxAngularVel);
         controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
         controlDrop.x_vel = (int) velocityX;
         controlDrop.y_vel = 0;

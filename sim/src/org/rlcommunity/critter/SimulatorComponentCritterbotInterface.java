@@ -215,9 +215,22 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         idx = 0;
         for (SimulatorObject sen : sensors) {        
             ObjectStateBattery bData = (ObjectStateBattery)sen.getState(ObjectStateBattery.NAME);
-            stateDrop.battery[idx] = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+            switch (idx) {
+              // This sounds like we should be using an array, as Adam was
+              //  doing...
+              case 0:
+                stateDrop.batv40 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+                break;
+              case 1:
+                stateDrop.batv160 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+                break;
+              case 2:
+                stateDrop.batv280 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+                break;
+            }
             // Don't add more light data than we have space
-            if (++idx == stateDrop.light.length) {
+            // @todo make 3 a constant
+            if (++idx >= 3) {
                 break;
             }            
         }
