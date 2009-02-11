@@ -37,15 +37,20 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                     motor100, motor220, motor340);
         }
     }
+    /** Two matrices defining the transformations from XYT space to
+     *   wheel space and vice-versa.
+     */
     private static final double[][] XYT2MS = {{-0.98, -0.17, 1.07},
         {0.64, -0.76, 1.07},
         {0.34, 0.93, 1.07}};
     private static final double[][] MS2XYT = {{-0.65, 0.42, 0.22},
         {-0.11, -0.51, 0.62},
         {0.31, 0.31, 0.31}};
+    
     private static final double motorCommandFactor = 10;
     private static final double motorSpeedFactor = 12;
     private static final double motorIntensity = 5;
+
     public static final String NAME = "critterbot_interface";
 
     // Scales for the different drop values
@@ -59,9 +64,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double LIGHT_SCALE = 0.18;
     public static final double BATTERY_SCALE = 1.0;
     public static final double IRDIST_SCALE = 255.0;
-    protected DropInterface aDropInterface;
     public static final double BUMP_SENSOR_SCALE = 1000.0;
-    final private MotorCommand command = new MotorCommand();
+
+    protected DropInterface aDropInterface;
+    private final int numBatteries = 3;
+
+    private final MotorCommand aCommand = new MotorCommand();
 
     public SimulatorComponentCritterbotInterface(DropInterface pInterface) {
         aDropInterface = pInterface;
@@ -69,6 +77,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
     public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) {
         if (aDropInterface != null) {
+            // Read in drops
             List<SimulatorDrop> drops = aDropInterface.receiveDrops();
             List<SimulatorObject> critters =
                     pCurrent.getObjects(SimulatorComponentCritterbotInterface.NAME);
@@ -163,7 +172,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         }
         driveData.setVelocity(velocity);
         driveData.setAngVelocity(angleVelocity);
-        command.setCommandValue(velocity, angleVelocity);
+        aCommand.setCommandValue(velocity, angleVelocity);
     }
 
     private int computeIntensity(double command, double actual) {
@@ -178,22 +187,22 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         stateDrop.cycle_time = pState.getTime();
 
         // Set the command value
-        stateDrop.motor100.command = (int) (command.motor100 * motorCommandFactor);
-        stateDrop.motor220.command = (int) (command.motor220 * motorCommandFactor);
-        stateDrop.motor340.command = (int) (command.motor340 * motorCommandFactor);
+        stateDrop.motor100.command = (int) (aCommand.motor100 * motorCommandFactor);
+        stateDrop.motor220.command = (int) (aCommand.motor220 * motorCommandFactor);
+        stateDrop.motor340.command = (int) (aCommand.motor340 * motorCommandFactor);
 
         // Compute fake intensity
         ObjectStateDynamics driveData = (ObjectStateDynamics) pObject.getState(SimulatorComponentDynamics.NAME);
         MotorCommand fakeCommand = new MotorCommand();
         fakeCommand.setCommandValue(driveData.getVelocity(), driveData.getAngVelocity());
 
-        stateDrop.motor100.velocity = (int) (command.motor100 * motorSpeedFactor);
-        stateDrop.motor220.velocity = (int) (command.motor220 * motorSpeedFactor);
-        stateDrop.motor340.velocity = (int) (command.motor340 * motorSpeedFactor);
+        stateDrop.motor100.velocity = (int) (aCommand.motor100 * motorSpeedFactor);
+        stateDrop.motor220.velocity = (int) (aCommand.motor220 * motorSpeedFactor);
+        stateDrop.motor340.velocity = (int) (aCommand.motor340 * motorSpeedFactor);
 
-        stateDrop.motor100.current = computeIntensity(command.motor100, fakeCommand.motor100);
-        stateDrop.motor220.current = computeIntensity(command.motor220, fakeCommand.motor220);
-        stateDrop.motor340.current = computeIntensity(command.motor340, fakeCommand.motor340);
+        stateDrop.motor100.current = computeIntensity(aCommand.motor100, fakeCommand.motor100);
+        stateDrop.motor220.current = computeIntensity(aCommand.motor220, fakeCommand.motor220);
+        stateDrop.motor340.current = computeIntensity(aCommand.motor340, fakeCommand.motor340);
 
         // Get all of this object's light sensors
         List<SimulatorObject> sensors =
@@ -229,8 +238,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 break;
             }
             // Don't add more light data than we have space
-            // @todo make 3 a constant
-            if (++idx >= 3) {
+            if (++idx >= numBatteries) {
                 break;
             }            
         }

@@ -18,6 +18,10 @@ import java.util.List;
 import java.util.ListIterator;
 
 public class Polygon {
+  /** Some flags to request debug information */
+  public static final boolean debugDrawEdgeNormals = false;
+  public static final boolean debugDrawBoundingBoxes = false;
+  
 	/*
 	 * Used for approximate methods; epsilon is the tolerance at which two
 	 * coordinates are considered the same.
@@ -677,22 +681,24 @@ public class Polygon {
 	 *            The main Graphics object to draw with
 	 */
 	public void draw(SimulatorGraphics g) {
-        // @todo concurrency issue - we might redraw half-modified lists of
-        //  points
-        if (aXPoints == null || aYPoints == null) return;
-        
-		Color tempC = g.getColor();
-		g.setColor(Color.black);
-		g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
-		g.setColor(tempC);
+    if (aXPoints == null || aYPoints == null) {
+      return;
+    }
 
-		// Draw the edge normals
-		//drawEdgeNormals(g);
-		// Draw the bounding box
-		//drawBoundingBox(g);
+    Color tempC = g.getColor();
+    g.setColor(Color.black);
+    g.drawPolyline(aXPoints, aYPoints, aXPoints.length);
+    g.setColor(tempC);
+
+  // Draw the edge normals
+  if (debugDrawEdgeNormals)
+    drawEdgeNormals(g);
+  // Draw the bounding box
+  if (debugDrawBoundingBoxes)
+    drawBoundingBoxes(g);
 	}
 
-	public void drawBoundingBox(SimulatorGraphics g) {
+	public void drawBoundingBoxes(SimulatorGraphics g) {
 		double[] bbx = new double[5];
 		double[] bby = new double[5];
 

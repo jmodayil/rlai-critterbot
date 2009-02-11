@@ -206,13 +206,14 @@ public class SimulatorObject {
 			Polygon.Intersection i1 = isects.get(0);
 			Polygon.Intersection i2 = isects.get(1);
 
-            // @todo fixme - this is not the proper way, we should reorder the
-            //  intersections themselves (or something)
-            if (i1.alpha > i2.alpha) {
-                Polygon.Intersection tmp = i1;
-                i1 = i2;
-                i2 = tmp;
-            }
+      // Ensure that the the second intersection comes after the first on the
+      //   polygon, so that the normal to the alpha-related polygon is pointing
+      //   outwards
+      if (i1.alpha > i2.alpha) {
+        Polygon.Intersection tmp = i1;
+        i1 = i2;
+        i2 = tmp;
+      }
 
 			Vector2D p1 = aShape.getPoint(i1.alpha);
 			Vector2D p2 = aShape.getPoint(i2.alpha);
@@ -220,24 +221,22 @@ public class SimulatorObject {
 			// Keep the polygon coordinates of the collision point
 			// This is an interpolation between the two points. Could be
 			// very wrong, e.g. pacman-style shapes
-			/*
-			 * This is wrong - need to view alpha's as between (-n/2, n/2]
-			 * col.alpha = (i1.alpha + i2.alpha) / 2; col.beta = (i1.beta +
-			 * i2.beta) / 2;
-			 */
-			// @todo For now, we return a single intersection point - this is
-			// because
-			// The interpolation of the two points might not be a good point of
-			// contact at all
+			/* @todo For now, we return a single intersection point - this is
+			 *  because the interpolation of the two points might not be a good point
+       *  of contact at all
+       *
+       * IF doing interpolation, remember how to interpolate at the boundaries
+       *  (i.e. alpha = n-epsilon and alpha2 = epsilon interpolate to 0,
+       *  not n/2
+       */
 			col.alpha = i1.alpha;
 			col.beta = i1.beta;
 
-			// @todo this is also wrong in general, e.g. if alpha1 = n-1 and
-			// alpha2 = 0,
 			// this results in alpha = (n-1)/2 (when it should be n - 1/2)
 			col.point = aShape.getPoint(col.alpha);
 
-			// The normal is the normal to p2-p1
+			// The normal is the normal to p2-p1 (note: the normal itself is good,
+      //   even if the point of contact would not be)
 			col.normal = p2.minus(p1).rotate(Math.PI / 2);
 			col.normal.normalize();
 
