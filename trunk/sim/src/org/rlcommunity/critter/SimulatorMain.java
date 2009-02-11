@@ -44,6 +44,7 @@ public class SimulatorMain {
         engine.addComponent(new SimulatorComponentCritterbotInterface(dropInterface));
         engine.addComponent(new SimulatorComponentIRDistance(randomizer));
         engine.addComponent(new SimulatorComponentBattery());
+        
         return engine;
     }
 
@@ -140,10 +141,10 @@ public class SimulatorMain {
         final KeyboardClient keyboardClient = createKeyboardClient(dropInterface);
 
         int millisPerStep = 10;
-//        final SimulatorEngine engine = createSimulatorEngine(dropInterface,
-//                new FunEnvironment());
+        final SimulatorEngine engine = createSimulatorEngine(dropInterface,
+                new FunEnvironment());
 //        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new BasketBallEnvironment());
-        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new LightBatteryEnvironment());
+//        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new LightBatteryEnvironment());
         
         if (useGui) {
             runGUI(engine, keyboardClient);

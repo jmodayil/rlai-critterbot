@@ -64,6 +64,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                 continue;
             }
             ObjectStateDynamics dynData = (ObjectStateDynamics) os;
+
             if (debugDisplayData) {
                 System.out.println("Current velocity " + dynData.getVelocity() + " Position: "+obj.getPosition());
             }
@@ -101,6 +102,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             double mass = dynData.getMass();
             
             Force thrust = dynData.getForceSum();
+            
             //thrust.vec.plusEquals(friction.vec);
             double torque = dynData.getTorque();
             double wi = dynData.getAngVelocity();
