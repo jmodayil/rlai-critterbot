@@ -13,7 +13,6 @@ public class ObjectStateLightSource implements ObjectState
 {
   public static final String NAME = SimulatorComponentLight.NAME + "source";
 
-  // A grayscale light value (@todo this needs to be changed) 
   protected int aIntensity; //in Candela
 
   public ObjectStateLightSource()

@@ -17,7 +17,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
     public static final String NAME = "dynamics";
     public static final boolean collisionEnergySink = false;
-    // @todo clean up
+
     protected static boolean debugDetailedCollisions = false;
     protected static boolean debugCollisions = false;
     protected static boolean debugDynamicsData = false;
@@ -197,7 +197,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                             SimulatorObject compObjP = pCurrent.getObject(compObj);
 
 
-                            //@TODO!!!
                             if (debugCollisions) {
                                 System.out.println("Collision at " + pt.point +
                                         "between " + obj + " and " + compObj + "!");
@@ -273,23 +272,15 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 Vector2D projVab = n.times(vab.dot(n));
 
                                 // Compute the resulting impulse
-                                //  Taken from Physics for Game Developers
-                                double taua = ra.cross(n) / Ia;
-                                double taub = rb.cross(n) / Ib;
-
-                                Vector2D tmpa = new Vector2D(taua * ra.y, -taua * ra.x);
-                                Vector2D tmpb = new Vector2D(taub * rb.y, -taub * rb.x);
-
                                 // @todo clean up
-                                double altValueA = n.x * ra.y - n.y * ra.x;
-                                altValueA = altValueA * altValueA;
-                                altValueA /= Ia;
-                                double altValueB = n.x * rb.y - n.y * rb.x;
-                                altValueB = altValueB * altValueB;
-                                altValueB /= Ib;
+                                double tauA = n.x * ra.y - n.y * ra.x;
+                                tauA = tauA * tauA;
+                                tauA /= Ia;
+                                double tauB = n.x * rb.y - n.y * rb.x;
+                                tauB = tauB * tauB;
+                                tauB /= Ib;
 
-                                double denom = 1.0 / ma + 1.0 / mb + 
-                                        altValueA + altValueB;
+                                double denom = 1.0 / ma + 1.0 / mb + tauA + tauB;
                                 
                                 Vector2D projImpulse = projVab.times(-(1 + e) / denom);
 
@@ -304,15 +295,11 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.println ("P: "+pt.point);
                                     System.out.println ("R: "+ra+" "+rb);
                                     System.out.println ("N, e: "+n+" "+e);
-                                    System.out.println ("Dots: "+n.dot(tmpa)+" "+n.dot(tmpb));
                                     System.out.println ("V-: "+va+" "+vb);
                                     System.out.printf ("W-: %.4g %.4g\n", wa, wb);
                                     System.out.println ("vPoint: "+vaPoint+" "+vbPoint);
                                     System.out.println ("v_ab: "+vab);
                                     System.out.println ("Projection: "+projVab);
-                                    System.out.println ("A: "+ taua + " " + tmpa + " " + denom);
-                                    System.out.println ("B: "+ taub + " " + tmpb + " " + denom);
-                                    System.out.println ("Compare: "+altValueA+" "+n.dot(tmpa));
                                     System.out.println ("Impulse: "+projImpulse);
                                     System.out.println("V: "+vap+" "+vbp);
                                     System.out.printf("W: %.4g %.4g\n", wap, wbp);
