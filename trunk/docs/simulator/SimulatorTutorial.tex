@@ -1,6 +1,8 @@
 \documentclass[12pt]{article}
 
 \usepackage{fullpage}
+\usepackage{epsfig}
+\usepackage{graphicx}
 
 \author{Marc G. Bellemare, Adam White}
 \title{The RLAI Robotic Simulator\\ A Tutorial}
@@ -11,11 +13,12 @@
 \section{Requirements}
 
 \begin{itemize}
-\item{Java 1.5 (1.6?)}
+\item{Java 1.5}
 \end{itemize}
 
-I suggest running the simulator locally, at least initially, to be able
-to visualize the environment.
+I suggest running the simulator in standalone mode 
+(see Section \ref{subsec:standalone}), at least initially, to be able to 
+visualize the environment.
 
 \section{Installing the Simulator}
 
@@ -23,8 +26,8 @@ Installing the simulator is a matter of a few steps. In order, you should:
 
 \begin{enumerate}
 \item{Download and build the DisCo framework}
-\item{Download and extract the RLAI Robotic Simulator package}
-\item{Copy relevant files into the Simulator package}
+\item{Download and extract the RLAI Robotic Simulator}
+\item{Copy relevant files into the Simulator}
 \end{enumerate}
 
 Each step will be detailed in the following sections with instructions for
@@ -47,7 +50,7 @@ http://www.cs.ualberta.ca/~mg17/critterbot/files/DiscoExtension.tgz
 \end{verbatim}
 
 For the remaining of this tutorial, I will assume that you are downloading
-files to a directory called robots.
+files to a directory called \verb+robots+.
 
 First, extract the files from \verb+DiscoExtension.tgz+:
 
@@ -68,17 +71,19 @@ Assuming a Linux machine, execute the following:
 
 \begin{verbatim}
 robots> cd disco
-robots/disco> cp make/LIBSMAC.d make/LIBS.d
+robots/disco> cp make/LIBSEXAMPLE.d make/LIBS.d
 \end{verbatim}
 
-We are now ready to build:
+On a Mac OS-based machine, you would replace LIBSEXAMPLE.d by LIBSMACS.d. We 
+are now ready to build:
+
 \begin{verbatim}
 robots/disco> make
 robots/disco> cd ..
 robots>
 \end{verbatim}
 
-\subsection{Downloading and installing the RLAI Robotic Simulator package}
+\subsection{Downloading and installing the RLAI Robotic Simulator}
 
 The Simulator package can be downloaded from
 
@@ -93,7 +98,7 @@ the directory \verb+robots+, extract files from the tarball:
 
 That's all - nothing to compile here.
 
-\subsection{Copying relevant files to the RLAI Robotic Simulator package}
+\subsection{Copying relevant files to the RLAI Robotic Simulator}
 
 There is a single file of interest in the DisCo directory, located in the
 \verb+bin+ directory and named \verb+Control.bin+. If you extracted the 
@@ -108,12 +113,41 @@ then you can copy the file as follows:
 robots> cp disco/bin/Control.bin simulator/bin/Control.bin
 \end{verbatim}
 
-(For UNIX users, ln -s is recommended)
+This completes the installation! 
 
 \section{Running the Simulator}
 
 Provided that you installed all the required files, you should now be able to
-run the Simulator out of the box:
+run the Simulator out of the box. There are two possible modes of operation,
+namely standalone mode and normal mode. In standalone mode only the simulator
+itself will be running, without an agent or a source of rewards. In this mode
+you can control the robot manually using the arrow keys. On the other hand,
+in normal mode the Agent program (\verb+src/Agent.java+) controls the robot.
+
+Playing with the simulator in standalone mode can give you an idea of how the
+robot moves around and how objects react before designing an agent.
+
+\subsection{Standalone Mode}\label{subsec:standalone}
+
+The following will start the simulator in standalone mode:
+
+\begin{verbatim}
+robots> cd simulator 
+robots/simulator> ./runStandalone.sh
+\end{verbatim}
+
+The \verb+runStandalone.sh+ script will compile the simulator loader,
+\verb+src/Simulator.java+, and execute it. The specifics of this program will 
+be detailed later in this tutorial.
+
+Once you execute \verb+runStandalone.sh+, you should see a GUI appear, showing
+the state of the simulator. The arrows will drive the robot around. Some of the
+sensory information is currently drawn (such as bump sensors), but we do not
+aim to provide a complete visualization of the data.
+
+\subsection{Normal Mode}
+
+The following will start the simulator in normal mode:
 
 \begin{verbatim}
 robots> cd simulator 
@@ -141,12 +175,61 @@ terminate all of them.
 Once you start \verb+run.sh+, you should see a GUI appear (provided you are
 running locally). By default the Agent will send commands at period intervals;
 you should see the robot performing some behavior which depends on the mood
-of the programmer at the time the simulator was packaged. You can also
-manually control the robot with the arrow keys within the GUI; however, this
-will result in the Agent and yourself competing for control, which is probably
-not the desired behavior. If you wish to play around the simulator without
-the Agent, you can run the \verb+Simulator+ process on its own (peek inside
-\verb+run.sh+ for more details).
+of the programmer at the time the simulator was packaged. The arrow keys are
+disabled in Normal Mode to prevent competition for control between the agent
+and the user. 
 
-% @todo add GUI image
+\begin{figure}
+\centerline{
+\psfig{file=images/simulator_gui.pdf,width=5in}
+}
+\caption{The RLAI Robotic Simulator.}
+\end{figure}
+
+\section{Default Parameters and Command-Line Arguments\label{sec:changingDefaults}}
+
+\subsection{Simulator}
+
+The following command-line arguments can be used with \verb+Simulator.java+:
+
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+\verb+-p [port]+ & specify which port the Simulator should listen on (see also, DisCo parameters below). Default: 2324. \\
+\hline
+\verb+-ng+ & disables the GUI (and keyboard control). \\
+\hline
+\verb+-nk+ & disables controlling the robot via the keyboard. \\
+\hline
+\verb+-s [scale]+ & specifies the time scale (see below for details). Default: 1.0. \\
+\hline
+\verb+-h+ & provides help on command-line options \\ 
+\hline
+\end{tabular}
+\end{center}
+
+The time scale $s$ is specified in relative speed of the simulator with respect 
+to wall clock. If $s=1.0$, 1 second of simulator time is simulated in 1 second
+of wall time. If $s=0.5$, 0.5 second of simulator time is simulated in 1
+second of wall time. Values larger than $1.0$ may tax the processor too much,
+in which case the simulator will report `Running behind' and slow down.
+
+\subsection{Agent}
+
+In order to modify the port on which the Agent listens, the file 
+\verb+Agent.java+ will have to be modified and the variable \verb+discoAgentPort+ changed to a different value.
+
+\subsection{Reward Generator}
+
+% @todo
+
+\subsection{DisCo}
+
+The configuration for DisCo may be found in 
+\verb+robots/simulator/bin/simulator.xml+. It is beyond the scope of this
+tutorial to detail how DisCo should be configured. Of chief interest are the
+ports that DisCo connects to. By default these will be 2324, 2325 and 2326.
+If modifying the ports for either the Simulator, Agent or Reward Generator,
+the DisCo configuration file will also have to be modified accordingly.
+
 \end{document}
