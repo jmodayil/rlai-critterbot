@@ -85,11 +85,23 @@ public class CommonObjects {
 
           boolean invalidPosition = false;
 
+          Polygon ourPoly = pNewObject.getShape();
+          
           // Determine whether any of the existing objects intersect with us
           for (SimulatorObject o : pList) {
             if (pNewObject.collidesWith(o) != null) {
               invalidPosition = true;
               break;
+            }
+            Polygon otherPoly = o.getShape();
+
+            // Test for a polygon containing the other, which can occur
+            //  independently of intersection
+            if (ourPoly != null && otherPoly != null) {
+              if (ourPoly.contains(otherPoly) || otherPoly.contains(ourPoly)) {
+                invalidPosition = true;
+                break;
+              }
             }
           }
 

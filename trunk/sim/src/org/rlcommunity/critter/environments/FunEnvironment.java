@@ -31,20 +31,19 @@ public class FunEnvironment implements EnvironmentDescription {
                 new Vector2D(0.0, 0.0), 0.0, id);
 
         id = CommonObjects.addObject(objects,
-                CommonObjects.generateHex("Hex", id),
-                new Vector2D(1.0, 1.0), 0.0, id);
-
-        id = CommonObjects.addObject(objects,
-                CommonObjects.generateBar("Bar", id),
-                new Vector2D(3.0, 2.5), 0.0, id);
-
-        id = CommonObjects.addObject(objects,
                 CommonObjects.generateLightSource("Light Source1", id,600),
-                new Vector2D(0.5, 0.5), 0.0, id); //something funnie going on with positions
+                new Vector2D(0.5, 0.5), 0.0, id);
 
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateBatteryCharger("batteryCharger", id),
                 new Vector2D(3.0, 0.25), 0.0, id);
+
+        int numBars = 4;
+        for (int i = 0; i < numBars; i++) {
+          id = CommonObjects.addObjectRandomPosition(objects,
+                CommonObjects.generateBar("Bar"+i, id),
+                new double[][] {{0.5, 4.5}, {0.5, 4.5}, {-Math.PI, Math.PI}}, id);
+        }
 
         int numSmallBalls = 4;
 
@@ -54,7 +53,7 @@ public class FunEnvironment implements EnvironmentDescription {
                 new double[][] {{0.5, 4.5}, {0.5, 4.5}, {0, 0}}, id);
         }
 
-        int numMediumBalls = 4;
+        int numMediumBalls = 2;
 
         for (int i = 0; i < numMediumBalls; i++) {
           id = CommonObjects.addObjectRandomPosition(objects,
@@ -62,7 +61,7 @@ public class FunEnvironment implements EnvironmentDescription {
                 new double[][] {{0.5, 4.5}, {0.5, 4.5}, {0, 0}}, id);
         }
 
-        int numBigBalls = 2;
+        int numBigBalls = 1;
 
         for (int i = 0; i < numBigBalls; i++) {
           id = CommonObjects.addObjectRandomPosition(objects,

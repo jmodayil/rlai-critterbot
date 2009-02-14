@@ -27,6 +27,10 @@ public class SimulatorScheduler {
     protected volatile boolean aTerminated = false;
 
     public final int NANOSECONDS_IN_MILLISECOND = 1000000;
+
+    /** How often (in time steps) the average time should be reported, or 0 to
+     * not report */
+    public final int averageTimeReportInterval = 0;
     
     /** Creates a new scheduler for the given engine. This scheduler will run
      *   the engine on the given time step at a frequency pStepLength / pScale,
@@ -48,7 +52,6 @@ public class SimulatorScheduler {
 
         double averageTime = 0;
         int count = 0;
-        int reportInterval = 1000;
 
         int lagCount = 0;
         
@@ -71,9 +74,11 @@ public class SimulatorScheduler {
             averageTime += computationTime;
             count++;
 
-            if (count >= reportInterval) {
-                count -= reportInterval;
-                System.err.println ("Average time: "+averageTime/reportInterval);
+            if (averageTimeReportInterval > 0 &&
+                    count >= averageTimeReportInterval) {
+                count -= averageTimeReportInterval;
+                System.err.println ("Average time: "+
+                        averageTime/averageTimeReportInterval);
                 averageTime = 0;
             }
 
