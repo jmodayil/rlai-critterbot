@@ -38,7 +38,7 @@ public class CommonObjects {
      *   the next object should receive.
      * 
      * @param pList The list to which the object should be added
-     * @param newObject The object to be added.
+     * @param pNewObject The object to be added.
      * @param pId The first available object ID.
      * 
      * @return The next available object ID, after the given object has been added.

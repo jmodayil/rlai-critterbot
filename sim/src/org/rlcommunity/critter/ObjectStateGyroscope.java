@@ -37,7 +37,7 @@ public class ObjectStateGyroscope implements ObjectState
 
   /** Sets the new angular velocity measurement 
     *
-    * @return The new angular velocity measured by the gyroscope 
+    * @param pAngularVel The new angular velocity measured by the gyroscope
     */
   public void setSensorValue(double pAngularVel)
   {

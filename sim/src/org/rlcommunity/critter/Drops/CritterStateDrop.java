@@ -18,9 +18,13 @@ public class CritterStateDrop implements SimulatorDrop
 {
   public class motor_struct
   {
+    /** The command executed by the system (as opposed to the requested command) */
     public int command;
+    /** The velocity of the corresponding wheel */
     public int velocity;
+    /** The current being drawn by the motor */
     public int current;
+    /** The temperature of the motor */
     public int temp;
 
     public void readData(InterfaceInputStream pIn) throws IOException
@@ -71,21 +75,33 @@ public class CritterStateDrop implements SimulatorDrop
 
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
+  /** The current power source of the robot */
   public PowerSource power_source;
 
+  /** The bus voltage (currently unused) */
   public int bus_voltage;
+  /** The state of the three batteries (currently only batv40 has nonzero values) */
   public int batv40, batv160, batv280;
 
+  /** The state of the three motors */
   public motor_struct motor100, motor220, motor340;
+  /** The accelerometer and magnetomer status (as 3D vectors) */
   public vector_struct accel, mag;
 
+  /** The gyroscope information */
   public int rotation;
+  /** An array of infrared distance sensor values */
   public int[] ir_distance;
+  /** An array of IR light sensor values (currently unused) */
   public int[] ir_light;
+  /** An array of light sensor values */
   public int[] light;
+  /** An array of thermal sensor values (currently unused) */
   public int[] thermal;
+  /** An array of bump sensor values */
   public int[] bump;
 
+  /** Error flags reported by robot (unused by the simulator) */
   public int error_flags;
   public int cycle_time;
 
@@ -122,8 +138,10 @@ public class CritterStateDrop implements SimulatorDrop
            / 8; // divide by 8 because all of these are bit sizes
   }
 
-  public CritterStateDrop()
-  {
+  /** Creates a new CritterStateDrop with default (mostly 0) values.
+   * 
+   */
+  public CritterStateDrop() {
     power_source = PowerSource.SHORE;
     
     ir_distance = new int[IR_DISTANCE_SIZE];
@@ -139,8 +157,13 @@ public class CritterStateDrop implements SimulatorDrop
     motor340 = new motor_struct();
   }
 
-  public void writeData(InterfaceOutputStream pOut) throws IOException
-  {
+  /** Writes this data drop to the given output stream.
+   *
+   * @param pOut The output stream to which the drop should be written.
+   *
+   * @throws java.io.IOException
+   */
+  public void writeData(InterfaceOutputStream pOut) throws IOException {
     pOut.writeInt(power_source.ordinal());
 
     pOut.writeInt(bus_voltage);
@@ -170,6 +193,12 @@ public class CritterStateDrop implements SimulatorDrop
     pOut.writeInt(cycle_time);
   }
 
+  /** Reads in a drop from the input stream.
+   *
+   * @param pIn The input stream from which the drop should be read.
+   * 
+   * @throws java.io.IOException
+   */
   public void readData(InterfaceInputStream pIn) throws IOException
   {
     power_source = (PowerSource)EnumSet.range(PowerSource.SHORE,

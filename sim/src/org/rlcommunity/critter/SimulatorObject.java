@@ -249,8 +249,8 @@ public class SimulatorObject {
 	 * This method is obsolete and should be removed at the earliest possible
 	 * time.
 	 * 
-	 * @returns True if the passed object intersects this object
-	 * @obsolete - This method does not take the object hierarchy into account
+	 * @return True if the passed object intersects this object
+	 * @deprecated - This method does not take the object hierarchy into account
 	 **/
 	public Vector2D intersects(SimulatorObject compObj) {
 		if (aShape == null || compObj.getShape() == null)
@@ -450,8 +450,7 @@ public class SimulatorObject {
 	/**
 	 * Sets the global direction of the object
 	 * 
-	 * @param The
-	 *            new direction
+	 * @param newDir The new direction
 	 */
 	public void setDirection(double newDir) {
         // First bound the direction
@@ -571,9 +570,6 @@ public class SimulatorObject {
 	 * should remain fixed as the object tree is traversed. Also updates the
 	 * Polygon of this object's children.
 	 * 
-	 * @todo MGB: This is not quite clean - I don't like having to pass a center
-	 *     of rotation around. There should be a better way.
-	 * 
 	 * @param pTranslation
 	 *            The translation to perform on the object
 	 * @param pRotation
@@ -583,6 +579,9 @@ public class SimulatorObject {
 	 */
 	public void updateShape(Vector2D pTranslation, double pRotation,
 			Vector2D pRotCenter) {
+	 /* @todo MGB: This is not quite clean - I don't like having to pass a center
+	  *     of rotation around. There should be a better way.
+	  */
 		if (aShape != null) {
 			aShape.translate(pTranslation);
 			aShape.rotate(pRotation, pRotCenter);
@@ -640,8 +639,7 @@ public class SimulatorObject {
 	 * Compares the position and direction of the current object to the
 	 * argument's position and direction
 	 * 
-	 * @param Comparison
-	 *            SimulatorObject
+	 * @param compObj SimulatorObject
 	 **/
 	public boolean geometryEquals(SimulatorObject compObj) {
 		return (aPos.equals(compObj.getPosition()) && aDir == compObj.getDirection());
@@ -651,7 +649,7 @@ public class SimulatorObject {
 	 * Sets the position and direction of the current object to the argument's
 	 * position and direction
 	 * 
-	 * @param Template
+	 * @param compObj
 	 *            SimulatorObject
 	 **/
 	public void setGeometry(SimulatorObject compObj) {
