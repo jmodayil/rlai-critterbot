@@ -54,7 +54,7 @@ public class ObjectStateLightSource implements ObjectState
   public void draw(SimulatorGraphics g, SimulatorObject parent)
   {
         Vector2D pos = parent.getPosition();
-        g.setColor(Color.BLACK);
+        g.setColor(Color.YELLOW);
         g.drawOval(pos.x, pos.y, 0.15, 0.15);
         g.drawOval(pos.x+0.02, pos.y+0.02, 0.1, 0.1);   
   }

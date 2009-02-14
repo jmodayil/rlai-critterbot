@@ -642,7 +642,8 @@ public class SimulatorObject {
 	 * @param compObj SimulatorObject
 	 **/
 	public boolean geometryEquals(SimulatorObject compObj) {
-		return (aPos.equals(compObj.getPosition()) && aDir == compObj.getDirection());
+		return (getPosition().equals(compObj.getPosition()) &&
+            getDirection() == compObj.getDirection());
 	}
 
 	/**

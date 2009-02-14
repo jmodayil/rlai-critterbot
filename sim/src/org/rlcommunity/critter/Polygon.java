@@ -352,7 +352,33 @@ public class Polygon {
 		return (count % 2 == 1);
 	}
 
-	/**
+  /** Returns whether this polygon contains the given polygon. This method does
+   *   not necessarily return true if the two polygons intersect, EVEN if the
+   *   said polygons are convex. Use intersects() instead.
+   *
+   * @param pPoly The polygon that may be contained in this one.
+   *
+   * @return True if pPoly is completely contained in this polygon, false
+   *    otherwise.
+   */
+	public boolean contains(Polygon pPoly) {
+		int numPoints = points.size();
+
+		if (numPoints < 3)
+			return false;
+
+    // Test each point of the other polygon, in turn, and verify that it lies
+    //  inside this Polygon
+    for (Vector2D p : pPoly.getPoints()) {
+      if (!contains(p)) return false;
+    }
+
+    // We could not find a point of the other polygon not inside this polygon,
+    //   so return true
+    return true;
+	}
+
+  /**
 	 * Returns a point, if any, at which this polygon intersects the given
 	 * polygon. The 'relationship' is, of course, symmetric. Note that no
 	 * efficiency guarantee is given.
