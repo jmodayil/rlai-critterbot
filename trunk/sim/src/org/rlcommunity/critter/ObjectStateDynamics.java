@@ -57,7 +57,7 @@ public class ObjectStateDynamics implements ObjectState {
      *
      * @param pMass The mass of the object to which this state component belongs,
      *   in kilograms
-     * @param pMomentI The moment of inertia of the object to which this state
+     * @param pMomentInertia The moment of inertia of the object to which this state
      *   component belongs, in kg m^2
      */
     public ObjectStateDynamics(double pMass, double pMomentInertia) {
@@ -199,7 +199,7 @@ public class ObjectStateDynamics implements ObjectState {
     /**
      * Calculate the force of friction acting on the object based on its
      *  current velocity
-     * @param The timestep length in seconds
+     * @param dt The timestep length in seconds
      * @return the component vector of the force of friction
      */
     public Vector2D calculateFriction(double dt) {
@@ -358,7 +358,7 @@ public class ObjectStateDynamics implements ObjectState {
     /** Returns null if the object does not have an ObjectStateDynamics,
      *   or its ObjectStateDynamics otherwise.
      *
-     * @param pObj The object from which we want the ObjectStateDynamics.
+     * @param pObject The object from which we want the ObjectStateDynamics.
      * @return The ObjectStateDynamics corresponding to the object.
      */
     public static ObjectStateDynamics retrieve(SimulatorObject pObject) {

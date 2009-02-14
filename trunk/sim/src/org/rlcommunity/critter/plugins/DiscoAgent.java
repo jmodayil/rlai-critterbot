@@ -125,7 +125,6 @@ public class DiscoAgent {
         for (int i = 0; i < pDrop.ir_distance.length; i++)
             aObservation[idx++] = pDrop.ir_distance[i];
 
-        // @todo this might be Java 1.6
         if (debugPrintObservations)
             System.out.println ("Observation: "+Arrays.toString(aObservation));
 

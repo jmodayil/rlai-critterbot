@@ -47,7 +47,7 @@ public class ObjectStateAccelerometer implements ObjectState
 
   /** Sets the new acceleration data
     *
-    * @return The new acceleration data
+    * @param pAccel The new acceleration data
     */
   public void setSensorValue(Vector2D pAccel)
   {

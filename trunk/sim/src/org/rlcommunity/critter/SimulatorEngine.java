@@ -60,7 +60,7 @@ public class SimulatorEngine {
      *  getRootObjects() which only returns the highest level objects, and
      *  not their children.
      *
-     * @return
+     * @return A list of all existing objects.
      */
 	public List<SimulatorObject> getObjects() {
 		return Collections.unmodifiableList(aState.getObjects());

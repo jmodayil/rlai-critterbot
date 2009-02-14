@@ -118,7 +118,7 @@ public class Vector2D {
     
     /** Rotates this vector by a given angle, and returns it (as a new instance).
      *
-     * @param dir The angle of rotation
+     * @param angle The angle of rotation
      * @return A rotated version of this vector
      */
     public Vector2D rotate(double angle) {

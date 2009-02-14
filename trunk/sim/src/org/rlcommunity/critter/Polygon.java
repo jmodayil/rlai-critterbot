@@ -358,7 +358,7 @@ public class Polygon {
 	 * efficiency guarantee is given.
 	 * 
 	 * 
-	 * @param poly
+	 * @param pPoly
 	 *            The polygon to be tested against.
 	 * @return The (first) point of intersection of the two polygons, or null if
 	 *         none exist.
@@ -375,7 +375,7 @@ public class Polygon {
 
 	/**
 	 * Returns up to num intersections found with the given polygon as a list of
-	 * pairs <alpha, beta> where alpha is the point of intersection, in polygon
+	 * pairs < alpha, beta > where alpha is the point of intersection, in polygon
 	 * coordinates, for this polygon and beta is the same point in the other
 	 * polygons' coordinate system.
 	 * 

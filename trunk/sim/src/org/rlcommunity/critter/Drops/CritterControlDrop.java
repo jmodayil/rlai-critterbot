@@ -18,7 +18,9 @@ public class CritterControlDrop implements SimulatorDrop
   public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE };
   public enum LedMode { THING1, THING2, THING3 };
 
+  /** The motor mode determining which fields are actually used */
   public MotorMode motor_mode;
+  /** The LED mode (currently unused) */
   public LedMode   led_mode;
 
   /** Velocities used in XYTHETA_SPACE */
@@ -106,6 +108,7 @@ public class CritterControlDrop implements SimulatorDrop
       LedMode.THING3).toArray()[pIn.readInt()];
   }
 
+  @Override
   public String toString()
   {
     return "Motor mode: "+motor_mode+
