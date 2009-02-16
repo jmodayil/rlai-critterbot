@@ -302,7 +302,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
             double alpha = sensor - lowSensor;
             stateDrop.bump[lowSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
-            stateDrop.bump[highSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
+            stateDrop.bump[highSensor] = (int) (alpha * data.magnitude * BUMP_SENSOR_SCALE);
         }
 
         return stateDrop;
