@@ -64,7 +64,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double LIGHT_SCALE = 0.18;
     public static final double BATTERY_SCALE = 1.0;
     public static final double IRDIST_SCALE = 255.0;
-    public static final double BUMP_SENSOR_SCALE = 1000.0;
+    public static final double BUMP_SENSOR_SCALE = 100.0;
+    public static final double BUMP_SENSOR_MAX = 255.0;
 
     protected DropInterface aDropInterface;
     private final int numBatteries = 3;
@@ -301,8 +302,10 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             }
 
             double alpha = sensor - lowSensor;
-            stateDrop.bump[lowSensor] = (int) ((1 - alpha) * data.magnitude * BUMP_SENSOR_SCALE);
-            stateDrop.bump[highSensor] = (int) (alpha * data.magnitude * BUMP_SENSOR_SCALE);
+            double val = Math.min(data.magnitude * BUMP_SENSOR_SCALE, BUMP_SENSOR_MAX);
+
+            stateDrop.bump[lowSensor] = (int) ((1 - alpha) * val);
+            stateDrop.bump[highSensor] = (int) (alpha * val);
         }
 
         return stateDrop;
