@@ -1,5 +1,5 @@
 /*
- * CopylastAction.intArray[3] 2008 Brian Tanner
+ * Copyright 2008 Brian Tanner
  * http://bt-recordbook.googlecode.com/
  * brian@tannerpages.com
  * http://brian.tannerpages.com
