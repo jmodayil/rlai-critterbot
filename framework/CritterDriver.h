@@ -6,19 +6,23 @@
 
 #include <termios.h>
 
-#include "USeconds.h"
 #include "Component.h"
 #include "BitMask.h"
 #include "ErrorMessage.h"
 #include "CritterControlDrop.h"
 #include "CritterStateDrop.h"
+#include "USeconds.h"
 
 #define SER_HEADER1 0xDE
 #define SER_HEADER2 0xAD
 #define SER_HEADER3 0xBE
 #define SER_HEADER4 0xEF
 
-#define STATE_LENGTH 38
+#define STATE_LENGTH 42
+
+#define LOG_INTERVAL 5 // in minutes
+#define LOG_PATH "/var/log/"
+#define LOG_EXTENSION ".crtrlog"
 
 using namespace std;
 
@@ -41,7 +45,7 @@ class CritterDriver : public Component {
     int port;
     unsigned char state_buf[STATE_LENGTH];
     static const unsigned short crctable[256]; 
-    
+    USeconds last_log; 
     FILE *log;
   
   public:
@@ -54,7 +58,6 @@ class CritterDriver : public Component {
     //virtual int think(USeconds &wokeAt);
     virtual int sense(USeconds &wokeAt);
     virtual int act(USeconds &wokeAt);
-    virtual BitMask type();
 
     //virtual int loadConfig(ComponentConfig *conf);
     int readConfig(ComponentConfig *conf, string &device, int &postWait);
@@ -64,8 +67,8 @@ class CritterDriver : public Component {
     unsigned short calccrc(unsigned char* buf, int size); 
     void initport();
     void closeport();
-    void readPacket(unsigned char buf[]);
-    void publishData(USeconds &now);
+    void readPacket(unsigned char buf[], USeconds *theTime);
+    FILE* rotate_log( FILE *log, USeconds *now );
     
 };
 
