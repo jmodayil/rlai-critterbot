@@ -61,7 +61,28 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
 
   lastPost.setAsNow();
 
-  log = fopen("/var/log/robot.log","a");
+
+}
+
+FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
+
+  char file_name[100];
+
+  if(log)
+    fclose(log);
+
+  strcpy( file_name, LOG_PATH );
+  strcat( file_name, (now->formatTime("%y-%m-%d-%H-%M-%S")).c_str() );
+  strcat( file_name, LOG_EXTENSION );
+
+  log = fopen( file_name, "a" );
+  last_log = *now;
+  
+  fprintf( log, "Time Voltage Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
+
+  fflush( log );
+  
+  return log;
 }
 
 CritterDriver::~CritterDriver() {
@@ -123,6 +144,8 @@ int CritterDriver::init(USeconds &wokeAt) {
   
   printf("Initializing serial port.\n");
   initport();
+  
+  log = rotate_log(NULL, &wokeAt);
   return 1;
 }
 
@@ -130,35 +153,33 @@ int CritterDriver::getFID() {
   return fid;
 }
 
-void CritterDriver::readPacket( unsigned char buf[]) {
+void CritterDriver::readPacket( unsigned char buf[], USeconds *theTime) {
 
       int i = 0;
       unsigned short their_crc;
-      time_t now;
-//for(i = 0; i < 37; i++) {
-//fprintf(stderr, "%02x ", buf[i]);
-//}
-//i = 0;
-      stateDrop.bus_voltage       = (int) buf[i++] * 25;
+      
+      fprintf(stderr, "Reading Packet...\n" );
+
+      stateDrop.bus_voltage       = (int) buf[i++];
       stateDrop.motor100.command  = (char) buf[i++];
-      stateDrop.motor100.temp     = (int) buf[i++];
       stateDrop.motor100.velocity = (char) buf[i++];
       stateDrop.motor100.current  = (int) buf[i++];
+      stateDrop.motor100.temp     = (int) buf[i++];
       stateDrop.motor220.command  = (char) buf[i++];
-      stateDrop.motor220.temp     = (int) buf[i++];
       stateDrop.motor220.velocity = (char) buf[i++];
       stateDrop.motor220.current  = (int) buf[i++];
+      stateDrop.motor220.temp     = (int) buf[i++];
       stateDrop.motor340.command  = (char) buf[i++];
-      stateDrop.motor340.temp     = (int) buf[i++];
       stateDrop.motor340.velocity = (char) buf[i++];
       stateDrop.motor340.current  = (int) buf[i++];
+      stateDrop.motor340.temp     = (int) buf[i++];
       
       stateDrop.accel.x           = ((char) buf[i++]) << 4;
       stateDrop.accel.y           = ((char) buf[i++]) << 4;
       stateDrop.accel.z           = ((char) buf[i++]) << 4;
-      stateDrop.mag.x             = ((char) buf[i++]) << 2;
-      stateDrop.mag.y             = ((char) buf[i++]) << 2;
-      stateDrop.mag.z             = ((char) buf[i++]) << 2;
+      //stateDrop.mag.x             = ((char) buf[i++]) << 2;
+      //stateDrop.mag.y             = ((char) buf[i++]) << 2;
+      //stateDrop.mag.z             = ((char) buf[i++]) << 2;
 
       stateDrop.rotation          = ((char) buf[i++]) << 2;
 
@@ -177,20 +198,35 @@ void CritterDriver::readPacket( unsigned char buf[]) {
 //	error("Receive a Corrupt Robot State Packet!");
 //	return;
   //    }
-}
-
-void CritterDriver::publishData(USeconds &now) {
+      if(theTime->time.tv_sec >= last_log.time.tv_sec + LOG_INTERVAL * 60 ) {
+        fprintf( stderr, "Opening new Log File.\n" );
+	log = rotate_log( log, theTime );
+      }
       
-      int i;
-
-      fprintf(log, "%s : ", now.toString().c_str());
-      for(i = 0; i < STATE_LENGTH - 2; i++ ) {
-        fprintf(log, "%d ", state_buf[i]);
-      } 
+      fprintf(log, "%s ", (theTime->toString()).c_str());
+      fprintf(log, "%d ", stateDrop.motor100.command);
+      fprintf(log, "%d ", stateDrop.motor100.velocity);
+      fprintf(log, "%d ", stateDrop.motor100.current);
+      fprintf(log, "%d ", stateDrop.motor100.temp);
+      fprintf(log, "%d ", stateDrop.motor220.command);
+      fprintf(log, "%d ", stateDrop.motor220.velocity);
+      fprintf(log, "%d ", stateDrop.motor220.current);
+      fprintf(log, "%d ", stateDrop.motor220.temp);
+      fprintf(log, "%d ", stateDrop.motor340.command);
+      fprintf(log, "%d ", stateDrop.motor340.velocity);
+      fprintf(log, "%d ", stateDrop.motor340.current);
+      fprintf(log, "%d ", stateDrop.motor340.temp);
+      fprintf(log, "%d ", stateDrop.accel.x);
+      fprintf(log, "%d ", stateDrop.accel.y);
+      fprintf(log, "%d ", stateDrop.accel.z);
+      fprintf(log, "%d ", stateDrop.rotation);
+      for(int i = 0; i < 10; i++)
+        fprintf(log, "%d ", stateDrop.ir_distance[i]);
+      for(int i = 0; i < 4; i++)
+        fprintf(log, "%d ", stateDrop.light[i]);
       fprintf(log, "\n");
       (*(CritterStateDrop*)lake->startWriteHead(stateId)) = stateDrop;  
       lake->doneWriteHead(stateId);
-
 }
 
 unsigned short CritterDriver::calccrc(unsigned char* data, int size) {
@@ -218,7 +254,6 @@ int CritterDriver::sense(USeconds &wokeAt) {
   
   if(fid <= 0)
     return error("sense(): Error reading from serial port.  FID: %d", fid);
-
   
   while(read(fid, &buf, 1) == 1) {
     switch(state) {
@@ -240,7 +275,7 @@ int CritterDriver::sense(USeconds &wokeAt) {
 	}
         state_buf[i++] = buf;
 	if(i == STATE_LENGTH) {
-	  readPacket(state_buf);
+	  readPacket(state_buf, &wokeAt);
 	  i = 0;
 	  state = HEADER;
 	}
@@ -249,7 +284,7 @@ int CritterDriver::sense(USeconds &wokeAt) {
         if(buf == 0xFF) {
 	  state_buf[i++] = buf;
 		if(i == STATE_LENGTH) {
-		  readPacket(state_buf);
+		  readPacket(state_buf, &wokeAt);
 		  i = 0;
 		  state = HEADER;
 		  break;
@@ -309,11 +344,4 @@ int CritterDriver::act(USeconds &now) {
     }
   }
   return 1;
-}
-
-BitMask CritterDriver::type() {
-  BitMask mask;
-  mask.maskBit(Component::ComponentSense);
-  mask.maskBit(Component::ComponentAct);
-  return mask;
 }
