@@ -10,29 +10,54 @@
 \begin{document}
 \maketitle
 
+\section{Introduction}
+
+This tutorial documents the RLAI Robotic Simulator: how to install it, how
+to run it and how to use it in your work. After installing the simulator
+you will have a choice of operating it in Normal mode (involving an agent
+and a reward function) or in Standalone mode, where you can personally 
+control the robot in the environment. After performing the installation
+(Section \ref{sec:installation}),  I suggest running the simulator in 
+Standalone mode (see Section \ref{subsec:standalone}) once initially to get
+an idea of the environment in which the robot evolves. 
+
 \section{Requirements}
 
 \begin{itemize}
 \item{Java 1.5}
+\item{A POSIX Operating System}
 \end{itemize}
 
-I suggest running the simulator in standalone mode 
-(see Section \ref{subsec:standalone}), at least initially, to be able to 
-visualize the environment.
-
-\section{Installing the Simulator}
+\section{Installing the Simulator}\label{sec:installation}
 
 Installing the simulator is a matter of a few steps. In order, you should:
 
 \begin{enumerate}
-\item{Download and build the DisCo framework}
-\item{Download and extract the RLAI Robotic Simulator}
+\item{Download the Simulator package}
+\item{Build the DisCo framework}
 \item{Copy relevant files into the Simulator}
 \end{enumerate}
 
 Each step will be detailed in the following sections with instructions for
 UNIX systems.
 
+\subsection{Downloading and installing the RLAI Robotic Simulator}
+
+The Simulator package can be downloaded from
+
+\begin{verbatim}
+http://www.cs.ualberta.ca/~mg17/critterbot/files/RLAISimulator.tgz
+\end{verbatim}
+
+For the remaining of this tutorial, I will assume that you have downloaded
+this file to a directory called \verb+robots+. Assuming that this is done, 
+you should extract files from the tarball:
+
+\begin{verbatim}robots> tar -xvzf RLAISimulator.tgz \end{verbatim}
+
+The simulator itself, being in Java, does not need to be compiled. Before
+we actually use it, however, we need to set up the framework, called DisCo,
+that binds the simulator, the agent and the reward generator together.
 
 \subsection{Building DisCo}
 
@@ -42,26 +67,15 @@ For now we will not
 concern with the details of what the framework does; you can learn more at
 \begin{verbatim}http://www.cs.ualberta.ca/~roberts/intro.html\end{verbatim}.
 
-Thankfully, you can download a pre-packaged version of DisCo, extended with
-Critterbot-specific files, at 
-
-\begin{verbatim}
-http://www.cs.ualberta.ca/~mg17/critterbot/files/DiscoExtension.tgz
-\end{verbatim}
-
-For the remaining of this tutorial, I will assume that you are downloading
-files to a directory called \verb+robots+.
-
-First, extract the files from \verb+DiscoExtension.tgz+:
-
-\begin{verbatim}robots> tar -xvzf DiscoExtension.tgz \end{verbatim}
-
-This will create a directory \verb+disco+. Next, you need to copy a file 
-specifying some information about your operating system. The file in question 
-is:
+Thankfully, \verb+RLAISimulator.tgz+ comes with a pre-packaged version of 
+DisCo, extended with Critterbot-specific files. The files of interest are in
+a subdirectory \verb+disco+. Before compiling the framework, you need to copy 
+a file specifying some information about your operating system (DisCo is meant
+to be cross-platform). Depending on your operation system, the file in 
+question is:
 
 \begin{itemize}
-\item{\textbf{Linux}: LIBSEXAMPLE.d}
+\item{\textbf{Linux}: LIBSLINUX.d}
 % UNIX?
 \item{\textbf{Mac OS}: LIBSMAC.d}
 \item{\textbf{Windows}: Out of luck.}
@@ -71,32 +85,21 @@ Assuming a Linux machine, execute the following:
 
 \begin{verbatim}
 robots> cd disco
-robots/disco> cp make/LIBSEXAMPLE.d make/LIBS.d
+robots/disco> cp make/LIBSLINUX.d make/LIBS.d
 \end{verbatim}
 
-On a Mac OS-based machine, you would replace LIBSEXAMPLE.d by LIBSMACS.d. We 
+On a Mac OS-based machine, you would replace LIBSLINUX.d by LIBSMACS.d. We 
 are now ready to build:
 
 \begin{verbatim}
 robots/disco> make
+
+<crunch crunch crunch>
+
 robots/disco> cd ..
 robots>
 \end{verbatim}
 
-\subsection{Downloading and installing the RLAI Robotic Simulator}
-
-The Simulator package can be downloaded from
-
-\begin{verbatim}
-http://www.cs.ualberta.ca/~mg17/critterbot/files/RLAIRobotSimulator.tgz
-\end{verbatim}
-
-Again assuming that you have downloaded \verb+RLAIRobotSimulator.tgz+ to
-the directory \verb+robots+, extract files from the tarball:
-
-\begin{verbatim}robots> tar -xvzf RLAIRobotSimulator.tgz \end{verbatim}
-
-That's all - nothing to compile here.
 
 \subsection{Copying relevant files to the RLAI Robotic Simulator}
 
@@ -141,7 +144,8 @@ The \verb+runStandalone.sh+ script will compile the simulator loader,
 be detailed later in this tutorial.
 
 Once you execute \verb+runStandalone.sh+, you should see a GUI appear, showing
-the state of the simulator. The arrows will drive the robot around. Some of the
+the state of the simulator. The arrow keys will drive the robot around. Some 
+of the
 sensory information is currently drawn (such as bump sensors), but we do not
 aim to provide a complete visualization of the data.
 
@@ -173,7 +177,7 @@ for any of the four processes to die, at which point it will attempt to
 terminate all of them.
 
 Once you start \verb+run.sh+, you should see a GUI appear (provided you are
-running locally). By default the Agent will send commands at period intervals;
+running locally). By default the Agent will send commands at regular intervals;
 you should see the robot performing some behavior which depends on the mood
 of the programmer at the time the simulator was packaged. The arrow keys are
 disabled in Normal Mode to prevent competition for control between the agent
@@ -188,14 +192,14 @@ and the user.
 
 \section{Default Parameters and Command-Line Arguments\label{sec:changingDefaults}}
 
-\subsection{Simulator}
+\subsection{Simulator}\label{subsec:simulator_parameters}
 
 The following command-line arguments can be used with \verb+Simulator.java+:
 
 \begin{center}
-\begin{tabular}{|c|c|}
+\begin{tabular}{|c|l|}
 \hline
-\verb+-p [port]+ & specify which port the Simulator should listen on (see also, DisCo parameters below). Default: 2324. \\
+\verb+-p [port]+ & specifies which port the Simulator should listen on. Default: 2324. \\
 \hline
 \verb+-ng+ & disables the GUI (and keyboard control). \\
 \hline
@@ -231,5 +235,45 @@ tutorial to detail how DisCo should be configured. Of chief interest are the
 ports that DisCo connects to. By default these will be 2324, 2325 and 2326.
 If modifying the ports for either the Simulator, Agent or Reward Generator,
 the DisCo configuration file will also have to be modified accordingly.
+
+\section{Logging and Common Error Messages}
+
+The output of all processes (there are four of them) is redirected by default
+to files in the directory \verb+simulator/logs+. In this section we review
+what kind of messages you should expect to see if you take a peek at one of
+the output logs.
+
+\subsection{Simulator}
+
+The log file for the simulator is \verb+simulator/logs/Simulator+. The 
+simulator, like all pieces of software, is not perfect. The most common
+error message you are likely to see is
+
+\begin{verbatim}
+Simulator is running behind...
+\end{verbatim}
+
+This is the simulator's way of telling you that it is unable to simulate
+at the requested speed. The easiest way to get rid of it is to reduce the
+time scale at which the simulator is asked to operate (below 1.0 if necessary).
+In any event, no harm is caused; the simulator will trudge along as fast as it
+can.
+
+\subsection{DisCo}
+
+The log file for DisCo is \verb+simulator/logs/Disco+. DisCo actually generates 
+a lot of output, including information about the data
+that is being passed around. A discussion on the Drop data structure and how 
+it is handled by DisCo is beyond the scope of this tutorial. However, most of 
+the data in the DisCo log file should be easily interpreted.
+
+\section{Final Notes}
+
+The provided package is meant to be easy to install and use. Most likely,
+however, you will want to run the Agent (and maybe the RewardGenerator) in
+a separate console in order to more easily debug it.
+
+If you have any concerns or questions about the package or the simulator,
+you should contact Marc G. Bellemare (\texttt{mgbellemare \_at\_ ualberta.ca+}) or Adam White (\texttt{awhite \_at\_ cs.ualberta.ca}).
 
 \end{document}
