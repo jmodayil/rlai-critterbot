@@ -1,5 +1,5 @@
 #ifndef CritterRewardDrop_H
-#define CritterRewardDrop_h
+#define CritterRewardDrop_H
 
 #include "Drop.h"
 #include "CritterDrop.h"
