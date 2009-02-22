@@ -31,7 +31,7 @@ struct command_packet {
     int theta_vel;
   };
 
-  enum { CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0x67 }
+  enum { CNONE, CCLEAR, CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0x67 }
    led_mode;
 };
 

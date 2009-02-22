@@ -6,14 +6,14 @@
 #include "lib_events.h"
 #include <stdlib.h>
 
-
+#define LED_NUM_LEDS 16
 
 //RGB LED array of structures
 struct rgbled {
 	unsigned char r;
 	unsigned char g;
 	unsigned char b;
-}LED[16];
+}LED[LED_NUM_LEDS];
 //angle tracking info
 struct angleinfo {
 	unsigned int grad;
@@ -22,7 +22,7 @@ struct angleinfo {
 }ANGLEINFO[4];
 
 //States of leddrive_event()
-enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW};
+enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW,CUSTOM};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED,RED,GREEN,BLUE};
 
@@ -112,7 +112,7 @@ void leddrive_colordisplay(void);
 void leddrive_busy(void);
 void leddrive_byte(unsigned char *val);
 void leddrive_rainbow(void);
-
+void leddrive_custom(void);
 /*
 cval is 0-4095, leddrive_grad1/2 decide what cval will represent.
 */

@@ -628,7 +628,11 @@ int leddrive_event(void) {
 				if (a>=2400)
 					a=0;
 			break;
-	  case CLEAR:	
+    case CUSTOM:
+      if(a == 0)
+        clearled();
+      break;
+    case CLEAR:	
 	    clearled();
 	    leddrive_stop();
 	    break;
@@ -667,6 +671,10 @@ void leddrive_rotate(int *rot){
 
 void leddrive_clear(void){
 	leddrive_state=CLEAR;
+}
+
+void leddrive_custom(void){
+  leddrive_state=CUSTOM;
 }
 
 void leddrive_stop(void){
