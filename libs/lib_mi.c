@@ -104,6 +104,19 @@ void mi_get_commands(void) {
   m3 = ((signed char)((unsigned char)armgetchar()));
   robot_command.led_mode = armgetchar();
   
+  if(robot_command.led_mode == CCUSTOM) { 
+    for( i = 0; i < LED_NUM_LEDS; i++ ) {
+      LED[i].r = armgetchar();
+      LED[i].g = armgetchar();
+      LED[i].b = armgetchar();
+    }
+  }  
+  else {
+    for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
+      armgetchar();
+    }
+  }
+  
   switch(robot_command.motor_mode) {
     case WHEEL_SPACE:
       motor_set_speed_slew(m1, m2, m3);
@@ -123,7 +136,12 @@ void mi_get_commands(void) {
       break;
   }
  
-  /*switch(robot_command.led_mode) {
+  switch(robot_command.led_mode) {
+    case CNONE:
+      break;
+    case CCLEAR:
+      leddrive_clear();
+      break;
     case CBATTERY:
       leddrive_rainbow();
       break;
@@ -131,14 +149,18 @@ void mi_get_commands(void) {
       leddrive_ball();
       break;
     case CERROR:
-      leddrive_emerg();
+      leddrive_error();
       break;
     case CBUSY:
       leddrive_busy();
       break;
-    default:
-      leddrive_clear();
+    case CEMERGENCY:
+      leddrive_emerg();
+    case CCUSTOM:
+      leddrive_custom(); 
       break;
-  }*/
+    default:
+      break;
+  }
   return;
 }
