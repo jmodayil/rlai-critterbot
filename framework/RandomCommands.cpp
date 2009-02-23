@@ -42,7 +42,7 @@ int RandomCommands::think(USeconds &wokeAt) {
     drop->x_vel = (int)((random() * 1.0) / (RAND_MAX + 1.0) * 50.0 - 25.0);
     drop->y_vel = (int)((random() * 1.0) / (RAND_MAX + 1.0) * 50.0 - 25.0);
 
-    drop->led_mode = CritterControlDrop::THING1;
+    drop->led_mode = CritterControlDrop::NONE;
 
     lake->doneWriteHead(commandWrite);
 

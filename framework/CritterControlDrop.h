@@ -4,6 +4,8 @@
 #include "Drop.h"
 #include "CritterDrop.h"
 
+#define NUM_LEDS 16
+
 using namespace std;
 
 /**
@@ -29,8 +31,14 @@ class CritterControlDrop : public CritterDrop {
     int theta_vel;
   };
   // leaving this aside for now
-  enum { THING1, THING2, THING3} led_mode;
-  
+  enum { NONE, CLEAR, BATTERY, BALL, ERROR, EMERGENCY, BUSY, CUSTOM } led_mode;
+ 
+  struct {
+    unsigned char r;
+    unsigned char g;
+    unsigned char b;
+  } led_val[NUM_LEDS];
+
 	CritterControlDrop();
 	virtual ~CritterControlDrop();
 
