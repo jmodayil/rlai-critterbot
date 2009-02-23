@@ -74,7 +74,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     public static final double ANG_VELOCITY_SCALE = 9.0;
     // All of these need to be made proper
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
-    public static final double LIGHT_SCALE = 0.18;
+    public static final double LIGHT_SCALE = 1.0;
     public static final double BATTERY_SCALE = 1.0;
     public static final double IRDIST_SCALE = 255.0;
     public static final double BUMP_SENSOR_SCALE = 100.0;
@@ -224,15 +224,17 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
         // Fill in the light data array
         int idx = 0;
+        System.out.print ("L: ");
         for (SimulatorObject sen : sensors) {
             ObjectStateLightSensor sData = (ObjectStateLightSensor) sen.getState(ObjectStateLightSensor.NAME);
             stateDrop.light[idx] = (int) (sData.getLightSensorValue() * LIGHT_SCALE);
-
+            System.out.print (stateDrop.light[idx]+" ");
             // Don't add more light data than we have space
             if (++idx == stateDrop.light.length) {
                 break;
             }
         }
+        System.out.println();
         
          sensors = pObject.getChildren(ObjectStateBattery.NAME);
         idx = 0;
