@@ -29,7 +29,7 @@ import org.rlcommunity.critter.InterfaceOutputStream;
 public class CritterControlDrop implements SimulatorDrop
 {
   public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE };
-  public enum LedMode { THING1, THING2, THING3 };
+  public enum LedMode { NONE, CLEAR, BATTERY, BALL, ERROR, EMERGENCY, BUSY, CUSTOM };
 
   /** The motor mode determining which fields are actually used */
   public MotorMode motor_mode;
@@ -41,6 +41,38 @@ public class CritterControlDrop implements SimulatorDrop
   /** Velocities used in WHEEL_SPACE */
   public int m100_vel, m220_vel, m340_vel;
 
+  /** LED values in CUSTOM mode */
+  public class led_struct
+  {
+    public int r,g,b;
+
+    public void readData(InterfaceInputStream pIn) throws IOException
+    {
+      r = pIn.readByte();
+      r = (r < 0 ? (r + 256) : r);
+      g = pIn.readByte();
+      g = (g < 0 ? (g + 256) : g);
+      b = pIn.readByte();
+      b = (b < 0 ? (b + 256) : b);
+    }
+
+    public void writeData(InterfaceOutputStream pOut) throws IOException
+    {
+      pOut.writeByte((byte)r);
+      pOut.writeByte((byte)g);
+      pOut.writeByte((byte)b);
+    }
+
+    public int getSize()
+    {
+      return 3 * Integer.SIZE;
+    }
+  }
+  public led_struct[] LEDValues;
+
+  public static final int LED_VALUES_SIZE = 16;
+
+
   /** Returns the size of the data contained in this drop.
     *  This must correspond to the amount of data written and read by
     *  writeData and readData, respectively. 
@@ -48,9 +80,21 @@ public class CritterControlDrop implements SimulatorDrop
     */
   public int getSize()
   {
-    return Integer.SIZE + // motor_mode
+    return (Integer.SIZE + // motor_mode
            Integer.SIZE + // led_mode
-           3 * Integer.SIZE; // x_vel + y_vel + theta_vel OR m_vel's
+           3 * Integer.SIZE + // x_vel + y_vel + theta_vel OR m_vel's
+           LEDValues[0].getSize() * LED_VALUES_SIZE) // LEDValues
+           / 8; // Divide by 8 because we're adding up bits
+  }
+
+  /** Creates a new CritterControlDrop and zeros LEDValues
+   *   for posterity.
+   */
+  public CritterControlDrop() {
+      LEDValues = new led_struct[LED_VALUES_SIZE];
+      for(int i = 0; i < LED_VALUES_SIZE; i++) {
+          LEDValues[i] = new led_struct();
+      }
   }
 
   /** Write control drop data out to a stream. The order in which things 
@@ -86,6 +130,9 @@ public class CritterControlDrop implements SimulatorDrop
 
     // Write LED mode
     pOut.writeInt(led_mode.ordinal());
+
+    for(int i = 0; i < LED_VALUES_SIZE; i++)
+        LEDValues[i].writeData(pOut);
   }
  
   /** Reverse of writeData; reads the drop from a DataInputStream
@@ -117,8 +164,12 @@ public class CritterControlDrop implements SimulatorDrop
     }
    
     // Read LED mode
-    led_mode = (LedMode)EnumSet.range(LedMode.THING1, 
-      LedMode.THING3).toArray()[pIn.readInt()];
+    led_mode = (LedMode)EnumSet.range(LedMode.NONE,
+      LedMode.CUSTOM).toArray()[pIn.readInt()];
+
+    for(int i = 0; i < LED_VALUES_SIZE; i++)
+        LEDValues[i].readData(pIn);
+
   }
 
   @Override
