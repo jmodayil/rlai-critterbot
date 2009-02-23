@@ -19,6 +19,7 @@
 #define SER_HEADER4 0xEF
 
 #define STATE_LENGTH 42
+#define NUM_LEDS 16
 
 #define LOG_INTERVAL 5 // in minutes
 #define LOG_PATH "/var/log/"

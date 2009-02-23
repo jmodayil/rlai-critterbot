@@ -321,7 +321,9 @@ int CritterDriver::act(USeconds &now) {
 
   unsigned char sdata[] = {SER_HEADER1, SER_HEADER2, SER_HEADER3, SER_HEADER4,
     0, 0, 0, 0, 0};
-  
+ 
+  unsigned char leddata[NUM_LEDS * 3];
+
   if(now - lastPost >= postWait) {
     lastPost = now + (now - lastPost - postWait);
     acts++;
@@ -338,9 +340,19 @@ int CritterDriver::act(USeconds &now) {
       sdata[7] = (char)controlDrop->theta_vel;
       sdata[8] = (char)controlDrop->led_mode;
 
+      if(controlDrop->led_mode == CritterControlDrop::CUSTOM) {
+        for(int i = 0; i < NUM_LEDS; i++) {
+          leddata[i] = controlDrop->led_val[i].r;
+          leddata[i + 1] = controlDrop->led_val[i].g;
+          leddata[i + 2] = controlDrop->led_val[i].b;
+        }  
+      }
+
       if(9 != write(fid, &sdata, 9)) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
-     
+      
+      if(48 != write(fid, &leddata, 48))
+          fprintf(stderr, "Error writing data out to serial port!\n");     
     }
   }
   return 1;
