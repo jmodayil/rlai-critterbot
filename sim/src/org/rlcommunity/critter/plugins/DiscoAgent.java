@@ -80,7 +80,7 @@ public class DiscoAgent {
             actionDrop.theta_vel = 10;
 
             // For completeness, set the LED mode, although it has no effect
-            actionDrop.led_mode = CritterControlDrop.LedMode.THING1;
+            actionDrop.led_mode = CritterControlDrop.LedMode.NONE;
             
             if (debugPrintActions) {
                 System.out.println(actionDrop.toString());
