@@ -43,4 +43,23 @@ public class Collision
     /** The point of collision, in polygon-coordinates, for each polygon
      *   involved */
     public double alpha,  beta;
+
+    /** Creates the reverse of this collision (so that the Collision information
+     *    is shown from the other object's "viewpoint"). In particular,
+     *    alpha becomes beta and vice-versa, and the normal's direction is
+     *    reversed.
+     *
+     * @param pCol The original Collision information.
+     * @return The reversed collision information.
+     */
+    public static Collision reverse(Collision pCol) {
+      Collision revCol = new Collision();
+      revCol.point = pCol.point;
+      revCol.magnitude = pCol.magnitude;
+      revCol.alpha = pCol.beta;
+      revCol.beta = pCol.alpha;
+      revCol.normal = pCol.normal.reverse();
+
+      return revCol;
+    }
 }

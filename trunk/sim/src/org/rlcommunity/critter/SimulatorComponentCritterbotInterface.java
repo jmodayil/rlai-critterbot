@@ -224,17 +224,14 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
         // Fill in the light data array
         int idx = 0;
-        System.out.print ("L: ");
         for (SimulatorObject sen : sensors) {
             ObjectStateLightSensor sData = (ObjectStateLightSensor) sen.getState(ObjectStateLightSensor.NAME);
             stateDrop.light[idx] = (int) (sData.getLightSensorValue() * LIGHT_SCALE);
-            System.out.print (stateDrop.light[idx]+" ");
             // Don't add more light data than we have space
             if (++idx == stateDrop.light.length) {
                 break;
             }
         }
-        System.out.println();
         
          sensors = pObject.getChildren(ObjectStateBattery.NAME);
         idx = 0;

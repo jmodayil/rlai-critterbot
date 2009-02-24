@@ -182,18 +182,28 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      *  @param delta    The amount of time (in ms) between the current and
      *         next states.
      **/
-    
+
     private void checkForCollisions(SimulatorState pCurrent, SimulatorState pNext, int delta) {
         boolean positionReset = true;
 
+        /** a simple variable for now to make sure we are not deadlocking */
+        int deadlockLoopCount = 0;
+
+        List<SimulatorObject> dynamicObjects =
+                pNext.getObjects(SimulatorComponentDynamics.NAME);
+        
         while (positionReset) {
+          deadlockLoopCount++;
+          if (deadlockLoopCount > dynamicObjects.size())
+              throw new RuntimeException("Deadlock in checkCollisions");
+          
             positionReset = false;
 
-            for (SimulatorObject obj : pNext.getObjects(SimulatorComponentDynamics.NAME)) {
+            for (SimulatorObject obj : dynamicObjects) {
                 // we only need to check for collisions if the object
                 // has moved
                 if (!obj.geometryEquals(pCurrent.getObject(obj))) {
-                    for (SimulatorObject compObj : pNext.getObjects(SimulatorComponentDynamics.NAME)) {
+                    for (SimulatorObject compObj : dynamicObjects) {
 
                         //ignore this if it is the same object
 
@@ -340,7 +350,11 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                             // Store the collision information in the next state
                             addCollision(pt, obj, colMagnitude);
-                            addCollision(pt, compObj, colMagnitude);
+                            // We provide the other object with the inverse of
+                            //  the collision
+                            Collision compPt = Collision.reverse(pt);
+
+                            addCollision(compPt, compObj, colMagnitude);
 
                             //now double-check that collision has been resolved
                             // this check should fail. Pt should be null.
