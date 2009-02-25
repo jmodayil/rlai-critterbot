@@ -65,7 +65,7 @@ public class CritterControlDrop implements SimulatorDrop
 
     public int getSize()
     {
-      return 3 * Integer.SIZE;
+      return 3 * Byte.SIZE;
     }
   }
   public led_struct[] LEDValues;

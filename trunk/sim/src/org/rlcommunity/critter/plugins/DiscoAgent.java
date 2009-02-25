@@ -33,7 +33,7 @@ public class DiscoAgent {
     protected static final boolean debugPrintObservations = true;
     /** If debugPrintActions = true, the action returned by the agent will
      *   be printed out. */
-    protected static final boolean debugPrintActions      = true;
+    protected static final boolean debugPrintActions      = false;
 
     protected static final int numObservations =
             CritterStateDrop.BUMP_SIZE +
