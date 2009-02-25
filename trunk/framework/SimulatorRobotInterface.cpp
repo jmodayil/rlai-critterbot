@@ -138,7 +138,7 @@ int SimulatorRobotInterfaceProc::processDrop()
   {
     controlDrop = true;
     // @todo see above comment
-    dropLength = 20;
+    dropLength = 68;
   }
   else if (strncmp(data, CritterRewardDrop::name.c_str(), nameLength) == 0)
   {
