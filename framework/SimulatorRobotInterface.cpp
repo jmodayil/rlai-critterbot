@@ -91,7 +91,7 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
 
         memcpy (readData, unreadDataPtr, len); 
         // Reset the read pointers accordingly 
-        readPtr = readPtr - len; 
+        readPtr = readPtr - numBytes; 
         unreadDataPtr = readData;
       }
     }
