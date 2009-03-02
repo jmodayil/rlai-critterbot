@@ -44,15 +44,30 @@ public class DiscoInterfaceServer extends Thread implements DropClient
 {
   protected ServerSocket aSocket;
 
-  protected LinkedList<DiscoInterfaceClientHandler> aClients; 
+  protected LinkedList<DiscoInterfaceClientHandler> aClients;
+
+  /** The maximum number of drops in each client queue */
+  protected int aMaxQueuedDrops;
+
+  public static final int defaultMaxQueuedDrops = 20;
+
   /**
     * Constructs a new Server which listens on the given port, sending
     *  and receiving drops via TCP/IP.
     *
     * @param pPort The port to listen to.
     */
-  public DiscoInterfaceServer(int pPort)
-  {
+  public DiscoInterfaceServer(int pPort) {
+    this(pPort, defaultMaxQueuedDrops);
+  }
+
+  /**
+    * Constructs a new Server which listens on the given port, sending
+    *  and receiving drops via TCP/IP.
+    *
+    * @param pPort The port to listen to.
+    */
+  public DiscoInterfaceServer(int pPort, int pMaxQueuedDrops) {
     try
     {
       aSocket = new ServerSocket(pPort);
@@ -64,6 +79,8 @@ public class DiscoInterfaceServer extends Thread implements DropClient
     }
     
     aClients = new LinkedList<DiscoInterfaceClientHandler>();
+
+    aMaxQueuedDrops = pMaxQueuedDrops;
   }
 
   /**
@@ -137,7 +154,7 @@ public class DiscoInterfaceServer extends Thread implements DropClient
         Socket clientSocket = aSocket.accept();
         System.out.println ("New client!");
         DiscoInterfaceClientHandler ch = 
-          new DiscoInterfaceClientHandler(clientSocket);
+          new DiscoInterfaceClientHandler(clientSocket, aMaxQueuedDrops);
         ch.start();
         aClients.add(ch);
       }
