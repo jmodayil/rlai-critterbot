@@ -64,6 +64,8 @@ public class SimulatorScheduler {
         int count = 0;
 
         int lagCount = 0;
+
+        double ltAverageTime = 0;
         
         while (!aTerminated) {
             // Delta is the actual length of time , in ms, between two runs
@@ -84,6 +86,8 @@ public class SimulatorScheduler {
             averageTime += computationTime;
             count++;
 
+            ltAverageTime = averageTime / count;
+            
             if (averageTimeReportInterval > 0 &&
                     count >= averageTimeReportInterval) {
                 count -= averageTimeReportInterval;
@@ -99,12 +103,27 @@ public class SimulatorScheduler {
             if (tau < 0) {
                 lagCount++;
                 if (lagCount % 100 == 0) {
-                    System.err.println ("Simulator is running behind...");
+
+                  double estScale;
+                  
+                  if (count > 0)
+                    estScale = aStepLength*NANOSECONDS_IN_MILLISECOND/(ltAverageTime);
+                  else
+                    estScale = 0.0;
+
+                  // Make the time scale printable
+                  estScale = Math.round(100*estScale) / 100.0;
+                  
+                  System.err.println ("Simulator is running behind... "+
+                            "(actual time scale: "+estScale+")");
                 }
                 
                 fullMillis = 0;
             }
-            else fullMillis = (long)Math.floor(tau);
+            else {
+              fullMillis = (long)Math.floor(tau);
+              lagCount = 0;
+            }
             
             tau -= fullMillis;
             if (fullMillis > 0) {

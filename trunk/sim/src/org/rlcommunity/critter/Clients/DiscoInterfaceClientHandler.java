@@ -47,10 +47,8 @@ public class DiscoInterfaceClientHandler extends Thread
   protected boolean aClosed = false;
 
 
-  public static final int defaultMaxQueuedDrops = 20;
-
   /** Creates a new client handler corresponding to the given Socket */
-  public DiscoInterfaceClientHandler(Socket pClient) {
+  public DiscoInterfaceClientHandler(Socket pClient, int pMaxQueueSize) {
     aClient = pClient;
     try
     {
@@ -63,7 +61,7 @@ public class DiscoInterfaceClientHandler extends Thread
     }
 
     aInQueue = new LinkedList<SimulatorDrop>();
-    aMaxQueuedDrops = defaultMaxQueuedDrops;
+    aMaxQueuedDrops = pMaxQueueSize;
   }
 
   /** Main code for this Thread */
