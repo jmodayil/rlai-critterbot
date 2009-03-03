@@ -34,12 +34,12 @@ public class SimulatorVizEvents implements KeyListener {
 	
 	public void keyTyped(KeyEvent e) {
         char key = e.getKeyChar();
-	  if('d' == key)
+/*	  if('d' == key)
           debug = 1;
       else if('t' == key)
         thrust = 1;
       else if('p' == key)
-        spin = 1;
+        spin = 1; */
   }
 	
 	public void keyPressed(KeyEvent e) {

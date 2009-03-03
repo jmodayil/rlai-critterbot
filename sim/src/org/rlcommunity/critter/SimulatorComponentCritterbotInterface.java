@@ -198,7 +198,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
         CritterStateDrop stateDrop = new CritterStateDrop();
 
-        stateDrop.cycle_time = pState.getTime();
+        // Some bogus percentage
+        stateDrop.cycle_time = 50;
 
         // Set the command value
         stateDrop.motor100.command = (int) (aCommand.motor100 * motorCommandFactor);
@@ -233,28 +234,25 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             }
         }
         
-         sensors = pObject.getChildren(ObjectStateBattery.NAME);
+        sensors = pObject.getChildren(ObjectStateBattery.NAME);
         idx = 0;
         for (SimulatorObject sen : sensors) {        
             ObjectStateBattery bData = (ObjectStateBattery)sen.getState(ObjectStateBattery.NAME);
-            switch (idx) {
-              // This sounds like we should be using an array, as Adam was
-              //  doing...
-              case 0:
-                stateDrop.batv40 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
-                break;
-              case 1:
-                stateDrop.batv160 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
-                break;
-              case 2:
-                stateDrop.batv280 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
-                break;
-            }
+            // assume the batteries are discharging together for now...
+            stateDrop.batv40 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+            stateDrop.batv160 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+            stateDrop.batv280 = (int) (bData.getCurrentCharge() * BATTERY_SCALE);
+
+            // @todo should be SHORE when charging
+            stateDrop.power_source = CritterStateDrop.PowerSource.BAT40;
+
+            idx += 3;
             // Don't add more light data than we have space
             if (++idx >= numBatteries) {
                 break;
             }            
         }
+        
         sensors = pObject.getChildren(ObjectStateIRDistanceSensor.NAME);
 
         idx = 0;

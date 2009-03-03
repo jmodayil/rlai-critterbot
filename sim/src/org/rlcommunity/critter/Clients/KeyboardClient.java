@@ -32,10 +32,10 @@ import java.util.LinkedList;
  */
 public class KeyboardClient implements DropClient, KeyListener {
 
-    public int up;
-    public int down;
-    public int left;
-    public int right;
+    private int up, down;
+    private int left, right;
+    private int slideleft, slideright;
+    
     private int motor100;
     private int motor220;
     private int motor340;
@@ -44,6 +44,7 @@ public class KeyboardClient implements DropClient, KeyListener {
 
     public KeyboardClient() {
         up = down = left = right = 0;
+        slideleft = slideright = 0;
         motor100 = motor220 = motor340 = 0;
         hasChange = false;
     }
@@ -54,52 +55,76 @@ public class KeyboardClient implements DropClient, KeyListener {
     public void keyPressed(KeyEvent e) {
         hasChange = true;
 
-        if (KeyEvent.VK_UP == e.getKeyCode()) {
+        switch (e.getKeyCode()) {
+          case KeyEvent.VK_UP:
+          case KeyEvent.VK_W:
             up = 1;
-        }
-        if (KeyEvent.VK_DOWN == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_DOWN:
+          case KeyEvent.VK_S:
             down = 1;
-        }
-        if (KeyEvent.VK_LEFT == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_LEFT:
+          case KeyEvent.VK_A:
             left = 1;
-        }
-        if (KeyEvent.VK_RIGHT == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_RIGHT:
+          case KeyEvent.VK_D:
             right = 1;
-        }
-        if (KeyEvent.VK_Q == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_Q:
+            slideleft = 1;
+            break;
+          case KeyEvent.VK_E:
+            slideright = 1;
+            break;
+          case KeyEvent.VK_U:
             motor100 = 1;
-        }
-        if (KeyEvent.VK_W == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_I:
             motor220 = 1;
-        }
-        if (KeyEvent.VK_A == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_O:
             motor340 = 1;
+            break;
         }
     }
 
     public void keyReleased(KeyEvent e) {
         hasChange = true;
 
-        if (KeyEvent.VK_UP == e.getKeyCode()) {
+        switch (e.getKeyCode()) {
+          case KeyEvent.VK_UP:
+          case KeyEvent.VK_W:
             up = 0;
-        }
-        if (KeyEvent.VK_DOWN == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_DOWN:
+          case KeyEvent.VK_S:
             down = 0;
-        }
-        if (KeyEvent.VK_LEFT == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_LEFT:
+          case KeyEvent.VK_A:
             left = 0;
-        }
-        if (KeyEvent.VK_RIGHT == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_RIGHT:
+          case KeyEvent.VK_D:
             right = 0;
-        }
-        if (KeyEvent.VK_Q == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_Q:
+            slideleft = 0;
+            break;
+          case KeyEvent.VK_E:
+            slideright = 0;
+            break;
+          case KeyEvent.VK_U:
             motor100 = 0;
-        }
-        if (KeyEvent.VK_W == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_I:
             motor220 = 0;
-        }
-        if (KeyEvent.VK_A == e.getKeyCode()) {
+            break;
+          case KeyEvent.VK_O:
             motor340 = 0;
+            break;
         }
     }
 
@@ -126,10 +151,12 @@ public class KeyboardClient implements DropClient, KeyListener {
         //  called after we release one of the keys (e.g. going forward and left
         //  causes the robot to stop when left is released).
         hasChange = hasChange || (up > 0 || down > 0 || left > 0 || right > 0 ||
-                motor100 > 0 || motor220 > 0 || motor340 > 0);
+                motor100 > 0 || motor220 > 0 || motor340 > 0 || slideleft > 0 ||
+                slideright > 0);
         
         if (hasChange) {
-            if (up > 0 || down > 0 || right > 0 || left > 0) {
+            if (up > 0 || down > 0 || right > 0 || left > 0 ||
+                     slideleft > 0 || slideright > 0) {
                 setDropWithXYThetaSpace(controlDrop);
             } else if (motor100 > 0 || motor220 > 0 || motor340 > 0) {
                 setDropWithMotorSpace(controlDrop);
@@ -151,17 +178,18 @@ public class KeyboardClient implements DropClient, KeyListener {
     }
 
     private void setDropWithXYThetaSpace(CritterControlDrop controlDrop) {
-        double velocityX, angVel;
+        double velocityX, velocityY, angVel;
         int maxVel = 100; // 100 cm/s
         int maxAngularVel = 27; // Roughly 1/2 a turn in a second
         velocityX = (up * maxVel - down * maxVel);
+        velocityY = (slideright * maxVel - slideleft * maxVel);
         // @todo MGB: The angle here LOOKS wrong (right is positive). The idea
         //  is that the world is drawn inverted around the x axis, resulting in
         //  a left turn looking like a right turn.
         angVel = (right * maxAngularVel + left * -maxAngularVel);
         controlDrop.motor_mode = CritterControlDrop.MotorMode.XYTHETA_SPACE;
         controlDrop.x_vel = (int) velocityX;
-        controlDrop.y_vel = 0;
+        controlDrop.y_vel = (int) velocityY;
         controlDrop.theta_vel = (int) angVel;
     }
 
