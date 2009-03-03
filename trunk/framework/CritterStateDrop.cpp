@@ -238,7 +238,7 @@ string CritterStateDrop::toString(string offset) {
   value += buf;
   sprintf(buf, "\nError Codes: %08x\n", error_flags);
   value += buf;
-  sprintf(buf, "CPU \%: %u\n", cycle_time);
+  sprintf(buf, "CPU %%: %u\n", cycle_time);
   value += buf;
 
 
