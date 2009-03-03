@@ -13,7 +13,12 @@ CritterControlDrop::~CritterControlDrop() {
 
 int CritterControlDrop::getSize() {
 
-  return 20 + sizeof(led_val);
+  return sizeof(motor_mode) + 
+         sizeof(m100_vel) + 
+         sizeof(m220_vel) + 
+         sizeof(m340_vel) +
+         sizeof(led_mode) +
+         sizeof(led_val);
 
 }
 
@@ -21,11 +26,11 @@ void CritterControlDrop::writeArray(void *d) {
 
   int i = 0;
   char *data = (char *)d;
-  memcpy(data + i, &motor_mode, 4); i += 4;
-  memcpy(data + i, &m100_vel, 4);   i += 4;
-  memcpy(data + i, &m220_vel, 4);   i += 4;
-  memcpy(data + i, &m340_vel, 4);   i += 4;
-  memcpy(data + i, &led_mode, 4);   i += 4;
+  memcpy(data + i, &motor_mode, sizeof(motor_mode)); i += sizeof(motor_mode);
+  memcpy(data + i, &m100_vel, sizeof(m100_vel));   i += sizeof(m100_vel);
+  memcpy(data + i, &m220_vel, sizeof(m220_vel));   i += sizeof(m220_vel);
+  memcpy(data + i, &m340_vel, sizeof(m340_vel));   i += sizeof(m340_vel);
+  memcpy(data + i, &led_mode, sizeof(led_mode));   i += sizeof(led_mode);
   memcpy(data + i, &led_val, sizeof(led_val));  i += sizeof(led_val);
 }
 
@@ -33,18 +38,18 @@ void CritterControlDrop::readArray(void *d) {
   
   int i = 0;
   char *data = (char *)d;
-  memcpy(&motor_mode, data + i, 4); i += 4;
-  memcpy(&m100_vel, data + i, 4);   i += 4;
-  memcpy(&m220_vel, data + i, 4);   i += 4;
-  memcpy(&m340_vel, data + i, 4);   i += 4;
-  memcpy(&led_mode, data + i, 4);   i += 4;
+  memcpy(&motor_mode, data + i, sizeof(motor_mode)); i += sizeof(motor_mode);
+  memcpy(&m100_vel, data + i, sizeof(m100_vel));   i += sizeof(m100_vel);
+  memcpy(&m220_vel, data + i, sizeof(m220_vel));   i += sizeof(m220_vel);
+  memcpy(&m340_vel, data + i, sizeof(m340_vel));   i += sizeof(m340_vel);
+  memcpy(&led_mode, data + i, sizeof(led_val));   i += sizeof(led_val);
   memcpy(&led_val,  data + i, sizeof(led_val));  i += sizeof(led_val);
 }
 
 string CritterControlDrop::toString(string offset) {
 
   string out;
-  char buf[100];
+  char buf[1024];
 
   int i;
   out += "- Critter Control Drop -\n";
@@ -59,7 +64,6 @@ string CritterControlDrop::toString(string offset) {
       out += "*";
     }
   }
-  printf("Size of led_val: %d\n", sizeof(led_val)); 
   out += "\n";
   return out; 
 }
