@@ -25,7 +25,8 @@ an idea of the environment in which the robot evolves.
 
 \begin{itemize}
 \item{Java 1.5}
-\item{A POSIX Operating System}
+\item{Make and g++}
+\item{A POSIX Operating System (Mac OS X, Linux, BSD...)}
 \end{itemize}
 
 \section{Installing the Simulator}\label{sec:installation}
@@ -43,7 +44,7 @@ UNIX systems.
 
 \subsection{Downloading and installing the RLAI Robotic Simulator}
 
-The Simulator package can be downloaded from
+If you have not yet downloaded it, the Simulator package can be found at 
 
 \begin{verbatim}
 http://www.cs.ualberta.ca/~mg17/critterbot/files/RLAISimulator.tgz
@@ -225,7 +226,10 @@ In order to modify the port on which the Agent listens, the file
 
 \subsection{Reward Generator}
 
-% @todo
+In order to modify the port on which the Reward Generator listens, the file 
+\verb+RewardGenerator.java+ will have to be modified and the variable 
+\verb+discoRewardGeneratorPort+ changed to a different value.
+
 
 \subsection{DisCo}
 
@@ -250,14 +254,15 @@ simulator, like all pieces of software, is not perfect. The most common
 error message you are likely to see is
 
 \begin{verbatim}
-Simulator is running behind...
+Simulator is running behind...(actual time scale: 3.55)
 \end{verbatim}
 
 This is the simulator's way of telling you that it is unable to simulate
 at the requested speed. The easiest way to get rid of it is to reduce the
 time scale at which the simulator is asked to operate (below 1.0 if necessary).
-In any event, no harm is caused; the simulator will trudge along as fast as it
-can.
+The actual time scale reported is the average speed at which the simulator
+has operated since it was started. In any event, no harm is caused; the 
+simulator will trudge along as fast as it can.
 
 \subsection{DisCo}
 
