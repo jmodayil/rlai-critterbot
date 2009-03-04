@@ -32,18 +32,30 @@ public class ObjectStateLightSensor implements ObjectState
   protected int aNumPixels;     
   protected double aSensorDepth; //in Meters 
 
+  protected double aError;
+
+  public static final double defaultError = 0.05;
+  
   public ObjectStateLightSensor()
   {
       this(0,0.0,0.0);
   }
 
-    public ObjectStateLightSensor(int pNumPixels, double pSensorDepth, 
-            double pSensorWidth) {
+  public ObjectStateLightSensor(int pNumPixels, double pSensorDepth,
+          double pSensorWidth) {
+    this(pNumPixels, pSensorDepth, pSensorWidth, defaultError);
+  }
+
+  public ObjectStateLightSensor(int pNumPixels, double pSensorDepth,
+                                double pSensorWidth, double pError) {
     aData = 0;
     aSensorWidth = pSensorWidth;
     aNumPixels = pNumPixels;
     aSensorDepth = pSensorDepth;
-    }
+    aError = pError;
+  }
+
+    public double getError() { return aError; }
 
   /** ObjectState interface */
   

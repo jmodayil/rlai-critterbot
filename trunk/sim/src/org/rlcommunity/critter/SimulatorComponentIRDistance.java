@@ -88,17 +88,21 @@ public class SimulatorComponentIRDistance implements SimulatorComponent {
         double range = sensor.getRange(); 
         double distance;
 
+        double noise = sensor.getError();
+        
         // Find out how far the intersection is
         if (intersection == null)
           distance = range; 
         else
-        {
           // Note - the distance is valid iff the ray uses a unit vector!
           distance = intersection.rayAlpha; 
-          // The distance is capped by the range
-          if (distance >= range) distance = range;
-        }
 
+        // Modify the sensed distance by gaussian noise
+        distance += distance * aRandom.nextGaussian() * noise;
+
+        // The distance is capped in [0, range]
+        distance = Math.min(range, Math.max(0, distance));
+        
         sensor.setSensorValue(distance);
       }
 

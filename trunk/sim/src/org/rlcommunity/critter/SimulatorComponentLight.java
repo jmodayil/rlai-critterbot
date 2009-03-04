@@ -177,9 +177,11 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
 
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
-            double noise = aRandom.nextGaussian();
-            int reading = (int)(sumIntensity / numPixels + noise);
-            if(reading<0) reading =0;
+            double noise = aRandom.nextGaussian() * lightSensor.getError();
+            double doubleReading = sumIntensity / numPixels;
+
+            int reading = (int)(doubleReading * (1.0 + noise));
+            if(reading < 0) reading =0;
             if(reading > maxIntensity)lightSensor.setLightSensorValue(maxIntensity);
             else lightSensor.setLightSensorValue(reading);
 

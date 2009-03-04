@@ -70,6 +70,9 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
     /** Accelerometer data is in g / 1024 */
     public static final double ACCEL_SCALE =
             1024.0 / ObjectStateDynamics.GRAVITY;
+    public static final int ACCEL_MIN = -2048;
+    public static final int ACCEL_MAX = 2048;
+
     public static final double XY_VELOCITY_SCALE = 100.0;
     public static final double ANG_VELOCITY_SCALE = 9.0;
     // All of these need to be made proper
@@ -233,7 +236,7 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 break;
             }
         }
-        
+
         sensors = pObject.getChildren(ObjectStateBattery.NAME);
         idx = 0;
         for (SimulatorObject sen : sensors) {        
@@ -279,9 +282,12 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
             Vector2D xyAccel = sData.getSensorValue();
             double zAccel = sData.getZSensorValue();
 
-            stateDrop.accel.x = (int) (xyAccel.x * ACCEL_SCALE);
-            stateDrop.accel.y = (int) (xyAccel.y * ACCEL_SCALE);
-            stateDrop.accel.z = (int) (zAccel * ACCEL_SCALE);
+            stateDrop.accel.x = Math.max(ACCEL_MIN, 
+                    Math.min((int) (xyAccel.x * ACCEL_SCALE), ACCEL_MAX));
+            stateDrop.accel.y = Math.max(ACCEL_MIN,
+                    Math.min((int) (xyAccel.y * ACCEL_SCALE), ACCEL_MAX));
+            stateDrop.accel.z = Math.max(ACCEL_MIN,
+                    Math.min((int) (zAccel * ACCEL_SCALE), ACCEL_MAX));
         }
 
         os = pObject.getState(ObjectStateGyroscope.NAME);

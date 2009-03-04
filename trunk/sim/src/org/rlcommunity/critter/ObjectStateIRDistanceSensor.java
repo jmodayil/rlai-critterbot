@@ -32,11 +32,22 @@ public class ObjectStateIRDistanceSensor implements ObjectState
   protected double aData;
   protected double aRange;
 
-  public ObjectStateIRDistanceSensor(double pRange)
-  {
+  /** The relative error of the distance sensor */
+  protected double aError;
+
+  public static final double defaultError = 0.05;
+
+  public ObjectStateIRDistanceSensor(double pRange) {
+    this (pRange, defaultError);
+  }
+
+  public ObjectStateIRDistanceSensor(double pRange, double pError) {
     aData = 0;
     aRange = pRange;
+    aError = pError;
   }
+
+  public double getError() { return aError; }
 
   /** Sets the current sensor reading for this sensor
     *

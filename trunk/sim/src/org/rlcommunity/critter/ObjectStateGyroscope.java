@@ -21,12 +21,6 @@ package org.rlcommunity.critter;
   * @author Marc G. Bellemare
   */
 
-import java.awt.Graphics;
-import java.awt.Color;
-
-import java.util.LinkedList;
-import java.util.List;
-
 public class ObjectStateGyroscope implements ObjectState
 {
   public static final String NAME = SimulatorComponentGyroscope.NAME; 
@@ -34,10 +28,25 @@ public class ObjectStateGyroscope implements ObjectState
   /** The angular velocity measured by the gyroscope */
   protected double aVelocity; 
 
-  public ObjectStateGyroscope()
-  {
-    clearTransient();
+  /** The relative error of the gyroscope */
+  protected double aError;
+
+    public static final double defaultError = 0.01;
+
+  public ObjectStateGyroscope() {
+    this(defaultError);
   }
+
+  public ObjectStateGyroscope(double pError) {
+    clearTransient();
+    aError = pError;
+  }
+
+  /** Returns the relative error of this gyroscope
+   *
+   * @return The relative error of this gyroscope.
+   */
+  public double getError() { return aError; }
 
   /** Returns the current angular velocity measured by the gyroscope
     *

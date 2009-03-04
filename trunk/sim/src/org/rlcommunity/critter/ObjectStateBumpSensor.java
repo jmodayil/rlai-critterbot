@@ -37,7 +37,7 @@ public class ObjectStateBumpSensor implements ObjectState
     public static final double BUMP_SENSOR_DRAW_SCALE = 10.0;
     public static final String NAME = SimulatorComponentBumpSensor.NAME;
 
-    /** Class encapsulating relevant bump sensor data */
+  /** Class encapsulating relevant bump sensor data */
     public class BumpSensorData {
         // The magnitude of the sensed force
         public double magnitude;
@@ -56,10 +56,21 @@ public class ObjectStateBumpSensor implements ObjectState
     /** A list of forces sensed by this bump sensor */
     protected LinkedList<BumpSensorData> aData = new LinkedList<BumpSensorData>();
 
-  public ObjectStateBumpSensor()
-  {
+    /** The relative error of the bump sensor */
+    protected double aError;
+
+    public static final double defaultError = 0.01;
+
+  public ObjectStateBumpSensor() {
+    this(defaultError);
   }
 
+  public ObjectStateBumpSensor(double pError) {
+    aError = pError;
+  }
+  
+  public double getError() { return aError; }
+  
   /** Clears the list of sensed forces */
   public void clearData() { aData.clear(); }
 
