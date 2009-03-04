@@ -97,11 +97,15 @@ public class SimulatorComponentBattery implements SimulatorComponent {
                 
                 }
             }
+            
             if(deplete){                           
                     newCharge -= oldRobotBattery.getIdleDepletionRate();
                     if (newCharge < 0) 
-                        newCharge = 0; //BATTERY is Dead   
+                        newCharge = 0; //BATTERY is Dead 
+                    newRobotBattery.setIsCharging(false);
             }
+            else
+                newRobotBattery.setIsCharging(true);
             
             newRobotBattery.setCurrentCharge(newCharge);
 

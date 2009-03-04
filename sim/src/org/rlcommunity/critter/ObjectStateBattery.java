@@ -26,6 +26,7 @@ public class ObjectStateBattery implements ObjectState {
         private int aChargeCapacity = 0; //in Coulomb
         private int aMaxChargeRate = 0; //in Ampere
         private int aIdleDepletionRate = 0; //in Ampere
+        private boolean aIsBeingCharged = false;
 
         public static final String NAME = SimulatorComponentBattery.NAME;        
     
@@ -34,6 +35,8 @@ public class ObjectStateBattery implements ObjectState {
         aMaxChargeRate = pMaxChargeRate;
         aIdleDepletionRate = pIdleDepletionRate;
         aCurrentCharge = pChargeCapacity;
+        aIsBeingCharged = false;
+        aFullyCharged = false;
         
     }
 
@@ -43,6 +46,7 @@ public class ObjectStateBattery implements ObjectState {
         this.aChargeCapacity = battery2Copy.aChargeCapacity;   
         this.aMaxChargeRate = battery2Copy.aMaxChargeRate;
         this.aIdleDepletionRate = battery2Copy.aIdleDepletionRate;
+        this.aIsBeingCharged = battery2Copy.aIsBeingCharged;
     }
     
     public int getCurrentCharge(){
@@ -63,7 +67,10 @@ public class ObjectStateBattery implements ObjectState {
     public boolean isCharged(){
         return aFullyCharged;
     }
-   
+
+     public boolean isBeingCharged(){
+        return aIsBeingCharged;
+    }  
     
     public void setCurrentCharge(int pCurrentCharge){
         aCurrentCharge = pCurrentCharge;
@@ -71,6 +78,11 @@ public class ObjectStateBattery implements ObjectState {
 
     public void setFullyCharged(boolean pFullyCharged){
         aFullyCharged = pFullyCharged;
+    }
+    
+    public void setIsCharging(boolean pIsCharging)
+    {
+        aIsBeingCharged = pIsCharging;
     }
     public boolean isBatteryDepleted()
     {
