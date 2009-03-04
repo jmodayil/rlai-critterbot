@@ -23,12 +23,6 @@ package org.rlcommunity.critter;
   * @author Marc G. Bellemare
   */
 
-import java.awt.Graphics;
-import java.awt.Color;
-
-import java.util.LinkedList;
-import java.util.List;
-
 public class ObjectStateAccelerometer implements ObjectState
 {
   public static final String NAME = SimulatorComponentAccelerometer.NAME; 
@@ -42,12 +36,27 @@ public class ObjectStateAccelerometer implements ObjectState
 
   /** The Z acceleration sensed by this accelerometer. In 2D, this is
     *  always gravity */
-  protected double aZAccel = ObjectStateDynamics.GRAVITY; 
+  protected double aZAccel;
 
-  public ObjectStateAccelerometer()
-  {
-    clearTransient();
+  /** The relative error of the accelerometer */
+  protected double aError;
+
+  public static final double defaultError = 0.01;
+
+  public ObjectStateAccelerometer() {
+    this(defaultError);
   }
+
+  public ObjectStateAccelerometer(double pError) {
+    clearTransient();
+    aError = pError;
+  }
+
+  /** Returns the relative error of this accelerometer
+   *
+   * @return The relative error of this accelerometer.
+   */
+  public double getError() { return aError; }
 
   /** Returns the current acceleration data
     *
@@ -67,6 +76,10 @@ public class ObjectStateAccelerometer implements ObjectState
     aAccel = new Vector2D(pAccel); 
   }
 
+  public void setZSensorValue(double pAccel) {
+    aZAccel = pAccel;
+  }
+  
   public double getZSensorValue()
   {
     return aZAccel;

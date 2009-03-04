@@ -76,6 +76,12 @@ public class SimulatorComponentBumpSensor implements SimulatorComponent {
             if (newMagnitude < 0.01)
                 continue;
 
+            // Add gaussian noise to the initial sensed data
+            newMagnitude += newMagnitude * aRandom.nextGaussian() * bs.getError();
+
+            // A magnitude cannot be negative
+            newMagnitude = Math.max(0, newMagnitude);
+            
             nextbs.addData(newMagnitude, f.alpha, f.point);
         }
 

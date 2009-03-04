@@ -72,7 +72,10 @@ public class SimulatorComponentGyroscope implements SimulatorComponent {
         ObjectStateDynamics dynData = (ObjectStateDynamics)os;
 
         double vel = dynData.getAngVelocity();
-
+        double noise = gyroData.getError();
+        
+        // add some gaussian noise
+        vel += vel * aRandom.nextGaussian() * noise;
         nextGyroData.setSensorValue(vel);
       }
     }

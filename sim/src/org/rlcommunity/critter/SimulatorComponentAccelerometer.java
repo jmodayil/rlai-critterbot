@@ -76,7 +76,15 @@ public class SimulatorComponentAccelerometer implements SimulatorComponent {
         //  Compute a very rough estimate of the acceleration as a 
         //   difference in velocities
         Vector2D accelValue = curVel.minus(oldVel).times(1000.0 / delta);
+
+        double noise = accelData.getError();
+
+        // Add some Gaussian noise to the accelerometer sample
+        accelValue.plusEquals(accelValue.times(aRandom.nextGaussian()*noise));
+        double zAccel = ObjectStateDynamics.GRAVITY * (1.0 + aRandom.nextGaussian()*noise);
+
         nextAccelData.setSensorValue(accelValue);
+        nextAccelData.setZSensorValue(zAccel);
         // Store the current velocity for the next time step
         nextAccelData.setVelocitySample(curVel);
       }
