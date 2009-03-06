@@ -76,6 +76,7 @@ public class SimulatorComponentAccelerometer implements SimulatorComponent {
         //  Compute a very rough estimate of the acceleration as a 
         //   difference in velocities
         Vector2D accelValue = curVel.minus(oldVel).times(1000.0 / delta);
+        accelValue = accelValue.rotate(-sensor.getDirection());
 
         double noise = accelData.getError();
 
