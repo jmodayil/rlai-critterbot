@@ -4,7 +4,7 @@
 \usepackage{epsfig}
 \usepackage{graphicx}
 
-\author{Marc G. Bellemare, Adam White}
+\author{Marc G. Bellemare, Adam White, Mike Sokolsky}
 \title{The RLAI Robotic Simulator\\ A Tutorial}
 
 \begin{document}
@@ -190,6 +190,50 @@ and the user.
 }
 \caption{The RLAI Robotic Simulator.}
 \end{figure}
+
+\section{Writing an Agent and a Reward Generator}
+
+\subsection{Introduction}\label{subsec:programming_introduction}
+
+Within the simulator package each of the basic signals in reinforcement learning (actions, observations, rewards) is a separate class.  Individual instances of data are known as Drops, terminology borrowed from Disco, so we are interested in \verb+CritterControlDrop+s, \verb+CritterStateDrop+s, and \verb+CritterRewardDrop+s.  It is well worth a few minutes to read over the documentation on the content of these drops at:
+
+\begin{verbatim}
+http://www.cs.ualberta.ca/~sokolsky/critterbot/interface.php
+\end{verbatim}
+
+Disco takes care of distributing the data to classes that are interested in it, so all you have to worry about is choosing the reward value and generating actions to be implemented on the robot.  Read the following section even if you plan on developing in C++ as it contains some useful information about how the system is organized.
+
+\subsection{Java}\label{subsec:java_agent}
+
+If you are using Java, the two files you are interested in will be in the \verb+src+ directory.  Lets first take a look at \verb+RewardGenerator.java+.  Most of this file is machinery for moving the data around, we are mostly interested in the \verb+parseStateDrop+ method.  It takes in a CritterStateDrop and should set the value of \verb+aReward+ before returning.  You have access to all the information in the CritterStateDrop, documented at:
+
+\begin{verbatim}
+http://www.cs.ualberta.ca/~mg17/critterbot/docs/
+\end{verbatim}
+
+There are two very simple examples already in the file, one generates a reward proportional to the front facing light sensor, the other a binary reward if a bump sensor is activated or not.  Keep in mind that in the simulator environment the bump sensor values are 0 when inactive, while in a real-world environment they would likely always have some low noisy value.  You are welcome to create significantly more complex generators for reward signals, depending on the task.
+
+The file we are most interested in is \verb+Agent.java+, where your learning agent lives.  There are a few places here you'll be adding code, and will likely add more methods and external classes when creating an agent of any complexity.  The first place to look is at the \verb+parseStateDrop+ method.  Data is provided here in Drop form, and generally for reinforcement learning we'd like it as a simple vector.  The double vector \verb+aObservation+ is available to save whatever fields from the drop you would like to use as part of your state observation.  If you prefer, feel free to save the drop itself in an instance variable and use it instead of the \verb+aObservation+ vector.
+
+Finally we get to the actual learning code.  There is a method named \verb+act+, a term also inherited from Disco.  This method gets called repeatedly, so we wait until we've collected a new observation and reward before proceeding.  Now you get to run code you want called each timestep.  In the example we create a very simple behavior, the robot can either drive forward or backward, and changes direction every time it received a non-zero reward.  Once we return from this method the \verb+CritterControlDrop+ that was just created gets passed on to the robot itself.
+
+Executing the \verb+run.sh+ script will automatically recompile these two files and start the simulator and your agents running.
+
+\subsection{C++}\label{subsec:cpp_agent}
+
+Programming in C++ means interacting directly with Disco.  Like in Java the reward generator is separate from the agent, but we now have four files, two cpp files and two header files, located in \verb+disco/source/critterbot+.  In RewardGenerator.cpp there are two methods you will probably modify.  \verb+init+ is as expected, do any variable or other initialized here.  The \verb+update+ method is called when there is a new observation to create a reward from, and that observation is available to you in the instance of \verb+stateDrop+.  This follows the same structure as the Java state drop, for details see \verb+CritterStateDrop.h+ in the same directory.
+
+Your agent will live in \verb+CritterAgent.cpp+, and as in \verb+RewardGenerator.cpp+ any initialization should be put in \verb+init+, which will be called once at startup.  The agent itself will run out of the \verb+update+ method, here you have access to both the state observation information and the reward, and should write whatever values you want to the \verb+controlDrop+ instance.  Details on the C++ control drop are, amazingly enough, found in \verb+CritterControlDrop.h+ in the same directory.
+
+The script \verb+runDisco.sh+ will try to compile your C++ agent and reward code and run it in the simulator.  -IMPORTANT NOTE-  The makefile used by Disco only looks for changes to .cpp files.  If you only edit a header file it will not automatically recompile your code, so be sure to touch the related .cpp file.
+
+\subsection{Errata}\label{subsec:programming_exercises}
+
+You may have noticed watching the default agent that it doesn't always change direction immediately after running into something.  This is because the bump sensor values decay a little after impact before returning to zero, meaning the agent receives several sequential non-zero rewards.  Depending on if there are an even or odd number of these the agent may or may not start moving in the opposite direction.
+
+Both the robot and the simulator are real-time systems, so interacting with them is necessarily asynchronous.  Nothing is going to wait for you to finish some time-intensive computation, so it is highly recommended not to allow your code to block.  If one or more observations occur while your agent is still processing data they will be discarded, only the most recent observation is provided when your agent is called.  Depending on what your agent does this may or may not be a problem.  Spawning a separate Java thread is one possible way to do long-term processing, it is beyond the scope of this document to describe but Disco also allows externalizing complex processing to a separate process.
+
+Another result of the asynchronous environment is that you cannot rely on an ordering of events.  Don't expect your agent code to be called exactly on the 10ms mark, between the OS scheduler and TCP transport delays there will likely be some variation.  The code is currently written so your agent always receives a new observation and reward drop together, but be aware the reward may be slightly out of phase with the observations; the reward may actually be generated by an observation one or two time steps in the past.  Remember, you don't have to use a separate reward generator, you can do the reward calculation direction in your agent, it is simply there as a useful abstraction.
 
 \section{Default Parameters and Command-Line Arguments\label{sec:changingDefaults}}
 
