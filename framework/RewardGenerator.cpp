@@ -77,7 +77,7 @@ void RewardGenerator::update( void ) {
   // No cookie for you.  Bad robot.
   rewardDrop.reward = 0;
   
-  for(int i = 0; i < 32; i++ ) {
+  for(int i = 0; i < BUMP_SIZE; i++ ) {
     if(stateDrop->bump[i] != 0)
       rewardDrop.reward = 1;
   }

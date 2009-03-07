@@ -45,11 +45,17 @@ int CritterAgent::think(USeconds &wokeAt) {
 	
 	// Read in new data from the world.
   stateDrop = ((CritterStateDrop*)lake->readHead(stateInput));
-  lake->doneRead(stateInput);
   rewardDrop = ((CritterRewardDrop*)lake->readHead(rewardInput));
-  lake->doneRead(rewardInput);
 
-	if(stateDrop && rewardDrop) {
+  if (rewardDrop) {
+    // Check the reward
+    if( rewardDrop->reward != 0) {
+      actionDir = -actionDir;
+    }
+  }
+
+    
+	if(stateDrop) {
 
 	  update();
 
@@ -58,6 +64,9 @@ int CritterAgent::think(USeconds &wokeAt) {
     
     thinks++;
 	}
+  
+  lake->doneRead(stateInput);
+  lake->doneRead(rewardInput);
   return 1;
 }
 
@@ -67,11 +76,6 @@ int CritterAgent::think(USeconds &wokeAt) {
  * update gets called at regular intervals, and you can do stuff here.
  */
 void CritterAgent::update( void ) {
-
-  // Check the reward
-  if( rewardDrop->reward != 0) {
-    actionDir = -actionDir;
-  }
 
   // Check the state information
   if( stateDrop->rotation > 10 ) {
