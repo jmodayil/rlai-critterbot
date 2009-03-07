@@ -13,7 +13,6 @@ CritterAgent::CritterAgent(DataLake *lake,
 	rewardInput = lake->readyReading("CritterRewardDrop");
   controlOutput = lake->readyWriting("CritterControlDrop");
 	thinks = 0;
-	newData = false;
 }
 
 /**
@@ -27,10 +26,6 @@ CritterAgent::~CritterAgent() {
 
 
 int CritterAgent::loadConfig(ComponentConfig *config) {
-  // see FakeLaser.cpp for ideas about how to read the config
-	// file once we have some things that need to be configured
-  
-
   return 1; 
 }
 
@@ -40,16 +35,12 @@ int CritterAgent::loadConfig(ComponentConfig *config) {
 int CritterAgent::init(USeconds &wokeAt) {
   
   // @TODO: Default values etc...
+  actionDir = 1;
 
   // You will want to always return 1.
   return 1; 
 }
 
-/**
- * This is where the brains of the Agent live.
- * 
- * think gets called at regular intervals, and you can do stuff here.
- */
 int CritterAgent::think(USeconds &wokeAt) {
 	
 	// Read in new data from the world.
@@ -58,12 +49,7 @@ int CritterAgent::think(USeconds &wokeAt) {
   rewardDrop = ((CritterRewardDrop*)lake->readHead(rewardInput));
   lake->doneRead(rewardInput);
 
-  if (rewardDrop) {
-    // Do something with the reward drop
-  }
-
-  // @TODO: This doesn't quite work and should be fixed.
-	if(stateDrop) {
+	if(stateDrop && rewardDrop) {
 
 	  update();
 
@@ -75,11 +61,16 @@ int CritterAgent::think(USeconds &wokeAt) {
   return 1;
 }
 
+/**
+ * This is where the brains of the Agent live.
+ * 
+ * update gets called at regular intervals, and you can do stuff here.
+ */
 void CritterAgent::update( void ) {
 
   // Check the reward
   if( rewardDrop->reward != 0) {
-    // I got a reward!  Yay.
+    actionDir = -actionDir;
   }
 
   // Check the state information
@@ -92,7 +83,7 @@ void CritterAgent::update( void ) {
 
   // Send a new action.
   controlDrop.motor_mode = CritterControlDrop::XYTHETA_SPACE;
-  controlDrop.x_vel = 0;
+  controlDrop.x_vel = 100 * actionDir;
   controlDrop.y_vel = 0;
   controlDrop.theta_vel = 0;
 

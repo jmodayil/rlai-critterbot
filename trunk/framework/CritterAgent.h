@@ -39,10 +39,10 @@ class CritterAgent : public Component {
 
 		bool newData;
 		int thinks;
-		int fid;
+    int fid;
 
 		// Agent variables go here...
-    //
+    int actionDir;
 };
 
 #endif
