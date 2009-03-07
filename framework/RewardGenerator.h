@@ -34,7 +34,6 @@ class RewardGenerator : public Component {
     RiverWrite rewardOutput;
 
 		CritterRewardDrop rewardDrop;
-    CritterControlDrop* controlDrop;
 		CritterStateDrop* stateDrop;
 
 		bool newData;
@@ -42,7 +41,6 @@ class RewardGenerator : public Component {
 		int fid;
 
 		// Agent variables go here...
-    //
 };
 
 #endif

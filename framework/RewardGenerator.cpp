@@ -1,4 +1,5 @@
 #include "RewardGenerator.h"
+#include "ErrorMessage.h"
 
 /**
  * Constructor for RewardGenerator.  Sets up internal variables and starts reading data from
@@ -11,9 +12,7 @@ RewardGenerator::RewardGenerator(DataLake *lake,
 	fid = -1;
 	stateInput = lake->readyReading("CritterStateDrop");
 	rewardOutput = lake->readyWriting("CritterRewardDrop");
-  controlInput = lake->readyReading("CritterControlDrop");
 	thinks = 0;
-	newData = false;
 }
 
 /**
@@ -22,14 +21,13 @@ RewardGenerator::RewardGenerator(DataLake *lake,
 RewardGenerator::~RewardGenerator() {
 	lake -> stopReading(stateInput);
   lake -> stopWriting(rewardOutput);
-	lake -> stopReading(controlInput);
 }
 
-
+/*
+ * This function will read in data from the xml configuration file.
+ * Probably you will never need to use this.
+ */
 int RewardGenerator::loadConfig(ComponentConfig *config) {
-  // see FakeLaser.cpp for ideas about how to read the config
-	// file once we have some things that need to be configured
-  
 
   return 1; 
 }
@@ -38,11 +36,11 @@ int RewardGenerator::loadConfig(ComponentConfig *config) {
  * Initialize Reward related things here
  */
 int RewardGenerator::init(USeconds &wokeAt) {
-  
-  // @TODO: Default values etc...
 
-  // You will want to always return 1.
-  return 1; 
+  //  Initialize agent-related foo here
+  //
+
+  return 1;  
 }
 
 /**
@@ -52,8 +50,6 @@ int RewardGenerator::think(USeconds &wokeAt) {
 	// Read in new data from the world.
   stateDrop = ((CritterStateDrop*)lake->readHead(stateInput));
   lake->doneRead(stateInput);
-  controlDrop = ((CritterControlDrop*)lake->readHead(controlInput));
-  lake->doneRead(controlInput);
 
   // @TODO: This doesn't quite work and should be fixed.
 	if(stateDrop) {
@@ -70,11 +66,6 @@ int RewardGenerator::think(USeconds &wokeAt) {
 
 void RewardGenerator::update( void ) {
 
-  // Check the command 
-  if( controlDrop->motor_mode == CritterControlDrop::XYTHETA_SPACE) {
-    // We're in XYTheta space!  Yay.
-  }
-
   // Check the state information
   if( stateDrop->rotation > 10 ) {
     // I'm turning left.
@@ -85,6 +76,11 @@ void RewardGenerator::update( void ) {
 
   // No cookie for you.  Bad robot.
   rewardDrop.reward = 0;
+  
+  for(int i = 0; i < 32; i++ ) {
+    if(stateDrop->bump[i] != 0)
+      rewardDrop.reward = 1;
+  }
 
   return;
 }
