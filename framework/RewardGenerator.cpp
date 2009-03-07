@@ -56,7 +56,7 @@ int RewardGenerator::think(USeconds &wokeAt) {
   lake->doneRead(controlInput);
 
   // @TODO: This doesn't quite work and should be fixed.
-	if(stateDrop && controlDrop) {
+	if(stateDrop) {
 
 	  update();
 

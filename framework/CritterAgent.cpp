@@ -58,8 +58,12 @@ int CritterAgent::think(USeconds &wokeAt) {
   rewardDrop = ((CritterRewardDrop*)lake->readHead(rewardInput));
   lake->doneRead(rewardInput);
 
+  if (rewardDrop) {
+    // Do something with the reward drop
+  }
+
   // @TODO: This doesn't quite work and should be fixed.
-	if(stateDrop && rewardDrop) {
+	if(stateDrop) {
 
 	  update();
 
