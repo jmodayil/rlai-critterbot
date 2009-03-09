@@ -68,7 +68,8 @@ class CritterDriver : public Component {
     void closeport();
     void readPacket(unsigned char buf[], USeconds *theTime);
     FILE* rotate_log( FILE *log, USeconds *now );
-    
+    int readConfig(ComponentConfig *config);
+    string log_path, serial_port; 
 };
 
 #endif

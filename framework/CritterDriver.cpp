@@ -63,6 +63,24 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
 
 }
 
+int CritterDriver::readConfig(ComponentConfig *config) {
+
+  XMLNode *tag;
+  XMLError err;
+
+  tag = config->getXMLNode("config", err);
+  if( tag == NULL ) 
+    return error(err.msg);
+  
+  if( !tag->getAttrValue( "logDir", log_path, err ) ) 
+    return error(err.msg);
+
+  if( !tag->getAttrValue( "serialPort", serial_port, err ) )
+    return error(err.msg);
+
+  return 1;
+}
+
 FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
 
   char file_name[100];
@@ -70,7 +88,7 @@ FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
   if(log)
     fclose(log);
 
-  strcpy( file_name, LOG_PATH );
+  strcpy( file_name, log_path.c_str() );
   strcat( file_name, (now->formatTime("%y-%m-%d-%H-%M-%S")).c_str() );
   strcat( file_name, LOG_EXTENSION );
 
@@ -134,8 +152,11 @@ void CritterDriver::closeport() {
 
 int CritterDriver::init(USeconds &wokeAt) {
 
+  if(readConfig(&config) != 1)
+    return error("Error reading configuration data!");
+
   printf("Opening serial port.\n");
-  if (0 > (fid = open(DEVICE, O_RDWR | O_NOCTTY | O_NDELAY))) {
+  if (0 > (fid = open(serial_port.c_str(), O_RDWR | O_NOCTTY | O_NDELAY))) {
     printf("Could not open serial port.\n");
     return -1;
   }
@@ -199,7 +220,7 @@ void CritterDriver::readPacket( unsigned char buf[], USeconds *theTime) {
   //    }
       if(theTime->time.tv_sec >= last_log.time.tv_sec + LOG_INTERVAL * 60 ) {
         fprintf( stderr, "Opening new Log File.\n" );
-	log = rotate_log( log, theTime );
+        log = rotate_log( log, theTime );
       }
       
       fprintf(log, "%s ", (theTime->toString()).c_str());
