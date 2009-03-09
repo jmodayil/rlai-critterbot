@@ -369,7 +369,6 @@ int CritterDriver::act(USeconds &now) {
           leddata[3*i + 2] = controlDrop->led_val[i].b;
         }  
       }
-      fprintf(stderr,"%3d %3d %3d\n",leddata[45], leddata[46], leddata[47]);
 
       if(9 != write(fid, &sdata, 9)) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
