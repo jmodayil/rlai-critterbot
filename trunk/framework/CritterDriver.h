@@ -18,7 +18,7 @@
 #define SER_HEADER3 0xBE
 #define SER_HEADER4 0xEF
 
-#define STATE_LENGTH 42
+#define STATE_LENGTH 38
 #define NUM_LEDS 16
 
 #define LOG_INTERVAL 5 // in minutes

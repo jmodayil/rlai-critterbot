@@ -61,7 +61,6 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
 
   lastPost.setAsNow();
 
-
 }
 
 FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
@@ -77,6 +76,7 @@ FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
 
   log = fopen( file_name, "a" );
   last_log = *now;
+  
   
   fprintf( log, "Time Voltage Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
 
@@ -158,7 +158,6 @@ void CritterDriver::readPacket( unsigned char buf[], USeconds *theTime) {
       int i = 0;
       unsigned short their_crc;
       
-      fprintf(stderr, "Reading Packet...\n" );
 
       stateDrop.bus_voltage       = (int) buf[i++];
       stateDrop.motor100.command  = (char) buf[i++];
@@ -260,13 +259,14 @@ int CritterDriver::sense(USeconds &wokeAt) {
       case HEADER:
         if(buf == header[i]) {
           if(i >= 3) {
-	    i = 0;
-	    state = DATA;
+            i = 0;
+            state = DATA;
           }
 	  else
 	    i++;
           break;
         }
+	      fprintf(stderr, "Misaligned Packet!!!\n");
         break;
       case DATA:
         if(buf == 0xFF) {
@@ -275,7 +275,7 @@ int CritterDriver::sense(USeconds &wokeAt) {
 	}
         state_buf[i++] = buf;
 	if(i == STATE_LENGTH) {
-	  readPacket(state_buf, &wokeAt);
+    readPacket(state_buf, &wokeAt);
 	  i = 0;
 	  state = HEADER;
 	}
@@ -302,7 +302,7 @@ int CritterDriver::sense(USeconds &wokeAt) {
 	  break;
 	}
 	else {
-	  fprintf(stderr, "Errr, not sure how this could happen, buf: %u", buf);
+	  fprintf(stderr, "Error, not sure how this could happen, buf: %u", buf);
 	  i = 0;
 	  state = HEADER;
 	  break;
@@ -339,14 +339,16 @@ int CritterDriver::act(USeconds &now) {
       sdata[6] = (char)-controlDrop->y_vel;
       sdata[7] = (char)controlDrop->theta_vel;
       sdata[8] = (char)controlDrop->led_mode;
+      //fprintf(stderr,"led_mode: %d\n", (char)controlDrop->led_mode );
 
       if(controlDrop->led_mode == CritterControlDrop::CUSTOM) {
         for(int i = 0; i < NUM_LEDS; i++) {
-          leddata[i] = controlDrop->led_val[i].r;
-          leddata[i + 1] = controlDrop->led_val[i].g;
-          leddata[i + 2] = controlDrop->led_val[i].b;
+          leddata[3*i] = controlDrop->led_val[i].r;
+          leddata[3*i + 1] = controlDrop->led_val[i].g;
+          leddata[3*i + 2] = controlDrop->led_val[i].b;
         }  
       }
+      fprintf(stderr,"%3d %3d %3d\n",leddata[45], leddata[46], leddata[47]);
 
       if(9 != write(fid, &sdata, 9)) 
           fprintf(stderr, "Error writing data out to serial port!\n"); 
