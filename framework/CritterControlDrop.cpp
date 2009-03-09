@@ -42,7 +42,7 @@ void CritterControlDrop::readArray(void *d) {
   memcpy(&m100_vel, data + i, sizeof(m100_vel));   i += sizeof(m100_vel);
   memcpy(&m220_vel, data + i, sizeof(m220_vel));   i += sizeof(m220_vel);
   memcpy(&m340_vel, data + i, sizeof(m340_vel));   i += sizeof(m340_vel);
-  memcpy(&led_mode, data + i, sizeof(led_val));   i += sizeof(led_val);
+  memcpy(&led_mode, data + i, sizeof(led_mode));   i += sizeof(led_mode);
   memcpy(&led_val,  data + i, sizeof(led_val));  i += sizeof(led_val);
 }
 
@@ -60,8 +60,20 @@ string CritterControlDrop::toString(string offset) {
   sprintf(buf,"led_mode: %d\n", led_mode);
   out += buf;
   if(led_mode == CUSTOM) {
+    out += "R:  ";
     for( i = 0; i < NUM_LEDS; i++ ) {
-      out += "*";
+      sprintf(buf, "%3u ", led_val[i].r);
+      out += buf;
+    }
+    out += "\nG:  ";
+    for( i = 0; i < NUM_LEDS; i++ ) {
+      sprintf(buf, "%3u ", led_val[i].g);
+      out += buf;
+    }
+    out += "\nR:  ";
+    for( i = 0; i < NUM_LEDS; i++ ) {
+      sprintf(buf, "%3u ", led_val[i].b);
+      out += buf;
     }
   }
   out += "\n";
