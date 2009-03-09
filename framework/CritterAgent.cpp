@@ -12,7 +12,6 @@ CritterAgent::CritterAgent(DataLake *lake,
 	stateInput = lake->readyReading("CritterStateDrop");
 	rewardInput = lake->readyReading("CritterRewardDrop");
   controlOutput = lake->readyWriting("CritterControlDrop");
-	thinks = 0;
 }
 
 /**
@@ -52,6 +51,8 @@ int CritterAgent::think(USeconds &wokeAt) {
     if( rewardDrop->reward != 0) {
       actionDir = -actionDir;
     }
+
+    thinks++;
   }
 
     

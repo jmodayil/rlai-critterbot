@@ -26,7 +26,6 @@ class CritterViz : public Component {
 
  private:
 		RiverRead critterOutput;
-		int thinks;
 		bool newData;
 		USeconds postWait, lastPost;
 };

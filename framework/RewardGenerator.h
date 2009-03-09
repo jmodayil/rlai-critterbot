@@ -37,7 +37,6 @@ class RewardGenerator : public Component {
 		CritterStateDrop* stateDrop;
 
 		bool newData;
-		int thinks;
 		int fid;
 
 		// Agent variables go here...

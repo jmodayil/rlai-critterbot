@@ -32,7 +32,6 @@ class Manager : public Component {
 		JoystickDrop* joystickDrop;
 
 		bool newData;
-		int thinks;
 
 		int fid;
 

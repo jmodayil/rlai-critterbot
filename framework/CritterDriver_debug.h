@@ -25,8 +25,6 @@ class CritterDriver_debug : public Component {
 
     bool newData;
 
-    int acts;
-    
     struct termios oldterm;
     int fid;
     string device;
