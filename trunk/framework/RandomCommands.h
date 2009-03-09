@@ -30,7 +30,6 @@ class RandomCommands : public Component {
 
  private:
 		RiverWrite commandWrite;
-		int thinks;
 		bool newData;
 		USeconds thinkWait, thinkTime;
 

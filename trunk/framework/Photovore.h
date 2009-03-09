@@ -32,7 +32,6 @@ class Photovore : public Component {
 		CritterStateDrop* stateDrop;
 
 		bool newData;
-		int thinks;
 
 		int fid;
 
