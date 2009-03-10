@@ -251,16 +251,19 @@ which environment is created in the main method() of \verb+Simulator.java+.
 In particular, in the line
 
 \begin{verbatim}
-final SimulatorEngine engine = createSimulatorEngine(dropInterface, new SimpleEnvironment());
+final SimulatorEngine engine = 
+  createSimulatorEngine(dropInterface, new SimpleEnvironment());
 \end{verbatim}
 
 \verb+SimpleEnvironment+ may be replaced by another environment class name
 from the given list.
 
 \begin{table}
+\small{
 \begin{tabular}{|c|c|}
 \hline
-\code{SimpleEnvironment} & The default environment - some objects, a light source and a battery charger \\
+\code{SimpleEnvironment} & The default environment - \\
+& some objects, a light source and a battery charger \\
 \hline
 \code{FunEnvironment} & Same as SimpleEnvironment, but with more objects \\
 \hline
@@ -271,6 +274,7 @@ from the given list.
 \code{LightBatteryEnvironment} & An environment with a battery charger and five light sources \\ 
 \hline
 \end{tabular}
+}
 \caption{A list of available environments for the simulator.\label{table:environment_list}}
 \end{table}
 
