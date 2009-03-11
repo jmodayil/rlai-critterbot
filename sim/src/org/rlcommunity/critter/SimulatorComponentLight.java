@@ -97,7 +97,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
             }
             double sumIntensity = 0.0; //store total intensity of each pixel in the sensor
             int maxIntensity=0;
-                    
+
+            oldLightSensor.intersections = new LinkedList<RayIntersection>();
+
             //for each pixel in the sensor
             for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
                 //as we rotate clockwise through pixels may cross PI -PI boarder
@@ -112,7 +114,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
                 scene.removeSubtree(oldSensor.getRoot());
 
                 //find out first point (object) ray i intersects with
-                intersectData = scene.traceRay(r);
+                RayIntersection ri = scene.traceRay(r);
+                intersectData = ri;
+                oldLightSensor.intersections.add(ri);
 
                 if (intersectData != null) {//if the ray hits nothing then intensity is zero. We probably have no walls
 

@@ -21,10 +21,13 @@ package org.rlcommunity.critter;
   * @author Adam White, Marc G. Bellemare
   */
 
-import java.awt.Graphics;
+import java.awt.Color;
+import java.util.LinkedList;
 
 public class ObjectStateLightSensor implements ObjectState
 {
+  public static final boolean debugDrawIntersections = false;
+  
   public static final String NAME = SimulatorComponentLight.NAME + "sensor";
 
   protected int aData; //in candela
@@ -110,14 +113,23 @@ public class ObjectStateLightSensor implements ObjectState
    return aSensorDepth;   
       
   }
+
+  /** For debugging purposes only */
+  protected LinkedList<RayIntersection> intersections = new LinkedList<RayIntersection>();
+
   /** (Potentially) draw something about the state; may be null. This
     *  most likely should be moved out of here when we have time.
     *
     * @param g The canvas to draw on
     * @param parent The owner of this state
     */
-  public void draw(SimulatorGraphics g, SimulatorObject parent)
-  {
+  public void draw(SimulatorGraphics g, SimulatorObject parent) {
+    if (debugDrawIntersections) {
+      for (RayIntersection isect : intersections) {
+        g.setColor(new Color(127, 0, 127));
+        g.drawOval(isect.point.x - 0.025, isect.point.y - 0.025, 0.05, 0.05);
+      }
+    }
   }
 
   /** Provides a mean of clearing whatever data this ObjectState contains

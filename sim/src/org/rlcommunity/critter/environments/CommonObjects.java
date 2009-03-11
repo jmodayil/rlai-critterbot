@@ -252,7 +252,7 @@ public class CommonObjects {
 
         lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
         lightSensor.setPosition(new Vector2D(0, 0.198));
-        lightSensor.setLocalDirection(-Math.PI / 2.0);
+        lightSensor.setLocalDirection(Math.PI / 2.0);
         sa.addChild(lightSensor);
 
         lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
