@@ -52,6 +52,7 @@ CritterDriver::CritterDriver(DataLake *lake, ComponentConfig &conf,
                    string &name) : Component(lake, conf, name) {
 
   fid       = -1;
+  //logTagId = lake->readyReading("CritterLogTagDrop");
   controlId = lake->readyReading("CritterControlDrop");
   stateId   = lake->readyWriting("CritterStateDrop");
   acts      = 0;
@@ -85,18 +86,23 @@ FILE* CritterDriver::rotate_log( FILE *log, USeconds *now ) {
 
   char file_name[100];
 
-  if(log)
+  strcpy( file_name, log_path.c_str() );
+  strcat( file_name, "current_robot.log" );
+  
+  if(log) {
     fclose(log);
+    rename( file_name, file_timestamp.c_str() );
+  }
+  
+  log = fopen( file_name, "a" );
 
   strcpy( file_name, log_path.c_str() );
   strcat( file_name, (now->formatTime("%y-%m-%d-%H-%M-%S")).c_str() );
   strcat( file_name, LOG_EXTENSION );
-
-  log = fopen( file_name, "a" );
+  file_timestamp = file_name;
   last_log = *now;
   
-  
-  fprintf( log, "Time Voltage Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
+  fprintf( log, "#Time Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
 
   fflush( log );
   
@@ -109,13 +115,20 @@ CritterDriver::~CritterDriver() {
 
 void CritterDriver::cleanup() {
 
+  char file_name[100];
+  //lake->doneRead(logTagId);
   lake->doneRead(controlId);
   lake->doneWriteHead(stateId);
 
   closeport();
-  close(fid);
-  fclose(log);
-
+  if(fid)
+    close(fid);
+  if(log) {
+    strcpy( file_name, log_path.c_str() );
+    strcat( file_name, "current_robot.log" );
+    fclose(log);
+    rename( file_name, file_timestamp.c_str() );
+  }
 }
 
 void CritterDriver::initport() {
@@ -219,11 +232,14 @@ void CritterDriver::readPacket( unsigned char buf[], USeconds *theTime) {
 //	return;
   //    }
       if(theTime->time.tv_sec >= last_log.time.tv_sec + LOG_INTERVAL * 60 ) {
-        fprintf( stderr, "Opening new Log File.\n" );
+        fprintf( stderr, "Opening new Log File: %s\n", 
+            file_timestamp.c_str() );
         log = rotate_log( log, theTime );
       }
       
-      fprintf(log, "%s ", (theTime->toString()).c_str());
+      string timestring = theTime->toString();
+      fprintf(log, "%s ", (timestring.substr(0,timestring.length() - 1)).c_str());
+      //fprintf(log, "%s ", ((theTime->toString()).c_str()));
       fprintf(log, "%d ", stateDrop.motor100.command);
       fprintf(log, "%d ", stateDrop.motor100.velocity);
       fprintf(log, "%d ", stateDrop.motor100.current);
@@ -275,6 +291,13 @@ int CritterDriver::sense(USeconds &wokeAt) {
   if(fid <= 0)
     return error("sense(): Error reading from serial port.  FID: %d", fid);
   
+  //logTagDrop = (CritterLogTagDrop*)lake->readHead(logTagId);  
+  //lake->doneRead(logTagId);
+ 
+  //if(logTagDrop != NULL) {
+  //  fprintf(log, "#%s\n", logTagDrop->tagInfo.c_str() );
+  //}
+
   while(read(fid, &buf, 1) == 1) {
     switch(state) {
       case HEADER:

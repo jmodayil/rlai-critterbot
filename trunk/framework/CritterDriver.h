@@ -11,6 +11,7 @@
 #include "ErrorMessage.h"
 #include "CritterControlDrop.h"
 #include "CritterStateDrop.h"
+#include "CritterLogTagDrop.h"
 #include "USeconds.h"
 
 #define SER_HEADER1 0xDE
@@ -31,8 +32,10 @@ class CritterDriver : public Component {
   private:
     USeconds lastPost, postWait; //postTimer commandWait
     RiverRead controlId;
+    //RiverRead logTagId;
     RiverWrite stateId;
 
+    //CritterLogTagDrop* logTagDrop;
     CritterControlDrop* controlDrop;
     CritterStateDrop stateDrop;
 
@@ -70,6 +73,7 @@ class CritterDriver : public Component {
     FILE* rotate_log( FILE *log, USeconds *now );
     int readConfig(ComponentConfig *config);
     string log_path, serial_port; 
+    string file_timestamp;
 };
 
 #endif
