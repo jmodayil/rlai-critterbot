@@ -236,7 +236,8 @@ public class CommonObjects {
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-        new ObjectStateLightSensor(10, 0.005, 0.01); //get real numbers from mike                
+        new ObjectStateLightSensor(3,0.005, 0.01); //odd number of pixels ONLY
+        
         //new ObjectStateLightSensor(5, 0.005, 0.1); //get real numbers from mike
         //->->pixels, depth(m), width(m)
         lightSensor.addState(specificLightSensor);
@@ -257,8 +258,8 @@ public class CommonObjects {
 
         lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
         lightSensor.setPosition(new Vector2D(-0.198, 0.0));
-        lightSensor.setLocalDirection(-Math.PI);
-        sa.addChild(lightSensor); 
+        lightSensor.setLocalDirection(Math.PI);
+          sa.addChild(lightSensor); 
 
         SimulatorObject battery = new SimulatorObject("battery",
         pId++);
