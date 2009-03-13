@@ -236,7 +236,7 @@ public class CommonObjects {
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
-        new ObjectStateLightSensor(3,0.005, 0.01); //odd number of pixels ONLY
+        new ObjectStateLightSensor(11,0.005, 0.01); //odd number of pixels ONLY
         
         //new ObjectStateLightSensor(5, 0.005, 0.1); //get real numbers from mike
         //->->pixels, depth(m), width(m)
