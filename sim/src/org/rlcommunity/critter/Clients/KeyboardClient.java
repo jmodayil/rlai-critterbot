@@ -172,9 +172,12 @@ public class KeyboardClient implements DropClient, KeyListener {
 
     private void setDropWithMotorSpace(CritterControlDrop controlDrop) {
         controlDrop.motor_mode = CritterControlDrop.MotorMode.WHEEL_SPACE;
-        controlDrop.m100_vel = motor100;
-        controlDrop.m220_vel = motor220;
-        controlDrop.m340_vel = motor340;
+
+        int maxVel = 100;
+
+        controlDrop.m100_vel = motor100 * maxVel;
+        controlDrop.m220_vel = motor220 * maxVel;
+        controlDrop.m340_vel = motor340 * maxVel;
     }
 
     private void setDropWithXYThetaSpace(CritterControlDrop controlDrop) {

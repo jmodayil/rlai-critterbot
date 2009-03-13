@@ -180,8 +180,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 double yvel = m100 * MS2XYT[1][0] + m220 * MS2XYT[1][1] + m340 * MS2XYT[1][2];
                 double tvel = m100 * MS2XYT[2][0] + m220 * MS2XYT[2][1] + m340 * MS2XYT[2][2];
 
-                velocity = new Vector2D(xvel, yvel);
-                angleVelocity = tvel;
+                velocity = new Vector2D(xvel / XY_VELOCITY_SCALE, yvel / XY_VELOCITY_SCALE);
+                angleVelocity = tvel / ANG_VELOCITY_SCALE;
                 break;
             default:
                 System.err.println("Unimplemented motor mode: " + pDrop.motor_mode);
