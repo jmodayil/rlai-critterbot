@@ -311,7 +311,7 @@ public class CommonObjects {
             {-16, -5.0, -pi},
             // Sensor 7 - midway on the tail, facing out. Pos. may be wrong
             {-32.0, 9.0, pi / 2 + pi / 8},};
-
+ 
         for (int i = 0; i < irDistancePos.length; i++) {
             SimulatorObject sensor =
                     baseIrSensor.makeCopy("IRSensor" + i, pId++);
@@ -325,7 +325,16 @@ public class CommonObjects {
         return sa;
     }
 
-    /** Generates an instance of the wall enclosing the environment.
+    public static double defaultWallWidth = 5.0;
+    public static double defaultWallHeight = 5.0;
+    public static double defaultWallThickness = 0.2;
+
+    public static SimulatorObject generateWall(String pName, int pId) {
+      return generateWall(pName, pId, defaultWallWidth, defaultWallHeight,
+              defaultWallThickness);
+    }
+
+   /** Generates an instance of the wall enclosing the environment.
      *
      * Note: This wall object may be composed of many objects. As such, the
      *  next ID should be increased by the size of the object tree, not by 1.
@@ -335,40 +344,41 @@ public class CommonObjects {
      *
      * @return A new wall instance.
      */
-    public static SimulatorObject generateWall(String pName, int pId) {
+    public static SimulatorObject generateWall(String pName, int pId, double
+            pWidth, double pHeight, double pThickness) {
         Wall w = new Wall(pName, pId++);
         // @todo w.setSVG("wall").resetNativeTranslation();
 
-        w.addPoint(0.20, 0.20);
-        w.addPoint(0.20, 4.80);
-        w.addPoint(4.80, 4.80);
-        w.addPoint(4.80, 0.20);
-        w.addPoint(0.20, 0.20);
+        w.addPoint(pThickness, pThickness);
+        w.addPoint(pThickness, pHeight - pThickness);
+        w.addPoint(pWidth - pThickness, pHeight - pThickness);
+        w.addPoint(pWidth - pThickness, pThickness);
+        w.addPoint(pThickness, pThickness);
 
         double[][][] partPoints = new double[][][] {
             { // North side
-                { 0.2, 0.0 },
-                { 5.0, 0.0 },
-                { 5.0, 0.2 },
-                { 0.2, 0.2 },
+                { pThickness, 0.0 },
+                { pWidth, 0.0 },
+                { pWidth, pThickness },
+                { pThickness, pThickness },
             },
             { // East side
-                { 5.0, 0.2 },
-                { 5.0, 5.0 },
-                { 4.8, 5.0 },
-                { 4.8, 0.2 },
+                { pWidth, pThickness },
+                { pWidth, pHeight },
+                { pWidth - pThickness, pHeight },
+                { pWidth - pThickness, pThickness },
             },
             { // South side
-                { 4.8, 5.0 },
-                { 0.0, 5.0 },
-                { 0.0, 4.8 },
-                { 4.8, 4.8 },
+                { pWidth - pThickness, pHeight },
+                { 0.0, pHeight },
+                { 0.0, pHeight - pThickness },
+                { pWidth - pThickness, pHeight - pThickness },
             },
             { // West side
-                { 0.0, 4.8 },
+                { 0.0, pHeight - pThickness },
                 { 0.0, 0.0 },
-                { 0.2, 0.0 },
-                { 0.2, 4.8 },
+                { pThickness, 0.0 },
+                { pThickness, pHeight - pThickness },
             }
         };
 
