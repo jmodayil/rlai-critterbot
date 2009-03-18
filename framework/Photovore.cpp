@@ -35,6 +35,7 @@ int Photovore::init(USeconds &wokeAt) {
 int Photovore::think(USeconds &wokeAt) {
 	//do we need to wait and think and all that?
 	// only if we want to make sure we don't get swamped with joystick commands
+  int x,y;
   static int cycle;
   static unsigned int light[4];
   int tempt = 0, i;
@@ -58,10 +59,10 @@ int Photovore::think(USeconds &wokeAt) {
       light[3] = light[3] / 10;
 
 
-    if(front_last == 0) {
+    /*if(front_last == 0) {
 		  front_last = light[0];
       return 1;
-    }
+    }*/
     
     if(light[1] > light[0]) {
       tempt -= 10;
@@ -82,9 +83,51 @@ int Photovore::think(USeconds &wokeAt) {
 
     front_last = light[0];
 
+    x = 0;
+    y = 0;
+
+    if(stateDrop->ir_distance[0] > 150) {
+      x -= 10;
+      y += 0;
+    }
+    if(stateDrop->ir_distance[1] > 150) {
+      x -= 10;
+      y -= 5;
+    }
+    if(stateDrop->ir_distance[2] > 150) {
+      x += 0;
+      y -= 5;
+    }
+    if(stateDrop->ir_distance[3] > 150) {
+      x += 0;
+      y -= 5;
+    }
+    if(stateDrop->ir_distance[4] > 150) {
+      x += 0;
+      y += 5;
+    }
+    if(stateDrop->ir_distance[5] > 150) {
+      x += 0;
+      y += 5;
+    }
+    if(stateDrop->ir_distance[6] > 150) {
+      x -= 10;
+      y += 5;
+    }
+    if(stateDrop->ir_distance[7] > 150) {
+      tempt += 5;
+    }
+    if(stateDrop->ir_distance[8] > 150) {
+      tempt += 5;
+    }
+    if(stateDrop->ir_distance[9] > 150) {
+      tempt -= 5;
+    }
+
+
     controlDrop.motor_mode = CritterControlDrop::XYTHETA_SPACE;
-		controlDrop.x_vel = 5;
-		controlDrop.y_vel = 0;
+		controlDrop.x_vel = x + 5;
+		controlDrop.y_vel = y ;
 		controlDrop.theta_vel = tempt;
 		
 		//copying James

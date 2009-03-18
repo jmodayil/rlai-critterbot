@@ -3,6 +3,7 @@
 #include "CritterStateDrop.h"
 #include "CritterRewardDrop.h"
 #include "CritterDrop.h"
+#include "CritterLogTagDrop.h"
 
 #include "XMLNode.h"
 #include <string.h>
@@ -21,6 +22,7 @@ int SimulatorRobotInterfaceProc::readConfig() {
 }
 
 int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
+  logTagWrite = lake->readyWriting("CritterLogTagDrop");
   stateWrite = lake->readyWriting(CritterStateDrop::name);
   controlWrite = lake->readyWriting(CritterControlDrop::name);
   rewardWrite = lake->readyWriting(CritterRewardDrop::name);
@@ -118,6 +120,7 @@ int SimulatorRobotInterfaceProc::processDrop()
   // Read in the classname
   if (newDataLength < nameLength) return -1;
 
+  bool logTagDrop = false;
   bool stateDrop = false;
   bool controlDrop = false;
   bool rewardDrop = false;
@@ -144,6 +147,11 @@ int SimulatorRobotInterfaceProc::processDrop()
   {
     rewardDrop = true;
     dropLength = 8;
+  }
+  else if (strncmp(data, CritterLogTagDrop::name.c_str(), nameLength) == 0)
+  {
+    logTagDrop = true;
+    dropLength = 104;
   }
 
   if (dropLength < 0)
@@ -192,6 +200,15 @@ int SimulatorRobotInterfaceProc::processDrop()
     // Write a new drop to the lake and fill it with the data from the socket
     newDrop->readArray(data);
     lake->doneWriteHead(rewardWrite);
+  }
+  else if (logTagDrop)
+  {
+    CritterLogTagDrop * newDrop = 
+      (CritterLogTagDrop*)lake->startWriteHead(logTagWrite);
+
+    // Write a new drop to the lake and fill it with the data from the socket
+    newDrop->readArray(data+4);
+    lake->doneWriteHead(logTagWrite);
   }
 
 

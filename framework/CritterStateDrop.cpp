@@ -35,19 +35,27 @@ CritterStateDrop::~CritterStateDrop() {
 }
 
 int CritterStateDrop::getSize() {
-  return sizeof(power_source) +
-         sizeof(bus_voltage) +
-         sizeof(batv40) + sizeof(batv160) + sizeof(batv280) +
-         sizeof(motor100) + sizeof(motor220) + sizeof(motor340) +
-         sizeof(accel) + sizeof(mag) + 
-         sizeof(rotation) +
-         sizeof(ir_distance) +
-         sizeof(ir_light) + 
-         sizeof(light) + 
-         sizeof(thermal) +
-         sizeof(bump) +
-         sizeof(error_flags) +
-         sizeof(cycle_time);
+  int size;
+
+  size = sizeof(power_source);
+  size += sizeof(bus_voltage);
+  size += sizeof(batv40);
+  size += sizeof(batv160);
+  size += sizeof(batv280);
+  size += sizeof(motor100);
+  size += sizeof(motor220);
+  size += sizeof(motor340);
+  size += sizeof(accel);
+  size += sizeof(mag);
+  size += sizeof(rotation);
+  size += sizeof(ir_distance);
+  size += sizeof(ir_light);
+  size += sizeof(light);
+  size += sizeof(thermal);
+  size += sizeof(bump);
+  size += sizeof(error_flags);
+  size += sizeof(cycle_time);
+  return size; 
 }
 
 void CritterStateDrop::writeArray(void *d) {
@@ -106,7 +114,6 @@ void CritterStateDrop::writeArray(void *d) {
   
   memcpy(data, &cycle_time, sizeof(cycle_time));
   data += sizeof(cycle_time);
-
 }
 
 void CritterStateDrop::readArray(void *d) {

@@ -24,6 +24,7 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
     RiverRead stateRead;
     RiverRead controlRead;
     RiverRead rewardRead;
+    RiverWrite logTagWrite;
     RiverWrite stateWrite;
     RiverWrite controlWrite;
     RiverWrite rewardWrite;
