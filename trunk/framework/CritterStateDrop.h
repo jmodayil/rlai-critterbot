@@ -14,7 +14,7 @@ using namespace std;
 
 class CritterStateDrop : public CritterDrop {
  public:
-	static string name;
+  static string name;
   
   enum Power_Source { SHORE, BAT40, BAT160, BAT280 } power_source;
 
@@ -44,13 +44,13 @@ class CritterStateDrop : public CritterDrop {
   unsigned int error_flags; // (4) 34
   unsigned int cycle_time;
 
-	CritterStateDrop();
-	virtual ~CritterStateDrop();
+  CritterStateDrop();
+  virtual ~CritterStateDrop();
 
-	virtual int getSize();
-	virtual void writeArray(void *d);
-	virtual void readArray(void *d);
-	virtual string toString(string offset = "");
+  virtual int getSize();
+  virtual void writeArray(void *d);
+  virtual void readArray(void *d);
+  virtual string toString(string offset = "");
 
   virtual string getName() { return name; }
 };

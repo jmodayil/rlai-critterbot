@@ -1,17 +1,18 @@
-#ifndef Manager_H
-#define Manager_H
+#ifndef LedTest_H
+#define LedTest_H
 
 #include "Component.h"
 #include "CritterControlDrop.h"
-#include "JoystickDrop.h"
+#include "CritterStateDrop.h"
+#include "ColorImageDrop.h"
 
 /**
  * @todo: comment me
  */
-class Manager : public Component {
+class LedTest : public Component {
   public:
-    Manager(DataLake *lake, ComponentConfig &config, string &name);
-    virtual ~Manager();
+    LedTest(DataLake *lake, ComponentConfig &config, string &name);
+    virtual ~LedTest();
 
     //for reloading config when it changes
     virtual int loadConfig(ComponentConfig *config) ;
@@ -26,18 +27,21 @@ class Manager : public Component {
 
  private:
 		RiverWrite controlOutput;
-		RiverRead joystickInput;
-		RiverRead photovoreInput;
+		RiverRead stateInput;
+    RiverRead imageInput;
 
-		CritterControlDrop controlDrop, photovorDrop;
-		JoystickDrop* joystickDrop;
+		CritterControlDrop  controlDrop;
+		CritterStateDrop*   stateDrop;
+    ColorImageDrop*     image;
 
 		bool newData;
+		int thinks;
 
 		int fid;
 
 		// control variables
-		float speed;
+		unsigned int front_last;
+    int dir;
 };
 
 #endif

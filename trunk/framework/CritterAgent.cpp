@@ -10,7 +10,6 @@ CritterAgent::CritterAgent(DataLake *lake,
                                    Component(lake, config, name) {
 	fid = -1;
 	stateInput = lake->readyReading("CritterStateDrop");
-	rewardInput = lake->readyReading("CritterRewardDrop");
   controlOutput = lake->readyWriting("CritterControlDrop");
 }
 
@@ -19,7 +18,6 @@ CritterAgent::CritterAgent(DataLake *lake,
  */
 CritterAgent::~CritterAgent() {
 	lake -> stopReading(stateInput);
-  lake -> stopReading(rewardInput);
 	lake -> stopWriting(controlOutput);
 }
 
@@ -44,18 +42,7 @@ int CritterAgent::think(USeconds &wokeAt) {
 	
 	// Read in new data from the world.
   stateDrop = ((CritterStateDrop*)lake->readHead(stateInput));
-  rewardDrop = ((CritterRewardDrop*)lake->readHead(rewardInput));
 
-  if (rewardDrop) {
-    // Check the reward
-    if( rewardDrop->reward != 0) {
-      actionDir = -actionDir;
-    }
-
-    thinks++;
-  }
-
-    
 	if(stateDrop) {
 
 	  update();
@@ -78,19 +65,20 @@ int CritterAgent::think(USeconds &wokeAt) {
  */
 void CritterAgent::update( void ) {
 
-  // Check the state information
-  if( stateDrop->rotation > 10 ) {
-    // I'm turning left.
-  }
-  else if( stateDrop->rotation < -10 ) {
-    // I'm turning right.
-  }
-
-  // Send a new action.
   controlDrop.motor_mode = CritterControlDrop::XYTHETA_SPACE;
-  controlDrop.x_vel = 100 * actionDir;
-  controlDrop.y_vel = 0;
-  controlDrop.theta_vel = 0;
+  // Check the state information
+  if( stateDrop->ir_distance[1] > 75 || stateDrop->ir_distance[2] > 75 ||
+      stateDrop->ir_distance[0] > 75) {
+    controlDrop.x_vel = 7;
+    controlDrop.y_vel = 7;
+    controlDrop.theta_vel = 6;
+  }
+  else {
+    controlDrop.x_vel = 10;
+    controlDrop.y_vel = 10;
+    controlDrop.theta_vel = -1;
+  }
+  // Send a new action.
 
   return;
 }

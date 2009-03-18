@@ -77,6 +77,8 @@ string CritterControlDrop::toString(string offset) {
     }
   }
   out += "\n";
+  sprintf(buf, "Sizeof led_val: %d\n", sizeof(led_val));
+  out += buf;
   return out; 
 }
 

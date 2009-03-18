@@ -6,6 +6,7 @@ Manager::Manager(DataLake *lake,
                                    Component(lake, config, name) {
 	fid = -1;
 	joystickInput = lake->readyReading("JoystickDrop");
+  //photovoreInput = lake->readyReading("PhotovoreControlDrop");
 	controlOutput = lake->readyWriting("CritterControlDrop");
 	thinks = 0;
 	speed = 25;
@@ -16,6 +17,7 @@ Manager::Manager(DataLake *lake,
 Manager::~Manager() {
 	//might want to make an array of these and just iterate?
 	lake -> stopReading(joystickInput);
+	//lake -> stopReading(photovoreInput);
 	lake -> stopWriting(controlOutput);
 }
 
@@ -38,10 +40,18 @@ int Manager::think(USeconds &wokeAt) {
 
 	// read in the Joystick Control Drop
 	joystickDrop = ((JoystickDrop*)lake->readHead(joystickInput));
+  //photovoreDrop = ((CritterControlDrop*)lake->readHead(photovoreInput));
+  //lake->doneRead(photovoreInput);
+	lake->doneRead(joystickInput);
 
+  /*if(photovoreDrop) {
+		(*(CritterControlDrop*)lake->startWriteHead(controlOutput)) = photovoreDrop;
+		lake ->doneWriteHead(controlOutput);
+
+  } 
 	// translate the joystick controls into robot commands
 	// write the robot commands to the drop
-	if(joystickDrop) {
+  else*/ if(joystickDrop) {
 
 		//translate commands
 		// buttons 1-4 control the percentage speed
@@ -69,10 +79,10 @@ int Manager::think(USeconds &wokeAt) {
 		controlDrop.theta_vel = (int)speed*(joystickDrop->rightAnalogX)/JOY_AXIS_MAX;
 		
 		//copying James
+
 		(*(CritterControlDrop*)lake->startWriteHead(controlOutput)) = controlDrop;
 		lake ->doneWriteHead(controlOutput);
 	}
-	lake ->doneRead(joystickInput);
 	thinks++;
   return 1;
 }
