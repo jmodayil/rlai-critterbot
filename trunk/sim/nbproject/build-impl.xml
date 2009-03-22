@@ -394,6 +394,7 @@ is divided into following sections:
         <echo>java -cp "${run.classpath.with.dist.jar}" ${main.class}</echo>
     </target>
     <target depends="init,compile,-pre-pre-jar,-pre-jar" if="manifest.available+main.class+mkdist.available" name="-do-jar-with-libraries">
+        <echo>Not adding libraries to path because it's causing unecessary warnings.</echo>
         <property location="${build.classes.dir}" name="build.classes.dir.resolved"/>
         <pathconvert property="run.classpath.without.build.classes.dir">
             <path path="${run.classpath}"/>
@@ -411,7 +412,7 @@ is divided into following sections:
             <fileset dir="${build.classes.dir}"/>
             <manifest>
                 <attribute name="Main-Class" value="${main.class}"/>
-                <attribute name="Class-Path" value="${jar.classpath}"/>
+                <!-- <attribute name="Class-Path" value="${jar.classpath}"/> -->
             </manifest>
         </copylibs>
         <echo>To run this application from the command line without Ant, try:</echo>
