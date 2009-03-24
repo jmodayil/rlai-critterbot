@@ -93,7 +93,7 @@ public class CritterStateDrop implements SimulatorDrop
 
   /** The bus voltage (currently unused) */
   public int bus_voltage;
-  /** The state of the three batteries (currently only batv40 has nonzero values) */
+  /** The state of the three batteries  */
   public int batv40, batv160, batv280;
 
   /** The state of the three motors */
