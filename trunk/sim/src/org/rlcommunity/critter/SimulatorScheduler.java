@@ -36,8 +36,6 @@ public class SimulatorScheduler {
     /** A flag telling us that we should stop running. */
     protected volatile boolean aTerminated = false;
 
-    public final int NANOSECONDS_IN_MILLISECOND = 1000000;
-
     /** How often (in time steps) the average time should be reported, or 0 to
      * not report */
     public final int averageTimeReportInterval = 0;
@@ -56,87 +54,78 @@ public class SimulatorScheduler {
         aScale = pScale;
     }
 
-    public void run() {
-        // Tau is the residual time
-        double tau = 0;
+  public void run() {
+    SimulatorSchedulerClock clock = new SimulatorSchedulerClock();
+    int lagCount = 0;
+    int count = 0;
+    boolean permanentlyBehind = false;
+    int permanentCount = 0;
+    
+    while (!aTerminated) {
+      double delta = aStepLength / aScale;
 
-        double averageTime = 0;
-        int count = 0;
+      count++;
+      
+      clock.startClock();
+      // Make sure no one else is modifying the engine's state before we
+      //  step through
+      synchronized (aEngine) {
+        aEngine.step((int) aStepLength);
+      }
 
-        int lagCount = 0;
+      long millis = clock.endClock(delta);
+      if (clock.isBehind()) {
+        lagCount++;
+      }
+      else if (!permanentlyBehind) {
+        lagCount = 0;
+      }
 
-        double ltAverageTime = 0;
+      double averageTime = clock.getAverageTime();
+
+      if (averageTimeReportInterval > 0 &&
+          count >= averageTimeReportInterval) {
+        count -= averageTimeReportInterval;
+        System.err.println("Average time: " +
+                           averageTime / averageTimeReportInterval);
+        clock.resetAverageTime();
+      }
+
+      if (lagCount > 0 && lagCount % 100 == 0) {
+        double estScale;
+
+        estScale = aStepLength / (averageTime);
+ 
+        // Make the time scale printable
+        estScale = Math.round(100 * estScale) / 100.0;
+
+        permanentCount++;
         
-        while (!aTerminated) {
-            // Delta is the actual length of time , in ms, between two runs
-            //  Because the time scale may change over time we recompute delta
-            double delta = aStepLength / aScale;
-
-            // @todo look at the time before and after
-            // @todo take care of the case when aScale << 1
-            // Run the simulator for a bit
-            long startTime = System.nanoTime();
-            // Make sure no one else is modifying the engine's state before we
-            //  step through
-            synchronized(aEngine) {
-                aEngine.step((int)aStepLength);
-            }
-            long computationTime = System.nanoTime() - startTime;
-
-            averageTime += computationTime;
-            count++;
-
-            ltAverageTime = averageTime / count;
-            
-            if (averageTimeReportInterval > 0 &&
-                    count >= averageTimeReportInterval) {
-                count -= averageTimeReportInterval;
-                System.err.println ("Average time: "+
-                        averageTime/averageTimeReportInterval);
-                averageTime = 0;
-            }
-
-            tau += delta - computationTime / NANOSECONDS_IN_MILLISECOND;
-            
-            long fullMillis;
-            // If we are lagging behind do not stop
-            if (tau < 0) {
-                lagCount++;
-                if (lagCount % 100 == 0) {
-
-                  double estScale;
-                  
-                  if (count > 0)
-                    estScale = aStepLength*NANOSECONDS_IN_MILLISECOND/(ltAverageTime);
-                  else
-                    estScale = 0.0;
-
-                  // Make the time scale printable
-                  estScale = Math.round(100*estScale) / 100.0;
-                  
-                  System.err.println ("Simulator is running behind... "+
-                            "(actual time scale: "+estScale+")");
-                }
-                
-                fullMillis = 0;
-            }
-            else {
-              fullMillis = (long)Math.floor(tau);
-              lagCount = 0;
-            }
-            
-            tau -= fullMillis;
-            if (fullMillis > 0) {
-                try {
-                    Thread.sleep(fullMillis);
-                } catch (InterruptedException ex) {
-                    // @todo handle the interrupted case
-                }
-            }
+        if (!permanentlyBehind) {
+          if (permanentCount == 25) {
+            permanentlyBehind = true;
+            System.err.println ("Simulator is often behind, will stop reporting it.");
+          }
+          else
+            System.err.println("Simulator is running behind... " +
+                           "(actual time scale: " + estScale + ", req. "+
+                           aScale+")");
         }
+        
+        lagCount = 0;
+      }
 
-        aTerminated = false;
+      if (millis > 0) {
+        try {
+          Thread.sleep(millis);
+        } catch (InterruptedException ex) {
+          // @todo handle the interrupted case
+          }
+      }
     }
+
+    aTerminated = false;
+  }
 
     /** Set the time scale at which things run. A value greater than 1 means the
      *   simulator is run faster than real-time; a value smaller than 1 means
