@@ -24,6 +24,9 @@ public class SimulatorSchedulerClock {
 
     public boolean isBehind() { return isBehindFlag; }
 
+    /** Tells the clock to start counting how long a given operation takes.
+     * 
+     */
     public void startClock() {
       startClock(System.nanoTime());
     }
@@ -32,6 +35,12 @@ public class SimulatorSchedulerClock {
       aStartNanos = pNanos;
     }
 
+    /** Tells the clock to stop ticking.
+     *
+     * @param pDelta The desired number of milliseconds for the clocked
+     *  operation.
+     * @return The actual number of milliseconds we should sleep.
+     */
     public long endClock(double pDelta) {
       return endClock(pDelta, System.nanoTime());
     }
