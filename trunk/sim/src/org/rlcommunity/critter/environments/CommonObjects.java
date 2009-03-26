@@ -43,7 +43,8 @@ import org.rlcommunity.critter.svg.Loader;
 public class CommonObjects {
 
     /** Robot length in meters */
-    public static final double ROBOT_LENGTH = 0.68;
+    public static final double NOMINAL_ROBOT_LENGTH = 0.68;
+    public static final double ROBOT_LENGTH = 0.41;
     public static final double CM_PER_METER = 100;
 
     /** Adds a generated object to the given list. This method also takes care of
@@ -198,13 +199,16 @@ public class CommonObjects {
             new double[]{7.5, 18.5},};
 
         Polygon agentShape = new Polygon();
+        double robotLength = NOMINAL_ROBOT_LENGTH;
+        double robotScale = ROBOT_LENGTH / robotLength;
+
         for (double[] pt : agentShapePoints) {
             // Convert the points to meters
-            agentShape.addPoint(pt[0] / CM_PER_METER, pt[1] / CM_PER_METER);
+            agentShape.addPoint(robotScale * pt[0] / CM_PER_METER,
+                    robotScale * pt[1] / CM_PER_METER);
         }
 
         agentShape.rotate(-Math.PI / 2, new Vector2D(0, 0));
-        double robotLength = ROBOT_LENGTH; // Rough length estimate
 
         agentShape.doneAddPoints();
 

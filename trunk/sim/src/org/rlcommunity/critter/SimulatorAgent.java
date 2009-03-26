@@ -51,7 +51,8 @@ public class SimulatorAgent extends SimulatorObject {
 			URL url = this.getClass().getResource(resourceName);
                         assert url!=null : "Could not load resource: "+resourceName+" from the jar.";
 			robotop = ImageIO.read(url);
-			robotop = robotop.getScaledInstance(40, 68, Image.SCALE_SMOOTH);
+      // Was initially: 40,68
+			robotop = robotop.getScaledInstance(27, 40, Image.SCALE_SMOOTH);
 		} catch (IOException ioe) {
 			System.out.println(ioe.toString());
 		}
@@ -65,7 +66,7 @@ public class SimulatorAgent extends SimulatorObject {
 			newXform.rotate(Math.PI / 2 + aDir,
                     g.scaleToDouble(aPos.x), g.scaleToDouble(aPos.y));
 			g.setTransform(newXform);
-			g.drawImage(robotop, aPos.x - 0.19, aPos.y - 0.21, null);
+			g.drawImage(robotop, aPos.x - 0.13, aPos.y - 0.12, null);
 			g.setTransform(oldXform);
 
 			Color tempC = g.getColor();
