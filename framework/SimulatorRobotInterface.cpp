@@ -10,6 +10,8 @@
 
 SimulatorRobotInterfaceProc::SimulatorRobotInterfaceProc(DataLake *lake, 
   ComponentConfig &config, string name) : SocketProtocol(lake, config, name) {
+  
+  numMapItems = 0;
 }
 
 int SimulatorRobotInterfaceProc::readConfig() {
@@ -22,13 +24,11 @@ int SimulatorRobotInterfaceProc::readConfig() {
 }
 
 int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
-  logTagWrite = lake->readyWriting("CritterLogTagDrop");
-  stateWrite = lake->readyWriting(CritterStateDrop::name);
-  controlWrite = lake->readyWriting(CritterControlDrop::name);
-  rewardWrite = lake->readyWriting(CritterRewardDrop::name);
-  stateRead = lake->readyReading(CritterStateDrop::name);
-  controlRead = lake->readyReading(CritterControlDrop::name);
-  rewardRead = lake->readyReading(CritterRewardDrop::name);
+  // Add all the drops we care about
+  addDropToMap(CritterStateDrop::name, true, true);
+  addDropToMap(CritterRewardDrop::name, true, true);
+  addDropToMap(CritterControlDrop::name, true, true);
+  // addDropToMap(CritterLogTagDrop::name, true, false);
 
   return readConfig();
 }
@@ -120,98 +120,57 @@ int SimulatorRobotInterfaceProc::processDrop()
   // Read in the classname
   if (newDataLength < nameLength) return -1;
 
-  bool logTagDrop = false;
-  bool stateDrop = false;
-  bool controlDrop = false;
-  bool rewardDrop = false;
+  char receivedDropName[1024];
 
-  int dropLength = -1;
-
-  // @@@ Find a better way to do this - is there a classloader?
-  if (strncmp(data, CritterStateDrop::name.c_str(), nameLength) == 0)
-  {
-    stateDrop = true;
-    // This is hardcoded, not as a sign of weakness but rather as a reminder
-    //  that the drop length needs to be read from the socket. The reason
-    //  is that if we have variable length data, the other (Java) end needs
-    //  to tell us the data size
-    dropLength = 352;
-  }
-  else if (strncmp(data, CritterControlDrop::name.c_str(), nameLength) == 0)
-  {
-    controlDrop = true;
-    // @todo see above comment
-    dropLength = 68;
-  }
-  else if (strncmp(data, CritterRewardDrop::name.c_str(), nameLength) == 0)
-  {
-    rewardDrop = true;
-    dropLength = 8;
-  }
-  else if (strncmp(data, CritterLogTagDrop::name.c_str(), nameLength) == 0)
-  {
-    logTagDrop = true;
-    dropLength = 104;
+  if (nameLength >= sizeof(receivedDropName)) {
+    debug("ERROR: Very long drop name, probably garbage.");
+    // @todo at this point do something
+    return -1;
   }
 
-  if (dropLength < 0)
-  {
+  strncpy(receivedDropName, data, nameLength);
+  // Terminate with a 0
+  receivedDropName[nameLength] = 0;
+
+  data += nameLength;
+  newDataLength -= nameLength;
+
+  dropMapItem * item = getItemByName(receivedDropName);
+  if (item == NULL) {
     // Unsafe! but at this point we should just cry
-    data[nameLength] = 0;
-    debug("ERROR: Unknown drop type %s\n", data);
+    debug("ERROR: Unknown drop type %s\n", receivedDropName);
     // Trash the data to avoid repeating
     // @todo this should happen in processRead
     unreadDataPtr += nameLength;
     return -1;
   }
 
-  data += nameLength;
-  newDataLength -= nameLength;
+  if (newDataLength < sizeof(int)) return -1;
+  newDataLength -= 4;
+
+  // Read the drop length 
+  int dropLength = *((int*)data);
+  data += sizeof(dropLength);
+
+  // Do we have enough data to parse this drop?
+  if (newDataLength < dropLength) return -1;
+
+  if (dropLength < 0) {
+    debug("ERROR: Negative drop length, probably garbage.");
+    // @todo do something
+    return -1;
+  }
 
   // Test if there is enough data in the buffer (length >= dropLength)
   if (newDataLength < dropLength)
     return -1;
 
-  // Process this drop as a CritterStateDrop
-  if (stateDrop)
-  {
-    CritterStateDrop * newDrop = 
-      (CritterStateDrop*)lake->startWriteHead(stateWrite);
-    // @@@ fprintf (stderr, "Size of drop is %d\n", newDrop->getSize());
+  // I hope you defined dropWrite...
+  DataDrop * newDrop = lake->startWriteHead(item->dropWrite);
+  newDrop->readArray(data);
+  lake->doneWriteHead(item->dropWrite);
 
-    // Write a new drop to the lake and fill it with the data from the socket
-    newDrop->readArray(data);
-    lake->doneWriteHead(stateWrite);
-  }
-  else if (controlDrop)
-  {
-    CritterControlDrop * newDrop = 
-      (CritterControlDrop*)lake->startWriteHead(controlWrite);
-
-    // Write a new drop to the lake and fill it with the data from the socket
-    newDrop->readArray(data);
-    lake->doneWriteHead(controlWrite);
-  }
-  else if (rewardDrop)
-  {
-    CritterRewardDrop * newDrop = 
-      (CritterRewardDrop*)lake->startWriteHead(rewardWrite);
-
-    // Write a new drop to the lake and fill it with the data from the socket
-    newDrop->readArray(data);
-    lake->doneWriteHead(rewardWrite);
-  }
-  else if (logTagDrop)
-  {
-    CritterLogTagDrop * newDrop = 
-      (CritterLogTagDrop*)lake->startWriteHead(logTagWrite);
-
-    // Write a new drop to the lake and fill it with the data from the socket
-    newDrop->readArray(data+4);
-    lake->doneWriteHead(logTagWrite);
-  }
-
-
+  // @todo logtagdrop will presently fail
   newDataLength -= dropLength;
 
   // Return the number of characters used
@@ -220,50 +179,29 @@ int SimulatorRobotInterfaceProc::processDrop()
 
 int SimulatorRobotInterfaceProc::act(USeconds & wokeAt)
 {
-  // Read in any queued control drops
-  CritterControlDrop * ctrlDrop = 
-    (CritterControlDrop*)lake->readHead(controlRead);
+  // Go through the list of possible drops
+  for (int i = 0; i < numMapItems; i++) {
+    // Get the river we want to read from
+    RiverRead river = dropMap[i].dropRead;
 
-  while (ctrlDrop != NULL)
-  {
-    // Write the control drop to the TCP buffer
-    writeDrop(ctrlDrop);
-    lake->doneRead(controlRead);
+    // Read in a drop of that type
+    // @todo add conditional
+    DataDrop * drop = lake->readHead(river);
 
-    ctrlDrop = (CritterControlDrop*)lake->readHead(controlRead);
-  }
-
-  // Extra doneRead() called when the drop is null so that we have a
-  //  matching number of doneRead's and readHead's
-  lake->doneRead(controlRead);
-
-  // Repeat the process for state drops (ack)
-  CritterStateDrop * stateDrop = 
-    (CritterStateDrop*)lake->readHead(stateRead);
-
-  while (stateDrop != NULL)
-  {
-    writeDrop(stateDrop);
-    lake->doneRead(stateRead);
-
-    stateDrop = (CritterStateDrop*)lake->readHead(stateRead);
-  }
-
-  lake->doneRead(stateRead);
+    while (drop != NULL) {
+      // Write this drop (and hope it's a CritterDrop)
+      writeDrop((CritterDrop*)drop);
+      lake->doneRead(river);
+      
+      // Read in the next drop
+      drop = lake->readHead(river);
+    }
   
-  // Repeat with reward drops 
-  CritterRewardDrop * rewardDrop = 
-    (CritterRewardDrop*)lake->readHead(rewardRead);
-
-  while (rewardDrop != NULL)
-  {
-    writeDrop(rewardDrop);
-    lake->doneRead(rewardRead);
-
-    rewardDrop = (CritterRewardDrop*)lake->readHead(rewardRead);
+    // Extra doneRead() called when the drop is null so that we have a
+    //  matching number of doneRead's and readHead's
+    lake->doneRead(river);
   }
-
-  lake->doneRead(rewardRead);
+  
   return 1;
 }
 
@@ -279,6 +217,28 @@ Socket* SimulatorRobotInterfaceProc::createClient(DataLake *lake,
   return new SimulatorRobotInterface(lake, config, name);
 }
 
+void SimulatorRobotInterfaceProc::addDropToMap(string dropName, 
+  bool needsRead, bool needsWrite) {
+  // 'create' a new map item
+  dropMap[numMapItems].dropName = dropName;
+  if (needsWrite)
+    dropMap[numMapItems].dropWrite = lake->readyWriting(dropName);
+  if (needsRead)
+    dropMap[numMapItems].dropRead = lake->readyReading(dropName);
+
+  numMapItems++;
+}
+
+dropMapItem * SimulatorRobotInterfaceProc::getItemByName(string dropName) {
+  // Try to find it in our list of items
+  for (int i = 0; i < numMapItems; i++) {
+    if (dropMap[i].dropName == dropName)
+      return &dropMap[i];
+  }
+
+  return NULL;
+}
+
 void SimulatorRobotInterfaceProc::writeDrop(CritterDrop * drop)
 {
   // First write the name of the drop to the buffer
@@ -287,7 +247,7 @@ void SimulatorRobotInterfaceProc::writeDrop(CritterDrop * drop)
 
   char * bufferHead = writePtr;
 
-  // @@@ do bounds-checking - fail if left space < sizeof(int) + len + 
+  // @@@ do bounds-checking - fail if remaining space < sizeof(int) + len + 
   //  drop.getSize()
   // Write the string length as first bit of data
   *((int*)writePtr) = len;
@@ -297,10 +257,16 @@ void SimulatorRobotInterfaceProc::writeDrop(CritterDrop * drop)
   memcpy (writePtr, dropName, len);
   
   writePtr += len;
+
+  // Then the drop size
+  int dropSize = drop->getSize();
+  *((int*)writePtr) = dropSize; 
+  writePtr += sizeof(dropSize);
+  
   // Now write the drop data
   drop->writeArray(writePtr);
 
-  writePtr += drop->getSize();
+  writePtr += dropSize; 
 
   // Keep track of how many bytes we just added to the buffer
   writeSize += (int)(writePtr - bufferHead);

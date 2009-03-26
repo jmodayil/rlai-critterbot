@@ -2,13 +2,14 @@
 #define CritterLogTagDrop_H
 
 #include "Drop.h"
+#include "CritterDrop.h"
 
 using namespace std;
 
 /**
  * Drop to hold tag data for the Critterbot log files.
  */
-class CritterLogTagDrop : public DataDrop {
+class CritterLogTagDrop : public CritterDrop {
  public:
 	static string name;
   
@@ -21,6 +22,8 @@ class CritterLogTagDrop : public DataDrop {
 	virtual string toString(string offset = "");
 	
   string tagInfo;
+
+  virtual string getName() { return name; }
 };
 
 #endif
