@@ -3,7 +3,6 @@
 string CritterLogTagDrop::name = "CritterLogTagDrop";
 
 CritterLogTagDrop::CritterLogTagDrop() {
-
 }
 
 CritterLogTagDrop::~CritterLogTagDrop() {
@@ -11,20 +10,33 @@ CritterLogTagDrop::~CritterLogTagDrop() {
 }
 
 int CritterLogTagDrop::getSize() {
-  return tagInfo.size() + 1;
+  return tagInfo.size() + 4 + tagName.size() + 4;
 }
 
 void CritterLogTagDrop::writeArray(void *d) {
 
-  strcpy((char *)d, tagInfo.c_str());
+  char *data = (char *)d;
+  int len = tagName.length();
+  *(int *)data = len;  data += sizeof(int);
+  memcpy(data, tagName.c_str(), len);
+  data += len;
+  len = tagInfo.length(); 
+  *(int *)data = len;  data += sizeof(int);
+  memcpy(data, tagInfo.c_str(), len);
 }
 
 void CritterLogTagDrop::readArray(void *d) {
   
-  tagInfo = (char *)d;
+  char *data = (char *)d;
+  int len = *((int *)data);
+  data += sizeof(int);
+  while(len--) tagName += *data++;
+  len = *((int *)data);
+  data += sizeof(int);
+  while(len--) tagInfo += *data++;
 }
 
 string CritterLogTagDrop::toString(string offset) {
 
-  return offset + tagInfo; 
+  return offset + tagName + ": " + tagInfo; 
 }

@@ -65,19 +65,40 @@ int CritterAgent::think(USeconds &wokeAt) {
  */
 void CritterAgent::update( void ) {
 
+  int x,y,t;
   controlDrop.motor_mode = CritterControlDrop::XYTHETA_SPACE;
-  // Check the state information
-  if( stateDrop->ir_distance[1] > 75 || stateDrop->ir_distance[2] > 75 ||
-      stateDrop->ir_distance[0] > 75) {
-    controlDrop.x_vel = 7;
-    controlDrop.y_vel = 7;
-    controlDrop.theta_vel = 6;
+  
+  x = 20;
+  y = 0;
+  t = 0;
+  if( stateDrop->ir_distance[0] > 65 ) {
+   x -= (stateDrop->ir_distance[0] - 65) / 10;
   }
-  else {
-    controlDrop.x_vel = 10;
-    controlDrop.y_vel = 10;
-    controlDrop.theta_vel = -1;
+  if( stateDrop->ir_distance[1] > 65 ) {
+   x -= (stateDrop->ir_distance[1] - 65) / 20;
+   t += (stateDrop->ir_distance[1] - 65) / 20; 
   }
+  if( stateDrop->ir_distance[6] > 65 ) {
+   x -= (stateDrop->ir_distance[6] - 65) / 20;
+   t -= (stateDrop->ir_distance[6] - 65) / 20; 
+  } 
+  if( stateDrop->ir_distance[2] > 65 ) {
+   t += (stateDrop->ir_distance[2] - 65) / 20;
+   y -= (stateDrop->ir_distance[2] - 65) / 20; 
+  } 
+  if( stateDrop->ir_distance[5] > 65 ) {
+   t -= (stateDrop->ir_distance[5] - 65) / 20;
+   y += (stateDrop->ir_distance[5] - 65) / 20; 
+  } 
+  if( stateDrop->ir_distance[7] > 60 ) {
+   y -= (stateDrop->ir_distance[7] - 60) / 5; 
+  } 
+  if( stateDrop->ir_distance[9] > 65 ) {
+   y += (stateDrop->ir_distance[9] - 65) / 10; 
+  } 
+  controlDrop.x_vel = x;
+  controlDrop.y_vel = y;
+  controlDrop.theta_vel = t;
   // Send a new action.
 
   return;
