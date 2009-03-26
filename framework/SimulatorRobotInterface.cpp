@@ -27,7 +27,7 @@ int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
   // Add all the drops we care about
   addDropToMap(CritterStateDrop::name, true, true);
   addDropToMap(CritterRewardDrop::name, true, true);
-  addDropToMap(CritterControlDrop::name, true, true);
+  addDropToMap(CritterControlDrop::name, true, false);
   // addDropToMap(CritterLogTagDrop::name, true, false);
 
   return readConfig();
@@ -166,9 +166,14 @@ int SimulatorRobotInterfaceProc::processDrop()
     return -1;
 
   // I hope you defined dropWrite...
-  DataDrop * newDrop = lake->startWriteHead(item->dropWrite);
-  newDrop->readArray(data);
-  lake->doneWriteHead(item->dropWrite);
+  if (!item->dropWrite.defined()) {
+    debug("WARNING: No write river defined for drop %s\n", receivedDropName);
+  }
+  else {
+    DataDrop * newDrop = lake->startWriteHead(item->dropWrite);
+    newDrop->readArray(data);
+    lake->doneWriteHead(item->dropWrite);
+  }
 
   // @todo logtagdrop will presently fail
   newDataLength -= dropLength;
@@ -183,6 +188,9 @@ int SimulatorRobotInterfaceProc::act(USeconds & wokeAt)
   for (int i = 0; i < numMapItems; i++) {
     // Get the river we want to read from
     RiverRead river = dropMap[i].dropRead;
+
+    // Ignores drops that don't get read from the system
+    if (!river.defined()) continue;
 
     // Read in a drop of that type
     // @todo add conditional
