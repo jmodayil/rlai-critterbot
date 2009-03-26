@@ -50,7 +50,8 @@ public class CritterRewardDrop implements SimulatorDrop {
      *
      * @throws java.io.IOException
      */
-    public void readData(InterfaceInputStream pIn) throws IOException {
+    public void readData(InterfaceInputStream pIn,int pDropSize) throws IOException {
+        assert (pDropSize == getSize());
         reward = pIn.readDouble();
     }
 

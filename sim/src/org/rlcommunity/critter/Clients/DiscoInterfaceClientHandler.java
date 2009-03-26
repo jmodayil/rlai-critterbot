@@ -87,8 +87,11 @@ public class DiscoInterfaceClientHandler extends Thread
         try
         {
           SimulatorDrop newDrop = DropFactory.create(className);
+
+          // Read in the drop size
+          int dropSize = aIn.readInt();
           // Read in the drop!
-          newDrop.readData(aIn);
+          newDrop.readData(aIn, dropSize);
         
           // Add the drop to the queue
           synchronized(aInQueue)
@@ -146,6 +149,9 @@ public class DiscoInterfaceClientHandler extends Thread
         String className = pData.getClass().getSimpleName();
         aOut.writeString(className);
     
+        // Write the drop size
+        aOut.writeInt(pData.getSize());
+        
         // Get the drop to write itself to the output stream
         pData.writeData(aOut);
       }
