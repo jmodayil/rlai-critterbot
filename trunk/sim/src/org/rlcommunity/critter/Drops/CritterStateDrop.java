@@ -212,8 +212,10 @@ public class CritterStateDrop implements SimulatorDrop
    * 
    * @throws java.io.IOException
    */
-  public void readData(InterfaceInputStream pIn) throws IOException
+  public void readData(InterfaceInputStream pIn,int pDropSize) throws IOException
   {
+    assert (pDropSize == getSize());
+
     power_source = (PowerSource)EnumSet.range(PowerSource.SHORE,
       PowerSource.BAT280).toArray()[pIn.readInt()];
     

@@ -29,12 +29,18 @@ import org.rlcommunity.critter.InterfaceOutputStream;
 public interface SimulatorDrop
 {
   /** Returns the size of the drop (amount of bytes written/read by
-    *  writeData/readData.
+    *  writeData/readData).
     */
   public int getSize();
 
   /** Write the drop's data to the given output stream */
   public void writeData(InterfaceOutputStream pOut) throws IOException;
-  /** Restore data from a given array */
-  public void readData(InterfaceInputStream pIn) throws IOException;
+  /** Restore data from a given stream.
+   *
+   * @param pIn The input stream from which the data should be restored.
+   * @param pDropSize The size of the drop, if needed by the drop reader.
+   *
+   * @throws java.io.IOException
+   */
+  public void readData(InterfaceInputStream pIn,int pDropSize) throws IOException;
 }

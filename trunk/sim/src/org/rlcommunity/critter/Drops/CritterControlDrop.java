@@ -139,8 +139,10 @@ public class CritterControlDrop implements SimulatorDrop
     *
     * @param pIn The input stream from which we read the data
     */
-  public void readData(InterfaceInputStream pIn) throws IOException
+  public void readData(InterfaceInputStream pIn,int pDropSize) throws IOException
   {
+    assert (pDropSize == getSize());
+
     // Read motor mode and convert it to an enum
     // Unfortunately, Java hates integer enums, so we have to circumvent this
     motor_mode = (MotorMode)EnumSet.range(MotorMode.WHEEL_SPACE, 
