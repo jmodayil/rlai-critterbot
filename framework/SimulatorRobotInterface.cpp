@@ -27,7 +27,7 @@ int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
   // Add all the drops we care about
   addDropToMap(CritterStateDrop::name, true, true);
   addDropToMap(CritterRewardDrop::name, true, true);
-  addDropToMap(CritterControlDrop::name, true, false);
+  addDropToMap(CritterControlDrop::name, true, true);
   // addDropToMap(CritterLogTagDrop::name, true, false);
 
   return readConfig();
