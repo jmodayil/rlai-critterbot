@@ -10,6 +10,14 @@
 using namespace std;
 
 #define MAX_ROBOT_INTERFACE_DATA_LENGTH 4096
+#define MAX_NUM_DROPS                   32
+
+typedef struct {
+  string dropName;
+  RiverRead dropRead;
+  RiverWrite dropWrite;
+} dropMapItem;
+
 
 class SimulatorRobotInterfaceProc : public SocketProtocol {
   private:
@@ -19,15 +27,11 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
     char * writePtr;
     char * readPtr, * unreadDataPtr;
 
-    int readConfig();
+    // Maps a drop name to its corresponding rivers
+    dropMapItem dropMap[MAX_NUM_DROPS];
+    int numMapItems;
 
-    RiverRead stateRead;
-    RiverRead controlRead;
-    RiverRead rewardRead;
-    RiverWrite logTagWrite;
-    RiverWrite stateWrite;
-    RiverWrite controlWrite;
-    RiverWrite rewardWrite;
+    int readConfig();
 
   protected:
     void clearWriteData();
@@ -52,6 +56,12 @@ class SimulatorRobotInterfaceProc : public SocketProtocol {
     // Attempts to read a drop from the read buffer (socket) and send it into 
     //  the Disco world
     int processDrop();
+
+    protected:
+      // adds a drop to our map, specifying whether we want read/write
+      //  rivers associated with the name 
+      void addDropToMap(string dropName, bool needsRead, bool needsWrite);
+      dropMapItem * getItemByName(string dropName);
 };
 
 //! Socket that sends strings
