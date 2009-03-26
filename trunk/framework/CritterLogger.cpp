@@ -8,6 +8,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 CritterLogger::CritterLogger(DataLake *lake, ComponentConfig &conf, 
                    string &name) : Component(lake, conf, name) {
@@ -36,31 +38,42 @@ int CritterLogger::readConfig(ComponentConfig *config) {
 
 FILE* CritterLogger::rotate_log( FILE *log, USeconds *now ) {
 
-  char file_name[100];
+  string file_name;
+  int exists = 0;
 
-  strcpy( file_name, log_path.c_str() );
-  strcat( file_name, "current_robot.log" );
-  
   if(log) {
     fclose(log);
-    rename( file_name, file_timestamp.c_str() );
   }
-  
-  if( !(log = fopen( file_name, "w" )) )  {
-    error("Could not open log file: %s\n", file_name);
+
+  file_name.assign( log_path );
+  if(access(file_name.c_str(), R_OK) == -1) {
+    error("Log directory does not exist!!!");
+    return 0;
+  }
+  file_name += "/20" + now->formatTime("%y");
+  if(access(file_name.c_str(), R_OK) == -1)
+    mkdir(file_name.c_str(), S_IRWXU | S_IRGRP | S_IROTH);
+  file_name += "/" + now->formatTime("%m");
+  if(access(file_name.c_str(), R_OK) == -1)
+    mkdir(file_name.c_str(), S_IRWXU | S_IRGRP | S_IROTH);
+  file_name += "/" + now->formatTime("%d");
+  if(access(file_name.c_str(), R_OK) == -1)
+    mkdir(file_name.c_str(), S_IRWXU | S_IRGRP | S_IROTH);
+  file_name += "/" + now->formatTime("%H") + LOG_EXTENSION;
+
+  if(access(file_name.c_str(), R_OK) == 0)
+    exists = 1;
+
+  if( !(log = fopen( file_name.c_str(), "a" )) )  {
+    error("Could not open log file: %s\n", file_name.c_str());
     return log;
   }
 
-  strcpy( file_name, log_path.c_str() );
-  strcat( file_name, (now->formatTime("%y-%m-%d-%H-%M-%S")).c_str() );
-  strcat( file_name, LOG_EXTENSION );
-  file_timestamp = file_name;
   last_log = *now;
   
-  fprintf( log, "#Time Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
+  if(!exists)
+    fprintf( log, "#Time Voltage Motor0_Command Motor0_Speed Motor0_Current Motor0_Temp Motor1_Command Motor1_Speed Motor1_Current Motor1_Temp Motor2_Command Motor2_Speed Motor2_Current Motor2_Temp AccelX AccelY AccelZ RotationVel IR0 IR1 IR2 IR3 IR4 IR5 IR6 IR7 IR8 IR9 Light0 Light1 Light2 Light3\n" );
 
-  fflush( log );
-  
   return log;
 }
 
@@ -76,10 +89,7 @@ void CritterLogger::cleanup() {
   lake->doneRead(stateId);
 
   if(log) {
-    strcpy( file_name, log_path.c_str() );
-    strcat( file_name, "current_robot.log" );
     fclose(log);
-    rename( file_name, file_timestamp.c_str() );
   }
 }
 
@@ -100,14 +110,15 @@ int CritterLogger::getFID() {
 
 void CritterLogger::logData(CritterStateDrop *stateDrop, USeconds *theTime) {
 
-  if(theTime->time.tv_sec >= last_log.time.tv_sec + LOG_INTERVAL * 60 ) {
-    fprintf( stderr, "Opening new Log File: %s\n", 
-        file_timestamp.c_str() );
+  if(atoi(theTime->formatTime("%M").c_str()) == 0 &
+     atoi(last_log.formatTime("%M").c_str()) > 0) {
+  //if(theTime->time.tv_sec >= last_log.time.tv_sec + LOG_INTERVAL * 60 ) {
     log = rotate_log( log, theTime );
   }
   
   string timestring = theTime->toString();
   fprintf(log, "%s ", (timestring.substr(0,timestring.length() - 1)).c_str());
+  fprintf(log, "%d ", stateDrop->bus_voltage);
   fprintf(log, "%d ", stateDrop->motor100.command);
   fprintf(log, "%d ", stateDrop->motor100.velocity);
   fprintf(log, "%d ", stateDrop->motor100.current);
@@ -146,6 +157,8 @@ int CritterLogger::act(USeconds &now) {
     logData(stateDrop, &now); 
   }
   if(logTagDrop) {
-    fprintf(log, "#%s\n", logTagDrop->tagInfo.c_str() );
+    fprintf(log, "#%s: %s\n", logTagDrop->tagName.c_str(),
+        logTagDrop->tagInfo.c_str() );
+    //fprintf(log, "#%s\n", logTagDrop->tagInfo.c_str());
   }
 }

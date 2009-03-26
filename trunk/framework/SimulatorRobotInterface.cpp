@@ -28,7 +28,7 @@ int SimulatorRobotInterfaceProc::init(USeconds &wokeAt) {
   addDropToMap(CritterStateDrop::name, true, true);
   addDropToMap(CritterRewardDrop::name, true, true);
   addDropToMap(CritterControlDrop::name, true, true);
-  // addDropToMap(CritterLogTagDrop::name, true, false);
+  addDropToMap(CritterLogTagDrop::name, false, true);
 
   return readConfig();
 }

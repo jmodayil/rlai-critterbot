@@ -21,6 +21,7 @@ class CritterLogTagDrop : public CritterDrop {
 	virtual void readArray(void *d);
 	virtual string toString(string offset = "");
 	
+  string tagName;
   string tagInfo;
 
   virtual string getName() { return name; }
