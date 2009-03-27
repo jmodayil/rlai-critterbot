@@ -4,7 +4,7 @@
  * Created on March 25, 2009, 11:54 AM
  */
 
-package org.rlcommunity.critter.plugins;
+package org.rlcommunity.critter.visualizer;
 
 import java.awt.event.WindowListener;
 import java.util.Calendar;
@@ -58,6 +58,7 @@ public class CritterVizLogs extends javax.swing.JFrame {
         setLocationByPlatform(true);
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Log Comments"));
+        jPanel1.setPreferredSize(new java.awt.Dimension(439, 339));
 
         jLogComment.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -98,12 +99,12 @@ public class CritterVizLogs extends javax.swing.JFrame {
                     .addComponent(jLogComment, javax.swing.GroupLayout.DEFAULT_SIZE, 201, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLogCommentSend)
-                .addGap(42, 42, 42))
+                .addGap(20, 20, 20))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(37, 37, 37)
+                .addContainerGap(37, Short.MAX_VALUE)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(jLogName, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -111,8 +112,7 @@ public class CritterVizLogs extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel1)
                     .addComponent(jLogComment, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLogCommentSend))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jLogCommentSend)))
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Time"));
@@ -174,7 +174,7 @@ public class CritterVizLogs extends javax.swing.JFrame {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel2Layout.createSequentialGroup()
-                .addContainerGap(55, Short.MAX_VALUE)
+                .addContainerGap(52, Short.MAX_VALUE)
                 .addComponent(jYear, javax.swing.GroupLayout.PREFERRED_SIZE, 47, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jMonth, javax.swing.GroupLayout.PREFERRED_SIZE, 33, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -212,21 +212,15 @@ public class CritterVizLogs extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE))
-                .addContainerGap())
+            .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 407, Short.MAX_VALUE)
+            .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, 140, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         pack();
@@ -237,18 +231,6 @@ public class CritterVizLogs extends javax.swing.JFrame {
                 jLogComment.getText()));
         jLogComment.setText("");
     }//GEN-LAST:event_sendLogTag
-
-    private void jSecondActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSecondActionPerformed
-        // TODO add your handling code here:
-}//GEN-LAST:event_jSecondActionPerformed
-
-    private void jMinuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMinuteActionPerformed
-        // TODO add your handling code here:
-}//GEN-LAST:event_jMinuteActionPerformed
-
-    private void jHourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jHourActionPerformed
-        // TODO add your handling code here:
-}//GEN-LAST:event_jHourActionPerformed
 
     private void jYearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jYearActionPerformed
         // TODO add your handling code here:
@@ -261,6 +243,18 @@ public class CritterVizLogs extends javax.swing.JFrame {
     private void jDayActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jDayActionPerformed
         // TODO add your handling code here:
 }//GEN-LAST:event_jDayActionPerformed
+
+    private void jHourActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jHourActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jHourActionPerformed
+
+    private void jMinuteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMinuteActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jMinuteActionPerformed
+
+    private void jSecondActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jSecondActionPerformed
+        // TODO add your handling code here:
+}//GEN-LAST:event_jSecondActionPerformed
  
  
     private static String getUserName() {

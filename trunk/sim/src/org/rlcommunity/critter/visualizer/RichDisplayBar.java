@@ -1,4 +1,4 @@
-package org.rlcommunity.critter.plugins;
+package org.rlcommunity.critter.visualizer;
 
 import java.awt.Color;
 import java.awt.Dimension;

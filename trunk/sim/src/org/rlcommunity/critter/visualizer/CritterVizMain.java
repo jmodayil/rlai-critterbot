@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package org.rlcommunity.critter.plugins;
+package org.rlcommunity.critter.visualizer;
 
 import java.util.List;
 import org.rlcommunity.critter.Clients.DiscoInterfaceServer;
