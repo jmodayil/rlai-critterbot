@@ -25,10 +25,9 @@ package org.rlcommunity.critter;
 import java.util.Random;
 import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
-import org.rlcommunity.critter.environments.BasketBallEnvironment;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
 import org.rlcommunity.critter.environments.FunEnvironment;
-import org.rlcommunity.critter.environments.LightBatteryEnvironment;
+import org.rlcommunity.critter.plugins.CritterbotDataVisualizerClient;
 
 public class SimulatorMain {
 
@@ -36,6 +35,7 @@ public class SimulatorMain {
     static private int discoServerPort = 2324;
     static private boolean useGui = true;
     static private boolean useKeyboard = true;
+    static private boolean useVisualizer = true;
     static private boolean doPrintHelp = false;
     static private double timeScale = 1.0;
     static private String dumpFilePath = null;
@@ -70,11 +70,23 @@ public class SimulatorMain {
     }
 
     static private KeyboardClient createKeyboardClient(DropInterface dropInterface) {
-        KeyboardClient theKeyboardClient = new KeyboardClient();
         if (useKeyboard) {
-            dropInterface.addClient(theKeyboardClient);
+          KeyboardClient theKeyboardClient = new KeyboardClient();
+          dropInterface.addClient(theKeyboardClient);
+          return theKeyboardClient;
         }
-        return theKeyboardClient;
+        else
+          return null;
+    }
+
+    static private CritterbotDataVisualizerClient createVisualizer(DropInterface dropInterface) {
+      if (useVisualizer) {
+        CritterbotDataVisualizerClient client = new CritterbotDataVisualizerClient();
+        dropInterface.addClient(client);
+        return client;
+      }
+      else
+        return null;
     }
 
     static private DropInterface createCentralDropInterface(DiscoInterfaceServer discoServer) {
@@ -102,10 +114,14 @@ public class SimulatorMain {
             }
             else if (flag.equals("-ng")) {
                 useGui = false;
+                useVisualizer = false;
                 useKeyboard = false;
             }
             else if (flag.equals("-nk")) {
                 useKeyboard = false;
+            }
+            else if (flag.equals("-nv")) {
+                useVisualizer = false;
             }
             else if (flag.equals("-s")) {
                 timeScale = Double.parseDouble(args[idx]);
@@ -137,6 +153,7 @@ public class SimulatorMain {
         System.out.println ("Options are:");
         System.out.println ("  -p [port]          Set the Disco server port, default=2324");
         System.out.println ("  -ng                Disable the GUI");
+        System.out.println ("  -nv                Disable the graphical visualizer");
         System.out.println ("  -nk                Disable the keyboard robot controller");
         System.out.println ("  -s [scale]         Set the simulator time scale, default=1.0");
         System.out.println ("  -d [dumpfile]      Data are dumped in [dumpfile]");
@@ -152,12 +169,11 @@ public class SimulatorMain {
         DiscoInterfaceServer discoServer = launchDisco();
         DropInterface dropInterface = createCentralDropInterface(discoServer);
         final KeyboardClient keyboardClient = createKeyboardClient(dropInterface);
+        createVisualizer(dropInterface);
 
         int millisPerStep = 10;
         final SimulatorEngine engine = createSimulatorEngine(dropInterface,
                 new FunEnvironment());
-//        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new BasketBallEnvironment());
-//        final SimulatorEngine engine = createSimulatorEngine(dropInterface, new LightBatteryEnvironment());
         
         if (useGui) {
             runGUI(engine, keyboardClient);
