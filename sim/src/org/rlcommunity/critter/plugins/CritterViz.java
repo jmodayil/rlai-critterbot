@@ -115,7 +115,6 @@ public class CritterViz extends JFrame implements WindowListener{
         accelx = new org.rlcommunity.critter.plugins.RichDisplayBar();
         accely = new org.rlcommunity.critter.plugins.RichDisplayBar();
         accelz = new org.rlcommunity.critter.plugins.RichDisplayBar();
-        jPanel13 = new javax.swing.JPanel();
         jMenuWindow = new javax.swing.JMenuBar();
         jMenuFile = new javax.swing.JMenu();
         jMenuFileExit = new javax.swing.JMenuItem();
@@ -127,223 +126,70 @@ public class CritterViz extends JFrame implements WindowListener{
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         setResizable(false);
+        getContentPane().setLayout(new java.awt.CardLayout());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Critterbot GUI", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
 
         jPanel3.setBorder(javax.swing.BorderFactory.createTitledBorder("IR Distance Sensors"));
-        jPanel3.setLayout(new java.awt.GridLayout(1, 0));
+        jPanel3.setLayout(new java.awt.GridLayout());
 
         ir0.setRange(0, 255);
-
-        javax.swing.GroupLayout ir0Layout = new javax.swing.GroupLayout(ir0);
-        ir0.setLayout(ir0Layout);
-        ir0Layout.setHorizontalGroup(
-            ir0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir0Layout.setVerticalGroup(
-            ir0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir0.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir0);
 
         ir1.setRange(0, 255);
-
-        javax.swing.GroupLayout ir1Layout = new javax.swing.GroupLayout(ir1);
-        ir1.setLayout(ir1Layout);
-        ir1Layout.setHorizontalGroup(
-            ir1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir1Layout.setVerticalGroup(
-            ir1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir1.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir1);
 
         ir2.setRange(0, 255);
-
-        javax.swing.GroupLayout ir2Layout = new javax.swing.GroupLayout(ir2);
-        ir2.setLayout(ir2Layout);
-        ir2Layout.setHorizontalGroup(
-            ir2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir2Layout.setVerticalGroup(
-            ir2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir2.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir2);
 
         ir3.setRange(0, 255);
-
-        javax.swing.GroupLayout ir3Layout = new javax.swing.GroupLayout(ir3);
-        ir3.setLayout(ir3Layout);
-        ir3Layout.setHorizontalGroup(
-            ir3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir3Layout.setVerticalGroup(
-            ir3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir3.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir3);
 
         ir4.setRange(0, 255);
-
-        javax.swing.GroupLayout ir4Layout = new javax.swing.GroupLayout(ir4);
-        ir4.setLayout(ir4Layout);
-        ir4Layout.setHorizontalGroup(
-            ir4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir4Layout.setVerticalGroup(
-            ir4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir4.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir4);
 
         ir5.setRange(0, 255);
-
-        javax.swing.GroupLayout ir5Layout = new javax.swing.GroupLayout(ir5);
-        ir5.setLayout(ir5Layout);
-        ir5Layout.setHorizontalGroup(
-            ir5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir5Layout.setVerticalGroup(
-            ir5Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir5.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir5);
 
         ir6.setRange(0, 255);
-
-        javax.swing.GroupLayout ir6Layout = new javax.swing.GroupLayout(ir6);
-        ir6.setLayout(ir6Layout);
-        ir6Layout.setHorizontalGroup(
-            ir6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir6Layout.setVerticalGroup(
-            ir6Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir6.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir6);
 
         ir7.setRange(0, 255);
-
-        javax.swing.GroupLayout ir7Layout = new javax.swing.GroupLayout(ir7);
-        ir7.setLayout(ir7Layout);
-        ir7Layout.setHorizontalGroup(
-            ir7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir7Layout.setVerticalGroup(
-            ir7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir7.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir7);
 
         ir8.setRange(0, 255);
-
-        javax.swing.GroupLayout ir8Layout = new javax.swing.GroupLayout(ir8);
-        ir8.setLayout(ir8Layout);
-        ir8Layout.setHorizontalGroup(
-            ir8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir8Layout.setVerticalGroup(
-            ir8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir8.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir8);
 
         ir9.setRange(0, 255);
-
-        javax.swing.GroupLayout ir9Layout = new javax.swing.GroupLayout(ir9);
-        ir9.setLayout(ir9Layout);
-        ir9Layout.setHorizontalGroup(
-            ir9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 26, Short.MAX_VALUE)
-        );
-        ir9Layout.setVerticalGroup(
-            ir9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        ir9.setLayout(new java.awt.GridLayout());
         jPanel3.add(ir9);
 
         jPanel4.setBorder(javax.swing.BorderFactory.createTitledBorder("Light Sensors"));
         jPanel4.setLayout(new java.awt.GridLayout(1, 0));
 
         light0.setRange(0, 800);
-
-        javax.swing.GroupLayout light0Layout = new javax.swing.GroupLayout(light0);
-        light0.setLayout(light0Layout);
-        light0Layout.setHorizontalGroup(
-            light0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
-        );
-        light0Layout.setVerticalGroup(
-            light0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        light0.setLayout(new java.awt.GridLayout());
         jPanel4.add(light0);
 
         light1.setRange(0, 800);
-
-        javax.swing.GroupLayout light1Layout = new javax.swing.GroupLayout(light1);
-        light1.setLayout(light1Layout);
-        light1Layout.setHorizontalGroup(
-            light1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
-        );
-        light1Layout.setVerticalGroup(
-            light1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        light1.setLayout(new java.awt.GridLayout());
         jPanel4.add(light1);
 
         light2.setRange(0, 800);
-
-        javax.swing.GroupLayout light2Layout = new javax.swing.GroupLayout(light2);
-        light2.setLayout(light2Layout);
-        light2Layout.setHorizontalGroup(
-            light2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
-        );
-        light2Layout.setVerticalGroup(
-            light2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        light2.setLayout(new java.awt.GridLayout());
         jPanel4.add(light2);
 
         light3.setRange(0, 800);
-
-        javax.swing.GroupLayout light3Layout = new javax.swing.GroupLayout(light3);
-        light3.setLayout(light3Layout);
-        light3Layout.setHorizontalGroup(
-            light3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 27, Short.MAX_VALUE)
-        );
-        light3Layout.setVerticalGroup(
-            light3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 299, Short.MAX_VALUE)
-        );
-
+        light3.setLayout(new java.awt.GridLayout());
         jPanel4.add(light3);
 
         jPanel5.setBorder(javax.swing.BorderFactory.createTitledBorder("Power"));
@@ -365,48 +211,15 @@ public class CritterViz extends JFrame implements WindowListener{
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
 
         mspeed0.setRange(-35, 35);
-
-        javax.swing.GroupLayout mspeed0Layout = new javax.swing.GroupLayout(mspeed0);
-        mspeed0.setLayout(mspeed0Layout);
-        mspeed0Layout.setHorizontalGroup(
-            mspeed0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mspeed0Layout.setVerticalGroup(
-            mspeed0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mspeed0.setLayout(new java.awt.GridLayout());
         jPanel2.add(mspeed0);
 
         mspeed1.setRange(-35, 35);
-
-        javax.swing.GroupLayout mspeed1Layout = new javax.swing.GroupLayout(mspeed1);
-        mspeed1.setLayout(mspeed1Layout);
-        mspeed1Layout.setHorizontalGroup(
-            mspeed1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mspeed1Layout.setVerticalGroup(
-            mspeed1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mspeed1.setLayout(new java.awt.GridLayout());
         jPanel2.add(mspeed1);
 
         mspeed2.setRange(-35, 35);
-
-        javax.swing.GroupLayout mspeed2Layout = new javax.swing.GroupLayout(mspeed2);
-        mspeed2.setLayout(mspeed2Layout);
-        mspeed2Layout.setHorizontalGroup(
-            mspeed2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mspeed2Layout.setVerticalGroup(
-            mspeed2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mspeed2.setLayout(new java.awt.GridLayout());
         jPanel2.add(mspeed2);
 
         jPanel6.add(jPanel2);
@@ -415,48 +228,15 @@ public class CritterViz extends JFrame implements WindowListener{
         jPanel8.setLayout(new java.awt.GridLayout(1, 0));
 
         mcurrent0.setRange(0, 90);
-
-        javax.swing.GroupLayout mcurrent0Layout = new javax.swing.GroupLayout(mcurrent0);
-        mcurrent0.setLayout(mcurrent0Layout);
-        mcurrent0Layout.setHorizontalGroup(
-            mcurrent0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mcurrent0Layout.setVerticalGroup(
-            mcurrent0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mcurrent0.setLayout(new java.awt.GridLayout());
         jPanel8.add(mcurrent0);
 
         mcurrent1.setRange(0, 90);
-
-        javax.swing.GroupLayout mcurrent1Layout = new javax.swing.GroupLayout(mcurrent1);
-        mcurrent1.setLayout(mcurrent1Layout);
-        mcurrent1Layout.setHorizontalGroup(
-            mcurrent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mcurrent1Layout.setVerticalGroup(
-            mcurrent1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mcurrent1.setLayout(new java.awt.GridLayout());
         jPanel8.add(mcurrent1);
 
         mcurrent2.setRange(0, 90);
-
-        javax.swing.GroupLayout mcurrent2Layout = new javax.swing.GroupLayout(mcurrent2);
-        mcurrent2.setLayout(mcurrent2Layout);
-        mcurrent2Layout.setHorizontalGroup(
-            mcurrent2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
-        );
-        mcurrent2Layout.setVerticalGroup(
-            mcurrent2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
-        );
-
+        mcurrent2.setLayout(new java.awt.GridLayout());
         jPanel8.add(mcurrent2);
 
         jPanel6.add(jPanel8);
@@ -470,11 +250,11 @@ public class CritterViz extends JFrame implements WindowListener{
         mtemp0.setLayout(mtemp0Layout);
         mtemp0Layout.setHorizontalGroup(
             mtemp0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
+            .addGap(0, 36, Short.MAX_VALUE)
         );
         mtemp0Layout.setVerticalGroup(
             mtemp0Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
+            .addGap(0, 178, Short.MAX_VALUE)
         );
 
         jPanel9.add(mtemp0);
@@ -485,11 +265,11 @@ public class CritterViz extends JFrame implements WindowListener{
         mtemp1.setLayout(mtemp1Layout);
         mtemp1Layout.setHorizontalGroup(
             mtemp1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
+            .addGap(0, 36, Short.MAX_VALUE)
         );
         mtemp1Layout.setVerticalGroup(
             mtemp1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
+            .addGap(0, 178, Short.MAX_VALUE)
         );
 
         jPanel9.add(mtemp1);
@@ -500,11 +280,11 @@ public class CritterViz extends JFrame implements WindowListener{
         mtemp2.setLayout(mtemp2Layout);
         mtemp2Layout.setHorizontalGroup(
             mtemp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 39, Short.MAX_VALUE)
+            .addGap(0, 36, Short.MAX_VALUE)
         );
         mtemp2Layout.setVerticalGroup(
             mtemp2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 188, Short.MAX_VALUE)
+            .addGap(0, 178, Short.MAX_VALUE)
         );
 
         jPanel9.add(mtemp2);
@@ -517,97 +297,37 @@ public class CritterViz extends JFrame implements WindowListener{
         jPanel11.setLayout(new java.awt.GridLayout(1, 0));
 
         rotation.setRange(-420,420);
-
-        javax.swing.GroupLayout rotationLayout = new javax.swing.GroupLayout(rotation);
-        rotation.setLayout(rotationLayout);
-        rotationLayout.setHorizontalGroup(
-            rotationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 75, Short.MAX_VALUE)
-        );
-        rotationLayout.setVerticalGroup(
-            rotationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 185, Short.MAX_VALUE)
-        );
-
+        rotation.setLayout(new java.awt.GridLayout());
         jPanel11.add(rotation);
 
         jPanel12.setBorder(javax.swing.BorderFactory.createTitledBorder("Accelerometer"));
         jPanel12.setLayout(new java.awt.GridLayout(1, 0));
 
         accelx.setRange(-2048, 2048);
-
-        javax.swing.GroupLayout accelxLayout = new javax.swing.GroupLayout(accelx);
-        accelx.setLayout(accelxLayout);
-        accelxLayout.setHorizontalGroup(
-            accelxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 33, Short.MAX_VALUE)
-        );
-        accelxLayout.setVerticalGroup(
-            accelxLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 185, Short.MAX_VALUE)
-        );
-
+        accelx.setLayout(new java.awt.GridLayout());
         jPanel12.add(accelx);
 
         accely.setRange(-2048, 2048);
-
-        javax.swing.GroupLayout accelyLayout = new javax.swing.GroupLayout(accely);
-        accely.setLayout(accelyLayout);
-        accelyLayout.setHorizontalGroup(
-            accelyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 33, Short.MAX_VALUE)
-        );
-        accelyLayout.setVerticalGroup(
-            accelyLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 185, Short.MAX_VALUE)
-        );
-
+        accely.setLayout(new java.awt.GridLayout());
         jPanel12.add(accely);
 
         accelz.setRange(-2048, 2048);
-
-        javax.swing.GroupLayout accelzLayout = new javax.swing.GroupLayout(accelz);
-        accelz.setLayout(accelzLayout);
-        accelzLayout.setHorizontalGroup(
-            accelzLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 33, Short.MAX_VALUE)
-        );
-        accelzLayout.setVerticalGroup(
-            accelzLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 185, Short.MAX_VALUE)
-        );
-
+        accelz.setLayout(new java.awt.GridLayout());
         jPanel12.add(accelz);
 
         javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
         jPanel10.setLayout(jPanel10Layout);
         jPanel10Layout.setHorizontalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel10Layout.createSequentialGroup()
+            .addGroup(jPanel10Layout.createSequentialGroup()
                 .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel11, javax.swing.GroupLayout.PREFERRED_SIZE, 87, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
         jPanel10Layout.setVerticalGroup(
             jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel10Layout.createSequentialGroup()
-                .addGroup(jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel11, 0, 214, Short.MAX_VALUE)
-                    .addComponent(jPanel12, javax.swing.GroupLayout.PREFERRED_SIZE, 214, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
-        );
-
-        jPanel13.setBorder(javax.swing.BorderFactory.createTitledBorder("Other"));
-
-        javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
-        jPanel13.setLayout(jPanel13Layout);
-        jPanel13Layout.setHorizontalGroup(
-            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 213, Short.MAX_VALUE)
-        );
-        jPanel13Layout.setVerticalGroup(
-            jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 217, Short.MAX_VALUE)
+            .addComponent(jPanel12, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
+            .addComponent(jPanel11, javax.swing.GroupLayout.DEFAULT_SIZE, 207, Short.MAX_VALUE)
         );
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
@@ -617,34 +337,32 @@ public class CritterViz extends JFrame implements WindowListener{
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, 121, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel6, 0, 0, Short.MAX_VALUE))
+                    .addComponent(jPanel6, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)
-                    .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jPanel5, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE)
+                    .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 220, Short.MAX_VALUE))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jPanel4, 0, 0, Short.MAX_VALUE)
-                    .addComponent(jPanel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE))
+                    .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 333, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 246, Short.MAX_VALUE)
-                    .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jPanel10, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jPanel6, javax.swing.GroupLayout.PREFERRED_SIZE, 236, Short.MAX_VALUE))
+                .addContainerGap(15, Short.MAX_VALUE))
         );
+
+        getContentPane().add(jPanel1, "card2");
 
         jMenuFile.setText("File");
 
@@ -671,20 +389,6 @@ public class CritterViz extends JFrame implements WindowListener{
         jMenuWindow.add(jMenu2);
 
         setJMenuBar(jMenuWindow);
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, 617, Short.MAX_VALUE)
-                .addContainerGap())
-        );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
@@ -784,6 +488,8 @@ public class CritterViz extends JFrame implements WindowListener{
         else
             voltage.setBackground(Color.white);
         updated = true;
+        if(logWindow != null)
+            logWindow.updateTime(state.time.getTimeInMillis());
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -811,7 +517,6 @@ public class CritterViz extends JFrame implements WindowListener{
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;
-    private javax.swing.JPanel jPanel13;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JPanel jPanel4;

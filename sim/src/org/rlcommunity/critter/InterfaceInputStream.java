@@ -79,6 +79,14 @@ public class InterfaceInputStream
       return aBuffer.getFloat();
   }
 
+  public long readUnsignedInt() throws IOException
+  {
+    requireBufferSize(INT_SIZE);
+    aIn.readFully(aBuffer.array(), 0, INT_SIZE);
+    
+    return 0xFFFFFFFFL & (long)(aBuffer.getInt());
+  }
+  
   public int readInt() throws IOException
   {
     requireBufferSize(INT_SIZE);
@@ -88,6 +96,14 @@ public class InterfaceInputStream
     return aBuffer.getInt();
   }
 
+  public int readUnsignedShort() throws IOException
+  {
+    requireBufferSize(SHORT_SIZE);
+    aIn.readFully(aBuffer.array(), 0, SHORT_SIZE);
+    
+    return 0xFFFF & (int)(aBuffer.getInt());
+  }
+  
   public short readShort() throws IOException
   {
     requireBufferSize(SHORT_SIZE);
@@ -96,6 +112,11 @@ public class InterfaceInputStream
     return aBuffer.getShort();
   }
 
+  public short readUnsignedByte() throws IOException
+  {
+    return (short)(0xFF & (int)(aIn.readByte()));
+    
+  }
   public byte readByte() throws IOException
   {
     // The ByteBuffer doesn't support byte operations (?), and there is

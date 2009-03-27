@@ -22,6 +22,7 @@ package org.rlcommunity.critter.Drops;
   */
 
 import java.io.IOException;
+import java.util.Calendar;
 import java.util.EnumSet;
 
 import org.rlcommunity.critter.InterfaceInputStream;
@@ -29,6 +30,42 @@ import org.rlcommunity.critter.InterfaceOutputStream;
 
 public class CritterStateDrop implements SimulatorDrop
 {
+  /* This class replicates the Disco concept of USeconds, however due to
+   * most Java constructs only dealing will milliseconds, when exporting
+   * data we drop the 3 least significant figures. */
+  public class USeconds
+  {
+      static final long MAX_USEC = 999999;
+      long tv_sec;
+      long tv_usec;
+      
+      public void readData(InterfaceInputStream pIn) throws IOException
+      {
+          // We want these to be considered _UNSIGNED_ (a dirty word in Java)
+          tv_sec = pIn.readUnsignedInt();
+          tv_usec = pIn.readUnsignedInt();
+          if(tv_usec > MAX_USEC)
+              tv_usec = MAX_USEC;
+      }
+      
+      public void writeData(InterfaceOutputStream pOut) throws IOException
+      {
+          pOut.writeUnsignedInt(tv_sec);
+          pOut.writeUnsignedInt(tv_sec);
+      }
+      
+      public int getSize()
+      {
+         return 2 * Long.SIZE;
+      }
+      
+      public long getTimeInMillis()
+      {
+          /* Yes, there are constants here.  But the number of milliseconds
+          *  in a second will hopefully never change */
+          return tv_sec * 1000 + (tv_usec / 1000);
+      }
+  }
   public class motor_struct
   {
     /** The command executed by the system (as opposed to the requested command) */
@@ -86,8 +123,18 @@ public class CritterStateDrop implements SimulatorDrop
     }
   }
 
+  public enum DataSource { ROBOT, SIMULATOR, LOGFILE };
+  
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
+  /** This replaces the USeconds construct in Disco, although
+   *  we do lose 3 characters of precision on the time.
+   */
+  public USeconds time;
+  
+  /** What produced this drop? */
+  public DataSource data_source;
+  
   /** The current power source of the robot */
   public PowerSource power_source;
 
@@ -132,7 +179,9 @@ public class CritterStateDrop implements SimulatorDrop
     */
   public int getSize()
   {
-    return (Integer.SIZE + // power_source (as an int)
+    return (Integer.SIZE + // data_source (as an int)
+           time.getSize() +
+           Integer.SIZE + // power_source (as an int)
            Integer.SIZE + // bus_voltage
            3 * Integer.SIZE + // batv40 + batv160 + batv280
            motor100.getSize() +
@@ -163,6 +212,7 @@ public class CritterStateDrop implements SimulatorDrop
     thermal     = new int[THERMAL_SIZE];
     bump        = new int[BUMP_SIZE];
 
+    time = new USeconds();
     accel = new vector_struct();
     mag = new vector_struct();
     motor100 = new motor_struct();
@@ -177,6 +227,9 @@ public class CritterStateDrop implements SimulatorDrop
    * @throws java.io.IOException
    */
   public void writeData(InterfaceOutputStream pOut) throws IOException {
+   
+    time.writeData(pOut);
+    pOut.writeInt(data_source.ordinal());
     pOut.writeInt(power_source.ordinal());
 
     pOut.writeInt(bus_voltage);
@@ -216,6 +269,9 @@ public class CritterStateDrop implements SimulatorDrop
   {
     assert (pDropSize == getSize());
 
+    time.readData(pIn);
+    data_source = (DataSource)EnumSet.range(DataSource.ROBOT,
+      DataSource.LOGFILE).toArray()[pIn.readInt()];
     power_source = (PowerSource)EnumSet.range(PowerSource.SHORE,
       PowerSource.BAT280).toArray()[pIn.readInt()];
     

@@ -78,6 +78,13 @@ public class InterfaceOutputStream
       aOut.write(aBuffer.array(), 0, FLOAT_SIZE);
   }
 
+  public void writeUnsignedInt(long v) throws IOException 
+  {
+      requireBufferSize(INT_SIZE);
+      aBuffer.putInt((int)(v));
+      aOut.write(aBuffer.array(), 0, INT_SIZE);
+  }
+  
   public void writeInt(int v) throws IOException
   {
     requireBufferSize(INT_SIZE);
@@ -87,6 +94,13 @@ public class InterfaceOutputStream
     aOut.write(aBuffer.array(), 0, INT_SIZE);
   }
 
+  public void writeUnsignedShort(int v) throws IOException
+  {
+    requireBufferSize(SHORT_SIZE);
+    aBuffer.putShort((short)(v & 0xFFFF));
+    aOut.write(aBuffer.array(), 0, SHORT_SIZE);
+  }
+  
   public void writeShort(short v) throws IOException
   {
     requireBufferSize(SHORT_SIZE);
@@ -94,6 +108,11 @@ public class InterfaceOutputStream
     aOut.write(aBuffer.array(), 0, SHORT_SIZE);
   }
 
+  public void writeUnsignedByte(short v) throws IOException
+  {
+    aOut.writeByte(v & 0xFF);
+  }
+  
   public void writeByte(byte v) throws IOException
   {
     // In this case we can write the byte directly
