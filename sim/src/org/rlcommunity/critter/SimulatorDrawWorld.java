@@ -30,8 +30,8 @@ import javax.swing.JPanel;
  */
 public class SimulatorDrawWorld extends JPanel {
 
-	private static final int x_size = 500;
-	private static final int y_size = 500;
+	public static final int x_size = 500;
+	public static final int y_size = 500;
 
 	protected double pixelsPerMeter = 100;
   
@@ -60,10 +60,12 @@ public class SimulatorDrawWorld extends JPanel {
     */
   public void setScale(double pScale) { pixelsPerMeter = pScale; }
 
+  @Override
 	public Dimension getPreferredSize() {
         return new Dimension(x_size, y_size);
     }
 
+  @Override
     public void paintComponent(Graphics g) {
         // Wrap the Graphics object in a SimulatorGraphics interface to provide
         // scaling capabilities
