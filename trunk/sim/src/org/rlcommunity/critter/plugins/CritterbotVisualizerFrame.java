@@ -12,10 +12,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.Timer;
 import org.rlcommunity.critter.Drops.CritterStateDrop;
-import org.rlcommunity.critter.Drops.DropInterface;
+import org.rlcommunity.critter.SimulatorDrawWorld;
 
 /**
  *
@@ -34,6 +33,7 @@ public class CritterbotVisualizerFrame extends JFrame implements WindowListener{
     
     /** Creates new form CritterViz */
     public CritterbotVisualizerFrame() {
+        setLocation(SimulatorDrawWorld.x_size+5, 0);
         batState = 0;
         initComponents();
         me = this;
@@ -53,6 +53,7 @@ public class CritterbotVisualizerFrame extends JFrame implements WindowListener{
                 });
         timer.start();
     }
+    
     
     /** This method is called from within the constructor to
      * initialize the form.
