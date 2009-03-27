@@ -2,7 +2,7 @@
  * (c) 2009 Marc G. Bellemare.
  */
 
-package org.rlcommunity.critter.plugins;
+package org.rlcommunity.critter.visualizer;
 
 import java.util.LinkedList;
 import java.util.List;
