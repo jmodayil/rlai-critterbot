@@ -3,6 +3,7 @@
 
 #include "Drop.h"
 #include "CritterDrop.h"
+#include "USeconds.h"
 
 #define IR_DISTANCE_SIZE 10
 #define IR_LIGHT_SIZE    8
@@ -16,6 +17,9 @@ class CritterStateDrop : public CritterDrop {
  public:
   static string name;
   
+  USeconds time;
+
+  enum Data_Source { ROBOT, SIMULATOR, LOGFILE } data_source;
   enum Power_Source { SHORE, BAT40, BAT160, BAT280 } power_source;
 
   unsigned int bus_voltage;

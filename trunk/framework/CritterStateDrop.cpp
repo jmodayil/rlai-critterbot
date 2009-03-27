@@ -3,6 +3,7 @@
 string CritterStateDrop::name = "CritterStateDrop";
 
 CritterStateDrop::CritterStateDrop() {
+  data_source = ROBOT;
   power_source = SHORE;
   bus_voltage = 0;
   batv40 = 0;
@@ -37,7 +38,9 @@ CritterStateDrop::~CritterStateDrop() {
 int CritterStateDrop::getSize() {
   int size;
 
-  size = sizeof(power_source);
+  size = time.getSize();
+  size += sizeof(data_source);
+  size += sizeof(power_source);
   size += sizeof(bus_voltage);
   size += sizeof(batv40);
   size += sizeof(batv160);
@@ -61,6 +64,13 @@ int CritterStateDrop::getSize() {
 void CritterStateDrop::writeArray(void *d) {
   
   char *data = (char *)d;
+  
+  time.writeArray(d);
+  data += time.getSize();
+
+  memcpy(data, &data_source, sizeof(data_source));
+  data += sizeof(data_source);
+
   memcpy(data, &power_source, sizeof(power_source));
   data += sizeof(power_source);
   
@@ -118,10 +128,16 @@ void CritterStateDrop::writeArray(void *d) {
 
 void CritterStateDrop::readArray(void *d) {
 
-  char *data = (char *)d;
- 
   // DON'T CHANGE THIS WITHOUT CHANGING CritterStateDrop.java (Simulator-side)
   //  Or I will come and cut your funding 
+  char *data = (char *)d;
+  
+  time.readArray(d);
+  data += time.getSize();
+
+  memcpy(&data_source, data, sizeof(data_source));
+  data += sizeof(data_source);
+  
   memcpy(&power_source, data, sizeof(power_source));
   data += sizeof(power_source);
   
