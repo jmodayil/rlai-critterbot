@@ -25,7 +25,7 @@ public class CritterViz extends JFrame implements WindowListener{
     
     DropInterface di;
     int batState;
-    CritterVizLogs logWindow;
+    //CritterVizLogs logWindow;
     JFrame me;
     private Timer timer;
     private static final int INTERVAL = 100;
@@ -53,7 +53,7 @@ public class CritterViz extends JFrame implements WindowListener{
     }
     
     private void showLogWindow() {
-        if(logWindow == null)
+        /*if(logWindow == null)
             javax.swing.SwingUtilities.invokeLater( 
                     new Runnable() {
                         public void run() {
@@ -63,7 +63,7 @@ public class CritterViz extends JFrame implements WindowListener{
                             logWindow.setVisible(true);
                         }
                     }
-            );   
+            ); */
     }
     
     /** This method is called from within the constructor to
@@ -126,10 +126,11 @@ public class CritterViz extends JFrame implements WindowListener{
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        setResizable(false);
         getContentPane().setLayout(new java.awt.CardLayout());
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Critterbot GUI", javax.swing.border.TitledBorder.CENTER, javax.swing.border.TitledBorder.DEFAULT_POSITION));
+        jPanel1.setMinimumSize(new java.awt.Dimension(500, 500));
+        jPanel1.setPreferredSize(new java.awt.Dimension(600, 500));
         jPanel1.setLayout(new java.awt.GridBagLayout());
 
         jPanelIR.setBorder(javax.swing.BorderFactory.createTitledBorder("IR Distance Sensors"));
@@ -228,7 +229,7 @@ public class CritterViz extends JFrame implements WindowListener{
         jPanel1.add(jPanelPower, gridBagConstraints);
 
         jPanelMotor.setBorder(javax.swing.BorderFactory.createTitledBorder("Motors"));
-        jPanelMotor.setLayout(new java.awt.GridLayout());
+        jPanelMotor.setLayout(new java.awt.GridLayout(1, 0));
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Speed"));
         jPanel2.setLayout(new java.awt.GridLayout(1, 0));
@@ -268,15 +269,15 @@ public class CritterViz extends JFrame implements WindowListener{
         jPanel9.setLayout(new java.awt.GridLayout(1, 0));
 
         mtemp0.setRange(40, 175);
-        mtemp0.setLayout(new java.awt.GridLayout());
+        mtemp0.setLayout(new java.awt.GridLayout(1, 0));
         jPanel9.add(mtemp0);
 
         mtemp1.setRange(40, 175);
-        mtemp1.setLayout(new java.awt.GridLayout());
+        mtemp1.setLayout(new java.awt.GridLayout(1, 0));
         jPanel9.add(mtemp1);
 
         mtemp2.setRange(40, 175);
-        mtemp2.setLayout(new java.awt.GridLayout());
+        mtemp2.setLayout(new java.awt.GridLayout(1, 0));
         jPanel9.add(mtemp2);
 
         jPanelMotor.add(jPanel9);
@@ -381,7 +382,7 @@ public class CritterViz extends JFrame implements WindowListener{
     }
     public void windowClosed(WindowEvent we) {
         System.out.println("Closing logWindow");
-        logWindow = null;
+        //logWindow = null;
     }
     public void windowClosing(WindowEvent we) {
         
@@ -463,8 +464,8 @@ public class CritterViz extends JFrame implements WindowListener{
         else
             voltage.setBackground(Color.white);
         updated = true;
-        if(logWindow != null)
-            logWindow.updateTime(state.time.getTimeInMillis());
+        //if(logWindow != null)
+        //    logWindow.updateTime(state.time.getTimeInMillis());
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
