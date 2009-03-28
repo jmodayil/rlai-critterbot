@@ -56,7 +56,7 @@ public class CritterStateDrop implements SimulatorDrop
       
       public int getSize()
       {
-         return 2 * Long.SIZE;
+         return 2 * Integer.SIZE;
       }
       
       public long getTimeInMillis()
@@ -205,6 +205,7 @@ public class CritterStateDrop implements SimulatorDrop
    */
   public CritterStateDrop() {
     power_source = PowerSource.SHORE;
+    data_source  = DataSource.SIMULATOR;
     
     ir_distance = new int[IR_DISTANCE_SIZE];
     ir_light    = new int[IR_LIGHT_SIZE];
