@@ -66,7 +66,7 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
 {
   // Keep track of partial drop data
   readPtr += size;
-  /** @@@ fprintf (stderr, "processRead, now %d left (%d) read in %d\n", 
+  /* fprintf (stderr, "processRead, now %d left (%d) read in %d\n", 
     readData + MAX_ROBOT_INTERFACE_DATA_LENGTH - readPtr,
     readPtr - readData, size); */
 
@@ -100,6 +100,10 @@ int SimulatorRobotInterfaceProc::processRead(char *buf, int size,
   }
   while (numBytes > 0) ;
 
+  if ((readPtr - readData) >= MAX_ROBOT_INTERFACE_DATA_LENGTH) {
+    debug("FATAL: Read buffer is full and not being used.");
+  }
+
   return 1;
 }
 
@@ -117,16 +121,17 @@ int SimulatorRobotInterfaceProc::processDrop()
   int nameLength = *((int*)data);
   data += sizeof(nameLength);
 
-  // Read in the classname
-  if (newDataLength < nameLength) return -1;
-
   char receivedDropName[1024];
 
   if (nameLength >= sizeof(receivedDropName)) {
-    debug("ERROR: Very long drop name, probably garbage.");
+    debug("ERROR: Very long drop name (%d), probably garbage.", nameLength);
     // @todo at this point do something
-    return -1;
+    // Throw out the offending bytes in hope of recovery
+    return sizeof(int);
   }
+
+  // Read in the classname
+  if (newDataLength < nameLength) return -1;
 
   strncpy(receivedDropName, data, nameLength);
   // Terminate with a 0
@@ -138,7 +143,7 @@ int SimulatorRobotInterfaceProc::processDrop()
   dropMapItem * item = getItemByName(receivedDropName);
   if (item == NULL) {
     // Unsafe! but at this point we should just cry
-    debug("ERROR: Unknown drop type %s\n", receivedDropName);
+    debug("ERROR: Unknown drop type: %s\n", receivedDropName);
     // Trash the data to avoid repeating
     // @todo this should happen in processRead
     unreadDataPtr += nameLength;
