@@ -30,7 +30,12 @@ public class CritterViz extends JFrame implements WindowListener{
     private Timer timer;
     private static final int INTERVAL = 100;
     private boolean updated;
+
+    private boolean doEventsNotifications;
     
+    /** A semaphore to prevent data updating while redrawing */
+    private final Object dataMutex = new Object();
+
     /** Creates new form CritterViz */
     public CritterViz(final DropInterface _di) {
         di = _di;
@@ -44,14 +49,25 @@ public class CritterViz extends JFrame implements WindowListener{
 
                     public void actionPerformed(ActionEvent e) {
                         if(updated) {
-                            repaint();
-                            updated = false;
+                            synchronized(dataMutex) {
+                              repaint();
+                              updated = false;
+                            }
                         }
                     }
                 });
         timer.start();
     }
     
+    /** Sets whether the visualizer should notify the user of voltage-related
+     *   events (and other bad things).
+     * 
+     * @param pNotify
+     */
+    public void setEventsNotifications(boolean pNotify) {
+      doEventsNotifications = pNotify;
+    }
+
     private void showLogWindow() {
         /*if(logWindow == null)
             javax.swing.SwingUtilities.invokeLater( 
@@ -412,6 +428,7 @@ public class CritterViz extends JFrame implements WindowListener{
     }*/
     
     public synchronized void updateDisplay(CritterStateDrop state) {
+      synchronized (dataMutex) {
         ir0.updateValue(state.ir_distance[0]);
         ir1.updateValue(state.ir_distance[1]);
         ir2.updateValue(state.ir_distance[2]);
@@ -440,32 +457,38 @@ public class CritterViz extends JFrame implements WindowListener{
         mtemp1.updateValue(state.motor220.temp);
         mtemp2.updateValue(state.motor340.temp);
         voltage.setText(Float.toString(((float)state.bus_voltage)/10));
-        if(state.bus_voltage < 125) {
+        if (doEventsNotifications) {
+          if (state.bus_voltage < 125) {
             voltage.setBackground(Color.red);
-            if(batState < 2) {
-                batState = 2;
-                JOptionPane.showMessageDialog(this, 
-                        "The Critterbot's batteries are critically low.  Turn " +
-                        "off the robot NOW!", 
-                        "Turn off Critterbot", 
-                        JOptionPane.ERROR_MESSAGE);
+            if (batState < 2) {
+              batState = 2;
+              JOptionPane.showMessageDialog(this,
+                                            "The Critterbot's batteries are critically low.  Turn " +
+                                            "off the robot NOW!",
+                                            "Turn off Critterbot",
+                                            JOptionPane.ERROR_MESSAGE);
             }
-        }
-        else if(state.bus_voltage < 135) {
+          }
+          else if (state.bus_voltage < 135) {
             voltage.setBackground(Color.red);
-            if(batState < 1) {
-                batState = 1;
-                JOptionPane.showMessageDialog(this, 
-                        "The Critterbot's batteries are running low.", 
-                        "Low Battery", 
-                        JOptionPane.WARNING_MESSAGE);
+            if (batState < 1) {
+              batState = 1;
+              JOptionPane.showMessageDialog(this,
+                                            "The Critterbot's batteries are running low.",
+                                            "Low Battery",
+                                            JOptionPane.WARNING_MESSAGE);
             }
+          }
+          else {
+            voltage.setBackground(Color.white);
+          }
         }
         else
             voltage.setBackground(Color.white);
         updated = true;
         //if(logWindow != null)
         //    logWindow.updateTime(state.time.getTimeInMillis());
+      }
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables

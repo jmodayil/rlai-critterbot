@@ -27,7 +27,7 @@ import org.rlcommunity.critter.Clients.*;
 import org.rlcommunity.critter.Drops.*;
 import org.rlcommunity.critter.environments.EnvironmentDescription;
 import org.rlcommunity.critter.environments.FunEnvironment;
-import org.rlcommunity.critter.plugins.CritterbotDataVisualizerClient;
+import org.rlcommunity.critter.visualizer.CritterbotDataVisualizerClient;
 
 public class SimulatorMain {
 
