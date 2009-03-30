@@ -27,6 +27,7 @@ import java.util.LinkedList;
 public class ObjectStateLightSensor implements ObjectState
 {
   public static final boolean debugDrawIntersections = false;
+  public static final boolean debugDrawPosition = false;
   
   public static final String NAME = SimulatorComponentLight.NAME + "sensor";
 
@@ -126,9 +127,23 @@ public class ObjectStateLightSensor implements ObjectState
   public void draw(SimulatorGraphics g, SimulatorObject parent) {
     if (debugDrawIntersections) {
       for (RayIntersection isect : intersections) {
+        Color tempC = g.getColor();
         g.setColor(new Color(127, 0, 127));
         g.drawOval(isect.point.x - 0.025, isect.point.y - 0.025, 0.05, 0.05);
+        g.setColor(tempC);
       }
+    }
+    if (debugDrawPosition) {
+      double rayLength = 0.05;
+      Vector2D pos = parent.getPosition();
+      Vector2D unitDir = Vector2D.unitVector(parent.getDirection());
+      unitDir.timesEquals(rayLength);
+      
+       Color tempC = g.getColor();
+       g.setColor(new Color(128, 64, 192));
+
+       g.drawLine(pos.x, pos.y, pos.x + unitDir.x, pos.y + unitDir.y);
+       g.setColor(tempC);
     }
   }
 

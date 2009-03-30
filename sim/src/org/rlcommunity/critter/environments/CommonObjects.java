@@ -172,6 +172,9 @@ public class CommonObjects {
     public static SimulatorObject generateCritterbot(String pName, int pId) {
         SimulatorAgent sa = new SimulatorAgent("Critterbot", pId++);
 
+        double robotLength = ROBOT_LENGTH;
+        double robotScale = ROBOT_LENGTH / NOMINAL_ROBOT_LENGTH;
+
         // Rough robot polygon, in cm
         double[][] agentShapePoints = new double[][]{
             new double[]{-0, 20},
@@ -199,8 +202,6 @@ public class CommonObjects {
             new double[]{7.5, 18.5},};
 
         Polygon agentShape = new Polygon();
-        double robotLength = NOMINAL_ROBOT_LENGTH;
-        double robotScale = ROBOT_LENGTH / robotLength;
 
         for (double[] pt : agentShapePoints) {
             // Convert the points to meters
@@ -236,7 +237,7 @@ public class CommonObjects {
         SimulatorObject lightSensor = new SimulatorObject("LightSensor1",
         pId++);
         // These three light sensors have no shape!
-        lightSensor.setPosition(new Vector2D(0.198, 0));
+        lightSensor.setPosition(new Vector2D(0.198*robotScale, 0));
         lightSensor.setDirection(0);
         //  lightSensor.setLocalDirection(0.0);
         ObjectStateLightSensor specificLightSensor =
@@ -251,26 +252,24 @@ public class CommonObjects {
 
         // Create three more light sensors
         lightSensor = lightSensor.makeCopy("LightSensor2", pId++);
-        lightSensor.setPosition(new Vector2D(0, -0.198));
+        lightSensor.setPosition(new Vector2D(0, -0.198*robotScale));
         lightSensor.setLocalDirection(-Math.PI / 2.0);
         sa.addChild(lightSensor);
 
         lightSensor = lightSensor.makeCopy("LightSensor3", pId++);
-        lightSensor.setPosition(new Vector2D(0, 0.198));
+        lightSensor.setPosition(new Vector2D(0, 0.198*robotScale));
         lightSensor.setLocalDirection(Math.PI / 2.0);
         sa.addChild(lightSensor);
 
         lightSensor = lightSensor.makeCopy("LightSensor4", pId++);
-        lightSensor.setPosition(new Vector2D(-0.198, 0.0));
+        lightSensor.setPosition(new Vector2D(-0.198*robotScale, 0.0));
         lightSensor.setLocalDirection(Math.PI);
           sa.addChild(lightSensor); 
 
         SimulatorObject battery = new SimulatorObject("battery",
         pId++);
-        // These three light sensors have no shape!
-        battery.setPosition(new Vector2D(0.198, 0));
+        battery.setPosition(new Vector2D(0.198*robotScale, 0));
         battery.setDirection(0);
-        //  lightSensor.setLocalDirection(0.0);
         ObjectStateBattery specificBattery = new ObjectStateBattery(10000,5,1);
         //->->capacity(Coulomb), chargeRate(Ampere), idleDepletionRate(Ampere)
         battery.addState(specificBattery);
@@ -320,8 +319,8 @@ public class CommonObjects {
             SimulatorObject sensor =
                     baseIrSensor.makeCopy("IRSensor" + i, pId++);
             sensor.setPosition(
-                    new Vector2D(irDistancePos[i][0] / CM_PER_METER,
-                    irDistancePos[i][1] / CM_PER_METER));
+                    new Vector2D(irDistancePos[i][0] * robotScale / CM_PER_METER,
+                    irDistancePos[i][1] * robotScale / CM_PER_METER));
             sensor.setDirection(irDistancePos[i][2]);
             sa.addChild(sensor);
         }
