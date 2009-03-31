@@ -34,7 +34,7 @@ public class ObjectStateBumpSensor implements ObjectState
 {
     public static final boolean drawBumpSensors = true;
     
-    public static final double BUMP_SENSOR_DRAW_SCALE = 10.0;
+    public static final double BUMP_SENSOR_DRAW_SCALE = 50.0;
     public static final String NAME = SimulatorComponentBumpSensor.NAME;
 
   /** Class encapsulating relevant bump sensor data */
