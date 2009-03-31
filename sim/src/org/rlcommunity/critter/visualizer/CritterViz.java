@@ -33,9 +33,6 @@ public class CritterViz extends JFrame implements WindowListener{
 
     private boolean doEventsNotifications;
     
-    /** A semaphore to prevent data updating while redrawing */
-    private final Object dataMutex = new Object();
-
     /** Creates new form CritterViz */
     public CritterViz(final DropInterface _di) {
         di = _di;
@@ -48,12 +45,10 @@ public class CritterViz extends JFrame implements WindowListener{
                 new ActionListener() {
 
                     public void actionPerformed(ActionEvent e) {
-                        if(updated) {
-                            synchronized(dataMutex) {
-                              repaint();
-                              updated = false;
-                            }
-                        }
+                      if (updated) {
+                        repaint();
+                        updated = false;
+                      }
                     }
                 });
         timer.start();
@@ -428,7 +423,6 @@ public class CritterViz extends JFrame implements WindowListener{
     }*/
     
     public synchronized void updateDisplay(CritterStateDrop state) {
-      synchronized (dataMutex) {
         ir0.updateValue(state.ir_distance[0]);
         ir1.updateValue(state.ir_distance[1]);
         ir2.updateValue(state.ir_distance[2]);
@@ -488,7 +482,6 @@ public class CritterViz extends JFrame implements WindowListener{
         updated = true;
         //if(logWindow != null)
         //    logWindow.updateTime(state.time.getTimeInMillis());
-      }
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
