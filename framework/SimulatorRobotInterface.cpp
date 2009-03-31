@@ -214,7 +214,6 @@ int SimulatorRobotInterfaceProc::act(USeconds & wokeAt)
     //  matching number of doneRead's and readHead's
     lake->doneRead(river);
   }
-  
   return 1;
 }
 
@@ -304,6 +303,7 @@ int SimulatorRobotInterface::act(USeconds & wokeAt)
   // Is it really evil to call a Component's act myself?
   if (wakeTime <= wokeAt)
   {
+    acts++;
     myProtocol->act(wokeAt);
     Socket::act(wokeAt);
   }
