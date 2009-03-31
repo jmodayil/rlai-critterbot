@@ -88,7 +88,15 @@ public class CommonObjects {
         double yRange = pRanges[yIndex][1] - pRanges[yIndex][0];
         double dRange = pRanges[dIndex][1] - pRanges[dIndex][0];
 
+        int retries = 100;
+        
         while (!done) {
+          retries--;
+          if (retries <= 0) {
+            throw new IllegalArgumentException("Could not add object at random position: "
+                    +pNewObject.getLabel());
+          }
+          
           Vector2D pos = new Vector2D(Math.random() * xRange + pRanges[xIndex][0],
                   Math.random() * yRange + pRanges[yIndex][0]);
           double dir = Math.random() * dRange + pRanges[dIndex][0];
@@ -521,6 +529,37 @@ public class CommonObjects {
         ball.addState(new ObjectStateDynamics(0.5, 0.5));
 
         return ball;
+    }
+
+    public static SimulatorObject generateBox(String pName, int pId, 
+            double pWidth, double pHeight, double pDensity) {
+        // Create the object
+        SimulatorObject box = new SimulatorObject(pName, pId);
+
+        // Create its shape
+        Polygon shape = new Polygon();
+
+        // Make the object position the center of the rectangle
+        double orgX = -pWidth/2;
+        double orgY = -pHeight/2;
+
+        shape.addPoint(0, 0);
+        shape.addPoint(0, pHeight);
+        shape.addPoint(pWidth, pHeight);
+        shape.addPoint(pWidth, 0);
+
+        shape.translate(new Vector2D(orgX, orgY));
+        shape.doneAddPoints();
+
+        box.setShape(shape);
+
+        double mass = pWidth * pHeight * pDensity;
+        // From wikipedia (List_of_moments_of_inertia)
+        double momInertia = mass * (pHeight*pHeight + pWidth*pWidth) / 12;
+        // Add dynamics to this object
+        box.addState(new ObjectStateDynamics(mass, momInertia));
+
+        return box;
     }
 
     /** Generates a light source.

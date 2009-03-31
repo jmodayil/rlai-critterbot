@@ -439,35 +439,37 @@ public class CritterbotDataVisualizerFrame extends JFrame implements WindowListe
     /** Actually update the values before repainting */
     public void completeUpdateDisplay() {
       synchronized (dataMutex) {
-        ir0.updateValue(lastStateDrop.ir_distance[0]);
-        ir1.updateValue(lastStateDrop.ir_distance[1]);
-        ir2.updateValue(lastStateDrop.ir_distance[2]);
-        ir3.updateValue(lastStateDrop.ir_distance[3]);
-        ir4.updateValue(lastStateDrop.ir_distance[4]);
-        ir5.updateValue(lastStateDrop.ir_distance[5]);
-        ir6.updateValue(lastStateDrop.ir_distance[6]);
-        ir7.updateValue(lastStateDrop.ir_distance[7]);
-        ir8.updateValue(lastStateDrop.ir_distance[8]);
-        ir9.updateValue(lastStateDrop.ir_distance[9]);
-        light0.updateValue(lastStateDrop.light[0]);
-        light1.updateValue(lastStateDrop.light[1]);
-        light2.updateValue(lastStateDrop.light[2]);
-        light3.updateValue(lastStateDrop.light[3]);
-        accelx.updateValue(lastStateDrop.accel.x);
-        accely.updateValue(lastStateDrop.accel.y);
-        accelz.updateValue(lastStateDrop.accel.z);
-        rotation.updateValue(lastStateDrop.rotation);
-        mspeed0.updateValue(lastStateDrop.motor100.velocity);
-        mspeed1.updateValue(lastStateDrop.motor220.velocity);
-        mspeed2.updateValue(lastStateDrop.motor340.velocity);
-        mcurrent0.updateValue(lastStateDrop.motor100.current);
-        mcurrent1.updateValue(lastStateDrop.motor220.current);
-        mcurrent2.updateValue(lastStateDrop.motor340.current);
-        mtemp0.updateValue(lastStateDrop.motor100.temp);
-        mtemp1.updateValue(lastStateDrop.motor220.temp);
-        mtemp2.updateValue(lastStateDrop.motor340.temp);
-        voltage.setText(Float.toString(((float)lastStateDrop.bus_voltage)/10));
-        voltage.setBackground(Color.white);
+        if (lastStateDrop != null) {
+          ir0.updateValue(lastStateDrop.ir_distance[0]);
+          ir1.updateValue(lastStateDrop.ir_distance[1]);
+          ir2.updateValue(lastStateDrop.ir_distance[2]);
+          ir3.updateValue(lastStateDrop.ir_distance[3]);
+          ir4.updateValue(lastStateDrop.ir_distance[4]);
+          ir5.updateValue(lastStateDrop.ir_distance[5]);
+          ir6.updateValue(lastStateDrop.ir_distance[6]);
+          ir7.updateValue(lastStateDrop.ir_distance[7]);
+          ir8.updateValue(lastStateDrop.ir_distance[8]);
+          ir9.updateValue(lastStateDrop.ir_distance[9]);
+          light0.updateValue(lastStateDrop.light[0]);
+          light1.updateValue(lastStateDrop.light[1]);
+          light2.updateValue(lastStateDrop.light[2]);
+          light3.updateValue(lastStateDrop.light[3]);
+          accelx.updateValue(lastStateDrop.accel.x);
+          accely.updateValue(lastStateDrop.accel.y);
+          accelz.updateValue(lastStateDrop.accel.z);
+          rotation.updateValue(lastStateDrop.rotation);
+          mspeed0.updateValue(lastStateDrop.motor100.velocity);
+          mspeed1.updateValue(lastStateDrop.motor220.velocity);
+          mspeed2.updateValue(lastStateDrop.motor340.velocity);
+          mcurrent0.updateValue(lastStateDrop.motor100.current);
+          mcurrent1.updateValue(lastStateDrop.motor220.current);
+          mcurrent2.updateValue(lastStateDrop.motor340.current);
+          mtemp0.updateValue(lastStateDrop.motor100.temp);
+          mtemp1.updateValue(lastStateDrop.motor220.temp);
+          mtemp2.updateValue(lastStateDrop.motor340.temp);
+          voltage.setText(Float.toString(((float) lastStateDrop.bus_voltage) / 10));
+          voltage.setBackground(Color.white);
+        }
       }
     }
     
