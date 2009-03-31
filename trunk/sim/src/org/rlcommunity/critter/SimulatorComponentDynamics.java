@@ -342,10 +342,12 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                 // Idea: store kinetic energy (other object's
                                 //   relative velocity times mass)?
                                 // @todo account for angular energy
-                                colMagnitude = (vap.minus(va).length() + vbp.minus(vb).length());
-                                double deltaW = (wap - wa + wbp - wb);
+                                colMagnitude =
+                                        (vap.minus(va).length() + vbp.minus(vb).length()) *
+                                        (o1.getMass() + o2.getMass());
+                                double deltaW = (wap - wa + wbp - wb) *
+                                        (o1.getMomentInertia() + o2.getMomentInertia());
                                 colMagnitude += deltaW*deltaW;
-                            // angular velocity? Needs to be implemented
                             }
 
                             // Store the collision information in the next state

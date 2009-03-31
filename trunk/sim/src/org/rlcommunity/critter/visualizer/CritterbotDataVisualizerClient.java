@@ -19,7 +19,7 @@ public class CritterbotDataVisualizerClient implements DropClient {
   // The margin to leave between the simulator GUI and the data visualizer
   public static final int WINDOW_MARGIN = 8;
 
-  private CritterViz aGUI;
+  private CritterbotDataVisualizerFrame aGUI;
 
   public CritterbotDataVisualizerClient() {
     // Create the 'GUI'
@@ -28,7 +28,7 @@ public class CritterbotDataVisualizerClient implements DropClient {
         new Runnable() {
 
           public void run() {
-            aGUI = new CritterViz(null);
+            aGUI = new CritterbotDataVisualizerFrame(null);
             aGUI.setLocation(SimulatorDrawWorld.x_size + WINDOW_MARGIN, 0);
             aGUI.setTitle("Critterbot GUI");
             aGUI.setVisible(true);
