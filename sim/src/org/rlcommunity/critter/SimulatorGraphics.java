@@ -42,6 +42,8 @@ public class SimulatorGraphics extends Graphics {
 
     private int[] aScaledXPoints;
     private int[] aScaledYPoints;
+
+    public boolean aNoScaling = false;
     
     public SimulatorGraphics(Graphics pGfx, double pScale) {
         aScale = pScale;
@@ -55,6 +57,8 @@ public class SimulatorGraphics extends Graphics {
      * @param yPoints The y coordinates of the points.
      */
     private void scalePoints(int[] xPoints, int[] yPoints) {
+      if (aNoScaling) throw new UnsupportedOperationException("Cannot refuse to scale point arrays.");
+      
         // Recreate the array of interest
         if (aScaledXPoints == null || xPoints.length != aScaledXPoints.length) {
             aScaledXPoints = new int[xPoints.length];
@@ -74,7 +78,9 @@ public class SimulatorGraphics extends Graphics {
      * @param yPoints The y coordinates of the points.
      */
     private void scalePoints(double[] xPoints, double[] yPoints) {
-        // Recreate the array of interest
+      if (aNoScaling) throw new UnsupportedOperationException("Cannot refuse to scale point arrays.");
+
+      // Recreate the array of interest
         if (aScaledXPoints == null || xPoints.length != aScaledXPoints.length) {
             aScaledXPoints = new int[xPoints.length];
             aScaledYPoints = new int[yPoints.length];
@@ -87,10 +93,12 @@ public class SimulatorGraphics extends Graphics {
     }
 
     private int scale (int p) {
+        if (aNoScaling) return p;
         return (int)Math.round(p * aScale);
     }
 
     private int scale (double p) {
+      if (aNoScaling) return (int)Math.round(p);
         return (int)Math.round(p * aScale);
     }
 
@@ -201,6 +209,12 @@ public class SimulatorGraphics extends Graphics {
 
     public void drawLine(int x1, int y1, int x2, int y2) {
         aGfx.drawLine(scale(x1), scale(y1), scale(x2), scale(y2));
+    }
+
+    public void drawRect(double x1, double y1, double x2, double y2) {
+        aNoScaling = true;
+        aGfx.drawLine(scale(x1), scale(y1), scale(x2), scale(y2));
+        aNoScaling = false;
     }
 
     public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
