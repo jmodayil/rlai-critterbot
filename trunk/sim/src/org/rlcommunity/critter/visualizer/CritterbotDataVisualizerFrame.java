@@ -229,8 +229,8 @@ public class CritterbotDataVisualizerFrame extends JFrame implements WindowListe
 
         jPanelPower.setBorder(javax.swing.BorderFactory.createTitledBorder("Power"));
 
-        jLabel2.setFont(new java.awt.Font("DejaVu Sans", 0, 18));
-        jLabel2.setText("Voltage:");
+        jLabel2.setFont(new java.awt.Font("DejaVu Sans", 0, 18)); // NOI18N
+        jLabel2.setText("Charge");
         jPanelPower.add(jLabel2);
 
         voltage.setColumns(4);
@@ -467,7 +467,7 @@ public class CritterbotDataVisualizerFrame extends JFrame implements WindowListe
           mtemp0.updateValue(lastStateDrop.motor100.temp);
           mtemp1.updateValue(lastStateDrop.motor220.temp);
           mtemp2.updateValue(lastStateDrop.motor340.temp);
-          voltage.setText(Float.toString(((float) lastStateDrop.bus_voltage) / 10));
+          voltage.setText(Float.toString(((float) lastStateDrop.batv40) / 100)+"%");
           voltage.setBackground(Color.white);
         }
       }
