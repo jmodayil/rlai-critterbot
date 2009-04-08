@@ -71,7 +71,7 @@ public class SimulatorAgent extends SimulatorObject {
 
 			Color tempC = g.getColor();
 			g.setColor(Color.lightGray);
-			g.drawString(aLabel, aPos.x + 0.2, aPos.y + 0.2);
+			//g.drawString(aLabel, aPos.x + 0.2, aPos.y + 0.2);
 			g.setColor(tempC);
 		} else if (false) {
             if (true)
