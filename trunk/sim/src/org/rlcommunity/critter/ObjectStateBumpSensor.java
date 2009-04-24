@@ -34,7 +34,9 @@ public class ObjectStateBumpSensor implements ObjectState
 {
     public static final boolean drawBumpSensors = true;
     
-    public static final double BUMP_SENSOR_DRAW_SCALE = 50.0;
+    public static final double BUMP_SENSOR_DRAW_SCALE = 25.0;
+    public static final double BUMP_SENSOR_DRAW_MAX_RADIUS = 10.0;
+
     public static final String NAME = SimulatorComponentBumpSensor.NAME;
 
   /** Class encapsulating relevant bump sensor data */
@@ -141,6 +143,10 @@ public class ObjectStateBumpSensor implements ObjectState
 
         for (BumpSensorData f : aData) {
             double rad = (f.magnitude * 2) / BUMP_SENSOR_DRAW_SCALE;
+
+            if (rad > BUMP_SENSOR_DRAW_MAX_RADIUS)
+              rad = BUMP_SENSOR_DRAW_MAX_RADIUS;
+            
             // Find out the current point of the sensor
             Vector2D curPoint;
             if (parent != null) curPoint = parent.aShape.getPoint(f.alpha);
