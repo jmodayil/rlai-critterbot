@@ -191,8 +191,9 @@ public class ObjectStateOmnidrive implements ObjectState {
         this.aAngVel = org.aAngVel;
 
         this.aTimeSinceCommand = org.aTimeSinceCommand;
-
         this.aPIDCoefficient = org.aPIDCoefficient;
+        this.aThrustError = org.aThrustError;
+        this.aTorqueError = org.aTorqueError;
     }
 
     public void draw(SimulatorGraphics g, SimulatorObject parent) {

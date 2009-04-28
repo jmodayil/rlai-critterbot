@@ -123,6 +123,7 @@ public class ObjectStateAccelerometer implements ObjectState
     this.aAccel = new Vector2D(sensor.aAccel);
     this.aZAccel = sensor.aZAccel;
     this.aVelSample = new Vector2D(sensor.aVelSample);
+    this.aError = sensor.aError;
   }
 
 

@@ -123,6 +123,7 @@ public class ObjectStateBumpSensor implements ObjectState
  
     // Assume that whatever forces were sensed at the last state do not
     //  carry over (let the BumpSensor component take care of this)
+    this.aError = sensor.aError;
   }
 
 
