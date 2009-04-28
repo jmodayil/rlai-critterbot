@@ -119,6 +119,8 @@ public class CommonObjects {
 
             // Test for a polygon containing the other, which can occur
             //  independently of intersection
+            // @todo This doesn't account for composite objects, so small objects
+            //  can end up inside those!
             if (ourPoly != null && otherPoly != null) {
               if (ourPoly.contains(otherPoly) || otherPoly.contains(ourPoly)) {
                 invalidPosition = true;
