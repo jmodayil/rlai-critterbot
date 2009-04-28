@@ -83,6 +83,7 @@ public class ObjectStateLightSensor implements ObjectState
     this.aSensorWidth = sensor.aSensorWidth;
     this.aNumPixels = sensor.aNumPixels;
     this.aSensorDepth = sensor.aSensorDepth;
+    this.aError = sensor.aError;
     
   }
   

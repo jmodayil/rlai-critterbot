@@ -84,6 +84,7 @@ public class ObjectStateGyroscope implements ObjectState
     ObjectStateGyroscope sensor = (ObjectStateGyroscope)os;
 
     this.aVelocity = sensor.aVelocity;
+    this.aError = sensor.aError;
   }
 
 

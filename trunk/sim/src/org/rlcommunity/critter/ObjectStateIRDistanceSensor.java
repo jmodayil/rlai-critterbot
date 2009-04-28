@@ -93,6 +93,7 @@ public class ObjectStateIRDistanceSensor implements ObjectState
   
     // Redundant code, but here for sanity purposes 
     this.aRange = sensor.aRange;
+    this.aError = sensor.aError;
   }
 
   /** only for debugging */
