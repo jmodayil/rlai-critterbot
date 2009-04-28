@@ -25,8 +25,6 @@ package org.rlcommunity.critter;
 import java.util.LinkedList;
 import java.util.List;
 
-import java.awt.Graphics;
-import java.awt.Color;
 
 public class ObjectStateDynamics implements ObjectState {
 
@@ -64,6 +62,8 @@ public class ObjectStateDynamics implements ObjectState {
     private double coefficientRestitution = 1.0;
     /** Min and max speed the object can move at, mostly useful for stationary objects */
     private double minSpeed, maxSpeed;
+    /** Max angular velocity of the object */
+    private double maxAngSpeed;
     
     /** Creates a new dynamics state component with a particular mass and 
      *  moment of inertia.
@@ -81,6 +81,7 @@ public class ObjectStateDynamics implements ObjectState {
         aAngVel = aTorque = 0;
         minSpeed = 0;
         maxSpeed = 1000;
+        maxAngSpeed = 1000;
         collisions = new LinkedList<Collision>();
     }
 
@@ -271,6 +272,13 @@ public class ObjectStateDynamics implements ObjectState {
         this.maxSpeed = maxSpeed;
     }
 
+    public double getMaxAngularSpeed() {
+      return maxAngSpeed;
+    }
+
+    public void setMaxAngularSpeed(double maxSpeed) {
+      maxAngSpeed = maxSpeed;
+    }
 
     double getCoefficientFrictionDyn() {
         return coefficientFrictionDyn;

@@ -188,73 +188,94 @@ public class SimulatorObject {
 	 *         Collision object containing collision information otherwise.
 	 */
 	public Collision collidesWith(SimulatorObject compObj) {
-		Polygon compShape = compObj.getShape();
+    // Create two lists to compare
+    List<SimulatorObject> myObjects = getChildren();
+    List<SimulatorObject> compObjects = compObj.getChildren();
+    
+    myObjects.add(this);
+    compObjects.add(compObj);
 
-		if (aShape == null || compShape == null)
-			return null;
+    // This is not recursive because we have two loops; recomputing the inner
+    //   loop's list of objects everytime would be extra work.
+    // Pairwise comparisons
+    for (SimulatorObject leftObject : myObjects) {
+      Polygon leftShape = leftObject.getShape();
 
-		// Get the first two intersections
-		List<Polygon.Intersection> isects = aShape.getIntersections(compShape,
-				2);
+      if (leftShape == null) continue;
+      
+      for (SimulatorObject rightObject : compObjects) {
+        Polygon rightShape = rightObject.getShape();
+        // @todo It might be worthwhile, here, to remove the elements from
+        //  compObjects which have no attached Polygon
+        if (rightShape == null) continue;
 
-		// No intersection, no collision
-		if (isects.size() == 0)
-			return null;
-		else if (isects.size() == 1) {
-			// @todo the case when we have one intersection is incorrect, as in
-			// this case it's not clear what the normal is
-            System.err.println ("WARNING: Single-point intersection.");
-			Collision col = new Collision();
-			Polygon.Intersection i1 = isects.get(0);
-			double alpha = i1.alpha;
-			col.point = aShape.getPoint(alpha);
-			col.normal = aShape.getNormal(alpha);
-			col.alpha = i1.alpha;
-			col.beta = i1.beta;
+        // Get the first two intersections
+        List<Polygon.Intersection> isects = leftShape.getIntersections(rightShape, 2);
 
-			return col;
-		} else {
-			Collision col = new Collision();
-			// Look at the two intersections that we have
-			Polygon.Intersection i1 = isects.get(0);
-			Polygon.Intersection i2 = isects.get(1);
+        // No intersection, no collision
+        if (isects.size() == 0) {
+          continue;
+        }
+        else if (isects.size() == 1) {
+          // @todo the case when we have one intersection is incorrect, as in
+          // this case it's not clear what the normal is
+          System.err.println("WARNING: Single-point intersection.");
+          Collision col = new Collision();
+          Polygon.Intersection i1 = isects.get(0);
+          double alpha = i1.alpha;
+          col.point = leftShape.getPoint(alpha);
+          col.normal = leftShape.getNormal(alpha);
+          col.alpha = i1.alpha;
+          col.beta = i1.beta;
 
-      // Ensure that the the second intersection comes after the first on the
-      //   polygon, so that the normal to the alpha-related polygon is pointing
-      //   outwards
-      if (i1.alpha > i2.alpha) {
-        Polygon.Intersection tmp = i1;
-        i1 = i2;
-        i2 = tmp;
-      }
+          return col;
+        }
+        else {
+          Collision col = new Collision();
+          // Look at the two intersections that we have
+          Polygon.Intersection i1 = isects.get(0);
+          Polygon.Intersection i2 = isects.get(1);
 
-			Vector2D p1 = aShape.getPoint(i1.alpha);
-			Vector2D p2 = aShape.getPoint(i2.alpha);
+          // Ensure that the the second intersection comes after the first on the
+          //   polygon, so that the normal to the alpha-related polygon is pointing
+          //   outwards
+          if (i1.alpha > i2.alpha) {
+            Polygon.Intersection tmp = i1;
+            i1 = i2;
+            i2 = tmp;
+          }
 
-			// Keep the polygon coordinates of the collision point
-			// This is an interpolation between the two points. Could be
-			// very wrong, e.g. pacman-style shapes
+          Vector2D p1 = leftShape.getPoint(i1.alpha);
+          Vector2D p2 = leftShape.getPoint(i2.alpha);
+
+          // Keep the polygon coordinates of the collision point
+          // This is an interpolation between the two points. Could be
+          // very wrong, e.g. pacman-style shapes
 			/* @todo For now, we return a single intersection point - this is
-			 *  because the interpolation of the two points might not be a good point
-       *  of contact at all
-       *
-       * IF doing interpolation, remember how to interpolate at the boundaries
-       *  (i.e. alpha = n-epsilon and alpha2 = epsilon interpolate to 0,
-       *  not n/2
-       */
-			col.alpha = i1.alpha;
-			col.beta = i1.beta;
+           *  because the interpolation of the two points might not be a good point
+           *  of contact at all
+           *
+           * IF doing interpolation, remember how to interpolate at the boundaries
+           *  (i.e. alpha = n-epsilon and alpha2 = epsilon interpolate to 0,
+           *  not n/2
+           */
+          col.alpha = i1.alpha;
+          col.beta = i1.beta;
 
-			// this results in alpha = (n-1)/2 (when it should be n - 1/2)
-			col.point = aShape.getPoint(col.alpha);
+          // this results in alpha = (n-1)/2 (when it should be n - 1/2)
+          col.point = leftShape.getPoint(col.alpha);
 
-			// The normal is the normal to p2-p1 (note: the normal itself is good,
-      //   even if the point of contact would not be)
-			col.normal = p2.minus(p1).rotate(Math.PI / 2);
-			col.normal.normalize();
+          // The normal is the normal to p2-p1 (note: the normal itself is good,
+          //   even if the point of contact would not be)
+          col.normal = p2.minus(p1).rotate(Math.PI / 2);
+          col.normal.normalize();
 
-			return col;
-		}
+          return col;
+        }
+      }
+    }
+
+    return null;
 	}
 
 	/**

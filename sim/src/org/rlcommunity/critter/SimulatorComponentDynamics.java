@@ -331,8 +331,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.println("-->");
                                 }
 
-                                checkSpeed(vap, o1);
-                                checkSpeed(vbp, o2);
+                                checkSpeed(vap, wap, o1);
+                                checkSpeed(vbp, wbp, o2);
                                 o1.setVelocity(vap);
                                 o2.setVelocity(vbp);
                                 o1.setAngVelocity(wap);
@@ -379,12 +379,13 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
     }
 
     /**
-     * This is a helpder function for setting the speed within legal ranges
+     * This is a helper function for setting the speed within legal ranges
      *
      * @param v - the vector to change the speed of
+     * @param w - the angular velocity of the object
      * @param oDyn - the Dynamics state object that gives the max and min speed
      */
-    public void checkSpeed(Vector2D v, ObjectStateDynamics oDyn) {
+    public void checkSpeed(Vector2D v, double w, ObjectStateDynamics oDyn) {
         double speed = v.length();
         if (speed < ObjectStateDynamics.TOL) {
             speed = 0;
@@ -394,9 +395,19 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             v.normalize();
             v.timesEquals(oDyn.getMaxSpeed());
         }
-        if (speed < oDyn.getMinSpeed()) {
+        else if (speed < oDyn.getMinSpeed()) {
             v.normalize();
             v.timesEquals(oDyn.getMinSpeed());
+        }
+
+        double absAngularVel = Math.abs(w);
+        double maxAngVel = oDyn.getMaxAngularSpeed();
+        
+        if (absAngularVel > maxAngVel) {
+          if (w > 0)
+            absAngularVel = maxAngVel;
+          else
+            absAngularVel = -maxAngVel;
         }
     }
 
