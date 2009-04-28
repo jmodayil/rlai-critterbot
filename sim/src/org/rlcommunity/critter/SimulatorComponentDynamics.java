@@ -331,8 +331,8 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
                                     System.out.println("-->");
                                 }
 
-                                checkSpeed(vap, wap, o1);
-                                checkSpeed(vbp, wbp, o2);
+                                wap = checkSpeed(vap, wap, o1);
+                                wbp = checkSpeed(vbp, wbp, o2);
                                 o1.setVelocity(vap);
                                 o2.setVelocity(vbp);
                                 o1.setAngVelocity(wap);
@@ -385,7 +385,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
      * @param w - the angular velocity of the object
      * @param oDyn - the Dynamics state object that gives the max and min speed
      */
-    public void checkSpeed(Vector2D v, double w, ObjectStateDynamics oDyn) {
+    public double checkSpeed(Vector2D v, double w, ObjectStateDynamics oDyn) {
         double speed = v.length();
         if (speed < ObjectStateDynamics.TOL) {
             speed = 0;
@@ -405,10 +405,12 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
         
         if (absAngularVel > maxAngVel) {
           if (w > 0)
-            absAngularVel = maxAngVel;
+            w = maxAngVel;
           else
-            absAngularVel = -maxAngVel;
+            w = -maxAngVel;
         }
+
+        return w;
     }
 
     /**
