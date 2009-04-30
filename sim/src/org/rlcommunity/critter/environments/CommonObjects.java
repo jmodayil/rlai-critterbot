@@ -13,6 +13,7 @@
 
 package org.rlcommunity.critter.environments;
 
+import java.util.LinkedList;
 import java.util.List;
 import org.rlcommunity.critter.ObjectStateAccelerometer;
 import org.rlcommunity.critter.ObjectStateBattery;
@@ -28,7 +29,6 @@ import org.rlcommunity.critter.ObjectStateOmnidrive;
 import org.rlcommunity.critter.Polygon;
 import org.rlcommunity.critter.SimulatorAgent;
 import org.rlcommunity.critter.SimulatorObject;
-import org.rlcommunity.critter.SimulatorState;
 import org.rlcommunity.critter.Vector2D;
 import org.rlcommunity.critter.Wall;
 import org.rlcommunity.critter.svg.Loader;
@@ -90,6 +90,32 @@ public class CommonObjects {
 
         int retries = 100;
         
+        // Create a list with all the objects in the new object's tree...
+        List<SimulatorObject> allOurObjects = pNewObject.getChildren();
+        allOurObjects.add(pNewObject);
+
+        // Keep only those objects which have a Polygon
+        List<SimulatorObject> ourObjects = new LinkedList<SimulatorObject>();
+        for (SimulatorObject o : allOurObjects) {
+          if (o.getShape() != null)
+            ourObjects.add(o);
+        }
+
+        // Also create a list of all other objects that have a polygon
+        List<SimulatorObject> otherObjects = new LinkedList<SimulatorObject>();
+        for (SimulatorObject root : pList) {
+          // Get this object's tree
+          List<SimulatorObject> rootTree = root.getChildren();
+          rootTree.add(root);
+          
+          // Add any of these which have a polygon to our master list
+          for (SimulatorObject o : rootTree) {
+            Polygon shape = o.getShape();
+            if (shape != null)
+              otherObjects.add(o);
+          }
+        }
+        
         while (!done) {
           retries--;
           if (retries <= 0) {
@@ -107,22 +133,25 @@ public class CommonObjects {
 
           boolean invalidPosition = false;
 
-          Polygon ourPoly = pNewObject.getShape();
-          
           // Determine whether any of the existing objects intersect with us
+          //  collidesWith() already traverses the tree, so we use the root
+          //   objects here
           for (SimulatorObject o : pList) {
             if (pNewObject.collidesWith(o) != null) {
               invalidPosition = true;
               break;
             }
-            Polygon otherPoly = o.getShape();
+          }
 
-            // Test for a polygon containing the other, which can occur
-            //  independently of intersection
-            // @todo This doesn't account for composite objects, so small objects
-            //  can end up inside those!
-            if (ourPoly != null && otherPoly != null) {
-              if (ourPoly.contains(otherPoly) || otherPoly.contains(ourPoly)) {
+          // Test for a polygon containing the other, which can occur
+          //  independently of intersection
+          for (SimulatorObject o1 : otherObjects) {
+            for (SimulatorObject o2 : ourObjects) {
+              // We know both o1 and o2 have polygons, by construction
+              Polygon poly1 = o1.getShape();
+              Polygon poly2 = o2.getShape();
+
+              if (poly1.contains(poly2) || poly2.contains(poly1)) {
                 invalidPosition = true;
                 break;
               }
