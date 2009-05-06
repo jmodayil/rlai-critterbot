@@ -2,9 +2,9 @@
  *  lib_ssc.c
  *  
  *
- *  Created by Michael Sokolsky on 4/11/08 as lib_spi.c.
- *  Modified by Marc G. Bellemare on 30/04/08 to emulate the SPI over the SSC.
- *  Last Revision: 30/04/08
+ *  Created by Michael Sokolsky on 11 April 08 as lib_spi.c.
+ *  Modified by Marc G. Bellemare on 30 April 08 to emulate the SPI over the SSC.
+ *  Last Revision: 30 April 08
  *
  */
 

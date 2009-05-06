@@ -1,3 +1,9 @@
+/*
+ * lib_motor.h
+ *
+ * Created by Michael Sokolsky
+ * Last modified: 30 April 09
+ */
 
 #include "armio.h"
 #include "lib_error.h"

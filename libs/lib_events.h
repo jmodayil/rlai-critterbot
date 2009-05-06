@@ -22,16 +22,18 @@
 #define EVENT_ID_UART 0
 #define EVENT_ID_SSC 1 
 #define EVENT_ID_SPI 2
-#define EVENT_ID_LEDDRIVE 3
-#define EVENT_ID_LEDCTL 4
-#define EVENT_ID_ACCEL 5
-#define EVENT_ID_BOOT 6
-#define EVENT_ID_ERROR 7
-#define EVENT_ID_MOTOR 8
-#define EVENT_ID_ADC 9
-#define EVENT_ID_ADCSPI 10
-#define EVENT_ID_UI 11
-#define EVENT_MAX 11
+#define EVENT_ID_MI_RECV 3
+#define EVENT_ID_LEDDRIVE 4
+#define EVENT_ID_LEDCTL 5
+#define EVENT_ID_ACCEL 6
+#define EVENT_ID_BOOT 7
+#define EVENT_ID_ERROR 8
+#define EVENT_ID_MOTOR 9
+#define EVENT_ID_ADC 10
+#define EVENT_ID_ADCSPI 11
+#define EVENT_ID_UI 12
+#define EVENT_ID_MI_SEND 13
+#define EVENT_MAX 13
 
 
 unsigned int init_flags;

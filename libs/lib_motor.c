@@ -1,3 +1,9 @@
+/*
+ * lib_motor.h
+ *
+ * Created by Michael Sokolsky
+ * Last modified: 30 April 09
+ */
 
 #include "lib_motor.h"
 #include "lib_mi.h"
@@ -59,54 +65,45 @@ int motor_event() {
   unsigned int volt;
   int i;
 
+  // Stop moving if we haven't received a command for a while
   if(++motor_timeout_count == MOTOR_TIMEOUT) {
     motor_set_speed_slew(0,0,0);
     motor_timeout_count = 0;
   }
 
+  // While we are slewing to a new motor speed
   if(motor_slew_count < motor_slew_steps) {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+      // Increment the float approximate value and then set as speed
       motor_speed_float[i] += motor_slew_interval[i];
       motor_speed[i] = (signed char) motor_speed_float[i];
     }
     motor_slew_count++;  
   }
+  // Once we have read a steady speed
   else if(motor_slew_count == motor_slew_steps) {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++)
       motor_speed[i] = (signed char)  motor_speed_final[i];
     motor_slew_count++;
   }
 
-  
+  // What was the bus voltage on the last cycle?
   volt = motor_get_voltage();
-  
+  // Now we queue the new commands to the motors.
   spi_send_packet(&power_packet); 
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     motor_tx_data[i][1] = (unsigned char) motor_speed[i];
     motor_tx_data[i][2] = volt;  
     spi_send_packet(&motor_packet[i]);
   }
+  // This checks the old packet we received to make sure it is a proper packet
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
       error_set(ERR_MOTOR_ALIGN);
   }
   if((power_rx_data[2] & 0xFF) != MOTOR_SPI_PADDING)
     error_set(ERR_MOTOR_ALIGN);
-      /*armprintf("!Motor %d: %d %d %d %d\r", i, 
-        motor_rx_data[i][1] & 0xFF, 
-        motor_rx_data[i][2] & 0xFF, 
-  
-        motor_rx_data[i][4] & 0xFF); 
-  }
-    for(i = 0; i < MOTOR_NUM_MOTORS; i++)
-      armprintf("Motor %d: %d %d %d %d %d\r", i, 
-        motor_rx_data[i][0] & 0xFF,
-        motor_rx_data[i][1] & 0xFF, 
-        motor_rx_data[i][2] & 0xFF, 
-        motor_rx_data[i][3] & 0xFF,
-        motor_rx_data[i][4] & 0xFF); 
-    //armprintf("\rPower: %d\r", power_rx_data & 0xFF);
-  */return 0; 
+  return 0; 
 }
 
 void motor_set_speed(int motor, signed char speed) {
@@ -194,12 +191,19 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_slew_count = 0;
 } 
 
+/*
+ * Take the raw ADC value received from the power controller and convert it to
+ * useful numbers (1/10th of a Volt)
+ */
 unsigned char motor_get_voltage() {
   
   unsigned int temp;
  
   temp = power_rx_data[1] & 0xFF;
-	if(0 == temp)
+	// 0 is not a valid voltage, and it also may indicate a communication error
+  // with the power controller.  If this is the case we don't actually know
+  // what the bus voltage is, so set it as high as possible for motor safety.
+  if(0 == temp)
 		return 255;
   return (temp*100 + 14730) / 154;
 }
@@ -224,6 +228,10 @@ void power_init_packet() {
   power_tx_data[2] = 0;
 }
 
+/*
+ * Not yet implemented on the controller side, however this should send raw
+ * PWM values to the controllers for low-level control
+ */
 void motor_set_pwm(int motor, int pwm) {
 
   unsigned int temp;
@@ -241,6 +249,9 @@ void motor_set_pwm(int motor, int pwm) {
   motor_tx_data[motor][2] = temp & 0xFF;
 }
 
+/*
+ * Returns the current velocity of the motor in encoder clicks per PID cycle
+ */
 signed char motor_clicks(int motor) {
 
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
@@ -249,6 +260,9 @@ signed char motor_clicks(int motor) {
   return motor_rx_data[motor][1] & 0xFF;
 }
 
+/*
+ * Returns the current amperage of the motor in unknown units
+ */
 unsigned char motor_current(int motor) {
 
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
@@ -257,6 +271,10 @@ unsigned char motor_current(int motor) {
   return motor_rx_data[motor][2] & 0xFF;
 }
 
+/*
+ * Returns the current temperature of the motor housing, in unknown units.
+ * This value has an inverse relationship with temperature.
+ */
 unsigned char motor_temp(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
@@ -264,6 +282,9 @@ unsigned char motor_temp(int motor) {
   return motor_rx_data[motor][3] & 0xFF;
 }
 
+/*
+ * Returns the last motor command received
+ */
 signed char motor_command(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;

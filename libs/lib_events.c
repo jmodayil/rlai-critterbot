@@ -33,6 +33,9 @@ extern event_s ui_event_s;
 extern event_s motor_event_s;
 extern event_s adc_event_s;
 extern event_s adcspi_event_s;
+extern event_s mi_recv_event_s;
+extern event_s mi_send_event_s;
+
 
 // Whether a new event cycle is ready to be processed
 volatile unsigned int events_status;
