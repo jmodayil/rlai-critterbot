@@ -1,6 +1,7 @@
 
 #include <string.h>
 #include "lib_leddrive.h"
+#include "lib_motor.h"
 #include "lib_accel.h"
 
 event_s leddrive_event_s = {
@@ -521,7 +522,7 @@ int leddrive_event(void) {
 			break;
 		case BATSTATUS:
 			clearled();
-			battlvl((motor_get_voltage()-48)*6);//
+			battlvl((motor_get_voltage()-115)*2);//
 			break;
 		case BALL:
 	  	ledball_crtl();	

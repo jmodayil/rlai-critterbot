@@ -2,8 +2,8 @@
  *  lib_spi.h
  *  
  *
- *  Created by Michael Sokolsky on 4/11/08.
- *  Last Revision: 01/07/08
+ *  Created by Michael Sokolsky on 11 March 08.
+ *  Last Revision: 30 April 09
  *
  */
 
@@ -25,6 +25,10 @@
                       AT91C_PA12_MISO | AT91C_PA11_NPCS0 | AT91C_PA31_NPCS1 )
 #define SPI_B_PINS  ( AT91C_PA10_NPCS2 | AT91C_PA22_NPCS3 )
 
+////////////////////////////////////////
+// Accelerometer 
+////////////////////////////////////////
+
 // Transfer settings for chip selects 0 - 3
 // delay = 32 * value / MCK; min=0, max=255
 #define SPI_CS0_3_DELAY_BETWEEN_TRANSFERS 0
@@ -45,6 +49,9 @@
                               SPI_CSO_3_WORD_SIZE<<4 | \
                               SPI_CSO_3_FLAGS )
 
+////////////////////////////////////////
+// Off-chip ADC converters 
+////////////////////////////////////////
 
 // Transfer settings for chip selects 4 - 7
 // delay = 32 * value / MCK; min=0, max=255
@@ -66,6 +73,9 @@
                               SPI_CS4_7_WORD_SIZE<<4 | \
                               SPI_CS4_7_FLAGS )
 
+////////////////////////////////////////
+// AVR Controllers for Motor and Power
+////////////////////////////////////////
 
 // Transfer settings for chip selects 8 - 11
 // delay = 32 * value / MCK; min=0, max=255

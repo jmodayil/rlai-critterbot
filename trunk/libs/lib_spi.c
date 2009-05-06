@@ -2,8 +2,8 @@
  *  lib_spi.c
  *  
  *
- *  Created by Michael Sokolsky on 4/11/08.
- *  Last Revision: 01/07/08
+ *  Created by Michael Sokolsky on 11 April 08.
+ *  Last Revision: 1 July 08
  *
  */
 

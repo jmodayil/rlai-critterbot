@@ -8,6 +8,18 @@
 #include "lib_events.h"
 #include "lib_leddrive.h"
 
+event_s mi_recv_event_s = {
+  NULL,
+  mi_get_commands,
+  0
+};
+
+event_s mi_send_event_s = {
+  NULL,
+  mi_send_status,
+  0
+};
+
 struct command_packet robot_command;
 extern unsigned short crctable[256];
 
@@ -15,22 +27,18 @@ unsigned short crc;
 unsigned char mi_test;
 
 void mi_start(void) {
-  leddrive_rainbow();
-  ui_set_handler(mi_event);
+  leddrive_clear();
+  event_start(EVENT_ID_MI_SEND);
+  event_start(EVENT_ID_MI_RECV);
+  event_stop(EVENT_ID_UI);
   error_clear(0xFFFFFFFF);
 }
 
 void mi_stop(void) {
   leddrive_ball();
-  ui_clear_handler(mi_event);
-}
-
-int mi_event(void) {
-
-  mi_send_status();
-  mi_get_commands();
-
-  return 0;
+  event_stop(EVENT_ID_MI_SEND);
+  event_stop(EVENT_ID_MI_RECV);
+  event_start(EVENT_ID_UI);
 }
 
 void putwcrc(unsigned char data) {
@@ -39,7 +47,7 @@ void putwcrc(unsigned char data) {
   armputchar(data);
 }
 
-void mi_send_status(void) {
+int mi_send_status(void) {
 
   int i;
  
@@ -76,18 +84,18 @@ void mi_send_status(void) {
 
   armputchar(crc >> 8);
   armputchar(crc & 0xFF);
-
+  return 0;
 }
 
-void mi_get_commands(void) {
+int mi_get_commands(void) {
   
   signed char m1, m2, m3;
-  int i,j;
+  int i;
   
   ALIGNMENT_ERROR:
 
   if(MI_COMMAND_LENGTH > armgetnumchars())
-    return;
+    return 0;
     
   if(MI_HEADER1 != armgetchar())
     goto ALIGNMENT_ERROR;
@@ -162,5 +170,5 @@ void mi_get_commands(void) {
     default:
       break;
   }
-  return;
+  return 0;
 }
