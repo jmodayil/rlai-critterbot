@@ -19,7 +19,7 @@ package org.rlcommunity.critterbot.javadrops.drops;
   * Used to create new drop instances from a given drop name
   */
 
-import org.rlcommunity.critterbot.simulator.*;
+
 
 public class DropFactory
 {

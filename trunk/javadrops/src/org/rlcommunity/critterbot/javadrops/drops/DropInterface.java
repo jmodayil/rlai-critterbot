@@ -25,7 +25,6 @@ package org.rlcommunity.critterbot.javadrops.drops;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.rlcommunity.critterbot.javadrops.*;
 import org.rlcommunity.critterbot.javadrops.clients.DropClient;
 
 public class DropInterface

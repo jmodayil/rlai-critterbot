@@ -13,7 +13,6 @@
 
 package org.rlcommunity.critterbot.javadrops.clients;
 
-import java.util.Arrays;
 import java.util.List;
 
 import org.rlcommunity.critterbot.javadrops.drops.CritterControlDrop;

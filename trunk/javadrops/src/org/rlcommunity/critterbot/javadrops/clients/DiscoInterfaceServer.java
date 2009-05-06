@@ -34,7 +34,7 @@ import java.util.List;
 import java.io.IOException;
 
 import org.rlcommunity.critterbot.javadrops.drops.*;
-import org.rlcommunity.critterbot.simulator.*;
+
 /**
  * Drop server listens for connections of sockets (say from Disco)
  * Added by Brian

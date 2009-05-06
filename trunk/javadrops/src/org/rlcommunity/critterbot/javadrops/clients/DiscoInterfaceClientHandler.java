@@ -22,7 +22,7 @@ package org.rlcommunity.critterbot.javadrops.clients;
 import org.rlcommunity.critterbot.javadrops.InterfaceInputStream;
 import org.rlcommunity.critterbot.javadrops.InterfaceOutputStream;
 import org.rlcommunity.critterbot.javadrops.drops.*;
-import org.rlcommunity.critterbot.simulator.*;
+
 
 import java.net.Socket;
 
