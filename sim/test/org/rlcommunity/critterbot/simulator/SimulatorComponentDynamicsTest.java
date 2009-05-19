@@ -10,9 +10,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.rlcommunity.critterbot.simulator.ObjectStateDynamics;
 import org.rlcommunity.critterbot.simulator.SimulatorComponentDynamics;
-import org.rlcommunity.critterbot.simulator.Vector2D;
 
-import static org.junit.Assert.*;
 
 /**
  *
