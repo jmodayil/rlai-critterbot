@@ -552,7 +552,6 @@ public class CommonObjects {
             shape.addPoint(pt.x, pt.y);
         }
 
-        shape.translate(new Vector2D(pRadius, pRadius));
         shape.doneAddPoints();
 
         ball.setShape(shape);

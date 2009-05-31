@@ -181,6 +181,19 @@ public class Vector2D {
       return this;
     }
 
+    /** Rounds the vector to the number of decimals.
+      *
+     *  @param decimals the number of decimals to keep.
+      * @return A copy of this vector.
+      */
+    public Vector2D round(int decimals) {
+      assert (decimals >= 0);
+
+      double base = Math.pow(10, decimals);
+
+      return new Vector2D(Math.round(base*this.x) / base, Math.round(base*this.y) / base);
+    }
+
     public boolean equals(Object o) {
         if (o.getClass() != this.getClass()) {
             return false;
