@@ -68,8 +68,10 @@ public class ObjectStateLightSource implements ObjectState
   {
         Vector2D pos = parent.getPosition();
         g.setColor(Color.YELLOW);
-        g.drawOval(pos.x, pos.y, 0.15, 0.15);
-        g.drawOval(pos.x+0.02, pos.y+0.02, 0.1, 0.1);   
+        double radius = 0.15;
+
+        g.drawOval(pos.x-radius/2, pos.y-radius/2, radius, radius);
+        g.drawOval(pos.x+0.02-radius/2, pos.y+0.02-radius/2, 0.1, 0.1);
   }
 
   /** Provides a mean of clearing whatever data this ObjectState contains
