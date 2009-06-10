@@ -9,13 +9,16 @@ RAMFUNC void spur_isr() {
 
 void C_Undef_Handler( unsigned int calling_addr ) {
   AT91C_BASE_AIC->AIC_SPU = (unsigned int)spur_isr;
-
+  // Disable PDC so the follow text isn't garbled.
+  AT91C_BASE_US0->US_PTCR = 0x00000202;
   __armprintf("\r*******\rUndefined Instruction\r*******\r");
   __armprintf("Calling address: %p\r", calling_addr);
   while(1);
 }
 
 void C_PAbt_Handler( unsigned int calling_addr ) {
+  // Disable PDC so the follow text isn't garbled.
+  AT91C_BASE_US0->US_PTCR = 0x00000202;
 
   __armprintf("\r*******\rPrefetch Abort\r*******\r");
   __armprintf("Calling address: %p\r", calling_addr);
@@ -25,6 +28,8 @@ void C_PAbt_Handler( unsigned int calling_addr ) {
 }
 
 void C_DAbt_Handler( unsigned int calling_addr ) {
+  // Disable PDC so the follow text isn't garbled.
+  AT91C_BASE_US0->US_PTCR = 0x00000202;
 
   __armprintf("\r*******\rData Abort\r*******\r");
   __armprintf("Calling address: %p\r", calling_addr);

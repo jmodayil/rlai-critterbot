@@ -8,10 +8,11 @@
 
 #define MI_COMMAND_LENGTH 9
 
-int mi_send_status(void);
-int mi_get_commands(void);
+void mi_send_status(void);
+void mi_get_commands(void);
 void mi_start(void);
 void mi_stop(void);
+int mi_event(void);
 void putwcrc(unsigned char data);
 
 struct command_packet {

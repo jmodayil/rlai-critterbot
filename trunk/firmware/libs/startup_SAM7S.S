@@ -119,8 +119,8 @@
 // </e>
 */
         .equ    WDT_SETUP,      1
-        .equ    WDT_MR_Val,     0x00008000
-//        .equ    WDT_MR_Val,     0x33002300
+//        .equ    WDT_MR_Val,     0x00008000
+        .equ    WDT_MR_Val,     0x33002300
 
 // Power Mangement Controller (PMC) definitions
         .equ    PMC_BASE,       0xFFFFFC00  /* PMC Base Address */
