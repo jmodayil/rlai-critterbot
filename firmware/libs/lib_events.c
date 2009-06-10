@@ -33,8 +33,6 @@ extern event_s ui_event_s;
 extern event_s motor_event_s;
 extern event_s adc_event_s;
 extern event_s adcspi_event_s;
-extern event_s mi_recv_event_s;
-extern event_s mi_send_event_s;
 
 
 // Whether a new event cycle is ready to be processed
@@ -118,27 +116,27 @@ void events_init()
   // Initialize the console first.
   event_init(0);
   
-  armprintf("\r\r\r------------CritterBOOT-------------\r\r");
-  armprintf("Last reset was a ");
+  __armprintf("\r\r\r------------CritterBOOT-------------\r\r");
+  __armprintf("Last reset was a ");
 
   reset_code = get_reset_code();
 
   if (reset_code >= 0 && reset_code < num_events_reset_names)
-    armprintf(events_reset_names[reset_code]);
+    __armprintf(events_reset_names[reset_code]);
   else
-    armprintf(events_undefined_reset_name);
+    __armprintf(events_undefined_reset_name);
 
-  armprintf(" reset.\r");
+  __armprintf(" reset.\r");
   // Initialized any functions with inits.
   for(i = 1; i <= EVENT_MAX; i++) {
     if((init_flags & (1 << i)) && (events[i]->init_func != NULL))
     {
       if (event_init(i)) {
-        armprintf("Failed to init EVENT_ID %d\r", i);
+        __armprintf("Failed to init EVENT_ID %d\r", i);
         // Stop this task, as it failed to init
         event_flags &= ~(1 << i);
       } else
-        armprintf("Initialized EVENT_ID %d\r", i);
+        __armprintf("Initialized EVENT_ID %d\r", i);
     }
   }
   // Enable the PIT interrupt and the PIT itself, as well as setting the

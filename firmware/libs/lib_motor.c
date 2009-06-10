@@ -197,15 +197,16 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
  */
 unsigned char motor_get_voltage() {
   
-  unsigned int temp;
+  //unsigned int temp;
  
-  temp = power_rx_data[1] & 0xFF;
+  //temp = power_rx_data[1] & 0xFF;
 	// 0 is not a valid voltage, and it also may indicate a communication error
   // with the power controller.  If this is the case we don't actually know
   // what the bus voltage is, so set it as high as possible for motor safety.
-  if(0 == temp)
+  if((power_rx_data[1] & 0xFF) == 0)
 		return 255;
-  return (temp*100 + 14730) / 154;
+  return power_rx_data[1] & 0xFF;
+  //return (temp*100 + 14730) / 154;
 }
 
 void motor_init_packet(int motor) {
