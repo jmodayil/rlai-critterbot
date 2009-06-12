@@ -122,7 +122,6 @@ int leddrive_init(void)
 
 void leddrive_write(void){
 	int i;
-  LED[0].r = 255;
 	for (i=0;i<=15;i++)
 		ledctl_setcolor(i,LED[i].r<<4,LED[i].g<<4,LED[i].b<<4);
 }
