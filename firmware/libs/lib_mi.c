@@ -154,6 +154,7 @@ void mi_get_commands(void) {
       break;
     case CEMERGENCY:
       leddrive_emerg();
+      break;
     case CCUSTOM:
       leddrive_custom(); 
       break;
