@@ -117,7 +117,7 @@ void mi_get_commands(void) {
   
   switch(robot_command.motor_mode) {
     case WHEEL_SPACE:
-      motor_set_speed_slew(m1, m2, m3);
+      motor_set_speed_slew(-m1, -m2, m3);
       break;
     case XYTHETA_SPACE:
       motor_set_speed_xytheta(m1, m2, m3);
