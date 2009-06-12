@@ -1,0 +1,86 @@
+CC = arm-elf-gcc
+LD = arm-elf-ld
+OBJCOPY = arm-elf-objcopy
+
+# Directories
+LDDIR=ldscripts
+BINDIR=bin
+GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
+STDC_LIB_DIR=/opt/local/arm-elf/lib
+
+LIBS=$(STDC_LIB_DIR)/libm.a $(STDC_LIB_DIR)/libc.a $(GCC_LIB_DIR)/libgcc.a
+
+# Uncomment to produce a memory map
+# PRODUCE_MEMORY_MAP=-Wl,-Map=memory.map
+PRODUCE_MEMORY_MAP=
+PRODUCE_MEMORY_MAP_LD=-Map=memory.map
+#PRODUCE_MEMORY_MAP_LD=
+
+# Compiler flags
+COMMONFLAGS = -c -mcpu=arm7tdmi
+ASSONLYFLAGS = -S -mcpu=arm7tdmi
+AFLAGS = -x assembler-with-cpp
+CFLAGS = -Winline -O2 -ffunction-sections -fdata-sections
+# Set DEBUGFLAGS to empty for normal compilation
+# DEBUGFLAGS =
+DEBUGFLAGS = -Wall
+
+# Linker flags
+LDFLAGS = --gc-sections --oformat elf32-littlearm $(PRODUCE_MEMORY_MAP_LD) 
+
+THUMB = -marm
+
+# Lib files to compile
+CSRC = lib_mi.c lib_except.c lib_motor.c lib_leddrive.c lib_spi.c lib_ui.c lib_ssc.c lib_ledctl.c lib_error.c lib_accel.c armio.c lib_events.c lib_boot.c lib_flash.c lib_adcspi.c lib_adc.c
+CASS = $(CSRC:.c=.aS)
+COBJ = $(CSRC:.c=.o)
+ASRC = startup_SAM7S.S lib_critical.S
+AOBJ = $(ASRC:.S=.o)
+
+# Test targets
+# Removed targets: $(BINDIR)/lib_ui_test.bin
+TESTBINS = $(BINDIR)/main_test.bin
+
+# Builds libraries (but nothing else)
+all: all_libs
+
+# Builds all tests
+tests: $(TESTBINS)
+
+clean:
+	rm -f *.o
+	rm -f *.aS
+	rm -f $(BINDIR)/*
+	rm -f memory.map
+
+# For now, we compile everything using gcc because inline functions are dup'ed
+all_libs: $(AOBJ) $(COBJ)
+#	$(CC) $(CFLAGS) $(THUMB) $(CSRC)
+
+# Test binaries
+$(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
+	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) -L$(GCC_LIB_DIR) -L$(STDC_LIB_DIR) $(LDFLAGS) $(COBJ) $(AOBJ) $(notdir $(addsuffix .o, $(basename $@))) $(LIBS) --output $(addsuffix .elf, $(basename $@))
+#	@echo $@ $(basename $@)
+	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@
+#	$(LD) -T$(LDDIR)/lib_ui_test.ld -L$(STDC_LIB_DIR) $(LDFLAGS) $(COBJ) $(AOBJ) $(LIBS) lib_ui_test.o --output $(BINDIR)/lib_ui_test.elf
+#	$(OBJCOPY) -O binary $(BINDIR)/lib_ui_test.elf $(BINDIR)/lib_ui_test.bin
+	@echo
+	@echo Binary size: `ls -l $@ | awk '{print $$5}'` bytes
+# Generate the bootloader file
+	@echo "bootloader cookie" `ls -l $@ | awk '{print $$5}'` | tr "\n" "\r" | cat - $@ >$(addsuffix .boot, $(basename $@))
+
+$(COBJ): %.o : %.c
+	@echo $<
+	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
+
+$(CASS): %.aS : %.c
+	@echo $<
+	$(CC) $(ASSONLYFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
+
+$(notdir $(TESTBINS:.bin=.o)): %.o : %.c
+	@echo $<
+	$(CC) $(COMMONFLAGS) $(CFLAGS) $(THUMB) $(DEBUGFLAGS) $< -o $@
+
+$(AOBJ): %.o : %.S
+	arm-elf-gcc $(COMMONFLAGS) $(AFLAGS) $(THUMB) $(INCLUDES) $(DEBUGFLAGS) -Wall $< -o $@
+

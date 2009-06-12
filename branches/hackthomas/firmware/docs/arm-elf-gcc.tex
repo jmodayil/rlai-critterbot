@@ -1,0 +1,52 @@
+\documentclass[12pt]{article}
+
+\title{The arm-elf compiler/linker}
+\author{Marc G. Bellemare}
+
+\begin{document}
+
+\maketitle
+
+This document will holds information on how the arm-elf compiler should
+be used with our ARM processor. Its purpose is to record general thoughts
+and processes about compiling our project, rather than to be an actual
+documentation.
+
+\section{Steps to compiling an ARM project}
+
+There are three steps to compiling the project:
+
+\begin{enumerate}
+\item{Compile the source files into objects using \verb+arm-elf-gcc+. You 
+should specify \verb+-mpcu=armtdmi+ and \verb+-mthumb+ (or such).}
+\item{Link the object files using \verb+arm-elf-ld+. This requires a linker
+script (see below) and in general, startup code written in assembly.}
+\item{Translate the linker's output (an ELF file) into what is needed by
+the chip programming device, e.g. ihex (?)}
+\end{enumerate}
+
+\section{RAM functions}
+
+A few things must be done in order to get interrupt service routines (ISRs)
+into RAM. Because RAM is volatile, we must copy anything that we want to be
+in RAM when the system is powered up. To do so, we keep a separate section
+of code/data and copy it on reset.
+
+\begin{enumerate}
+\item{Define a gcc/ld section \verb+.fastrun+ which contains functions that
+must be run in RAM}
+\item{Provide a linker script that specifies where \verb+.fastrun+ is
+loaded (e.g., in flash; this is the load memory address or LMA) and its 
+runtime address (the virtual memory address or VMA)}
+\item{Create a startup script that provides usual startup code and copies the
+data to be put in RAM from its LMA to its VMA}
+\item{Place the startup script at the beginning of the flash AND at the
+beginning of the RAM section - this is because we replace the exception vectors}
+\end{enumerate}
+
+\section{Programming the chip}
+
+I believe we can use something called OpenOCD which supports ihex and elf
+formats.
+
+\end{document}

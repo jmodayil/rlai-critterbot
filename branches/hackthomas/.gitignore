@@ -1,0 +1,8 @@
+.DS_Store
+bin
+sim/bin
+sim/build
+sim/dist
+sim/nbproject/private
+sim/dump.txt
+
