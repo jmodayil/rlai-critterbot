@@ -6,7 +6,7 @@
 #define MI_HEADER3 0xBE
 #define MI_HEADER4 0xEF
 
-#define MI_COMMAND_LENGTH 9
+#define MI_COMMAND_LENGTH 57
 
 void mi_send_status(void);
 void mi_get_commands(void);
