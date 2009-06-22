@@ -7,6 +7,8 @@
 
 #define BAUDRATE B115200
 #define DEVICE "/dev/ttyS0"
+//#define DEVICE "/dev/tty.usbserial"
+//#define DEVICE "/dev/tty.FireFly"
 
 FILE *boot;
 int port;
@@ -100,6 +102,7 @@ main(int argc, char *argv[]) {
         printf("\n");
     }
   } while(dat != '.');
+  printf("\n");
   closeport(port);
   fclose(boot);
   close(port);
