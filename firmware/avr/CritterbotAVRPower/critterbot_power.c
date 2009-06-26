@@ -5,24 +5,25 @@
  *      Author: sokolsky
  */
 
-#include <avr/io.h>
-#include <avr/interrupt.h>
 #include "include/pin_names.h"
+#include "include/critterbot_power.h"
+#include "include/power_avr_utils.h"
+#include "include/power_avr_charge.h"
+#include <avr/interrupt.h>
+#include <util/delay_basic.h>
 
-#define SPI_PACKET_HEADER 0x7F
-#define SPI_PADDING 0x80
+volatile uint8_t system_voltage, rstate;
 
-uint8_t sys_voltage, rstate, dummy;
+uint8_t bat40i, bat160i, bat280i;
+uint8_t bat40v, bat160v, bat280v;
 
-/*
- * SPI interrupt routine
- */
 ISR(SPI_STC_vect) {
+  uint8_t dummy;
 
   switch(rstate) {
     case 0:
       dummy = (uint8_t)SPDR;
-      SPDR = sys_voltage;
+      SPDR = system_voltage;
       if(dummy == SPI_PACKET_HEADER)
         rstate = 1;
       else
@@ -30,12 +31,27 @@ ISR(SPI_STC_vect) {
       break;
     case 1:
       dummy = (uint8_t)SPDR;
-      SPDR = SPI_PADDING;
+      SPDR = charge_state;
       rstate = 2;
       break;
     case 2:
       dummy = (uint8_t)SPDR;
-      SPDR = 0;
+      SPDR = bat40v;
+      rstate = 3;
+      break;
+    case 3:
+      dummy = (uint8_t)SPDR;
+      SPDR = bat160v;
+      rstate = 4;
+      break;
+    case 4:
+      dummy = (uint8_t)SPDR;
+      SPDR = bat280v;
+      rstate = 5;
+      break;
+    case 5:
+      dummy = (uint8_t)SPDR;
+      SPDR = SPI_PADDING;
       rstate = 0;
       break;
     default:
@@ -47,86 +63,201 @@ ISR(SPI_STC_vect) {
   }
 }
 
+void general_init(void) {
+  // BATEN are output and default off
+  BATEN_DDR |= (BAT280EN | BAT160EN | BAT40EN);
+  // CPUEN is output and defaults off
+  CPUEN_DDR |= CPUEN;
+  // V3INHIB is output and defaults off (inverted control)
+  V3INHIB_PORT |= V3INHIB;
+  V3INHIB_DDR |= V3INHIB;
 
-/*
- *  This reports system Voltage as:
- *  System Voltage = (val + 148) * 7 / 108
- *  or Approx:
- *  System Voltage = (val + 144) / 15
- *  This is close to linear, above 17V it starts to roll off
- *  because of the protection diode.
- */
-uint8_t get_sys_volt( void ) {
+  // Pullups on for switch input
+  SW_PORT |= (SW1 | SW2);
+  // LED1 is output
+  LED1_DDR |= LED1;
 
-  uint16_t raw;
-  uint8_t val;
-  raw = ADCL;
-  raw += (((uint16_t)ADCH) << 8);
-  ADMUX = 0x02;
-  ADCSRA = 0xC3;
-  val = (raw - 300) >> 1;
-  return val;
+  AVRRESET_PORT |= AVRRESET;
+  // AVRRESET is output
+  AVRRESET_DDR |= AVRRESET;
+  AVRRESET_PORT |= AVRRESET;
+  _delay_loop_2(600000);
+  AVRRESET_PORT &= ~AVRRESET;
+  _delay_loop_2(300000);
+  AVRRESET_DDR &= ~AVRRESET;
+  AVRRESET_PORT &= ~AVRRESET;
+
+  // LED1 on
+  //LED1_PORT |= LED1;
+  // AVRRESET high
+  //AVRRESET_PORT |= AVRRESET_PIN;
 }
 
+void fan_init(void) {
 
-void adc_init( void ) {
+  CPUFAN_DDR |= CPUFAN;
+  // Pins need to be corrected before using this, unless we want to use Timer1
+  MTRFAN_DDR |= MTRFAN;
+  // Enable phase-correct PWM, no prescaler, OCR2B output
+  TCCR2A = 0x21;
+  TCCR2B = 0x09;
+  // Count up to 0x20
+  OCR2A = 0x20;
+  // Initially full output until we get a voltage reading
+  OCR2B = 0x20;
 
-  ADMUX = 0x00;
-  ADCSRA = 0xC3; // C3 for 1Mhz, C6 for 8Mhz
+  // Temporarily setup so we can cool while charging.
+  TCCR1A = 0x81;
+  TCCR1B = 0x09;
+
+}
+
+void adc_init(void) {
+  ADMUX = 0x20; // Left adjust
+  ADCSRA = 0xC6; // C3 for 1Mhz, C6 for 8Mhz
   while( ADCSRA & 0x40 );
 }
 
 
-void fan_init(void) {
-
-  CPUFAN_DDR |= CPUFAN_PIN;
-  //DDRD |= 0x60;
-  TCCR2A = 0x21;
-  TCCR0B = 0x09;
-  OCR2A = 0x20;
-  OCR2B = 0x10;
-  //OCR0A = 0x20;
-  //OCR0B = 0x01;
-  //TCCR0A = 0x21;
-  //TCCR0B = 0x09;
-
-}
 
 void spi_init_slave( void ) {
 
   cli();
-  DDRB = 0x10;
+  SPI_DDR |= MISO;
   SPCR = _BV(SPE)|_BV(CPHA)|_BV(SPIE);
   SPDR = 0x00;
   sei();
 }
 
+/*
+ * Returns 1 if the battery levels are acceptably close
+ * otherwise returns 0, with a little hysteresis;
+ */
+int battery_level_okay(void) {
+  static uint8_t count;
+  uint8_t diff = 0;
+
+  if(bat40v > bat160v + 3)
+    diff = 1;
+  if(bat160v > bat40v + 3)
+    diff = 1;
+  if(bat40v > bat280v + 3)
+    diff = 1;
+  if(bat280v > bat40v + 3)
+    diff = 1;
+  if(bat160v > bat280v + 3)
+    diff = 1;
+  if(bat280v > bat160v + 3)
+    diff = 1;
+  if(diff == 1)
+    count++;
+  else
+    count = 0;
+  if(count > 5 && system_voltage < 172)
+    return 0;
+  else
+    return 1;
+}
+
+/*
+ * returns 1 if system voltage is okay.
+ * return 0 if it has dropped too low.
+ */
+int system_voltage_okay(void) {
+  static uint8_t count;
+  static uint8_t off;
+
+  if(system_voltage > 160)
+    off = 0;
+  if(system_voltage < 120) {
+    if(count < 50)
+      count++;
+  }
+  else
+    count = 0;
+  if(count > 50 || off == 1) {
+    off = 1;
+    return 0;
+  }
+  else
+    return 1;
+}
+
 int main(void) {
 
-  volatile uint16_t i;
-  unsigned char dat;
-  // Clear everything for safety sake
-  PORTB = 0x00;
-  PORTC = 0x00;
-  PORTD = 0x00;
-
-  DDRC |= 0x03;
-  DDRD |= 0xAC;
-
-  PORTC |= 0x01;
-  PORTD |= 0x80;
-
-
-  spi_init_slave();
-  rstate = 0;
+  charger_init();
+  general_init();
   fan_init();
+  spi_init_slave();
 
-  while(1) {
-    for(i = 0; i < 10000; i++);
-    sys_voltage = get_sys_volt();
-    dat = 10 - (sys_voltage / 11);
-    //OCR0B = dat;
-
+  if(system_voltage_okay()) {
+    v3_bus_enable();
+    cpu_enable();
   }
 
+  while(1) {
+    // Check battery status
+    bat40v = get_bat40_voltage();
+    bat160v = get_bat160_voltage();
+    bat280v = get_bat280_voltage();
+    bat40i = get_bat40_current();
+    bat160i = get_bat160_current();
+    bat280i = get_bat280_current();
+    bat40_enable();
+    bat160_enable();
+    bat280_enable();
+    // Disable batteries if they are not at equal charge levels
+    if(!battery_level_okay()) {
+      LED1_PORT |= LED1;
+      //bat40_disable();
+      //bat160_disable();
+      //bat280_disable();
+    }
+    else {
+      LED1_PORT &= ~LED1;
+
+      // Some sane way of recovering?
+    }
+    // Check system voltage and adjust fan speeds
+    system_voltage = get_vsys();
+    set_cpu_fan(system_voltage);
+    set_motor_fan(system_voltage);
+
+    // Disable things if system voltage gets too low
+    if(!system_voltage_okay()) {
+      v3_bus_disable();
+      cpu_disable();
+    }
+    else {
+      v3_bus_enable();
+      if(!(SW_PIN & SW1))
+        cpu_enable();
+    }
+
+    // Enable CPU if SW1 is set
+    if(SW_PIN & SW1)
+      cpu_disable();
+    else
+      cpu_enable();
+
+    // Enable the charger if SW2 is set
+    /*if(!(SW_PIN & SW2)) {
+        charge();
+        // Charge error!!!
+        if(charge_state >=200) {
+          // What to do??!?!
+        }
+    }
+    else {*/
+      charger40_disable();
+      charger160_disable();
+      charger280_disable();
+    //  charge_state = 0;
+    //}
+
+    // 20ms delay (at 8Mhz)
+    _delay_loop_2(40000);
+  }
+
+  return 0;
 }
