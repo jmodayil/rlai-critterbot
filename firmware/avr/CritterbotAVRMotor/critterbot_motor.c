@@ -162,7 +162,6 @@ int main(void) {
 
       speed = soft_pid_control(speed);
 
-
       set_speed(speed);
       event = 0;
     }
