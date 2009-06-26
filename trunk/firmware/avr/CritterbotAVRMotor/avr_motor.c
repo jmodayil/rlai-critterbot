@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include "include/avr_motor.h"
 
+#define SPEED_LIMIT 25
 #define KP 3 //8
 #define KD 4 //50
 #define KPS 8
@@ -15,13 +16,17 @@
 #define KDS 16
 #define P_LIMIT 500
 #define I_LIMIT 25
+#define I_LIMIT_MIN 1
 #define I_LIMIT_SCALE 32
+#define I_LIMIT_RATE 3
 // What is this?
 #define P_SCALE 3
 #define E_SCALE 4
 #define I_HIST_SIZE 100
 #define STALL_THRESH 20
 
+//static int8_t speed_limit_now;
+static uint8_t i_limit_now;
 static int32_t i_error;
 static uint8_t i_hist[I_HIST_SIZE];
 static uint8_t *i_hist_loc;
@@ -42,6 +47,8 @@ void motor_init(void) {
   v_now = 255;
   error = 0;
 
+  i_limit_now = I_LIMIT;
+  //speed_limit_now = SPEED_LIMIT;
   motor_setpoint = 101;
   PORTD &= ~(MTR_EN_PIN|MTR_A_PIN|MTR_B_PIN|MTR_LOW_A_PIN|MTR_LOW_B_PIN);
 
@@ -86,21 +93,82 @@ void set_speed(int8_t speed) {
 
 int8_t current_limit(int8_t setpoint) {
 
+  static int8_t correction;
+  static uint8_t count;
+  int16_t error;
+  int8_t setpoint_sign = setpoint > 0 ? 1 : -1;
+  // make setpoint a magnitude
+  setpoint = setpoint > 0 ? setpoint : -setpoint;
+
+  error = i_limit_now - current;
+
+  // If we are over the current limit
+  if(error < 0) {
+    correction++;
+    if(correction >= setpoint)
+      correction = setpoint - 1;
+    if(correction < 0)
+      correction = 0;
+    count++;
+    if(count >= I_LIMIT_RATE) {
+      count = 0;
+      //if(speed_limit_now > 1)
+      //    speed_limit_now--;
+    }
+  }
+  else {
+    if(correction > 0)
+      correction--;
+    if(correction < 0)
+      correction = 0;
+    else {
+      //if(speed_limit_now < SPEED_LIMIT)
+      //  speed_limit_now++;
+      count = 0;
+    }
+  }
+  //if(speed_limit_now <= 0)
+  //  return 0;
+  return (setpoint - correction) * setpoint_sign;
+}
+
+/*
+int8_t current_limit(int8_t setpoint) {
+
+  static uint8_t cycle_count;
   static int16_t correction;
   static int8_t last_error;
   int8_t d_error, error;
 
-
-  error = I_LIMIT - current;
+  error = i_limit_now - current;
   d_error = error - last_error;
   last_error = error;
 
+  // If we're going less than half as fast as we are supposed to be...
+  // Decrease the current limit slowly until min
+  if(((clicks >> 1) * (clicks > 0 ? 1 : -1)) <
+      setpoint > 0 ? setpoint : -setpoint) {
+    if(cycle_count++ > 10) {
+      cycle_count = 0;
+      i_limit_now--;
+      if(i_limit_now < I_LIMIT_MIN)
+        i_limit_now = I_LIMIT_MIN;
+    }
+  }
+  // Otherwise increase it back to the normal limit
+  else {
+    if(cycle_count > 0)
+      cycle_count--;
+    else {
+      if(i_limit_now < I_LIMIT)
+        i_limit_now++;
+    }
+  }
   if(error < 0) {
     //d_error = error - last_error;
     correction += error;
     if(correction < ((int16_t)(setpoint > 0 ? -setpoint : setpoint)) * I_LIMIT_SCALE )
       correction = ((int16_t)(setpoint > 0 ? -setpoint : setpoint)) * I_LIMIT_SCALE ;
-
   }
   else{
     correction += error;
@@ -113,7 +181,7 @@ int8_t current_limit(int8_t setpoint) {
 
   return setpoint;
 
-}
+}*/
 
 int8_t power_limit(int8_t setpoint) {
 
@@ -202,6 +270,7 @@ int8_t pid_control(int8_t setpoint) {
 
 int8_t soft_pid_control(int8_t setpoint) {
 
+  int8_t final_speed;
   int16_t d_error;
   static int16_t last_error;
   static int16_t hires_speed;
@@ -209,6 +278,10 @@ int8_t soft_pid_control(int8_t setpoint) {
 
   if(setpoint > 100 || setpoint < -100 || setpoint == 0)
     return 0;
+  if(setpoint > SPEED_LIMIT)
+    setpoint = SPEED_LIMIT;
+  if(setpoint < -SPEED_LIMIT)
+    setpoint = -SPEED_LIMIT;
 
   last_error = error;
   error = (((int16_t)setpoint << 2) - clicks);
@@ -223,4 +296,14 @@ int8_t soft_pid_control(int8_t setpoint) {
     hires_speed = -8128;
 
   return hires_speed >> 6;
+  //final_speed = hires_speed >> 6;
+  // Bound output speed.
+  /*if(final_speed > 0) {
+    if(final_speed > speed_limit_now)
+      final_speed = speed_limit_now;
+  } else {
+    if(final_speed < -speed_limit_now)
+      final_speed = -speed_limit_now;
+  }*/
+  //return final_speed;
 }
