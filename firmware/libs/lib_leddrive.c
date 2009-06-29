@@ -230,6 +230,39 @@ void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b){
 	}
 }
 
+void led_chargemax(int max) {
+  switch(max) {
+  case 0:
+    // We shouldn't be here I think?
+    break;
+  case 1:
+  case 2:
+    leddrive_charge_max = 3; 
+    break;
+  case 3:
+  case 4:
+    leddrive_charge_max = 5; 
+    break;
+  case 5:
+    leddrive_charge_max = 8; 
+    break;
+  case 6:
+  case 7:
+    leddrive_charge_max = 10; 
+    break;
+  case 8:
+    leddrive_charge_max = 13; 
+    break;
+  case 9:
+    leddrive_charge_max = 15; 
+    break;
+  case 10:
+    leddrive_charge_max = 16; 
+    break;
+  default:
+    break;
+  }
+}
 
 void battlvl(unsigned int lvl){
 	unsigned int light,i;
@@ -520,12 +553,29 @@ int leddrive_event(void) {
 		case STARTUP:
 			startup();
 			break;
-		case BATSTATUS:
+    case CHARGESTATUS:
+      clearled();
+      led_chargemax(motor_get_charge_state());
+      if(leddrive_charge_max == 0)
+        goto gohereonnoerror;
+      if(leddrive_charge_max > 16)
+        goto omgerror;
+      if(a > (leddrive_charge_max << 5) + 31)
+        a = 0;
+      for(i = 0; i < (a >> 5); i++) {
+        if(leddrive_charge_max != 16)
+          LED[i].r = 255;
+        LED[i].g = 255;
+      }      
+      a++;
+      break;
+    case BATSTATUS:
 			clearled();
 			battlvl((motor_get_voltage()-115)*2);//
 			break;
 		case BALL:
-	  	ledball_crtl();	
+gohereonnoerror:
+      ledball_crtl();	
 	  	ANGLEINFO[0].deg=(int*)&ledball_angle;
 	    ANGLEINFO[0].cval=&ledball_cval;
 	    ANGLEINFO[0].grad=BLUERED;
@@ -566,7 +616,8 @@ int leddrive_event(void) {
 			}
 			break;	
 		case ERROR:
-			a++;
+omgerror:
+      a++;
 			if (a<3){
 				for(i=0;i<=15;i++){
 					LED[i].r=255;					
@@ -668,6 +719,10 @@ void leddrive_fadeangle(unsigned int id,unsigned int grad,unsigned int *cval,int
 void leddrive_rotate(int *rot){
 	leddrive_state=ROTATE;
 	leddrive_rot = rot;
+}
+
+void leddrive_chargestatus(void) {
+  leddrive_state=CHARGESTATUS;
 }
 
 void leddrive_clear(void){

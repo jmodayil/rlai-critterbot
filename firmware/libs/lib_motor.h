@@ -20,11 +20,11 @@
 // Number of bytes in a motor packet (including header)
 #define MOTOR_NUM_BYTES 5
 // Number of bytes in a power packet (including header)
-#define MOTOR_PWR_BYTES 3
+#define MOTOR_PWR_BYTES 6
 
-#define MOTOR_PACKET_HEADER 0x7F
-#define MOTOR_PWM_HEADER 0x7E
-#define MOTOR_SPI_PADDING 0x80
+#define MOTOR_PACKET_HEADER 0x7A
+#define MOTOR_PWM_HEADER 0x7B
+#define MOTOR_SPI_PADDING 0x7D
 
 // Rate of slew to new speed (ratio based on one step per cycle)
 #define MOTOR_SLEW_RATE 1.0
@@ -32,6 +32,7 @@
 // Time (in cycles) to timeout if no commands received
 #define MOTOR_TIMEOUT 50
 
+// Constants for converting from X-Y-Theta to Wheel space
 #define XSC100 (-1008) // cos(90+100) * 1024
 #define YSC100 (-178) // sin(90+100) * 1024
 #define TSC100 (1096) // 1.07 * 1024
@@ -76,10 +77,30 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
 void motor_set_pwm(int motor, int pwm);
 
 /*
- * Returns the system voltage in 1/4 Volt increments. (12V = 48)
- * Returns 255 if voltage readings are not operating correctly.
+ * Sets raw PWM values to all motors as a normal control signal
+ */
+void motor_set_voltage(int pwm100, int pwm220, int pwm340);
+
+/*
+ * Returns the current system bus voltage in 1/10ths of a volt.
  */
 unsigned char motor_get_voltage();
+
+/*
+ * Returns the state of the battery charger.  0 is off,
+ * 200 is error, others are various states of charge.
+ */
+unsigned char motor_get_charge_state(); 
+
+/*
+ * Returns the current voltage of each battery.  While running on battery
+ * power these will all be the same.  They are in 1/10th of a volt,
+ * however accuracy is rough, and may not be better than 500mV.
+ */ 
+unsigned char motor_get_bat40();
+unsigned char motor_get_bat160();
+unsigned char motor_get_bat280();
+
 
 /*
  * Initialize a motor packet

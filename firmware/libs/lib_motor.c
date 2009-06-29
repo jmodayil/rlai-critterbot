@@ -7,6 +7,7 @@
 
 #include "lib_motor.h"
 #include "lib_mi.h"
+#include "lib_leddrive.h"
 
 event_s motor_event_s = {
   motor_init,
@@ -29,6 +30,8 @@ static char motor_slew_steps;
 static float motor_speed_float[MOTOR_NUM_MOTORS];
 static float motor_slew_interval[MOTOR_NUM_MOTORS];
 static char motor_slew_count;
+// 0 means velocity control, 1 is voltage control
+static int motor_mode;
 
 static unsigned int motor_timeout_count;
 
@@ -67,7 +70,10 @@ int motor_event() {
 
   // Stop moving if we haven't received a command for a while
   if(++motor_timeout_count == MOTOR_TIMEOUT) {
-    motor_set_speed_slew(0,0,0);
+    if(motor_mode == 0)
+      motor_set_speed_slew(0,0,0);
+    else
+      motor_set_voltage(0,0,0);
     motor_timeout_count = 0;
   }
 
@@ -91,8 +97,21 @@ int motor_event() {
   volt = motor_get_voltage();
   // Now we queue the new commands to the motors.
   spi_send_packet(&power_packet); 
+
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
-    motor_tx_data[i][1] = (unsigned char) motor_speed[i];
+    // Send the appropriate header so the AVR knowns whether to run PID or not
+    if(motor_mode == 0)
+      motor_tx_data[i][0] = MOTOR_PACKET_HEADER;
+    else
+      motor_tx_data[i][0] = MOTOR_PWM_HEADER;
+    // If we're in a non-zero charge state, i.e. plugged in, don't move!
+    // And, perhaps innapropriatly for this part of the code, display voltage state on LED's
+    if(motor_get_charge_state() != 0) {
+      motor_tx_data[i][1] = 0;
+      leddrive_chargestatus();
+    }
+    else
+      motor_tx_data[i][1] = (unsigned char) motor_speed[i];
     motor_tx_data[i][2] = volt;  
     spi_send_packet(&motor_packet[i]);
   }
@@ -101,13 +120,14 @@ int motor_event() {
     if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
       error_set(ERR_MOTOR_ALIGN);
   }
-  if((power_rx_data[2] & 0xFF) != MOTOR_SPI_PADDING)
+  if((power_rx_data[0] & 0xFF) != MOTOR_SPI_PADDING)
     error_set(ERR_MOTOR_ALIGN);
   return 0; 
 }
 
 void motor_set_speed(int motor, signed char speed) {
 
+  motor_mode = 1;
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return;
 
@@ -152,6 +172,7 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
 void motor_set_speed_slew(signed char speed100, signed char speed220,
    signed char speed340) {
 
+  motor_mode = 0;
   motor_timeout_count = 0;
   
   if(speed100 < -MOTOR_MAX_SPEED)
@@ -191,6 +212,16 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_slew_count = 0;
 } 
 
+void motor_set_voltage(int pwm100, int pwm220, int pwm340) {
+
+  motor_mode = 1;
+  motor_timeout_count = 0;
+
+  motor_set_speed(0, pwm100);
+  motor_set_speed(1, pwm220);
+  motor_set_speed(2, pwm340);
+}
+
 /*
  * Take the raw ADC value received from the power controller and convert it to
  * useful numbers (1/10th of a Volt)
@@ -206,8 +237,23 @@ unsigned char motor_get_voltage() {
   if((power_rx_data[1] & 0xFF) == 0)
 		return 255;
   return power_rx_data[1] & 0xFF;
-  //return (temp*100 + 14730) / 154;
 }
+
+unsigned char motor_get_charge_state() {
+  return power_rx_data[2] & 0xFF;
+}
+
+unsigned char motor_get_bat40() {
+  return power_rx_data[3] & 0xFF;
+}
+unsigned char motor_get_bat160() {
+  return power_rx_data[4] & 0xFF;
+}
+
+unsigned char motor_get_bat280() {
+  return power_rx_data[5] & 0xFF;
+}
+
 
 void motor_init_packet(int motor) {
 

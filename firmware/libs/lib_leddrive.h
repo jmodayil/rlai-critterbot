@@ -22,7 +22,7 @@ struct angleinfo {
 }ANGLEINFO[4];
 
 //States of leddrive_event()
-enum leddrive_states {STARTUP,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW,CUSTOM};
+enum leddrive_states {STARTUP,CHARGESTATUS,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW,CUSTOM};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED,RED,GREEN,BLUE};
 
@@ -33,7 +33,8 @@ unsigned int ledball_angle;
 unsigned int ledball_cval;
 //ledball simulator controller
 void ledball_crtl(void);
-
+//charge max indicator
+unsigned int leddrive_charge_max;
 
 //varibles for external functions.
 int *leddrive_rot;
@@ -70,6 +71,8 @@ void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b);
  * Display a rainbow pattern for good looks and cheer.
  */
 void rainbow(void);
+// Calculate how full our charge is right now
+void led_chargemax(int max);
 
 /*
 displays the battery lvl 0-100
@@ -106,6 +109,7 @@ void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
 void leddrive_ball(void);
+void leddrive_chargestatus(void);
 void leddrive_error(void);
 void leddrive_emerg(void);
 void leddrive_colordisplay(void);
