@@ -28,7 +28,7 @@ import org.rlcommunity.critterbot.javadrops.InterfaceOutputStream;
 
 public class CritterControlDrop implements SimulatorDrop
 {
-  public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE };
+  public enum MotorMode { WHEEL_SPACE, XYTHETA_SPACE, WHEEL_VOLTAGE };
   public enum LedMode { NONE, CLEAR, BATTERY, BALL, ERROR, EMERGENCY, BUSY, CUSTOM };
 
   /** The motor mode determining which fields are actually used */
