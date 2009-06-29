@@ -276,7 +276,11 @@ void ui_status(char * cmdstr)
   armprintf ("SPI Status Register: %x\r", AT91C_BASE_SPI->SPI_SR);
   armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
   armprintf ("System Voltage: %d\r", motor_get_voltage());
-  armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), motor_clicks(1), motor_clicks(2));
+  armprintf ("Charge State: %d\r", motor_get_charge_state());
+  armprintf ("Battery Voltages: %d %d %d\r", motor_get_bat40(),
+      motor_get_bat160(), motor_get_bat280());
+  armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
+      motor_clicks(1), motor_clicks(2));
   armprintf ("Coffee consumption: 0.266 cup / hr\r");
   armprintf("\r");
 }

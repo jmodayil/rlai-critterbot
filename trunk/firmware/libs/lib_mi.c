@@ -102,7 +102,7 @@ void mi_get_commands(void) {
   m3 = ((signed char)((unsigned char)armgetchar()));
   robot_command.led_mode = armgetchar();
   
-  if(robot_command.led_mode == CCUSTOM) { 
+  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0) { 
     for( i = 0; i < LED_NUM_LEDS; i++ ) {
       LED[i].r = armgetchar();
       LED[i].g = armgetchar();
@@ -122,6 +122,8 @@ void mi_get_commands(void) {
     case XYTHETA_SPACE:
       motor_set_speed_xytheta(m1, m2, m3);
       break;
+    case WHEEL_VOLTAGE:
+      motor_set_voltage(m1, m2, m3);
     case MOTOR_EXIT:
       if(robot_command.led_mode == LED_EXIT)
         mi_stop();
@@ -133,33 +135,35 @@ void mi_get_commands(void) {
       motor_set_speed(2, 0);
       break;
   }
- 
-  switch(robot_command.led_mode) {
-    case CNONE:
-      break;
-    case CCLEAR:
-      leddrive_clear();
-      break;
-    case CBATTERY:
-      leddrive_rainbow();
-      break;
-    case CBALL:
-      leddrive_ball();
-      break;
-    case CERROR:
-      leddrive_error();
-      break;
-    case CBUSY:
-      leddrive_busy();
-      break;
-    case CEMERGENCY:
-      leddrive_emerg();
-      break;
-    case CCUSTOM:
-      leddrive_custom(); 
-      break;
-    default:
-      break;
+
+  if(motor_get_charge_state == 0) { 
+    switch(robot_command.led_mode) {
+      case CNONE:
+        break;
+      case CCLEAR:
+        leddrive_clear();
+        break;
+      case CBATTERY:
+        leddrive_rainbow();
+        break;
+      case CBALL:
+        leddrive_ball();
+        break;
+      case CERROR:
+        leddrive_error();
+        break;
+      case CBUSY:
+        leddrive_busy();
+        break;
+      case CEMERGENCY:
+        leddrive_emerg();
+        break;
+      case CCUSTOM:
+        leddrive_custom(); 
+        break;
+      default:
+        break;
+    }
   }
   return;
 }
