@@ -148,10 +148,12 @@ uint8_t charger280_status(void) {
   return retval;
 }
 
+// Returns an 8-bit sample from the specified ADC channel.
+// This is blocking until the conversion is complete
 uint8_t get_adc(uint8_t channel) {
   uint8_t temp;
   ADMUX = 0x20 | channel;
-  ADCSRA = 0xC3;
+  ADCSRA = 0xC6; // C3 for 1Mhz, C6 for 8Mhz
   while( ADCSRA & 0x40 );
   temp = ADCH;
   return temp;

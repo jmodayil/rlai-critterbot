@@ -12,6 +12,9 @@
 
 uint8_t charge_state;
 
+
+// If batteries are highly charged allready, we should not charge.
+// Also, if
 void charge( void ) {
 
   static uint8_t count;
@@ -155,7 +158,7 @@ void charge( void ) {
           break;
       }
       break;
-    // Charger 380 top off
+    // Charger 280 top off
     case 9:
       stat = charger280_status();
       switch(stat) {

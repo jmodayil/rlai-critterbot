@@ -8,8 +8,8 @@
 #ifndef CRITTERBOT_POWER_H_
 #define CRITTERBOT_POWER_H_
 
-#define SPI_PACKET_HEADER 0x7F
-#define SPI_PADDING 0x80
+#define SPI_PACKET_HEADER 0x7A
+#define SPI_PADDING 0x7D
 
 extern volatile uint8_t system_voltage, rstate;
 extern uint8_t bat40i, bat160i, bat280i;

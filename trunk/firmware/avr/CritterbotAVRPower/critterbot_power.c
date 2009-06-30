@@ -77,13 +77,15 @@ void general_init(void) {
   // LED1 is output
   LED1_DDR |= LED1;
 
+  // Reset the motor controllers since they don't seem to work right on
+  // a fresh power-up
   AVRRESET_PORT |= AVRRESET;
   // AVRRESET is output
   AVRRESET_DDR |= AVRRESET;
   AVRRESET_PORT |= AVRRESET;
-  _delay_loop_2(600000);
+  _delay_loop_2(60000);
   AVRRESET_PORT &= ~AVRRESET;
-  _delay_loop_2(300000);
+  _delay_loop_2(30000);
   AVRRESET_DDR &= ~AVRRESET;
   AVRRESET_PORT &= ~AVRRESET;
 
@@ -149,11 +151,15 @@ int battery_level_okay(void) {
     diff = 1;
   if(bat280v > bat160v + 3)
     diff = 1;
-  if(diff == 1)
-    count++;
-  else
-    count = 0;
-  if(count > 5 && system_voltage < 172)
+  if(diff == 1) {
+    if(count < 10)
+      count++;
+  }
+  else {
+    if(count > 0)
+      count--;
+  }
+  if(count >= 5 && system_voltage < 172)
     return 0;
   else
     return 1;
@@ -162,12 +168,13 @@ int battery_level_okay(void) {
 /*
  * returns 1 if system voltage is okay.
  * return 0 if it has dropped too low.
+ * Will only reset to 1 after voltage has risen above 160
  */
 int system_voltage_okay(void) {
   static uint8_t count;
   static uint8_t off;
 
-  if(system_voltage > 160)
+  if(system_voltage > 170)
     off = 0;
   if(system_voltage < 120) {
     if(count < 50)
@@ -175,7 +182,7 @@ int system_voltage_okay(void) {
   }
   else
     count = 0;
-  if(count > 50 || off == 1) {
+  if(count == 50 || off == 1) {
     off = 1;
     return 0;
   }
@@ -185,14 +192,32 @@ int system_voltage_okay(void) {
 
 int main(void) {
 
+  uint8_t i;
+
   charger_init();
   general_init();
-  fan_init();
   spi_init_slave();
 
-  if(system_voltage_okay()) {
-    v3_bus_enable();
-    cpu_enable();
+  LED1_PORT |= LED1;
+  for(i = 0; i < 100; i++) {
+    // Get a sufficient sample of battery and system voltages before believing
+    // them
+    bat40v = get_bat40_voltage();
+    bat160v = get_bat160_voltage();
+    bat280v = get_bat280_voltage();
+    battery_level_okay();
+    system_voltage = get_vsys();
+    system_voltage_okay();
+    // 20ms delay (at 8Mhz)
+    _delay_loop_2(40000);
+  }
+
+  fan_init();
+
+  if(battery_level_okay()) {
+    bat40_enable();
+    bat160_enable();
+    bat280_enable();
   }
 
   while(1) {
@@ -203,18 +228,17 @@ int main(void) {
     bat40i = get_bat40_current();
     bat160i = get_bat160_current();
     bat280i = get_bat280_current();
-    bat40_enable();
-    bat160_enable();
-    bat280_enable();
+    //bat40_enable();
+    //bat160_enable();
+    //bat280_enable();
     // Disable batteries if they are not at equal charge levels
+    // THIS DOES NOT WORK DUMMY!
     if(!battery_level_okay()) {
-      LED1_PORT |= LED1;
       //bat40_disable();
       //bat160_disable();
       //bat280_disable();
     }
     else {
-      LED1_PORT &= ~LED1;
 
       // Some sane way of recovering?
     }
@@ -225,35 +249,45 @@ int main(void) {
 
     // Disable things if system voltage gets too low
     if(!system_voltage_okay()) {
+      LED1_PORT |= LED1;
       v3_bus_disable();
       cpu_disable();
+      // Doing the following can't hurt in this situation.
+      bat40_disable();
+      bat160_disable();
+      bat280_disable();
     }
     else {
       v3_bus_enable();
+      // Only enable the CPU is SW1 is set
       if(!(SW_PIN & SW1))
         cpu_enable();
+      else
+        cpu_disable();
     }
-
-    // Enable CPU if SW1 is set
-    if(SW_PIN & SW1)
-      cpu_disable();
-    else
-      cpu_enable();
 
     // Enable the charger if SW2 is set
-    /*if(!(SW_PIN & SW2)) {
-        charge();
-        // Charge error!!!
-        if(charge_state >=200) {
-          // What to do??!?!
-        }
+    if(!(SW_PIN & SW2)) {
+      bat40_disable();
+      bat160_disable();
+      bat280_disable();
+      charge();
+      // Charge error!!!
+      if(charge_state >=200) {
+        // What to do??!?!
+      }
     }
-    else {*/
+    else {
+      //if(battery_level_okay()) {
+      //  bat40_enable();
+      //  bat160_enable();
+      //  bat280_enable();
+      //}
       charger40_disable();
       charger160_disable();
       charger280_disable();
-    //  charge_state = 0;
-    //}
+      charge_state = 0;
+    }
 
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
