@@ -11,6 +11,7 @@ volatile uint8_t rstate, event, event_count;
 uint8_t adc_mux;
 volatile uint8_t dat, dummy, current, temperature;
 volatile uint8_t v_now;
+volatile uint8_t motor_mode;
 
 /*
  * SPI interrupt routine
@@ -21,8 +22,14 @@ ISR(SPI_STC_vect) {
     case 0:
       dummy = SPDR;
       SPDR = (clicks >> 2);
-      if(dummy == SPI_PACKET_HEADER)
+      if(dummy == SPI_PACKET_HEADER) {
+        motor_mode = 0;
         rstate = 1;
+      }
+      else if(dummy == SPI_PWM_HEADER) {
+        motor_mode = 1;
+        rstate = 1;
+      }
       else
         rstate = 0;
       break;
@@ -146,6 +153,7 @@ int main(void) {
   quadrature_init();
   spi_init_slave();
   rstate = 0;
+  motor_mode = 0;
 
   motor_init();
 
@@ -157,12 +165,12 @@ int main(void) {
         motor_setpoint = 0;
         event_count = 0;
       }
-
       speed = current_limit(motor_setpoint);
-
-      speed = soft_pid_control(speed);
-
+      if(motor_mode == 0) {
+        speed = soft_pid_control(speed);
+      }
       set_speed(speed);
+
       event = 0;
     }
   }
