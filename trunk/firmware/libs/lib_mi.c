@@ -117,6 +117,11 @@ void mi_get_commands(void) {
   
   switch(robot_command.motor_mode) {
     case WHEEL_SPACE:
+      // The two minus signs here are to correct for coordiate conventions.
+      // According to the robot spec's, +X is forward and +Y is right,
+      // and to make this work out we need to invert the translation commands
+      // before they are sent to the matrix.  @TODO:  the correct solution
+      // here is to correct signs in the cartesian->wheel matrix.
       motor_set_speed_slew(-m1, -m2, m3);
       break;
     case XYTHETA_SPACE:
