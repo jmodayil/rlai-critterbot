@@ -8,8 +8,6 @@
 #ifndef POWER_AVR_CHARGE_H_
 #define POWER_AVR_CHARGE_H_
 
-#define CHARGE_VOLTAGE_DELAY 10
-
 extern uint8_t charge_state;
 
 void charge( void );

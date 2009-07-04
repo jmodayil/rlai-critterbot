@@ -14,51 +14,53 @@
 
 volatile uint8_t system_voltage, rstate;
 
+uint8_t system_state;
 uint8_t bat40i, bat160i, bat280i;
 uint8_t bat40v, bat160v, bat280v;
 
-ISR(SPI_STC_vect) {
+ISR(SPI_STC_vect)
+{
   uint8_t dummy;
 
-  switch(rstate) {
-    case 0:
-      dummy = (uint8_t)SPDR;
-      SPDR = system_voltage;
-      if(dummy == SPI_PACKET_HEADER)
-        rstate = 1;
-      else
-        rstate = 0;
-      break;
-    case 1:
-      dummy = (uint8_t)SPDR;
-      SPDR = charge_state;
-      rstate = 2;
-      break;
-    case 2:
-      dummy = (uint8_t)SPDR;
-      SPDR = bat40v;
-      rstate = 3;
-      break;
-    case 3:
-      dummy = (uint8_t)SPDR;
-      SPDR = bat160v;
-      rstate = 4;
-      break;
-    case 4:
-      dummy = (uint8_t)SPDR;
-      SPDR = bat280v;
-      rstate = 5;
-      break;
-    case 5:
-      dummy = (uint8_t)SPDR;
-      SPDR = SPI_PADDING;
+  switch (rstate) {
+  case 0:
+    dummy = (uint8_t) SPDR;
+    SPDR = system_voltage;
+    if (dummy == SPI_PACKET_HEADER)
+      rstate = 1;
+    else
       rstate = 0;
-      break;
-    default:
-      dummy = (uint8_t)SPDR;
-      SPDR = 0;
-      rstate = 0;
-      break;
+    break;
+  case 1:
+    dummy = (uint8_t) SPDR;
+    SPDR = charge_state;
+    rstate = 2;
+    break;
+  case 2:
+    dummy = (uint8_t) SPDR;
+    SPDR = bat40v;
+    rstate = 3;
+    break;
+  case 3:
+    dummy = (uint8_t) SPDR;
+    SPDR = bat160v;
+    rstate = 4;
+    break;
+  case 4:
+    dummy = (uint8_t) SPDR;
+    SPDR = bat280v;
+    rstate = 5;
+    break;
+  case 5:
+    dummy = (uint8_t) SPDR;
+    SPDR = SPI_PADDING;
+    rstate = 0;
+    break;
+  default:
+    dummy = (uint8_t) SPDR;
+    SPDR = 0;
+    rstate = 0;
+    break;
 
   }
 }
@@ -108,65 +110,63 @@ void fan_init(void) {
   // Initially full output until we get a voltage reading
   OCR2B = 0x20;
 
-  // Temporarily setup so we can cool while charging.
-  TCCR1A = 0x81;
-  TCCR1B = 0x09;
-
 }
 
 void adc_init(void) {
   ADMUX = 0x20; // Left adjust
   ADCSRA = 0xC6; // C3 for 1Mhz, C6 for 8Mhz
-  while( ADCSRA & 0x40 );
+  while (ADCSRA & 0x40)
+    ;
 }
 
-
-
-void spi_init_slave( void ) {
+void spi_init_slave(void) {
 
   cli();
   SPI_DDR |= MISO;
-  SPCR = _BV(SPE)|_BV(CPHA)|_BV(SPIE);
+  SPCR = _BV(SPE) | _BV(CPHA) | _BV(SPIE);
   SPDR = 0x00;
   sei();
 }
 
 /*
  * Returns 1 if the battery levels are acceptably close
- * otherwise returns 0, with a little hysteresis;
+ * otherwise returns 0, with a slight delay;
  */
 int battery_level_okay(void) {
   static uint8_t count;
   uint8_t diff = 0;
 
-  if(bat40v > bat160v + 3)
+  if (bat40v > bat160v + 2)
     diff = 1;
-  if(bat160v > bat40v + 3)
+  if (bat160v > bat40v + 2)
     diff = 1;
-  if(bat40v > bat280v + 3)
+  if (bat40v > bat280v + 2)
     diff = 1;
-  if(bat280v > bat40v + 3)
+  if (bat280v > bat40v + 2)
     diff = 1;
-  if(bat160v > bat280v + 3)
+  if (bat160v > bat280v + 2)
     diff = 1;
-  if(bat280v > bat160v + 3)
+  if (bat280v > bat160v + 2)
     diff = 1;
-  if(diff == 1) {
-    if(count < 10)
+  if (diff == 1) {
+    if (count < 10)
       count++;
-  }
-  else {
-    if(count > 0)
+  } else {
+    if (count > 0)
       count--;
   }
-  if(count >= 5 && system_voltage < 172)
+  if (count >= 5) {
+    system_state &= ~BAT_OK;
     return 0;
-  else
+  } else {
+    system_state |= BAT_OK;
     return 1;
+  }
 }
 
 /*
- * returns 1 if system voltage is okay.
+ * returns 1 if system voltage is okay.../critterbot_power.c:98: error: ‘battery_state’ undeclared (first use in this function)
+ *
  * return 0 if it has dropped too low.
  * Will only reset to 1 after voltage has risen above 160
  */
@@ -174,20 +174,42 @@ int system_voltage_okay(void) {
   static uint8_t count;
   static uint8_t off;
 
-  if(system_voltage > 170)
+  if (system_voltage > 170)
     off = 0;
-  if(system_voltage < 120) {
-    if(count < 50)
+  if (system_voltage < 120) {
+    if (count < 50)
       count++;
-  }
-  else
+  } else
     count = 0;
-  if(count == 50 || off == 1) {
+  if (count == 50 || off == 1) {
     off = 1;
+    system_state &= ~VOLTAGE_OK;
+    return 0;
+  } else {
+    system_state |= VOLTAGE_OK;
+    return 1;
+  }
+}
+
+/* returns 1 if we're sufficiently convinced the charger is attached.
+ * returns 0 otherwise
+ */
+int charge_okay(void) {
+  static uint8_t delay;
+
+  if (system_voltage > 172) {
+    if (delay < CHARGE_VOLTAGE_DELAY)
+      delay++;
+  } else if (delay > 0)
+    delay--;
+  if (delay < CHARGE_VOLTAGE_DELAY) {
+    system_state &= ~CHARGE_OK;
     return 0;
   }
-  else
+  else {
+    system_state |= CHARGE_OK;
     return 1;
+  }
 }
 
 int main(void) {
@@ -198,29 +220,29 @@ int main(void) {
   general_init();
   spi_init_slave();
 
-  LED1_PORT |= LED1;
-  for(i = 0; i < 100; i++) {
-    // Get a sufficient sample of battery and system voltages before believing
-    // them
+  for (i = 0; i < 55; i++) {
+    // Get a sufficient sample of battery and system voltages to begin with
     bat40v = get_bat40_voltage();
     bat160v = get_bat160_voltage();
     bat280v = get_bat280_voltage();
     battery_level_okay();
     system_voltage = get_vsys();
     system_voltage_okay();
+    charge_okay();
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
   }
 
   fan_init();
 
-  if(battery_level_okay()) {
+  // Check if the battery levels are okay, if yes, then we can startup.
+  if ((system_state & BAT_OK) && (system_state & VOLTAGE_OK)) {
     bat40_enable();
     bat160_enable();
     bat280_enable();
   }
 
-  while(1) {
+  while (1) {
     // Check battery status
     bat40v = get_bat40_voltage();
     bat160v = get_bat160_voltage();
@@ -228,56 +250,72 @@ int main(void) {
     bat40i = get_bat40_current();
     bat160i = get_bat160_current();
     bat280i = get_bat280_current();
-    //bat40_enable();
-    //bat160_enable();
-    //bat280_enable();
+    system_voltage = get_vsys();
+    system_voltage_okay();
+    battery_level_okay();
+
+    switch(system_state) {
+    case 1:
+      break;
+    case 3:
+      break;
+    case 4:
+      break;
+    case 5:
+      break;
+    case 7:
+      break;
+    // Voltage is low and uneven
+    case 0:
+    // Invalid states
+    case 2:
+    case 6:
+    default:
+      break;
+    }
     // Disable batteries if they are not at equal charge levels
     // THIS DOES NOT WORK DUMMY!
-    if(!battery_level_okay()) {
+    if (!battery_level_okay()) {
       //bat40_disable();
       //bat160_disable();
       //bat280_disable();
-    }
-    else {
-
+    } else {
       // Some sane way of recovering?
     }
     // Check system voltage and adjust fan speeds
-    system_voltage = get_vsys();
     set_cpu_fan(system_voltage);
     set_motor_fan(system_voltage);
 
     // Disable things if system voltage gets too low
-    if(!system_voltage_okay()) {
+    if (!system_voltage_okay()) {
       LED1_PORT |= LED1;
       v3_bus_disable();
       cpu_disable();
-      // Doing the following can't hurt in this situation.
+      // Doing the following can't hurt in this situation.  But is this really what we
+      // want to do?
       bat40_disable();
       bat160_disable();
       bat280_disable();
-    }
-    else {
+    } else {
       v3_bus_enable();
       // Only enable the CPU is SW1 is set
-      if(!(SW_PIN & SW1))
+      if (!(SW_PIN & SW1))
         cpu_enable();
       else
         cpu_disable();
     }
 
     // Enable the charger if SW2 is set
-    if(!(SW_PIN & SW2)) {
+    if (!(SW_PIN & SW2)) {
       bat40_disable();
       bat160_disable();
       bat280_disable();
       charge();
       // Charge error!!!
-      if(charge_state >=200) {
+      if (charge_state >= 200) {
         // What to do??!?!
       }
-    }
-    else {
+    } else {
       //if(battery_level_okay()) {
       //  bat40_enable();
       //  bat160_enable();
@@ -286,7 +324,7 @@ int main(void) {
       charger40_disable();
       charger160_disable();
       charger280_disable();
-      charge_state = 0;
+      //charge_state = 0;
     }
 
     // 20ms delay (at 8Mhz)
