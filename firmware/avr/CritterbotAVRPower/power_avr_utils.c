@@ -82,6 +82,7 @@ void charger_init(void) {
   charger40_disable();
   charger160_disable();
   charger280_disable();
+  charge_read_state();
 }
 
 /**
@@ -160,15 +161,63 @@ uint8_t get_adc(uint8_t channel) {
 }
 
 uint8_t get_bat40_voltage(void) {
-  return get_adc(BAT40SENSE) - 3;
+  static uint8_t avg[ADC_AVG_SAMPLES];
+  uint8_t i;
+  uint16_t total;
+
+  if(avg[0] == 0) {
+    for(i = 0; i < ADC_AVG_SAMPLES; i++)
+      avg[i] = get_adc(BAT40SENSE) - 3;
+  }
+  else {
+    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+      avg[i] = avg[i+1];
+    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT40SENSE) - 3;
+  }
+  total = 0;
+  for(i = 0; i < ADC_AVG_SAMPLES; i++)
+    total += avg[i];
+  return (uint8_t)(total / ADC_AVG_SAMPLES);
 }
 
 uint8_t get_bat160_voltage(void) {
-  return get_adc(BAT160SENSE) - 2;
+  static uint8_t avg[ADC_AVG_SAMPLES];
+  uint8_t i;
+  uint16_t total;
+
+  if(avg[0] == 0) {
+    for(i = 0; i < ADC_AVG_SAMPLES; i++)
+      avg[i] = get_adc(BAT160SENSE) - 3;
+  }
+  else {
+    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+      avg[i] = avg[i+1];
+    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT160SENSE) - 3;
+  }
+  total = 0;
+  for(i = 0; i < ADC_AVG_SAMPLES; i++)
+    total += avg[i];
+  return (uint8_t)(total / ADC_AVG_SAMPLES);
 }
 
 uint8_t get_bat280_voltage(void) {
-  return get_adc(BAT280SENSE) - 2;
+  static uint8_t avg[ADC_AVG_SAMPLES];
+  uint8_t i;
+  uint16_t total;
+
+  if(avg[0] == 0) {
+    for(i = 0; i < ADC_AVG_SAMPLES; i++)
+      avg[i] = get_adc(BAT280SENSE) - 3;
+  }
+  else {
+    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+      avg[i] = avg[i+1];
+    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT280SENSE) - 3;
+  }
+  total = 0;
+  for(i = 0; i < ADC_AVG_SAMPLES; i++)
+    total += avg[i];
+  return (uint8_t)(total / ADC_AVG_SAMPLES);
 }
 
 uint8_t get_bat40_current(void) {
@@ -184,19 +233,40 @@ uint8_t get_bat280_current(void) {
 }
 
 uint8_t get_vsys(void) {
-  uint16_t temp = get_adc(VSYS);
-  // Correction to actual voltages
-  temp = (((temp * 69) >> 6) + 1);
-  return temp;
+  static uint8_t avg[ADC_AVG_SAMPLES];
+  uint8_t i;
+  uint16_t total;
+
+  if(avg[0] == 0) {
+    for(i = 0; i < ADC_AVG_SAMPLES; i++)
+      avg[i] = get_adc(VSYS) - 3;
+  }
+  else {
+    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+      avg[i] = avg[i+1];
+    avg[ADC_AVG_SAMPLES - 1] = get_adc(VSYS) - 3;
+  }
+  total = 0;
+  for(i = 0; i < ADC_AVG_SAMPLES; i++)
+    total += avg[i];
+  total = total / ADC_AVG_SAMPLES;
+
+  total = (((total * 69) >> 6) + 1);
+  return total;
 }
 
 void set_cpu_fan(uint8_t vsys) {
   OCR2B = 30 - (vsys / 10);
 }
 
-void set_motor_fan(uint8_t vsys) {
-  if(vsys > 170 && charge_state > 0 && charge_state < 200)
+void cpu_fan_off(void) {
+  OCR2B = 0x00;
+}
+
+void set_motor_fan(void) {
     OCR1AL = 0xB0;
-  else
-    OCR1AL = 0x00;
+}
+
+void motor_fan_off(void) {
+  OCR1AL = 0x00;
 }
