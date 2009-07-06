@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "crctable.h"
 #include <stdlib.h>
 
 #define BAUDRATE B115200
@@ -21,9 +20,9 @@ void initport(int port) {
   options.c_cflag &= ~(CSIZE | CSTOPB | CRTSCTS);
   options.c_cflag |= (CS8 | CLOCAL | CREAD | PARENB | PARODD);
   options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
-  options.c_iflag &= ~(INPCK | IXON | IXOFF);
-  options.c_iflag |= IGNPAR | OCRNL;
-  options.c_oflag &= ~OPOST; 
+  options.c_iflag &= ~(OCRNL | IXON | IXOFF);
+  options.c_iflag |= (INPCK | PARMRK | IGNBRK);
+  options.c_oflag = 0; 
   options.c_cc[VTIME] = 0;
   options.c_cc[VMIN] = 1;
   cfsetispeed(&options, BAUDRATE);
@@ -41,23 +40,50 @@ void closeport(int port) {
 
 main(int argc, char *argv[]) {
 
-  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xA8, 0, 0, 0, 0xB8};
- 
+  int force = 0;
+  int i;
+  char buf;
+  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x68, 0x00, 0x00, 0x00, 0x67};
+  unsigned char leds[48];
+
+  if(argc > 1) {
+    if(strcmp(argv[1],"-f") == 0)
+      force = 1;
+  }
+  
   printf("Opening serial port.\n");
   if (0 > (port = open(DEVICE, O_RDWR | O_NOCTTY | O_NDELAY))) {
     printf("Could not open serial port.\n");
     return -1;
   }
   printf("Serial port open with file descriptor %d.\n", port);
-  //fcntl(port, F_SETFL, O_NONBLOCK);
+  fcntl(port, F_SETFL, O_NONBLOCK);
   
   printf("Initializing serial port.\n");
   initport(port);
-
-	printf("Dumping to console.\n");
-	write(port, &data, 9);
   
-	closeport(port);
+  printf("Listening for data...");
+  for(i = 0; i < 200; i++) {
+    if(read(port, &buf, 1) != -1) {
+      force = 1;
+    }
+    usleep(100);
+  }
+ 
+  if(!force) {
+    printf("Connection doesn't seem to be active.\nTry -f to force\n");
+    closeport(port);
+    close(port);
+    return 0;
+  }
+  printf("OK\n");
+  printf("\n---------------\nDumping to console.\n");
+  for(i = 0; i < 1; i++) {
+    write(port, &data, 9);
+    write(port, &data, 48);
+    usleep(10000);
+  }
+  closeport(port);
   close(port);
   return 0;
 }
