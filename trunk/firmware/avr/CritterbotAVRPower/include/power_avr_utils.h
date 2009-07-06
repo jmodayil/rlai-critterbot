@@ -16,6 +16,8 @@
 #define IMON160 5
 #define IMON280 6
 
+#define ADC_AVG_SAMPLES 4
+
 void bat40_enable();
 void bat40_disable();
 void bat160_enable();
@@ -59,7 +61,8 @@ uint8_t get_bat280_current(void);
 uint8_t get_vsys(void);
 
 void set_cpu_fan(uint8_t vsys);
-void set_motor_fan(uint8_t vsys);
-
+void cpu_fan_off(void);
+void set_motor_fan(void);
+void motor_fan_off(void);
 
 #endif /* POWER_AVR_UTILS_H_ */

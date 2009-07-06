@@ -11,150 +11,261 @@
 #include "include/power_avr_utils.h"
 
 uint8_t charge_state;
+uint8_t saved_charge_state;
 
+void set_charge_state(uint8_t new_state) {
+  charge_state = new_state;
+  eeprom_write_byte(CHARGE_STAT_EEPROM, new_state);
+  return;
+}
 
-// If batteries are highly charged allready, we should not charge.
-// Also, if
+void read_charge_state(void) {
+  charge_state = eeprom_read_byte(CHARGE_STAT_EEPROM);
+}
+
 void charge( void ) {
 
   static uint8_t count;
-  static uint8_t delay;
+
   uint8_t stat;
-
-  // Only charge if the system bus has sufficient voltage
-  if(system_voltage > 175) {
-    if(delay < CHARGE_VOLTAGE_DELAY)
-      delay++;
-  }
-  else {
-    if(delay > 0)
-      delay--;
-  }
-  if(delay < CHARGE_VOLTAGE_DELAY)
+  // Stop things and reset if the charger gets unplugged.
+  // Signal an error if we were in the middle of charging.
+  if(!(system_state & CHARGE_OK)) {
+    // Error if we were charging and the charger was unplugged.
+    if(charge_state > 0 && charge_state < 10)
+      // We explicitly don't want to save this change to eeprom.
+      // Charging was interrupted and we want to preserve the previous
+      // state to resume from.
+      charge_state = 200;
+    // All is okay if we finished charging when it was unplugged.
+    if(charge_state == 10)
+      charge_state = 0;
     return;
-  if(delay == 0 && charge_state < 10)
-    charge_state = 200;
-  if(delay == 0 && charge_state == 10)
-    charge_state = 0;
+  }
 
+  // Due to the above test, we should never get this far unless we are in
+  // system_state 3 or 7.
+
+  // Some state transitions set charge_state explicitly, this bypasses
+  // writing to the EEPROM to minimize wear since the next state will
+  // Immediately transition to a new one.
   switch(charge_state) {
     case 0:
-      if(delay == CHARGE_VOLTAGE_DELAY) {
+      // First check if we were interrupted in charging last time
+      // If the batteries are uneven, start charging
+      if(!(system_state & BAT_OK))
         charge_state = 1;
-      }
+      // Otherwise, charge only if the battery voltage has fallen a little
       else
-        charge_state = 0;
+        if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
+          charge_state = 1;
       break;
     // Start charger 40
     case 1:
       charger40_enable();
-      charge_state = 2;
+      set_charge_state(2);
       break;
     // Charger 40 on normal
     case 2:
       stat = charger40_status();
       switch(stat) {
         case 0:
-          charge_state = 2;
+          // Stay in this mode
+          break;
+        case 1:
+          // This is never a state the charger should be in.
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR);
+          charge_state = 200;
           break;
         case 2:
-          charge_state = 3;
+          charge_state = 3;;
+          break;
+        case 3:
+          // To get here means charger 40 went directly into shutdown before
+          // topping off, which is very bad
+          system_state |= CHARGER40_ERROR;
+          charge_state = 200;
           break;
         default:
-          charge_state = 201;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
     // Charger 40 top off, start charger 160
     case 3:
-        charger160_enable();
-        charge_state = 4;
+      charger160_enable();
+      set_charge_state(4);
       break;
     // Charger 40 top off, charger 160 normal or top off
     case 4:
       stat = charger40_status();
       switch(stat) {
+        case 0:
+          // Charger 40 was trickling, but went back to a full charge.
+          system_state |= CHARGER40_ERROR;
+          charge_state = 200;
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR);
+          charge_state = 200;
+          break;
         case 2:
-          charge_state = 4;
+          // Stay in this mode
           break;
         case 3:
-          charge_state = 5;
+          // Charger 40 has completed its charge
+          set_charge_state(5);
           break;
         default:
-          charge_state = 202;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       stat = charger160_status();
       switch(stat) {
         case 0:
+          // We should stay here
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR & CHARGER160_ERROR);
+          charge_state = 200;
           break;
         case 2:
+          // Even if we're topping off stay here until Charger40 completes
+          break;
+        case 3:
+          // This means charger160 disabled itself before charger40 completed its
+          // top-off, this is possible if the batteries were at uneven charge levels,
+          // and bat 160 happened to be fully charged when 40 wasn't, and the timeout
+          // for 160 happened to be slightly shorter than for 40.  Any other situation
+          // this should be considered an error.  Not sure how to discern that.
+          // For now we shall treat it as an error.
+          system_state |= CHARGER160_ERROR;
+          charge_state = 200;
           break;
         default:
-          charge_state = 203;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
     // Charger 160 normal
     case 5:
-      //charger40_disable();
+      charger40_disable();
       stat = charger160_status();
       switch(stat) {
         case 0:
-          charge_state = 5;
+          // Stay here
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR | CHARGER160_ERROR);
+          charge_state = 200;
           break;
         case 2:
-          count = 0;
           charge_state = 6;
           break;
+        case 3:
+          // This would mean charger 160 either went from full charge to disabled,
+          // or was disabled when we got to state 5.  For now treating this a as an error
+          system_state |= CHARGER160_ERROR;
+          charge_state = 200;
+          break;
         default:
-          charge_state = 204;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR & CHARGER160_ERROR
+              & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
     // Charger 160 top off, start charger 280 or top off
     case 6:
       charger280_enable();
-      charge_state = 7;
+      set_charge_state(7);
       break;
     // Charger 160 top off, charger 280 normal
     case 7:
       stat = charger160_status();
       switch(stat) {
+        case 0:
+          // Charger 160 should really not be fully charging here.
+          system_state |= CHARGER160_ERROR;
+          charge_state = 200;
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR | CHARGER160_ERROR);
+          charge_state = 200;
+          break;
         case 2:
-          charge_state = 7;
+          // Stay here.
           break;
         case 3:
-          charge_state = 8;
+          set_charge_state(8);
           break;
         default:
-          charge_state = 205;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       stat = charger280_status();
       switch(stat) {
         case 0:
+          // Stay here
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR | CHARGER280_ERROR);
+          charge_state = 200;
           break;
         case 2:
+          // Even though we are topping off, stay here until 160 finishes
+          break;
+        case 3:
+          // This is a confusing case (see above)
+          system_state |= CHARGER280_ERROR;
+          charge_state = 200;
           break;
         default:
-          charge_state = 206;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
     // Charger 280 normal
     case 8:
-      //charger160_disable();
+      charger160_disable();
       stat = charger280_status();
       switch(stat) {
         case 0:
-          charge_state = 8;
+          // Stay here
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR | CHARGER280_ERROR);
+          charge_state = 200;
           break;
         case 2:
-          charge_state = 9;
+          set_charge_state(9);
+          break;
+        case 3:
+          // Again, confusing, see above
+          system_state |= CHARGER280_ERROR;
+          charge_state = 200;
           break;
         default:
-          charge_state = 207;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
@@ -162,14 +273,29 @@ void charge( void ) {
     case 9:
       stat = charger280_status();
       switch(stat) {
+        case 0:
+          system_state |= CHARGER280_ERROR;
+          charge_state = 200;
+          break;
+        case 1:
+          system_state |= (CHARGER_COMM_ERROR | CHARGER280_ERROR);
+          charge_state = 200;
+          break;
         case 2:
-          charge_state = 9;
+          // Stay here
           break;
         case 3:
+          // Not quite clean code, but to explain, this will set EEPROM charge state to 0
+          // but keep the ram state to 10, if we restart we know we didn't interrupt
+          // charging, but if we keep running then we know we have fully charged.
+          set_charge_state(0);
           charge_state = 10;
           break;
         default:
-          charge_state = 208;
+          // BAD BAD BAD
+          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
+              CHARGER160_ERROR & CHARGER280_ERROR);
+          charge_state = 200;
           break;
       }
       break;
@@ -179,14 +305,12 @@ void charge( void ) {
       charger160_disable();
       charger280_disable();
       LED1_PORT |= LED1;
-      delay = 0;
       break;
     // Error!
     default:
       charger40_disable();
       charger160_disable();
       charger280_disable();
-      delay = 0;
       break;
   }
 }

@@ -130,7 +130,7 @@ void spi_init_slave(void) {
 
 /*
  * Returns 1 if the battery levels are acceptably close
- * otherwise returns 0, with a slight delay;
+ * otherwise returns 0, with a slight delay and hysteresis;
  */
 int battery_level_okay(void) {
   static uint8_t count;
@@ -151,23 +151,27 @@ int battery_level_okay(void) {
   if (diff == 1) {
     if (count < 10)
       count++;
-  } else {
+  }
+  else {
     if (count > 0)
       count--;
   }
-  if (count >= 5) {
+  if (count >= 7) {
     system_state &= ~BAT_OK;
     return 0;
-  } else {
+  }
+  else if (count <= 3) {
     system_state |= BAT_OK;
     return 1;
+  }
+  else {
+    return (system_state & BAT_OK) >> 2;
   }
 }
 
 /*
- * returns 1 if system voltage is okay.../critterbot_power.c:98: error: ‘battery_state’ undeclared (first use in this function)
- *
- * return 0 if it has dropped too low.
+ * returns 1 if system voltage is okay
+ * return 0 if it has dropped below SYS_LOW_VOLT_THRESH for 50 cycles.
  * Will only reset to 1 after voltage has risen above 160
  */
 int system_voltage_okay(void) {
@@ -176,32 +180,38 @@ int system_voltage_okay(void) {
 
   if (system_voltage > 170)
     off = 0;
-  if (system_voltage < 120) {
+
+  if (system_voltage < SYS_LOW_VOLT_THRESH) {
     if (count < 50)
       count++;
-  } else
+  }
+  else
     count = 0;
+
   if (count == 50 || off == 1) {
     off = 1;
     system_state &= ~VOLTAGE_OK;
     return 0;
-  } else {
+  }
+  else {
     system_state |= VOLTAGE_OK;
     return 1;
   }
 }
 
-/* returns 1 if we're sufficiently convinced the charger is attached.
+/* returns 1 if the voltage rises above CHARGE_THRESH for CHARGE_VOLTAGE_DELAY cycles.
  * returns 0 otherwise
  */
 int charge_okay(void) {
   static uint8_t delay;
 
-  if (system_voltage > 172) {
+  if (system_voltage > CHARGE_THRESH) {
     if (delay < CHARGE_VOLTAGE_DELAY)
       delay++;
-  } else if (delay > 0)
+  }
+  else if (delay > 0) {
     delay--;
+  }
   if (delay < CHARGE_VOLTAGE_DELAY) {
     system_state &= ~CHARGE_OK;
     return 0;
@@ -233,99 +243,102 @@ int main(void) {
     _delay_loop_2(40000);
   }
 
-  fan_init();
-
-  // Check if the battery levels are okay, if yes, then we can startup.
-  if ((system_state & BAT_OK) && (system_state & VOLTAGE_OK)) {
-    bat40_enable();
-    bat160_enable();
-    bat280_enable();
+  // If we were shutdown and partially charged, we won't continue unless
+  // the charger is plugged in!
+  if(charge_state != 0 && (system_state & CHARGE_OK)) {
+    // HA!  Take that state machine!!!
+    while(1);
   }
+
+  fan_init();
+  v3_enable();
 
   while (1) {
     // Check battery status
     bat40v = get_bat40_voltage();
     bat160v = get_bat160_voltage();
     bat280v = get_bat280_voltage();
+    // We don't use these values as of yet, but they will provide a much
+    // more accurate time and % estimate of how long it will take for
+    // charging to complete, if the time is taken to implement that.
     bat40i = get_bat40_current();
     bat160i = get_bat160_current();
     bat280i = get_bat280_current();
     system_voltage = get_vsys();
+    // The following three functions should only be called once per loop,
+    // since they have time dependencies in sampling.
     system_voltage_okay();
     battery_level_okay();
+    charge_okay();
 
-    switch(system_state) {
-    case 1:
-      break;
-    case 3:
-      break;
-    case 4:
-      break;
-    case 5:
-      break;
-    case 7:
-      break;
-    // Voltage is low and uneven
+    switch (system_state) {
+    // Voltage is low and batteries unbalanced, can't charge
     case 0:
+    // Unbalanced batteries, can't charge
+    case 1:
+      bat40_disable();
+      bat160_disable();
+      bat280_disable();
+      cpu_disable();
+      motor_fan_off();
+      cpu_fan_off();
+      break;
+
+      // Low battery, can't charge
+    case 4:
+      cpu_disable();
+      cpu_fan_off();
+      motor_fan_off();
+      break;
+
+      // Normal running mode
+    case 5:
+      if (!(SW_PIN & SW1)) {
+        cpu_enable();
+        set_cpu_fan(system_voltage);
+      }
+      else {
+        cpu_disable();
+        cpu_fan_off();
+      }
+      motor_fan_off();
+      break;
+
+      // Unbalanced batteries but able to charge
+    case 3:
+      // Balanced batteries and able to charge.
+    case 7:
+      if (!(SW_PIN & SW1)) {
+        cpu_enable();
+        set_cpu_fan(system_voltage);
+      }
+      else {
+        cpu_disable();
+        cpu_fan_off();
+      }
+      set_motor_fan();
+      break;
+
     // Invalid states
     case 2:
     case 6:
+    // For now any charge related error will cause us to get here.  An since this shuts off the cpu,
+    // we will never get any useful indication of the charge error, this should be remedied in ARM
+    // code and the LED displays.
     default:
+      bat40_disable();
+      bat160_disable();
+      bat280_disable();
+      cpu_disable();
+      // Setting this means we will stay in this state until a reset.
+      system_state |= FATAL_ERROR;
+      motor_fan_off();
+      cpu_fan_off();
       break;
     }
-    // Disable batteries if they are not at equal charge levels
-    // THIS DOES NOT WORK DUMMY!
-    if (!battery_level_okay()) {
-      //bat40_disable();
-      //bat160_disable();
-      //bat280_disable();
-    } else {
-      // Some sane way of recovering?
-    }
-    // Check system voltage and adjust fan speeds
-    set_cpu_fan(system_voltage);
-    set_motor_fan(system_voltage);
 
-    // Disable things if system voltage gets too low
-    if (!system_voltage_okay()) {
-      LED1_PORT |= LED1;
-      v3_bus_disable();
-      cpu_disable();
-      // Doing the following can't hurt in this situation.  But is this really what we
-      // want to do?
-      bat40_disable();
-      bat160_disable();
-      bat280_disable();
-    } else {
-      v3_bus_enable();
-      // Only enable the CPU is SW1 is set
-      if (!(SW_PIN & SW1))
-        cpu_enable();
-      else
-        cpu_disable();
-    }
-
-    // Enable the charger if SW2 is set
-    if (!(SW_PIN & SW2)) {
-      bat40_disable();
-      bat160_disable();
-      bat280_disable();
+    if (!(SW_PIN & SW2))
       charge();
-      // Charge error!!!
-      if (charge_state >= 200) {
-        // What to do??!?!
-      }
-    } else {
-      //if(battery_level_okay()) {
-      //  bat40_enable();
-      //  bat160_enable();
-      //  bat280_enable();
-      //}
-      charger40_disable();
-      charger160_disable();
-      charger280_disable();
-      //charge_state = 0;
-    }
 
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
