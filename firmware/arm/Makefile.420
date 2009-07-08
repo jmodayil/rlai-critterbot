@@ -5,7 +5,7 @@ OBJCOPY = arm-elf-objcopy
 # Directories
 LDDIR=ldscripts
 BINDIR=bin
-GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.1.1
+GCC_LIB_DIR=/opt/local/lib/gcc/arm-elf/4.2.0
 STDC_LIB_DIR=/opt/local/arm-elf/lib
 
 LIBS=$(STDC_LIB_DIR)/libm.a $(STDC_LIB_DIR)/libc.a $(GCC_LIB_DIR)/libgcc.a
@@ -39,13 +39,19 @@ AOBJ = $(ASRC:.S=.o)
 
 # Test targets
 # Removed targets: $(BINDIR)/lib_ui_test.bin
-TESTBINS = $(BINDIR)/main_test.bin
+#TESTBINS = $(BINDIR)/main_test.bin
+
+# Main binary file
+MAINBIN = $(BINDIR)/main.bin
 
 # Builds libraries (but nothing else)
 all: all_libs
 
 # Builds all tests
 tests: $(TESTBINS)
+
+# Build the main binary file
+bin: $(MAINBIN)
 
 clean:
 	rm -f *.o
@@ -58,7 +64,7 @@ all_libs: $(AOBJ) $(COBJ)
 #	$(CC) $(CFLAGS) $(THUMB) $(CSRC)
 
 # Test binaries
-$(TESTBINS): all_libs $(notdir $(TESTBINS:.bin=.o))
+$(MAINBIN): all_libs $(notdir $(MAINBIN:.bin=.o))
 	$(LD) -T$(LDDIR)/$(notdir $(addsuffix .ld, $(basename $@))) -L$(GCC_LIB_DIR) -L$(STDC_LIB_DIR) $(LDFLAGS) $(COBJ) $(AOBJ) $(notdir $(addsuffix .o, $(basename $@))) $(LIBS) --output $(addsuffix .elf, $(basename $@))
 #	@echo $@ $(basename $@)
 	$(OBJCOPY) -O binary $(addsuffix .elf, $(basename $@)) $@

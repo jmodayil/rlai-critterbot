@@ -111,7 +111,7 @@ static unsigned char *byte_val;
 int leddrive_init(void)
 {	 
 	leddrive_state = STARTUP;
-	leddrive_startver = 2;
+	leddrive_startver = 1;
 	int i,j;
 	for(i=0,j=5000;i<=3;i++)
 		*(ANGLEINFO[i].cval)=j;
