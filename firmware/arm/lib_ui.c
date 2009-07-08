@@ -68,7 +68,7 @@ ui_cmd_item ui_commands[] = {
   {"fortune", ui_fortune, "fortune"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
   {"error", ui_error, "error [clear]"},
-  {"motor", ui_motor, "motor [motor #] [speed #]"},
+  {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
   {"mi", ui_mi, "mi on"}
 };
 
@@ -268,6 +268,15 @@ void ui_statled(char * cmdstr)
 
 void ui_status(char * cmdstr)
 {
+  unsigned int reset_code;
+  armprintf("Last reset was a ");
+  reset_code = get_reset_code();
+  if (reset_code >= 0 && reset_code < num_events_reset_names)
+    armprintf(events_reset_names[reset_code]); 
+  else
+    armprintf(events_undefined_reset_name);
+  armprintf(" reset.\r");
+  armprintf ("Event prior to reset was: %d\r", pre_reset_event);
   armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
