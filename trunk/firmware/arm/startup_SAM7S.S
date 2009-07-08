@@ -20,6 +20,10 @@
   - added C++ ctor handling
 */
 
+/*
+  Updated for use on the RLAI Critterbot platform by MGB and MVS.
+  2008-2009
+*/
 
 // mt: this file should not be used with the Configuration Wizard
 // since a lot of changes have been done for the WinARM/gcc example
@@ -476,7 +480,6 @@ PMC_MCK_Loop:   LDR     R2, [R0, #PMC_SR]
 
 
 // Setup Stack for each mode
-
                 LDR     R0, =Top_Stack
 
 //  Enter Undefined Instruction Mode and set its Stack Pointer
@@ -511,7 +514,6 @@ PMC_MCK_Loop:   LDR     R2, [R0, #PMC_SR]
 // Setup a default Stack Limit (when compiled with "-mapcs-stack-check")
                 SUB     SL, SP, #USR_Stack_Size
 
-
 // Relocate .data section (Copy from ROM to RAM)
                 LDR     R1, =_etext
                 LDR     R2, =_data
@@ -521,6 +523,11 @@ LoopRel:        CMP     R2, R3
                 STRLO   R0, [R2], #4
                 BLO     LoopRel
 
+// For debugging purposes- if the last reset was a watchdog reset RAM
+// should still be intact. Copy the value of current_event to a safe
+// holding place (pre_reset_event)  
+                LDR     R1, =current_event
+                LDR     R3, [R1]
 
 // Clear .bss section (Zero init)
                 MOV     R0, #0
@@ -530,6 +537,9 @@ LoopZI:         CMP     R1, R2
                 STRLO   R0, [R1], #4
                 BLO     LoopZI
 
+// Restore current_event to pre_reset_event
+                LDR     R1, =pre_reset_event
+                STR     R3, [R1]
 
 #ifdef VECTORS_IN_RAM
 /* 

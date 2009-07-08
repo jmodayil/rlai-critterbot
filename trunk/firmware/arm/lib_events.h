@@ -85,6 +85,21 @@ event_s *events[EVENT_MAX+1];
   */
 unsigned int events_has_event();
 
+/*
+ * This global field holds the current event that is being executed.
+ * Useful for debugging watchdog resets.
+ */
+unsigned int current_event;
+/*
+ * This is where the event that hung is stored if there was a watchdog
+ * reset.
+ */
+unsigned int pre_reset_event;
+
+extern char * events_reset_names[];
+extern int num_events_reset_names;
+char * events_undefined_reset_name;
+
 void event_stop(unsigned int);
 void event_start(unsigned int);
 /** Initializes a particular driver. Returns nonzero or the init. function
@@ -92,7 +107,6 @@ void event_start(unsigned int);
 int event_init(unsigned int);
 
 void events_do();
-
 
 /*
  * Returns the percent of the event loop that the last cycle took.

@@ -69,7 +69,7 @@ char * events_reset_names[] = {
   "watchdog",
   "software",
   "external",
-  "brownout" };
+  "brownout"};
 
 int num_events_reset_names = 
   sizeof(events_reset_names) / sizeof(*events_reset_names);
@@ -122,7 +122,7 @@ void events_init()
   reset_code = get_reset_code();
 
   if (reset_code >= 0 && reset_code < num_events_reset_names)
-    __armprintf(events_reset_names[reset_code]);
+    __armprintf(events_reset_names[reset_code]); 
   else
     __armprintf(events_undefined_reset_name);
 
@@ -199,19 +199,19 @@ int event_init(unsigned int id) {
 
 void events_do()
 {
-  int i, ret_val;
+  int ret_val;
 
   ping_watchdog();
-  for(i = 0; i <= EVENT_MAX; i++) {
-    if((event_flags & (1 << i)) && (*events[i]).event_func != NULL) {
+  for(current_event = 0; current_event <= EVENT_MAX; current_event++) {
+    if((event_flags & (1 << current_event)) && (*events[current_event]).event_func != NULL) {
       // If an event returns < 0, we will stop it
       // If an event returns > 0, we should do something
-      ret_val = (*events[i]).event_func();
+      ret_val = (*events[current_event]).event_func();
       //if(ret_val < 0)
       //  event_flags &= ~(1 << i);
       //if(ret_val > 0)
       //  return;
-      (*events[i]).event_count++;
+      (*events[current_event]).event_count++;
     }
   }
   event_time = AT91C_BASE_PITC->PITC_PIIR & 0x0000FFFF;
