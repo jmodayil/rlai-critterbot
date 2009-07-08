@@ -1,39 +1,35 @@
 /*
- * lib_motor.c
+ * lib_motor.h
  *
  * Created by Michael Sokolsky
- * Last modified: 15 June 09
+ * Last modified: 30 April 09
  */
 
 #include "lib_motor.h"
 #include "lib_mi.h"
 #include "lib_leddrive.h"
 
-// Motor event struct
 event_s motor_event_s = {
   motor_init,
   motor_event,
   0
 };
 
-// Motor packet payloads
 unsigned int motor_tx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
 unsigned int motor_rx_data[MOTOR_NUM_MOTORS][MOTOR_NUM_BYTES];
 unsigned int power_tx_data[MOTOR_PWR_BYTES];
 unsigned int power_rx_data[MOTOR_PWR_BYTES];
 
-// Motor packets
 struct spi_packet motor_packet[MOTOR_NUM_MOTORS]; 
 struct spi_packet power_packet;
 
-// To keep track of motor slewing
 signed char motor_speed[MOTOR_NUM_MOTORS];
 signed char motor_speed_final[MOTOR_NUM_MOTORS];
+
 static char motor_slew_steps;
 static float motor_speed_float[MOTOR_NUM_MOTORS];
 static float motor_slew_interval[MOTOR_NUM_MOTORS];
 static char motor_slew_count;
-
 // 0 means velocity control, 1 is voltage control
 static int motor_mode;
 
@@ -46,7 +42,6 @@ int motor_init() {
   motor_slew_steps = 0;
   motor_slew_count = 1;
 
-  // Set up the SPI packets
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     motor_packet[i].device_id = 9 + i;
     motor_packet[i].num_words = MOTOR_NUM_BYTES;
@@ -68,7 +63,6 @@ int motor_init() {
   return 0;  
 }
 
-// This gets called by the event loop.
 int motor_event() {
   
   unsigned int volt;
@@ -131,8 +125,6 @@ int motor_event() {
   return 0; 
 }
 
-// Set an individual motor speed, a misnomer as this actually sets a PWM value.
-// For testing only
 void motor_set_speed(int motor, signed char speed) {
 
   motor_mode = 1;
@@ -147,14 +139,12 @@ void motor_set_speed(int motor, signed char speed) {
   motor_speed[motor] = speed;
 }
 
-// Set a new target velocity in x-y-theta space
 void motor_set_speed_xytheta(signed char xvel, signed char yvel, 
     signed char tvel) {
  
   int max;
   int m100, m220, m340;
-
-  // Matrix transform
+  
   m100 = (xvel * XSC100 + yvel * YSC100 + tvel * TSC100) / 1024;
   m220 = (xvel * XSC220 + yvel * YSC220 + tvel * TSC220) / 1024;
   m340 = (xvel * XSC340 + yvel * YSC340 + tvel * TSC340) / 1024;  
@@ -179,7 +169,6 @@ void motor_set_speed_xytheta(signed char xvel, signed char yvel,
 
 }
 
-// Slew to target velocity
 void motor_set_speed_slew(signed char speed100, signed char speed220,
    signed char speed340) {
 
@@ -223,7 +212,6 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_slew_count = 0;
 } 
 
-// Set PWM values to the motor controllers directly
 void motor_set_voltage(int pwm100, int pwm220, int pwm340) {
 
   motor_mode = 1;
@@ -251,25 +239,22 @@ unsigned char motor_get_voltage() {
   return power_rx_data[1] & 0xFF;
 }
 
-// Return the charge state from the power controller
 unsigned char motor_get_charge_state() {
   return power_rx_data[2] & 0xFF;
 }
 
-// Return the voltage of battery 40
 unsigned char motor_get_bat40() {
   return power_rx_data[3] & 0xFF;
 }
-// Return the voltage of battery 160
 unsigned char motor_get_bat160() {
   return power_rx_data[4] & 0xFF;
 }
-// Return the voltage of battery 280 
+
 unsigned char motor_get_bat280() {
   return power_rx_data[5] & 0xFF;
 }
 
-// Set the default data in a motor packet
+
 void motor_init_packet(int motor) {
 
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
@@ -283,7 +268,6 @@ void motor_init_packet(int motor) {
 
 }
 
-// Set the default data in a power packet
 void power_init_packet() {
 
   power_tx_data[0] = MOTOR_PACKET_HEADER;
@@ -292,7 +276,7 @@ void power_init_packet() {
 }
 
 /*
- * THIS is for testing only, do not use as interface code!!!!
+ * Not yet implemented on the controller side, however this should send raw
  * PWM values to the controllers for low-level control
  */
 void motor_set_pwm(int motor, int pwm) {
