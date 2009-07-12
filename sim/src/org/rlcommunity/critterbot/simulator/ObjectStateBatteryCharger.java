@@ -61,10 +61,10 @@ public class ObjectStateBatteryCharger implements ObjectState {
     public void draw(SimulatorGraphics g, SimulatorObject parent) {
         Vector2D pos = parent.getPosition();
         g.setColor(Color.cyan);
-        double radius = aRange*0.75;
+        double radius = aRange;
 
-      g.drawOval((double)pos.x-radius/2, (double)pos.y-radius/2, radius, radius);
-      g.drawString("Charger", (double)pos.x-radius/2, (double)pos.y-radius/2);
+      g.drawOval((double)pos.x-radius, (double)pos.y-radius, radius*2, radius*2);
+      g.drawString("Charger", (double)pos.x-radius, (double)pos.y-radius);
         
 
     }
