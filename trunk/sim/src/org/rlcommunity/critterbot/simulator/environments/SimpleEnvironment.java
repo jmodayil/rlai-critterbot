@@ -44,9 +44,11 @@ public class SimpleEnvironment implements EnvironmentDescription {
                 CommonObjects.generateLightSource("Light Source1", id,600),
                 new Vector2D(0.5, 0.5), 0.0, id);
 
+        double chargerRadius = 0.25;
+
         id = CommonObjects.addObject(objects,
                 CommonObjects.generateBatteryCharger("batteryCharger", id),
-                new Vector2D(3.0, 0.25), 0.0, id);
+                new Vector2D(3.0+chargerRadius, 0.25+chargerRadius), 0.0, id);
 
         int numBars = 1;
         for (int i = 0; i < numBars; i++) {

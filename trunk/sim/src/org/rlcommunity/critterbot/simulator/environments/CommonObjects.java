@@ -635,7 +635,7 @@ public class CommonObjects {
 
         // @todo lightSource.setSVG("lightsource");
 
-        ObjectStateBatteryCharger specificCharger = new ObjectStateBatteryCharger(0.5,50); 
+        ObjectStateBatteryCharger specificCharger = new ObjectStateBatteryCharger(0.25,50);
         //->->range(m),charge rate (Ampere)
         batteryCharger.addState(specificCharger);
 
