@@ -22,7 +22,7 @@ struct angleinfo {
 }ANGLEINFO[4];
 
 //States of leddrive_event()
-enum leddrive_states {STARTUP,CHARGESTATUS,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW,CUSTOM};
+enum leddrive_states {STARTUP,MI,UI,CHARGESTATUS,BATSTATUS,ANGLE,ROTATE,GRADIENT,CLEAR,STOP,BALL,FADEANGLE,ERROR,EMERG,BUSY,COLORDIS,BYTE,RAINBOW,CUSTOM};
 //possible gradients for cval
 enum leddrive_gradient {BLACKWHITE,STOPLIGHT,BLUERED,RED,GREEN,BLUE};
 
@@ -108,6 +108,8 @@ void leddrive_rotate(int *rot);
 void leddrive_clear(void);//blanks led's
 void leddrive_stop(void);//keeps current color states on led's
 void leddrive_gradient(unsigned int *cval1,unsigned int *cval2,unsigned int grad1,unsigned int grad2);
+void leddrive_mi(void);
+void leddrive_ui(void);
 void leddrive_ball(void);
 void leddrive_chargestatus(void);
 void leddrive_error(void);

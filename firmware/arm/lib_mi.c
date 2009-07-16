@@ -15,13 +15,13 @@ unsigned short crc;
 unsigned char mi_test;
 
 void mi_start(void) {
-  leddrive_clear();
+  leddrive_mi();
   ui_set_handler(mi_event);
   error_clear(0xFFFFFFFF);
 }
 
 void mi_stop(void) {
-  leddrive_ball();
+  leddrive_ui();
   ui_clear_handler(mi_event);
 }
 
@@ -117,7 +117,7 @@ void mi_get_commands(void) {
   
   switch(robot_command.motor_mode) {
     case WHEEL_SPACE:
-      motor_set_speed_slew(-m1, -m2, m3);
+      motor_set_speed_slew(m1, m2, m3);
       break;
     case XYTHETA_SPACE:
       motor_set_speed_xytheta(m1, m2, m3);

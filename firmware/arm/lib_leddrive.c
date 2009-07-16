@@ -569,6 +569,30 @@ int leddrive_event(void) {
       }      
       a++;
       break;
+    case MI:
+      if(a == 0)
+        clearled();
+      if(a == 195) {
+        LED[0].r = 255;
+        LED[4].r = 255;
+        LED[8].r = 255;
+        LED[12].r = 255;
+      }
+      if(a++ > 200)
+        a = 0;
+      break;
+    case UI:
+      if(a == 0)
+        clearled();
+      if(a == 195) {
+        LED[0].g = 255;
+        LED[4].g = 255;
+        LED[8].g = 255;
+        LED[12].g = 255;
+      }
+      if(a++ > 200)
+        a = 0;
+      break;
     case BATSTATUS:
 			clearled();
 			battlvl((motor_get_voltage()-115)*2);//
@@ -731,6 +755,14 @@ void leddrive_clear(void){
 
 void leddrive_custom(void){
   leddrive_state=CUSTOM;
+}
+
+void leddrive_ui(void){
+  leddrive_state=MI;
+}
+
+void leddrive_mi(void){
+  leddrive_state=UI;
 }
 
 void leddrive_stop(void){
