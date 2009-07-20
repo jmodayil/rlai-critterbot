@@ -9,6 +9,7 @@
 #include "include/critterbot_power.h"
 #include "include/power_avr_charge.h"
 #include "include/power_avr_utils.h"
+#include <avr/eeprom.h>
 
 uint8_t charge_state;
 uint8_t saved_charge_state;
@@ -25,8 +26,6 @@ void read_charge_state(void) {
 
 void charge( void ) {
 
-  static uint8_t count;
-
   uint8_t stat;
   // Stop things and reset if the charger gets unplugged.
   // Signal an error if we were in the middle of charging.
@@ -42,7 +41,6 @@ void charge( void ) {
       charge_state = 0;
     return;
   }
-
   // Due to the above test, we should never get this far unless we are in
   // system_state 3 or 7.
 
@@ -51,7 +49,10 @@ void charge( void ) {
   // Immediately transition to a new one.
   switch(charge_state) {
     case 0:
-      // First check if we were interrupted in charging last time
+      // Don't charge if any of the batteries doesn't appear to be there.
+      if(bat40v < MIN_BAT_VOLTAGE || bat160v < MIN_BAT_VOLTAGE ||
+          bat280v < MIN_BAT_VOLTAGE)
+        break;
       // If the batteries are uneven, start charging
       if(!(system_state & BAT_OK))
         charge_state = 1;
@@ -101,6 +102,15 @@ void charge( void ) {
       break;
     // Charger 40 top off, charger 160 normal or top off
     case 4:
+      // Eventually we will get to this state if the batteries are unplugged
+      // by this point all batteries should be very low, so reset to charge_state
+      // 0 and we'll stay there happily.
+      if(bat280v < MIN_BAT_VOLTAGE) {
+        charger40_disable();
+        charger160_disable();
+        set_charge_state(0);
+        break;
+      }
       stat = charger40_status();
       switch(stat) {
         case 0:

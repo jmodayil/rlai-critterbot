@@ -82,7 +82,10 @@ void charger_init(void) {
   charger40_disable();
   charger160_disable();
   charger280_disable();
-  charge_read_state();
+  read_charge_state();
+  // If the EEPROM has been cleared for some reason
+  if(charge_state == 0xFF)
+    set_charge_state(0);
 }
 
 /**
@@ -256,7 +259,8 @@ uint8_t get_vsys(void) {
 }
 
 void set_cpu_fan(uint8_t vsys) {
-  OCR2B = 30 - (vsys / 10);
+  uint8_t temp = 200 - vsys;
+  OCR2B = temp + 70;
 }
 
 void cpu_fan_off(void) {
@@ -264,7 +268,7 @@ void cpu_fan_off(void) {
 }
 
 void set_motor_fan(void) {
-    OCR1AL = 0xB0;
+  OCR1AL = 0xB0;
 }
 
 void motor_fan_off(void) {
