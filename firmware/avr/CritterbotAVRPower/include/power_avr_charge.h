@@ -8,7 +8,12 @@
 #ifndef POWER_AVR_CHARGE_H_
 #define POWER_AVR_CHARGE_H_
 
+// Don't charge unless the batteries
+// are below this voltage
 #define MIN_BAT_CHARGE_VOLTAGE 155
+// Don't charge unless the batteries
+// are above this voltage
+#define MIN_BAT_VOLTAGE 80
 
 #define CHARGE_STAT_EEPROM ((uint8_t*)0x01)
 

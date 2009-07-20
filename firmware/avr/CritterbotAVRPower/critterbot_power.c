@@ -105,10 +105,16 @@ void fan_init(void) {
   // Enable phase-correct PWM, no prescaler, OCR2B output
   TCCR2A = 0x21;
   TCCR2B = 0x09;
+
+  // Temporarily setup so we can cool while charging.
+  TCCR1A = 0x81;
+  TCCR1B = 0x09;
+
   // Count up to 0x20
-  OCR2A = 0x20;
-  // Initially full output until we get a voltage reading
-  OCR2B = 0x20;
+  OCR2A = 0xFF;
+  // Initially on until we get a voltage reading
+  OCR2B = 0x14;
+  OCR1AL = 0xB0;
 
 }
 
@@ -229,6 +235,7 @@ int main(void) {
   charger_init();
   general_init();
   spi_init_slave();
+  fan_init();
 
   for (i = 0; i < 55; i++) {
     // Get a sufficient sample of battery and system voltages to begin with
@@ -245,13 +252,12 @@ int main(void) {
 
   // If we were shutdown and partially charged, we won't continue unless
   // the charger is plugged in!
-  if(charge_state != 0 && (system_state & CHARGE_OK)) {
+  if(charge_state != 0 && !(system_state & CHARGE_OK)) {
     // HA!  Take that state machine!!!
     while(1);
   }
 
-  fan_init();
-  v3_enable();
+  v3_bus_enable();
 
   while (1) {
     // Check battery status
@@ -286,6 +292,10 @@ int main(void) {
 
       // Low battery, can't charge
     case 4:
+      // Suppose batteries should be enabled here.
+      bat40_enable();
+      bat160_enable();
+      bat280_enable();
       cpu_disable();
       cpu_fan_off();
       motor_fan_off();
@@ -293,6 +303,9 @@ int main(void) {
 
       // Normal running mode
     case 5:
+      bat40_enable();
+      bat160_enable();
+      bat280_enable();
       if (!(SW_PIN & SW1)) {
         cpu_enable();
         set_cpu_fan(system_voltage);
@@ -310,13 +323,15 @@ int main(void) {
     case 7:
       if (!(SW_PIN & SW1)) {
         cpu_enable();
-        set_cpu_fan(system_voltage);
       }
       else {
         cpu_disable();
         cpu_fan_off();
       }
-      set_motor_fan();
+      if(charge_state > 0 && charge_state < 10)
+        set_motor_fan();
+      else
+        motor_fan_off();
       break;
 
     // Invalid states
