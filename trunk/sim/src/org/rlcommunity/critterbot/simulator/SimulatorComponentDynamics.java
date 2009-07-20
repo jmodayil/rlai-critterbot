@@ -121,7 +121,6 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
             double wi = dynData.getAngVelocity();
             Vector2D vi = dynData.getVelocity();
 
-
             // A very sad attempt at friction
             // we're not using real friction because of a bug from interaction
             // between the thrust and friction
@@ -333,6 +332,7 @@ public class SimulatorComponentDynamics implements SimulatorComponent {
 
                                 wap = checkSpeed(vap, wap, o1);
                                 wbp = checkSpeed(vbp, wbp, o2);
+
                                 o1.setVelocity(vap);
                                 o2.setVelocity(vbp);
                                 o1.setAngVelocity(wap);

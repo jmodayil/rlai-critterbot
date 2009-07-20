@@ -339,7 +339,7 @@ public class ObjectStateDynamics implements ObjectState {
         this.setMomentInertia(dyn.getMomentInertia());
         this.setMinSpeed(dyn.getMinSpeed());
         this.setMaxSpeed(dyn.getMaxSpeed());
-
+        this.setMaxAngularSpeed(dyn.getMaxAngularSpeed());
     // Should we copy the forces over? by definition we shouldn't carry
     //  them from state to state, but...
     }
