@@ -122,7 +122,8 @@ void accel_write_reg (unsigned int address, unsigned int data)
   accel_txdata[1] = (unsigned char)(data & 0xFF);
 
   /*
-   * This will never get called.
+   * This means the SPI either hasn't finished sending our last packet
+   * or has frozen.  Either way not good.
    */
   if(accel_spi_packet.finished != 1) {
     error_set(ERR_SPI_OVERFLOW);
@@ -143,13 +144,14 @@ void accel_write_reg (unsigned int address, unsigned int data)
   */
 void accel_write (unsigned int address, unsigned int count)
 {
-  if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
-  {
-    error_set(ERR_SPI_OVERFLOW);
+  if (count >= ACCEL_BUFFER_SIZE) {
     error_set(ERR_ACCEL);
     return;
   }
 
+  if (accel_spi_packet.finished != 1)
+    error_set(ERR_SPI_OVERFLOW);
+  
   // Prepare the data and the SPI packet
   accel_txdata[0] = 
     (unsigned char)((address & ACCEL_SPI_ADDR) | 
@@ -175,7 +177,7 @@ unsigned char accel_read_reg_block(unsigned int address)
 
 void accel_read_reg (unsigned int address)
 {
-  if (accel_spi_packet.finished == 0)
+  if (accel_spi_packet.finished != 0)
   {
     error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
@@ -202,13 +204,15 @@ void accel_read_reg (unsigned int address)
 void accel_read (unsigned int address, unsigned int count)
 {
 
-  if (accel_spi_packet.finished == 0 || count >= ACCEL_BUFFER_SIZE)
+  if (count >= ACCEL_BUFFER_SIZE)
   {
-    error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
     return;
   }
 
+  if (accel_spi_packet.finished == 0)
+    error_set(ERR_SPI_OVERFLOW);
+  
   // Prepare the data and the SPI packet
   accel_txdata[0] = 
     (unsigned char)((address & ACCEL_SPI_ADDR) | 
