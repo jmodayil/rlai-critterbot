@@ -46,7 +46,6 @@ void ui_setled (char * cmdstr);
 void ui_getled (char * cmdstr);
 void ui_statled (char * cmdstr);
 void ui_help (char * cmdstr);
-void ui_fortune (char * cmdstr);
 void ui_test (char * cmdstr);
 void ui_setdot (char * cmdstr);
 void ui_getdot (char * cmdstr);

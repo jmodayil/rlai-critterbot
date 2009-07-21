@@ -234,7 +234,7 @@ void boot_begin_receive(int data_size)
   */
 void boot_end_receive()
 {
-  leddrive_ball();
+  leddrive_ui();
   boot_receiving = 0;
   event_stop(EVENT_ID_BOOT);
   event_start(EVENT_ID_UI);

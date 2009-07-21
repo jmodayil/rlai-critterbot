@@ -233,6 +233,7 @@ void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b){
 void led_chargemax(int max) {
   switch(max) {
   case 0:
+    leddrive_charge_max = 0;
     // We shouldn't be here I think?
     break;
   case 1:
@@ -260,6 +261,7 @@ void led_chargemax(int max) {
     leddrive_charge_max = 16; 
     break;
   default:
+    leddrive_charge_max = 0;
     break;
   }
 }
@@ -453,7 +455,7 @@ void startup(void){
 					fadeto(&LED[i],0,0,0,2);
 			}
 			if (a>1250)		
-				leddrive_ball();
+				leddrive_ui();
 			break;
 		case 2:
 			a=0;
@@ -474,7 +476,7 @@ void startup(void){
 					fadeto(&LED[i],0,0,0,2);
 			}
 			if(a>920)
-				leddrive_ball();
+				leddrive_ui();
 			break;
 		case 3://Special U of A colours startup.
 		default:
@@ -534,7 +536,7 @@ void startup(void){
 				fadeto(&LED[0],0,0,0,10);
 			}
 			if(a>= 1650)
-				leddrive_ball();
+				leddrive_ui();
 			break;
 	}	
 }
@@ -556,10 +558,10 @@ int leddrive_event(void) {
     case CHARGESTATUS:
       clearled();
       led_chargemax(motor_get_charge_state());
-      if(leddrive_charge_max == 0)
-        goto gohereonnoerror;
-      if(leddrive_charge_max > 16)
-        goto omgerror;
+      if(leddrive_charge_max <= 0 || leddrive_charge_max > 16) {
+        leddrive_state = ERROR;  
+        break;
+      }
       if(a > (leddrive_charge_max << 5) + 31)
         a = 0;
       for(i = 0; i < (a >> 5); i++) {
@@ -598,7 +600,6 @@ int leddrive_event(void) {
 			battlvl((motor_get_voltage()-115)*2);//
 			break;
 		case BALL:
-gohereonnoerror:
       ledball_crtl();	
 	  	ANGLEINFO[0].deg=(int*)&ledball_angle;
 	    ANGLEINFO[0].cval=&ledball_cval;
@@ -640,7 +641,6 @@ gohereonnoerror:
 			}
 			break;	
 		case ERROR:
-omgerror:
       a++;
 			if (a<3){
 				for(i=0;i<=15;i++){

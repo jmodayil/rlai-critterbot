@@ -65,7 +65,6 @@ ui_cmd_item ui_commands[] = {
   {"test", ui_test, "test [ramfunc|int|stress]"},
   {"bootloader", ui_bootloader, "bootloader - do not use"},
   {"reset", ui_reset, "reset"},
-  {"fortune", ui_fortune, "fortune"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
   {"error", ui_error, "error [clear]"},
   {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
@@ -194,8 +193,6 @@ void ui_help(char * cmdstr)
   for (idx = 0; idx < ui_ncommands; idx++)
     armprintf ("%s - %s\r", ui_commands[idx].name, 
       ui_commands[idx].description);
-  
-  armprintf ("\rNote! Commands and arguments are case-sensitive.\r");
 }
 
 void ui_setled(char * cmdstr)
@@ -277,20 +274,20 @@ void ui_status(char * cmdstr)
     armprintf(events_undefined_reset_name);
   armprintf(" reset.\r");
   armprintf ("Event prior to reset was: %d\r", pre_reset_event);
-  armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
+  //armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
+  //   adc_output[2], adc_output[3]); 
+  //armprintf ("SPI Status Register: %x\r", AT91C_BASE_SPI->SPI_SR);
+  //armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
   armprintf ("On board adc: %d %d %d %d\r", adc_output[4], adc_output[5],
      adc_output[6], adc_output[7]); 
-  armprintf ("SPI Status Register: %x\r", AT91C_BASE_SPI->SPI_SR);
-  armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
   armprintf ("System Voltage: %d\r", motor_get_voltage());
   armprintf ("Charge State: %d\r", motor_get_charge_state());
   armprintf ("Battery Voltages: %d %d %d\r", motor_get_bat40(),
       motor_get_bat160(), motor_get_bat280());
   armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
       motor_clicks(1), motor_clicks(2));
-  armprintf ("Coffee consumption: 0.266 cup / hr\r");
   armprintf("\r");
 }
 
@@ -389,7 +386,7 @@ void ui_getaccel (char * cmdstr)
   int i; 
   unsigned char status = accel_get_status();
 
-  armprintf ("Accelerometer status and outputs: %d ", status);
+  armprintf ("Accelerometer status: %d ", status);
   for (i = 0; i < ACCEL_NUM_AXES; i++)
     armprintf (" %d", accel_get_output(i));
   armprintf ("\r");
@@ -508,8 +505,7 @@ void ui_bootloader(char * cmdstr)
       if(boot_data_size > 0)
         boot_core();
     }
-    armprintf ("This command is for bootloader purposes. "
-      "Insert disk #127 to continue (or refer to the manual).\r");
+    armprintf ("Use 'bootloader program' to flash chip\r");
     return;
   }
   
@@ -832,46 +828,6 @@ void ui_pid ( char * cmdstr)
   }
   armprintf ("pid [start|stop|stat] #\r");
   
-}
-
-static int fortune_idx = 0;
-
-char * fortunes[] = {
-  "It usually takes more than three weeks to prepare a good impromptu speech. (Mark Twain)",
-  "Qui vole un oeuf vole un boeuf",
-  "Father, I want to kill you. Mother, I want to oooo-doo-dii",
-  "Is it in RAM?",
-  "Has it been powered on?",
-  "Have you compiled?",
-  "Have you reprogrammed the chip?",
-  "Is it connected to the internet?",
-  "Mini-golf is all about patience and correcting the putter angle",
-  // Keep this 0 here!
-  0
-  };
-
-int num_fortunes = -1;
-
-/** Unecessary waste of work time */
-void ui_fortune(char * cmdstr)
-{
-  int r = 0;
-
-  if (num_fortunes == -1)
-  {
-    num_fortunes = 0;
-    while (fortunes[fortune_idx] != 0)
-    {
-      fortune_idx++;
-      num_fortunes++;
-    }
-  }
-
-  // Random-number generate from TC0
-  r = ui_random() % num_fortunes;
-
-  armprintf (fortunes[r]);
-  armprintf ("\r");
 }
 
 int ui_random()

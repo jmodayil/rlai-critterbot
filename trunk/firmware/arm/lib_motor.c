@@ -95,7 +95,7 @@ int motor_event() {
 
   // What was the bus voltage on the last cycle?
   volt = motor_get_voltage();
-  // Now we queue the new commands to the motors.
+  // Now we queue the new commands to the motors and power controller.
   spi_send_packet(&power_packet); 
 
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
@@ -115,7 +115,7 @@ int motor_event() {
     motor_tx_data[i][2] = volt;  
     spi_send_packet(&motor_packet[i]);
   }
-  // This checks the old packet we received to make sure it is a proper packet
+  // This checks the last packet we received to make sure it is a proper packet
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
       error_set(ERR_MOTOR_ALIGN);
@@ -273,6 +273,9 @@ void power_init_packet() {
   power_tx_data[0] = MOTOR_PACKET_HEADER;
   power_tx_data[1] = 0;
   power_tx_data[2] = 0;
+  power_tx_data[3] = 0;
+  power_tx_data[4] = 0;
+  power_tx_data[5] = 0;
 }
 
 /*

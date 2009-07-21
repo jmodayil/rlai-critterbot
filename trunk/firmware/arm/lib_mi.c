@@ -116,14 +116,18 @@ void mi_get_commands(void) {
   }
   
   switch(robot_command.motor_mode) {
+    // The various minus signs here are to correct the coordinate system.
+    // Really this is an easy way to do it, and should be corrected both
+    // in the signs of the XYT->Wheel transform and the wheel drivers
+    // themselves.
     case WHEEL_SPACE:
-      motor_set_speed_slew(m1, m2, m3);
+      motor_set_speed_slew(-m1, -m2, -m3);
       break;
     case XYTHETA_SPACE:
-      motor_set_speed_xytheta(m1, m2, m3);
+      motor_set_speed_xytheta(-m1, m2, -m3);
       break;
     case WHEEL_VOLTAGE:
-      motor_set_voltage(m1, m2, m3);
+      motor_set_voltage(-m1, -m2, -m3);
     case MOTOR_EXIT:
       if(robot_command.led_mode == LED_EXIT)
         mi_stop();
