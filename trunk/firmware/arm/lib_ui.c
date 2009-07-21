@@ -280,8 +280,8 @@ void ui_status(char * cmdstr)
   armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
-  armprintf ("On board adc: %d %d %d %d\r", adc_output[0], adc_output[1],
-     adc_output[2], adc_output[3]); 
+  armprintf ("On board adc: %d %d %d %d\r", adc_output[4], adc_output[5],
+     adc_output[6], adc_output[7]); 
   armprintf ("SPI Status Register: %x\r", AT91C_BASE_SPI->SPI_SR);
   armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
   armprintf ("System Voltage: %d\r", motor_get_voltage());

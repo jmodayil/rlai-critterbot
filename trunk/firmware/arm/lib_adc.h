@@ -34,7 +34,7 @@
 #define ADC_SHTIM ((unsigned int) (ADC_SHTIM_S*ADCCLOCK_FREQ-1) << 24)
 
 extern unsigned int adc_status;
-extern short adc_output[ADC_NUM_CHANNELS]; 
+extern unsigned int adc_output[ADC_NUM_CHANNELS]; 
 
 
 /**
