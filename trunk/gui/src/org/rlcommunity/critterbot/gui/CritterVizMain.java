@@ -20,7 +20,7 @@ import org.rlcommunity.critterbot.javadrops.drops.SimulatorDrop;
  * @author critterbot
  */
 public class CritterVizMain {
-    public static final int critterVizPort = 3444;
+    public static final int critterVizPort = 2330;
     public static final String critterVizHost = "localhost";
     public static final int dropQueueSize = 32;
     
