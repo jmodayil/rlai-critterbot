@@ -13,6 +13,8 @@
 
 package org.rlcommunity.critterbot.javadrops.clients;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -39,6 +41,7 @@ public class DiscoAgent {
             CritterStateDrop.BUMP_SIZE +
             CritterStateDrop.IR_DISTANCE_SIZE +
             CritterStateDrop.LIGHT_SIZE;
+	private static final int dropQueueSize = 32;
     
     /** The last observation received by the agent, as a real-valued vector */
     protected double[] aObservation;
@@ -47,7 +50,12 @@ public class DiscoAgent {
     protected boolean aHasNewObservation;
 
     protected double aReward;
+	private DropInterface dropInterface;
     
+	/** TCP information for connection to a disco server **/
+	private static final int portNum = 2330;
+	private static final String hostName = "localhost";
+	
     /**
      * Create a new DiscoAgent.
      */
@@ -148,31 +156,31 @@ public class DiscoAgent {
         System.out.println ("Reward: "+pDrop.reward);
         aReward = pDrop.reward;
     }
-
-
-
-
-
-
-
+    
     /** A main method for running the agent */
-
-    public static final int discoAgentPort = 2325;
     
     public static void main(String[] args) {
         // Create a TCP server to talk with Disco
-        DiscoInterfaceServer discoServer = new DiscoInterfaceServer(discoAgentPort);
+        //DiscoInterfaceServer discoServer = new DiscoInterfaceServer(discoAgentPort);
         // Start its thread
-        discoServer.start();
+        DiscoInterfaceClient discoClient = null;
+		try {
+			discoClient = new DiscoInterfaceClient(
+					InetAddress.getByName(hostName), portNum, 32);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			System.exit(0);
+		}
+    	discoClient.start();
 
         // Create the central drop interface
         DropInterface dropInterface = new DropInterface();
 
         // Add the disco server to the central drop interface
-        dropInterface.addClient(discoServer);
+        dropInterface.addClient(discoClient);
 
         // Create a new agent
-        DiscoAgent agent = new DiscoAgent();
+        CopyOfDiscoAgent agent = new CopyOfDiscoAgent();
         
         while (true) {
             // Receive drops from the simulator
