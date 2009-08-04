@@ -5,9 +5,11 @@
 
 package org.rlcommunity.critterbot.gui;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.List;
 
-import org.rlcommunity.critterbot.javadrops.clients.DiscoInterfaceServer;
+import org.rlcommunity.critterbot.javadrops.clients.DiscoInterfaceClient;
 import org.rlcommunity.critterbot.javadrops.drops.CritterControlDrop;
 import org.rlcommunity.critterbot.javadrops.drops.CritterRewardDrop;
 import org.rlcommunity.critterbot.javadrops.drops.CritterStateDrop;
@@ -18,7 +20,9 @@ import org.rlcommunity.critterbot.javadrops.drops.SimulatorDrop;
  * @author critterbot
  */
 public class CritterVizMain {
-    public static final int critterVisPort = 3444;
+    public static final int critterVizPort = 3444;
+    public static final String critterVizHost = "localhost";
+    public static final int dropQueueSize = 32;
     
     public CritterStateDrop currentState;
     
@@ -28,15 +32,24 @@ public class CritterVizMain {
         
         currentState = new CritterStateDrop();
         // Create a TCP server to talk with Disco
-        DiscoInterfaceServer discoServer = new DiscoInterfaceServer(critterVisPort);
+        InetAddress netAddr = null;
+        try {
+        	netAddr = InetAddress.getByName(critterVizHost);
+        }
+        catch (UnknownHostException e) {
+        	System.err.println("Unknown hostname.");
+        	System.exit(1);
+        }
+        DiscoInterfaceClient discoClient = new DiscoInterfaceClient(
+        		netAddr, critterVizPort, dropQueueSize);
         // Start its thread
-        discoServer.start();
+        discoClient.start();
 
         // Create the central drop interface
         DropInterface dropInterface = new DropInterface();
 
         // Add the disco server to the central drop interface
-        dropInterface.addClient(discoServer);
+        dropInterface.addClient(discoClient);
 
         // Create a new agent
         //CritterVizMain me = new CritterVizMain();
