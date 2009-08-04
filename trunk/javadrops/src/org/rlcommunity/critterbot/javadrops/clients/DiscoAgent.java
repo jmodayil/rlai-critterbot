@@ -180,7 +180,7 @@ public class DiscoAgent {
         dropInterface.addClient(discoClient);
 
         // Create a new agent
-        CopyOfDiscoAgent agent = new CopyOfDiscoAgent();
+        DiscoAgent agent = new DiscoAgent();
         
         while (true) {
             // Receive drops from the simulator
