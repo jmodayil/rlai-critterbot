@@ -71,15 +71,18 @@ int adc_event()
 			// read converted data
 			adc_output[i] = adc_channels[i];
 		}
+    if((st & 0xFF) != 0xF0)
+      error_set(ERR_ADC);
 	}
-  if(++adc_count > 100) {
+  AT91F_ADC_StartConversion(AT91C_BASE_ADC);
+  /*if(++adc_count > 100) {
     adc_count = 0;
     AT91F_PIO_ClearOutput(AT91C_BASE_PIOA, 1 << 28);
     for(i = 0; i < 100; i++);
     AT91F_PIO_SetOutput(AT91C_BASE_PIOA, 1 << 28);
     for(i = 0; i < 100; i++);
     AT91F_ADC_StartConversion(AT91C_BASE_ADC);
-  }
+  }*/
   return 0;
 }
 

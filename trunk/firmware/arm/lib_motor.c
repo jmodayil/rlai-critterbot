@@ -121,7 +121,7 @@ int motor_event() {
       error_set(ERR_MOTOR_ALIGN);
   }
   if((power_rx_data[0] & 0xFF) != MOTOR_SPI_PADDING)
-    error_set(ERR_MOTOR_ALIGN);
+    error_set(ERR_POWER_ALIGN);
   return 0; 
 }
 
@@ -339,6 +339,9 @@ signed char motor_command(int motor) {
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
 
-  return motor_speed_final[motor];
+  if(robot_command.motor_mode != WHEEL_VOLTAGE) 
+    return motor_speed_final[motor];
+  else
+    return motor_speed[motor]; 
 }
 

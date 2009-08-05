@@ -8,6 +8,8 @@
 
 #define MI_COMMAND_LENGTH 57
 
+extern struct command_packet robot_command;
+
 void mi_send_status(void);
 void mi_get_commands(void);
 void mi_start(void);

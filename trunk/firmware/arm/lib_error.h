@@ -15,23 +15,29 @@
 #include "lib_events.h"
 #include <stdio.h>
 
-// @@@ move to armconfig.h
+// Error flags for issues on the ARM
 #define ERR_LEDCTL        (1<<0)
 #define ERR_ACCEL         (1<<1)
 #define ERR_EVENTS        (1<<2)
 #define ERR_TXOVERFLOW    (1<<3)
+
 #define ERR_EVENTSLOW     (1<<4)
 #define ERR_BOOT          (1<<5)
 #define ERR_SPURINT       (1<<6)
 #define ERR_SSC_OVERFLOW  (1<<7)
+
 #define ERR_SPI_OVERFLOW  (1<<8)
 #define ERR_ADC_SPI       (1<<9)
 #define ERR_SELF_TEST     (1<<10)
 #define ERR_SER_PARITY    (1<<11)
+
 #define ERR_SER_OVRRUN    (1<<12)
 #define ERR_SER_FRAME     (1<<13)
 #define ERR_MOTOR_ALIGN   (1<<14)
-#define ERR_MAXERR      14
+#define ERR_POWER_ALIGN   (1<<15)
+
+#define ERR_ADC           (1<<16)
+#define ERR_MAXERR      16
 
 
 extern unsigned int error_reg;
