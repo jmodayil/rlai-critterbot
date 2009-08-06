@@ -169,7 +169,6 @@ public class DiscoInterfaceClient extends Thread implements DropClient
         
         // Get the drop to write itself to the output stream
         pData.writeData(aOut);
-        System.out.println("Wrote out drop: " + className);
       }
       catch (IOException e)
       {
