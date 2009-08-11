@@ -17,6 +17,7 @@
 #include "lib_error.h"
 #include "lib_events.h"
 #include "lib_boot.h"
+#include "lib_thermo.h"
 #include "lib_critical.h"
 #include "armio.h"
 
@@ -104,7 +105,8 @@ void events_init()
   events[8] = &motor_event_s;
   events[9] = &adc_event_s;
   events[10] = &adcspi_event_s;
-  events[11] = &ui_event_s;
+  events[11] = &thermo_event_s;
+  events[12] = &ui_event_s;
  
   // Set the first init for everyone
   for (i = 0; i <= EVENT_MAX; i++)

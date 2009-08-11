@@ -33,9 +33,9 @@
 // delay = 32 * value / MCK; min=0, max=255
 #define SPI_CS0_3_DELAY_BETWEEN_TRANSFERS 0
 // delay = value / MCK; min=0, max=255
-#define SPI_CS0_3_DELAY_BEFORE_CLOCK 0
+#define SPI_CS0_3_DELAY_BEFORE_CLOCK 5
 // rate = MCK / value; min=1, max=255
-#define SPI_CS0_3_BAUD_RATE 100 
+#define SPI_CS0_3_BAUD_RATE 20 
 // bits = 8 + value; min=0, max=8
 #define SPI_CSO_3_WORD_SIZE 0x0
 // bit 0: Clock polarity, 0 clock starts low, 1 clock starts high

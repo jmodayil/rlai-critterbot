@@ -37,7 +37,8 @@
 #define ERR_POWER_ALIGN   (1<<15)
 
 #define ERR_ADC           (1<<16)
-#define ERR_MAXERR      16
+#define ERR_TWI_NACK      (1<<17)
+#define ERR_MAXERR        17
 
 
 extern unsigned int error_reg;

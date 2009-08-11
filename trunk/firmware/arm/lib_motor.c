@@ -27,8 +27,10 @@ signed char motor_speed[MOTOR_NUM_MOTORS];
 signed char motor_speed_final[MOTOR_NUM_MOTORS];
 
 static char motor_slew_steps;
-static float motor_speed_float[MOTOR_NUM_MOTORS];
-static float motor_slew_interval[MOTOR_NUM_MOTORS];
+//static float motor_speed_float[MOTOR_NUM_MOTORS];
+//static float motor_slew_interval[MOTOR_NUM_MOTORS];
+static int motor_speed_float[MOTOR_NUM_MOTORS];
+static int motor_slew_interval[MOTOR_NUM_MOTORS];
 static char motor_slew_count;
 // 0 means velocity control, 1 is voltage control
 static int motor_mode;
@@ -82,7 +84,7 @@ int motor_event() {
     for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
       // Increment the float approximate value and then set as speed
       motor_speed_float[i] += motor_slew_interval[i];
-      motor_speed[i] = (signed char) motor_speed_float[i];
+      motor_speed[i] = (signed char) (motor_speed_float[i] >> 16);
     }
     motor_slew_count++;  
   }
@@ -203,12 +205,18 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   motor_speed_final[1] = speed220;
   motor_speed_final[2] = speed340;
 
-  motor_slew_interval[0] = ((float)(speed100 - motor_speed[0])) / motor_slew_steps;
-  motor_slew_interval[1] = ((float)(speed220 - motor_speed[1])) / motor_slew_steps;
-  motor_slew_interval[2] = ((float)(speed340 - motor_speed[2])) / motor_slew_steps;
-  motor_speed_float[0] = motor_speed[0];
-  motor_speed_float[1] = motor_speed[1];
-  motor_speed_float[2] = motor_speed[2];
+  //motor_slew_interval[0] = ((float)(speed100 - motor_speed[0])) / motor_slew_steps;
+  //motor_slew_interval[1] = ((float)(speed220 - motor_speed[1])) / motor_slew_steps;
+  //motor_slew_interval[2] = ((float)(speed340 - motor_speed[2])) / motor_slew_steps;
+  motor_slew_interval[0] = ((speed100 - motor_speed[0]) << 16) / motor_slew_steps;
+  motor_slew_interval[1] = ((speed100 - motor_speed[1]) << 16) / motor_slew_steps;
+  motor_slew_interval[2] = ((speed100 - motor_speed[2]) << 16) / motor_slew_steps;
+  motor_speed_float[0] = motor_speed[0] << 16;
+  motor_speed_float[1] = motor_speed[1] << 16;
+  motor_speed_float[2] = motor_speed[2] << 16;
+  //motor_speed_float[0] = motor_speed[0];
+  //motor_speed_float[1] = motor_speed[1];
+  //motor_speed_float[2] = motor_speed[2];
   motor_slew_count = 0;
 } 
 
@@ -279,7 +287,6 @@ void power_init_packet() {
 }
 
 /*
- * Not yet implemented on the controller side, however this should send raw
  * PWM values to the controllers for low-level control
  */
 void motor_set_pwm(int motor, int pwm) {

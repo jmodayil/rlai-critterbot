@@ -21,6 +21,7 @@
 #include "lib_adcspi.h"
 #include "lib_adc.h"
 #include "lib_mi.h"
+#include "lib_thermo.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -277,6 +278,8 @@ void ui_status(char * cmdstr)
   //armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
+  armprintf ("Thermos: %d %d %d %d\r", thermo_get_val(0), thermo_get_val(2),
+     thermo_get_val(4), thermo_get_val(6));
   //   adc_output[2], adc_output[3]); 
   //armprintf ("SPI Status Register: %x\r", AT91C_BASE_SPI->SPI_SR);
   //armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
