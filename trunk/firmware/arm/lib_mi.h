@@ -6,7 +6,7 @@
 #define MI_HEADER3 0xBE
 #define MI_HEADER4 0xEF
 
-#define MI_COMMAND_LENGTH 57
+#define MI_COMMAND_LENGTH 73
 
 extern struct command_packet robot_command;
 
