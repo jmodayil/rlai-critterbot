@@ -28,6 +28,7 @@ void mi_stop(void) {
 int mi_event(void) {
   mi_get_commands();
   mi_send_status();
+  error_clear(0xFFFFFFFF);
   return 0;
 }
 

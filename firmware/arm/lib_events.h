@@ -30,8 +30,9 @@
 #define EVENT_ID_MOTOR 8
 #define EVENT_ID_ADC 9
 #define EVENT_ID_ADCSPI 10
-#define EVENT_ID_UI 11
-#define EVENT_MAX 11
+#define EVENT_ID_THERMO 11
+#define EVENT_ID_UI 12
+#define EVENT_MAX 12
 
 
 unsigned int init_flags;
@@ -47,6 +48,7 @@ unsigned int event_flags;
     1 << EVENT_ID_MOTOR | \
     1 << EVENT_ID_ADC | \
     1 << EVENT_ID_ADCSPI | \
+    1 << EVENT_ID_THERMO | \
     1 << EVENT_ID_UI \
     )
 
@@ -57,6 +59,7 @@ unsigned int event_flags;
     1 << EVENT_ID_MOTOR | \
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_ADC | \
+    1 << EVENT_ID_THERMO | \
     1 << EVENT_ID_UI \
     )
 

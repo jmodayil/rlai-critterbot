@@ -27,7 +27,7 @@
 #define MOTOR_SPI_PADDING 0x7D
 
 // Rate of slew to new speed (ratio based on one step per cycle)
-#define MOTOR_SLEW_RATE 1.0
+#define MOTOR_SLEW_RATE 1
 
 // Time (in cycles) to timeout if no commands received
 #define MOTOR_TIMEOUT 50
