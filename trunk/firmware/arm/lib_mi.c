@@ -7,6 +7,7 @@
 #include "lib_accel.h"
 #include "lib_events.h"
 #include "lib_leddrive.h"
+#include "lib_thermo.h"
 
 struct command_packet robot_command;
 extern unsigned short crctable[256];
