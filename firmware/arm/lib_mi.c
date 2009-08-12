@@ -69,8 +69,8 @@ void mi_send_status(void) {
   putwcrc(adcspi_get_output(3,10) >> 2);
   putwcrc(adcspi_get_output(3,11) >> 2);
   for(i = 0; i < 8; i++) {
-	putwcrc((unsigned char)(thermo_get_val(i)));
-	putwcrc((unsigned char)(thermo_get_val(i)>>8));
+    putwcrc((unsigned char)(thermo_get_val(i)));
+    putwcrc((unsigned char)(thermo_get_val(i)>>8));
   }
   putwcrc(error_reg >> 24);
   putwcrc(error_reg >> 16);
