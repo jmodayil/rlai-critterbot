@@ -16,8 +16,10 @@ void ping_watchdog( void );
 #define WDT_KEY 0xA5000000
 
 // in 1/256th of a second
-#define WDT_WDV 0x300
+// MGB: Modified to follow Errata 40.4.14.1 
+#define WDT_WDV 0x00F
 
-#define WDT_WDD ((WDT_WDV - 256 / EVENTS_HZ) << 16)
+// MGB: Modified to follow Errata 40.4.14.1 
+#define WDT_WDD ((0xFFF) << 16)
 
 #endif //LIB_EXCEPT_H
