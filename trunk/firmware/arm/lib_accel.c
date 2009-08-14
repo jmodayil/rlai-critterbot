@@ -177,7 +177,7 @@ unsigned char accel_read_reg_block(unsigned int address)
 
 void accel_read_reg (unsigned int address)
 {
-  if (accel_spi_packet.finished != 0)
+  if (accel_spi_packet.finished != 1)
   {
     error_set(ERR_SPI_OVERFLOW);
     error_set(ERR_ACCEL);
