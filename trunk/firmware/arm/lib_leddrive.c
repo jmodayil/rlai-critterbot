@@ -575,10 +575,10 @@ int leddrive_event(void) {
       if(a == 0)
         clearled();
       if(a == 195) {
-        LED[0].r = 255;
-        LED[4].r = 255;
-        LED[8].r = 255;
-        LED[12].r = 255;
+        LED[0].g = 255;
+        LED[4].g = 255;
+        LED[8].g = 255;
+        LED[12].g = 255;
       }
       if(a++ > 200)
         a = 0;
@@ -587,10 +587,10 @@ int leddrive_event(void) {
       if(a == 0)
         clearled();
       if(a == 195) {
-        LED[0].g = 255;
-        LED[4].g = 255;
-        LED[8].g = 255;
-        LED[12].g = 255;
+        LED[0].r = 255;
+        LED[4].r = 255;
+        LED[8].r = 255;
+        LED[12].r = 255;
       }
       if(a++ > 200)
         a = 0;
@@ -758,11 +758,11 @@ void leddrive_custom(void){
 }
 
 void leddrive_ui(void){
-  leddrive_state=MI;
+  leddrive_state=UI;
 }
 
 void leddrive_mi(void){
-  leddrive_state=UI;
+  leddrive_state=MI;
 }
 
 void leddrive_stop(void){
