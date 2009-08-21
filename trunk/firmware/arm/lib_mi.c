@@ -55,23 +55,64 @@ void mi_send_status(void) {
     putwcrc(motor_current(i));
     putwcrc(motor_temp(i));
   }
+  // Accelerometer
   putwcrc(accel_output[0] >> 4);
   putwcrc(accel_output[1] >> 4);
   putwcrc(accel_output[2] >> 4);
+  // Least significant nibbles of the above three
+  putwcrc(accel_output[0] << 4 | (accel_output[1] & 0x0F));
+  putwcrc(accel_output[2] << 4);
+  // Magnetometer
   putwcrc(adc_output[4] >> 2);
   putwcrc(adc_output[5] >> 2);
   putwcrc(adc_output[6] >> 2);
+  // Gyroscope
   putwcrc((adcspi_get_output(3, 12) >> 2) - 128);
+  // Least significant 2 bits from the above 4
+  putwcrc((adc_output[4] & 0x03) << 6 | (adc_output[5] & 0x03) << 4 |
+      (adc_output[6] & 0x03) << 2 | (adcspi_get_output(3, 12) & 0x03));
+  // IR Distance
   for(i = 0; i < 10; i++)
     putwcrc(adcspi_get_output(0, i) >> 2);
+  // Least significant 2 bits from the above 10
+  putwcrc((adcspi_get_output(0, 0) & 0x03) << 6 |
+      (adcspi_get_output(0, 1) & 0x03) << 4 |
+      (adcspi_get_output(0, 2) & 0x03) << 2 |
+      (adcspi_get_output(0, 3) & 0x03));
+  putwcrc((adcspi_get_output(0, 4) & 0x03) << 6 |
+      (adcspi_get_output(0, 5) & 0x03) << 4 |
+      (adcspi_get_output(0, 6) & 0x03) << 2 |
+      (adcspi_get_output(0, 7) & 0x03));
+  putwcrc((adcspi_get_output(0, 8) & 0x03) << 6 |
+      (adcspi_get_output(0, 9) & 0x03) << 4);
+  // Light sensors
   putwcrc(adcspi_get_output(3,8) >> 2);
   putwcrc(adcspi_get_output(3,9) >> 2);
   putwcrc(adcspi_get_output(3,10) >> 2);
   putwcrc(adcspi_get_output(3,11) >> 2);
+  // Least significant bits from the above 4
+  putwcrc((adcspi_get_output(3, 8) & 0x03) << 6 |
+      (adcspi_get_output(3, 9) & 0x03) << 4 |
+      (adcspi_get_output(3, 10) & 0x03) << 2 |
+      (adcspi_get_output(3, 11) & 0x03));
+  // Thermal sensors
   for(i = 0; i < 8; i++) {
     putwcrc((unsigned char)(thermo_get_val(i)));
     putwcrc((unsigned char)(thermo_get_val(i)>>8));
   }
+  // IR light sensors
+  for(i = 0; i < 8; i++) {
+    putwcrc(adcspi_get_output(3,i) >> 2);
+  }
+  // Least significant bits from the above 8
+  putwcrc((adcspi_get_output(3, 0) & 0x03) << 6 |
+      (adcspi_get_output(3, 1) & 0x03) << 4 |
+      (adcspi_get_output(3, 2) & 0x03) << 2 |
+      (adcspi_get_output(3, 3) & 0x03));
+  putwcrc((adcspi_get_output(3, 4) & 0x03) << 6 |
+      (adcspi_get_output(3, 5) & 0x03) << 4 |
+      (adcspi_get_output(3, 6) & 0x03) << 2 |
+      (adcspi_get_output(3, 7) & 0x03));
   putwcrc(error_reg >> 24);
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
