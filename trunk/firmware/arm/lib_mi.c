@@ -104,7 +104,7 @@ void mi_send_status(void) {
   }
   // IR light sensors
   for(i = 0; i < 8; i++) {
-    putwcrc(adcspi_get_output(3,i) >> 2);
+    putwcrc((unsigned char)adcspi_get_output(3,i) >> 2);
   }
   // Least significant bits from the above 8
   putwcrc(((adcspi_get_output(3, 0) & 0x03) << 6) |
