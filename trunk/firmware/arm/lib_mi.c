@@ -49,6 +49,10 @@ void mi_send_status(void) {
   armputchar(MI_HEADER3);
   armputchar(MI_HEADER4);
   putwcrc(motor_get_voltage());
+  putwcrc(motor_get_charge_state());
+  putwcrc(motor_get_bat40());
+  putwcrc(motor_get_bat160());
+  putwcrc(motor_get_bat280());
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
     putwcrc(motor_command(i));
     putwcrc(motor_clicks(i));
