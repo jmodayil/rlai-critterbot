@@ -8,6 +8,7 @@
 #include <avr/io.h>
 #include "include/avr_motor.h"
 
+// Maximum speed to allow the wheels to spin
 #define SPEED_LIMIT 25
 #define KP 3 //8
 #define KD 4 //50
@@ -28,12 +29,13 @@
 //static int8_t speed_limit_now;
 static uint8_t i_limit_now;
 static int32_t i_error;
-static uint8_t i_hist[I_HIST_SIZE];
-static uint8_t *i_hist_loc;
-static uint16_t p_avg;
 static int16_t error;
 extern volatile uint8_t current;
 extern volatile uint8_t v_now;
+
+// Maximum voltage to send to the motors.  This floats with the system bus
+// voltage but may be decreased due to a extended current limit condition
+volatile int8_t voltage_limit;
 
 volatile uint16_t count, old_count;
 uint8_t rstate, event, event_count;
@@ -47,8 +49,9 @@ void motor_init(void) {
   v_now = 255;
   error = 0;
 
+  voltage_limit = 127;
   i_limit_now = I_LIMIT;
-  //speed_limit_now = SPEED_LIMIT;
+  i_limit_now = SPEED_LIMIT;
   motor_setpoint = 101;
   PORTD &= ~(MTR_EN_PIN|MTR_A_PIN|MTR_B_PIN|MTR_LOW_A_PIN|MTR_LOW_B_PIN);
 
@@ -63,32 +66,48 @@ void motor_init(void) {
   PORTD |= MTR_EN_PIN;
 }
 
-void set_speed(int8_t speed) {
+/**
+ * DO NOT MESS WITH ANYTHING IN THIS FUNCTION UNLESS YOU KNOW WHAT YOU ARE DOING
+ * Unwise changes to the code in set_voltage can cause permanent and probably
+ * smelly damage to the robot.
+ *
+ * This sets the output to the motor control H-Bridge.  Turning on both the
+ * high and low side drivers on the same leg at the same time will cause a
+ * nasty short.  There is no hardware protection against doing this.
+ */
+void set_voltage(int8_t voltage) {
 
-  static int8_t last_speed;
+  static int8_t last_voltage;
 
-  if((speed >= 0 ? 1 : -1) != (last_speed >= 0 ? 1 : -1)) {
+  // Bound voltage by the voltage limit
+  if(voltage > voltage_limit)
+    voltage = voltage_limit;
+  if(voltage < -voltage_limit)
+    voltage = -voltage_limit;
+
+  // Leave one dead cycle if velocity sign changes
+  if((voltage >= 0 ? 1 : -1) != (last_voltage >= 0 ? 1 : -1)) {
     OCR0A = 0;
     OCR0B = 0;
     PORTD &= ~(MTR_LOW_A_PIN | MTR_LOW_B_PIN);
   }
   else {
-    OCR0A = (speed > 0) ?
-      ((speed == 127) ? 255 : 2 * (uint8_t)speed) : 0;
-    OCR0B = (speed < 0) ?
-      ((speed == -127) ? 255 : 2 * (256-(uint8_t)speed)) : 0;
-    if( speed > 0 ) {
+    OCR0B = (voltage > 0) ?
+      ((voltage == 127) ? 255 : 2 * (uint8_t)voltage) : 0;
+    OCR0A = (voltage < 0) ?
+      ((voltage == -127) ? 255 : 2 * (256-(uint8_t)voltage)) : 0;
+    if( voltage < 0 ) {
       PORTD &= ~MTR_LOW_A_PIN;
       PORTD |= MTR_LOW_B_PIN;
     }
-    else if(speed < 0 ){
+    else if(voltage > 0 ){
       PORTD &= ~MTR_LOW_B_PIN;
       PORTD |= MTR_LOW_A_PIN;
     }
     else
       PORTD &= ~(MTR_LOW_A_PIN | MTR_LOW_B_PIN);
   }
-  last_speed = speed;
+  last_voltage = voltage;
 }
 
 int8_t current_limit(int8_t setpoint) {
@@ -100,151 +119,61 @@ int8_t current_limit(int8_t setpoint) {
   // make setpoint a magnitude
   setpoint = setpoint > 0 ? setpoint : -setpoint;
 
+  // calculate difference between limit and actual current
   error = i_limit_now - current;
 
   // If we are over the current limit
   if(error < 0) {
+    // Increase the correction factor by one
     correction++;
+    // Bound the correction
     if(correction >= setpoint)
       correction = setpoint - 1;
     if(correction < 0)
       correction = 0;
-    count++;
-    if(count >= I_LIMIT_RATE) {
-      count = 0;
-      //if(speed_limit_now > 1)
-      //    speed_limit_now--;
-    }
   }
+  // If we are not over the current limit
   else {
+    // If there is still correction going on slowly ease off
     if(correction > 0)
       correction--;
+    // Bound correction for safety in case other code changes that might cause
+    // a negative correction, which makes thing very very bad
     if(correction < 0)
       correction = 0;
     else {
-      //if(speed_limit_now < SPEED_LIMIT)
-      //  speed_limit_now++;
+      if(voltage_limit < 127)
+        voltage_limit++;
+      if(voltage_limit > 127)
+        voltage_limit = 127;
       count = 0;
     }
   }
+
+  if(correction > 0) {
+    //count++;
+    //if(count >= I_LIMIT_RATE) {
+      //count = 0;
+      if(voltage_limit > 1)
+        voltage_limit--;
+    //}
+  }
+  else {
+    if(voltage_limit < 127)
+      voltage_limit++;
+  }
+
   //if(speed_limit_now <= 0)
   //  return 0;
   return (setpoint - correction) * setpoint_sign;
 }
 
-/*
-int8_t current_limit(int8_t setpoint) {
-
-  static uint8_t cycle_count;
-  static int16_t correction;
-  static int8_t last_error;
-  int8_t d_error, error;
-
-  error = i_limit_now - current;
-  d_error = error - last_error;
-  last_error = error;
-
-  // If we're going less than half as fast as we are supposed to be...
-  // Decrease the current limit slowly until min
-  if(((clicks >> 1) * (clicks > 0 ? 1 : -1)) <
-      setpoint > 0 ? setpoint : -setpoint) {
-    if(cycle_count++ > 10) {
-      cycle_count = 0;
-      i_limit_now--;
-      if(i_limit_now < I_LIMIT_MIN)
-        i_limit_now = I_LIMIT_MIN;
-    }
-  }
-  // Otherwise increase it back to the normal limit
-  else {
-    if(cycle_count > 0)
-      cycle_count--;
-    else {
-      if(i_limit_now < I_LIMIT)
-        i_limit_now++;
-    }
-  }
-  if(error < 0) {
-    //d_error = error - last_error;
-    correction += error;
-    if(correction < ((int16_t)(setpoint > 0 ? -setpoint : setpoint)) * I_LIMIT_SCALE )
-      correction = ((int16_t)(setpoint > 0 ? -setpoint : setpoint)) * I_LIMIT_SCALE ;
-  }
-  else{
-    correction += error;
-    if(correction > 0)
-      correction = 0;
-  }
-
-  setpoint += (correction / I_LIMIT_SCALE) * (setpoint >= 0 ? 1 : -1);
-  i_error += (correction / I_LIMIT_SCALE) * (setpoint >= 0 ? 1 : -1);
-
-  return setpoint;
-
-}*/
-
-int8_t power_limit(int8_t setpoint) {
-
-  uint8_t i, avg;
-  uint16_t sum;
-  int16_t p_error, correction;
-  int8_t limit_setpoint;
-  static int8_t decay;
-
-  *i_hist_loc++ = current;
-  if(i_hist_loc >= i_hist + I_HIST_SIZE)
-    i_hist_loc = i_hist;
-
-  if(setpoint > 100 || setpoint < -100)
-    return setpoint;
-
-  sum = 0;
-  for(i = 0; i < I_HIST_SIZE; i++)
-    sum += i_hist[i];
-  avg = sum / I_HIST_SIZE;
-  p_avg = avg * v_now;
-
-  if(p_avg > (4 * P_LIMIT)) {
-    decay = 255;
-    return 0;
-  }
-  else if(decay) {
-    decay--;
-    return 0;
-  }
-  else {
-    return setpoint;
-  }
-
-  p_error = p_avg - P_LIMIT;
-
-  if(p_error > 0) {
-
-    if(p_error > 0)
-      correction = (p_error >> P_SCALE);// + ((error > 0 ? error : -error) >> E_SCALE);
-
-    if(motor_setpoint > 0) {
-      if(correction > setpoint)
-        correction = setpoint;
-      limit_setpoint = setpoint - correction;
-    }
-    else if(motor_setpoint < 0) {
-      if(correction > -setpoint)
-        correction = -setpoint;
-      limit_setpoint = setpoint + correction;
-    }
-    else
-      limit_setpoint = setpoint;
-
-  }
-  else {
-    limit_setpoint = setpoint;
-  }
-  return limit_setpoint;
-
-}
-
-
+/**
+ * Traditional velocity PID control, implements the integral component by
+ * increasing or decreasing the output by the result of KP*Perror + KD*Derror.
+ * This provides very fast and accurate response, but the integral component
+ * is not particularly adjustable.
+ */
 int8_t pid_control(int8_t setpoint) {
 
   int16_t d_error;
@@ -255,22 +184,32 @@ int8_t pid_control(int8_t setpoint) {
     return 0;
 
   last_error = error;
+  // Find the error and shift left for fixed point math.
   error = (((int16_t)setpoint << 2) - clicks);
+  // Find the error derivative
   d_error = (error - last_error);
 
+  // Calculate the output by incrementing it by the P and D errors
   hires_speed += error * KP + d_error * KD;
+  // Bound output
   if(hires_speed > 8128)
     hires_speed = 8128;
   if(hires_speed < -8128)
     hires_speed = -8128;
 
+  // Scale back down from fixed point to integer for output.
   return hires_speed >> 6;
 
 }
 
+/**
+ * A velocity PID controller that actually implements the integral component
+ * as a normal PID controller would.  This means that the output will never
+ * actually reach the setpoint but will get arbitrarily close depending on the
+ * value of KI.
+ */
 int8_t soft_pid_control(int8_t setpoint) {
 
-  int8_t final_speed;
   int16_t d_error;
   static int16_t last_error;
   static int16_t hires_speed;
@@ -286,9 +225,12 @@ int8_t soft_pid_control(int8_t setpoint) {
   last_error = error;
   error = (((int16_t)setpoint << 2) - clicks);
   d_error = (error - last_error);
-  //i_error += (error - i_error) / 8;
+
+  // Use a decaying sum to approximate the integral error.
+  // @TODO calculate if this needs to be bounded.
   i_error = (i_error * 63) / 64 + error;
 
+  // PID calculation and bounding
   hires_speed = error * KPS + i_error * KIS + d_error * KDS;
   if(hires_speed > 8128)
     hires_speed = 8128;
