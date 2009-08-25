@@ -14,7 +14,8 @@ volatile uint8_t v_now;
 volatile uint8_t motor_mode;
 
 /*
- * SPI interrupt routine
+ * SPI interrupt routine, listens for incoming packets from the arm
+ * and sends back internal data
  */
 ISR(SPI_STC_vect) {
 
@@ -63,19 +64,28 @@ ISR(SPI_STC_vect) {
   }
 }
 
+
+/**
+ * Encoder counting interrupt routine.  Every time we get a click from one
+ * encoder channel check the direction and increment the counter
+ */
 ISR(INT0_vect) {
   uint8_t val;
 
   val = PIND;
 
   if(0x0C == (val & 0x0C) || 0x00 == (val & 0x0C))
-    enc_count++;
-  else
     enc_count--;
+  else
+    enc_count++;
 
 }
 
-
+/**
+ * ADC sampling interrupt.  This continuous checks the values of the motor
+ * current and motor temperature ADC inputs and saves them to the correct
+ * location.
+ */
 ISR(TIMER1_COMPA_vect) {
 
   if(0x26 == adc_mux) {
@@ -90,7 +100,15 @@ ISR(TIMER1_COMPA_vect) {
   ADCSRA = 0xC6;
 }
 
-// Quadrature caclulation interrupt
+/**
+ * This timer triggered interrupt is called at regular intervals to
+ * calculate the different in encoder clicks since the last time it was
+ * called.  This gives a notion of velocity in clicks per timer expiration.
+ * The frequency this is called at is defined by the quadrature_init function
+ *
+ * This also defines the event frequency, or how fast the motor voltage is
+ * updated either from new input or via the PID controller
+ */
 ISR(TIMER2_COMPA_vect) {
 
   event = 1;
@@ -100,6 +118,10 @@ ISR(TIMER2_COMPA_vect) {
 
 }
 
+/**
+ * Initialize the ADC and the related interrupt to continously sample ADC
+ * values
+ */
 void adc_init( void ) {
 
   cli();
@@ -119,6 +141,9 @@ void adc_init( void ) {
   sei();
 }
 
+/**
+ * Initialize the encoder counter and relatecd interrupts.
+ */
 void quadrature_init( void ) {
 
   event = 0;
@@ -136,6 +161,7 @@ void quadrature_init( void ) {
   // Enable interrupts on OCR2A match
   TIMSK2 = 0x02;
 
+  // Enable external interrupts from the encoder input
   EICRA = 0x01;
   EIMSK = 0x01;
   sei();
@@ -143,7 +169,7 @@ void quadrature_init( void ) {
 
 int main(void) {
 
-  int8_t speed;
+  int8_t command;
   // Clear everything for safety
   PORTB = 0x00;
   PORTC = 0x00;
@@ -165,11 +191,11 @@ int main(void) {
         motor_setpoint = 0;
         event_count = 0;
       }
-      speed = current_limit(motor_setpoint);
+      command = current_limit(motor_setpoint);
       if(motor_mode == 0) {
-        speed = soft_pid_control(speed);
+        command = soft_pid_control(command);
       }
-      set_speed(speed);
+      set_voltage(command);
 
       event = 0;
     }

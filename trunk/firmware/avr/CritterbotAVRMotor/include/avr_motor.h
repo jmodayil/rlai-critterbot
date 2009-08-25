@@ -21,7 +21,7 @@ int16_t limited_drive_speed;
 int16_t clicks;
 
 void motor_init(void);
-void set_speed(int8_t);
+void set_voltage(int8_t);
 int8_t power_limit(int8_t);
 int8_t current_limit(int8_t);
 int8_t pid_control(int8_t);
