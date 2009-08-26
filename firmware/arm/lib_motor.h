@@ -34,13 +34,13 @@
 
 // Constants for converting from X-Y-Theta to Wheel space
 #define XSC100 (-1008) // cos(90+100) * 1024
-#define YSC100 (-178) // sin(90+100) * 1024
+#define YSC100 (178) // sin(90+100) * 1024
 #define TSC100 (1096) // 1.07 * 1024
 #define XSC220 (658) // cos(90+220) * 1024
-#define YSC220 (-784) // sin(90+220) * 1024
+#define YSC220 (784) // sin(90+220) * 1024
 #define TSC220 (1096) // 1.07 * 1024
 #define XSC340 (350) // cos(90+340) * 1024
-#define YSC340 (962) // sin(90+340) * 1024
+#define YSC340 (-962) // sin(90+340) * 1024
 #define TSC340 (1096) // 1.07 * 1024
 
 #define ABS(a) (((int)(a)) >= 0 ? (int)(a) : -(int)(a))
