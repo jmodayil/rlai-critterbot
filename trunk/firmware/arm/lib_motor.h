@@ -5,6 +5,9 @@
  * Last modified: 30 April 09
  */
 
+#ifndef LIB_MOTOR_H
+#define LIB_MOTOR_H
+
 #include "armio.h"
 #include "lib_error.h"
 #include "lib_events.h"
@@ -137,3 +140,5 @@ unsigned char motor_temp(int motor);
  * Returns the user commanded velocity of the motor
  */
 signed char motor_command(int motor);
+
+#endif /* LIB_MOTOR_H */
