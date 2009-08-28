@@ -17,11 +17,13 @@
 #include "lib_error.h"
 #include "lib_boot.h"
 #include "lib_critical.h"
+#include "lib_leddrive.h"
 #include "lib_events.h"
 #include "lib_adcspi.h"
 #include "lib_adc.h"
 #include "lib_mi.h"
 #include "lib_thermo.h"
+#include "lib_recharger.h"
 
 // Included for EOF, NULL
 #include <stdio.h>
@@ -69,7 +71,8 @@ ui_cmd_item ui_commands[] = {
   {"pid", ui_pid, "pid [start|stop|stat] #"},
   {"error", ui_error, "error [clear]"},
   {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
-  {"mi", ui_mi, "mi on"}
+  {"mi", ui_mi, "mi on"},
+  {"recharge", ui_recharge, "recharger [start|stop]"},
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -790,6 +793,21 @@ void ui_mi ( char * cmdstr)
     mi_start();
 }
 
+void ui_recharge (char * cmdstr) {
+  if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
+    return;
+
+  // If given 'start' as an argument, initialize the charger finder and start
+  //  it
+  if (strncmp (ui_strarg, "start", sizeof(ui_strarg)) == 0) {
+    recharger_reset();
+    recharger_enable();
+  }
+  else if (strncmp (ui_strarg, "stop", sizeof(ui_strarg)) == 0) {
+    recharger_disable();
+  }
+}
+
 void ui_pid ( char * cmdstr)
 {
   unsigned int pid, i;
@@ -833,7 +851,7 @@ void ui_pid ( char * cmdstr)
   
 }
 
-int ui_random()
+/* int ui_random()
 {
   return (AT91C_BASE_TC0->TC_CV);
-}
+} */

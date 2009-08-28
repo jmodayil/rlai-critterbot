@@ -12,6 +12,10 @@ extern struct command_packet robot_command;
 
 void mi_send_status(void);
 void mi_get_commands(void);
+/** Disables received commands from affecting the ARM, except for one that
+  *   changes the MI mode to UI mode. */
+void mi_disable_commands(void);
+void mi_enable_commands(void);
 void mi_start(void);
 void mi_stop(void);
 int mi_event(void);

@@ -15,6 +15,8 @@ extern unsigned short crctable[256];
 unsigned short crc;
 unsigned char mi_test;
 
+unsigned char mi_disabled_commands = 0;
+
 void mi_start(void) {
   leddrive_mi();
   ui_set_handler(mi_event);
@@ -24,6 +26,14 @@ void mi_start(void) {
 void mi_stop(void) {
   leddrive_ui();
   ui_clear_handler(mi_event);
+}
+
+void mi_disable_commands() { 
+  mi_disabled_commands = 1;
+}
+
+void mi_enable_commands() {
+  mi_disabled_commands = 1;
 }
 
 int mi_event(void) {
@@ -155,7 +165,8 @@ void mi_get_commands(void) {
   m3 = ((signed char)((unsigned char)armgetchar()));
   robot_command.led_mode = armgetchar();
   
-  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0) { 
+  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
+    !mi_disabled_commands) { 
     for( i = 0; i < LED_NUM_LEDS; i++ ) {
       LED[i].r = armgetchar();
       LED[i].g = armgetchar();
@@ -167,60 +178,67 @@ void mi_get_commands(void) {
       armgetchar();
     }
   }
-  
-  switch(robot_command.motor_mode) {
-    // The various minus signs here are to correct the coordinate system.
-    // Really this is an easy way to do it, and should be corrected both
-    // in the signs of the XYT->Wheel transform and the wheel drivers
-    // themselves.
-    case WHEEL_SPACE:
-      motor_set_speed_slew(m1, m2, m3);
-      break;
-    case XYTHETA_SPACE:
-      motor_set_speed_xytheta(m1, m2, m3);
-      break;
-    case WHEEL_VOLTAGE:
-      motor_set_voltage(m1, m2, m3);
-    case MOTOR_EXIT:
-      if(robot_command.led_mode == LED_EXIT)
-        mi_stop();
-      break;
-    default:
-      robot_command.motor_mode = WHEEL_SPACE;
-      motor_set_speed(0, 0); 
-      motor_set_speed(1, 0);
-      motor_set_speed(2, 0);
-      break;
-  }
-
-  if(motor_get_charge_state() == 0) { 
-    switch(robot_command.led_mode) {
-      case CNONE:
+ 
+  if (!mi_disabled_commands) {
+    switch(robot_command.motor_mode) {
+      // The various minus signs here are to correct the coordinate system.
+      // Really this is an easy way to do it, and should be corrected both
+      // in the signs of the XYT->Wheel transform and the wheel drivers
+      // themselves.
+      case WHEEL_SPACE:
+        motor_set_speed_slew(m1, m2, m3);
         break;
-      case CCLEAR:
-        leddrive_clear();
+      case XYTHETA_SPACE:
+        motor_set_speed_xytheta(m1, m2, m3);
         break;
-      case CBATTERY:
-        leddrive_rainbow();
-        break;
-      case CBALL:
-        leddrive_ball();
-        break;
-      case CERROR:
-        leddrive_error();
-        break;
-      case CBUSY:
-        leddrive_busy();
-        break;
-      case CEMERGENCY:
-        leddrive_emerg();
-        break;
-      case CCUSTOM:
-        leddrive_custom(); 
+      case WHEEL_VOLTAGE:
+        motor_set_voltage(m1, m2, m3);
+      case MOTOR_EXIT:
+        if(robot_command.led_mode == LED_EXIT)
+          mi_stop();
         break;
       default:
+        robot_command.motor_mode = WHEEL_SPACE;
+        motor_set_speed(0, 0); 
+        motor_set_speed(1, 0);
+        motor_set_speed(2, 0);
         break;
     }
+  
+    if(motor_get_charge_state() == 0) { 
+      switch(robot_command.led_mode) {
+        case CNONE:
+          break;
+        case CCLEAR:
+          leddrive_clear();
+          break;
+        case CBATTERY:
+          leddrive_rainbow();
+          break;
+        case CBALL:
+          leddrive_ball();
+          break;
+        case CERROR:
+          leddrive_error();
+          break;
+        case CBUSY:
+          leddrive_busy();
+          break;
+        case CEMERGENCY:
+          leddrive_emerg();
+          break;
+        case CCUSTOM:
+          leddrive_custom(); 
+          break;
+        default:
+          break;
+      }
+    }
+  }
+  else { // mi_disabled_commands
+    if(robot_command.motor_mode == MOTOR_EXIT && 
+       robot_command.led_mode == LED_EXIT)
+      mi_stop();
   }
   return;
 }
