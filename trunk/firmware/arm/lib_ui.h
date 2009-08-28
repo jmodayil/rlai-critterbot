@@ -59,8 +59,9 @@ void ui_pid (char * cmdstr);
 void ui_error (char * cmdstr);
 void ui_clearall (char * cmdstr);
 void ui_setall (char * cmdstr);
-void ui_motor ( char * cmdstr);
-void ui_mi ( char * cmdstr);
+void ui_motor (char * cmdstr);
+void ui_mi (char * cmdstr);
+void ui_recharge (char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);
@@ -85,8 +86,9 @@ void ui_do_report();
   *   look random to you provided you sample it at uniformly random intervals.
   *   There's no free lunch. Generates numbers between 0 and EVENTS_PIV_VALUE-1.
   * Returns the current counter value of the PIT.
+  *  Removed - used armrandom() instead.
   */
-int ui_random();
+// int ui_random();
 
 /** Sets an alternate IO handler in the UI. If such a handler is in place,
   *  the UI will not parse data until the handler is cleared using 

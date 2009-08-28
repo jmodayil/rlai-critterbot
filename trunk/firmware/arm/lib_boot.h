@@ -16,7 +16,7 @@
 
 #ifdef BOOT_LOAD_TO_RAM_AND_COPY
 // This definition MUST match the linker script's BOOTRAM size!
-#define BOOT_MAX_CODE_SIZE  0xA000
+#define BOOT_MAX_CODE_SIZE  0xA200
 // @@@ fixme
 #define BOOT_BUFFER         (boot_data)
 #elif defined(BOOT_LOAD_TO_FLASH)

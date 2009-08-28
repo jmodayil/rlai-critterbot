@@ -32,12 +32,15 @@
 #define EVENT_ID_ADCSPI 10
 #define EVENT_ID_THERMO 11
 #define EVENT_ID_UI 12
-#define EVENT_MAX 12
+#define EVENT_ID_RECHARGER 13
+
+#define EVENT_MAX 13
 
 
 unsigned int init_flags;
 unsigned int event_flags;
 
+// Events that should be initialized
 #define EVENTS_INITS ( \
     1 << EVENT_ID_UART | \
     1 << EVENT_ID_SSC | \
@@ -49,9 +52,11 @@ unsigned int event_flags;
     1 << EVENT_ID_ADC | \
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_THERMO | \
-    1 << EVENT_ID_UI \
+    1 << EVENT_ID_UI | \
+    1 << EVENT_ID_RECHARGER \
     )
 
+// Events started at boot time 
 #define EVENTS_DEFAULTS ( \
     1 << EVENT_ID_LEDDRIVE | \
     1 << EVENT_ID_LEDCTL | \
@@ -60,7 +65,8 @@ unsigned int event_flags;
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_ADC | \
     1 << EVENT_ID_THERMO | \
-    1 << EVENT_ID_UI \
+    1 << EVENT_ID_UI | \
+    1 << EVENT_ID_RECHARGER \
     )
 
 /*
@@ -80,7 +86,7 @@ typedef struct event{
   int first_init;
 }event_s;
 
-event_s *events[EVENT_MAX+1];
+extern event_s *events[EVENT_MAX+1];
 
 /** Returns true whether we should call the *_event functions.
   * This will clear the 'has_event' flag.

@@ -109,7 +109,8 @@ int motor_event() {
       motor_tx_data[i][0] = MOTOR_PWM_HEADER;
     // If we're in a non-zero charge state, i.e. plugged in, don't move!
     // And, perhaps innapropriatly for this part of the code, display voltage state on LED's
-    if(motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING) {
+    if(motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
+      motor_get_charge_state() != POWER_CHARGE_COMPLETE) {
       motor_tx_data[i][1] = 0;
       leddrive_chargestatus();
     }
