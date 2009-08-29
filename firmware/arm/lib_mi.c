@@ -33,7 +33,7 @@ void mi_disable_commands() {
 }
 
 void mi_enable_commands() {
-  mi_disabled_commands = 1;
+  mi_disabled_commands = 0;
 }
 
 int mi_event(void) {
