@@ -25,6 +25,9 @@
 #include "lib_thermo.h"
 #include "lib_recharger.h"
 
+#define INVALID_RANGE_STR ("%s must be in range %d..%d\r")
+#define INVALID_ARGNUM_STR ("Invalid argument(s) for %s.\r")
+
 // Included for EOF, NULL
 #include <stdio.h>
 
@@ -208,7 +211,7 @@ void ui_setled(char * cmdstr)
   if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
     &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
   {
-    armprintf ("Invalid number of arguments to set_led.\r");
+    armprintf (INVALID_ARGNUM_STR, "set_led");
     return;
   }
 
@@ -218,8 +221,8 @@ void ui_setled(char * cmdstr)
       ledColors[1] >= LEDCTL_MAX_VALUE ||
       ledColors[2] >= LEDCTL_MAX_VALUE)
   {
-    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
-    armprintf ("Colors must be in range 0..%d\r", LEDCTL_MAX_VALUE);
+    armprintf (INVALID_RANGE_STR, "LED", 0, LEDCTL_NUM_LEDS);
+    armprintf (INVALID_RANGE_STR, "Colors", 0, LEDCTL_MAX_VALUE); 
     return;
   }
 
@@ -236,13 +239,13 @@ void ui_getled (char * cmdstr)
 
   if (armsscanf (cmdstr, "%s %d", ui_cmdname, &ledNum) < 2)
   {
-    armprintf ("Invalid number of arguments to get_led.\r");
+    armprintf (INVALID_ARGNUM_STR, "get_led");
     return;
   }
 
   if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
   {
-    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
+    armprintf (INVALID_RANGE_STR, "LED", 0, LEDCTL_NUM_LEDS);
     return;
   }
   
@@ -312,7 +315,7 @@ void ui_setall(char * cmdstr)
 
   if (armsscanf (cmdstr, "%s %d", ui_cmdname, &colValue) < 2)
   {
-    armprintf ("Invalid number of arguments to setall.\r");
+    armprintf (INVALID_ARGNUM_STR, "setall");
     return;
   }
 
@@ -330,7 +333,7 @@ void ui_setdot(char * cmdstr)
   if (armsscanf (cmdstr, "%s %d %d %d %d", ui_cmdname,
     &ledNum, &ledColors[0], &ledColors[1], &ledColors[2]) < 5)
   {
-    armprintf ("Invalid number of arguments to set_dot.\r");
+    armprintf (INVALID_ARGNUM_STR, "set_dot");
     return;
   }
 
@@ -340,8 +343,8 @@ void ui_setdot(char * cmdstr)
       ledColors[1] >= LEDCTL_DC_MAX_VALUE ||
       ledColors[2] >= LEDCTL_DC_MAX_VALUE)
   {
-    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
-    armprintf ("Colors must be in range 0..%d\r", LEDCTL_MAX_VALUE);
+    armprintf (INVALID_RANGE_STR, "LED", 0, LEDCTL_NUM_LEDS);
+    armprintf (INVALID_RANGE_STR, "Colors", 0, LEDCTL_MAX_VALUE);
     return;
   }
 
@@ -368,7 +371,7 @@ void ui_getdot (char * cmdstr)
     ledNum = 0;
   else if (ledNum < 0 || ledNum >= LEDCTL_NUM_LEDS)
   {
-    armprintf ("LED must be in range 0..%d\r", LEDCTL_NUM_LEDS);
+    armprintf (INVALID_RANGE_STR, "LED", 0, LEDCTL_NUM_LEDS);
     return;
   }
 
@@ -469,7 +472,7 @@ void ui_mode (char * cmdstr)
 
   if (armsscanf(cmdstr, "%s %s %s", ui_cmdname, ui_strarg, modestr) < 3)
   {
-    armprintf ("Invalid argument(s) to ui_mode.\r");
+    armprintf (INVALID_ARGNUM_STR, "ui_mode");
     return;
   }
 
@@ -721,6 +724,8 @@ extern int swi_fail_count;
   */
 void ui_test (char * cmdstr)
 {
+  armprintf ("Disabled.");
+  /*
   if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
   {
     armprintf ("Test what?\r");
@@ -746,13 +751,14 @@ void ui_test (char * cmdstr)
     armprintf ("Number of retarded calls to crit_disable_int: %d\r");
   }
   else
-    armprintf ("Invalid argument.\r");
+    armprintf ("Invalid argument(s) to %s.\r", "test");
+  */
 }
 
 void ui_error ( char * cmdstr) 
 {
   if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2){
-    armprintf ("error [clear]\r");
+    armprintf (INVALID_ARGNUM_STR, "error");
     return;
   }
 
@@ -772,7 +778,7 @@ void ui_motor ( char * cmdstr)
   
   if (armsscanf(cmdstr, "%s %d %d %d", ui_cmdname, &motor, &speed, &last) < 3)
   {
-    armprintf ("Too few arguments");
+    armprintf (INVALID_ARGNUM_STR, "motor");
     return;
   }
   if (armsscanf(cmdstr, "%s %d %d %d", ui_cmdname, &motor, &speed, &last) < 4)
