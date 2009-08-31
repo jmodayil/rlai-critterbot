@@ -3,6 +3,9 @@
  *
  *  Created on: Jun 5, 2009
  *      Author: sokolsky
+ *
+ * This code is most definietly NOT OO.  There is significant internal state
+ * shared between functions.
  */
 
 #include <avr/io.h>
@@ -10,21 +13,28 @@
 
 // Maximum speed to allow the wheels to spin
 #define SPEED_LIMIT 25
-#define KP 3 //8
-#define KD 4 //50
+// KP and KD for the standard PID controller
+#define KP 3
+#define KD 4
+// KP, KI, and KD for the soft PID controller
 #define KPS 8
 #define KIS 8
 #define KDS 16
-#define P_LIMIT 500
-#define I_LIMIT 25
+// Current limit
+#define I_LIMIT 30
+// Current limit for stalled motor condition
 #define I_LIMIT_MIN 1
-#define I_LIMIT_SCALE 32
-#define I_LIMIT_RATE 3
-// What is this?
-#define P_SCALE 3
-#define E_SCALE 4
-#define I_HIST_SIZE 100
-#define STALL_THRESH 20
+// Ratio for scaling down current in a stalled condition.  A rate of 1 will
+// scale down to I_LIMIT_MIN in 255 cycles, higher rates multiply this.
+#define I_LIMIT_RATE 6
+// Bound the integral error term in
+#define I_ERROR_MAX 1000
+// Bound the maximum output of the PID controllers.  This is defined as
+// 64 * 127, the maximum control value shifted by 6.
+#define MAX_FIXED_POINT_OUTPUT 8128
+
+// Absolute value
+#define ABS(x) ((x) >= 0 ? (x) : -(x))
 
 //static int8_t speed_limit_now;
 static uint8_t i_limit_now;
@@ -35,7 +45,7 @@ extern volatile uint8_t v_now;
 
 // Maximum voltage to send to the motors.  This floats with the system bus
 // voltage but may be decreased due to a extended current limit condition
-volatile int8_t voltage_limit;
+int8_t voltage_limit;
 
 volatile uint16_t count, old_count;
 uint8_t rstate, event, event_count;
@@ -43,15 +53,13 @@ uint8_t adc_mux;
 volatile uint8_t dat, dummy, current, temperature;
 volatile uint8_t v_now;
 
-
 void motor_init(void) {
 
   v_now = 255;
   error = 0;
 
-  voltage_limit = 127;
+  voltage_limit = 0;
   i_limit_now = I_LIMIT;
-  i_limit_now = SPEED_LIMIT;
   motor_setpoint = 101;
   PORTD &= ~(MTR_EN_PIN|MTR_A_PIN|MTR_B_PIN|MTR_LOW_A_PIN|MTR_LOW_B_PIN);
 
@@ -85,7 +93,7 @@ void set_voltage(int8_t voltage) {
   if(voltage < -voltage_limit)
     voltage = -voltage_limit;
 
-  // Leave one dead cycle if velocity sign changes
+  // Leave one dead cycle if the velocity sign changes
   if((voltage >= 0 ? 1 : -1) != (last_voltage >= 0 ? 1 : -1)) {
     OCR0A = 0;
     OCR0B = 0;
@@ -95,7 +103,7 @@ void set_voltage(int8_t voltage) {
     OCR0B = (voltage > 0) ?
       ((voltage == 127) ? 255 : 2 * (uint8_t)voltage) : 0;
     OCR0A = (voltage < 0) ?
-      ((voltage == -127) ? 255 : 2 * (256-(uint8_t)voltage)) : 0;
+      ((voltage <= -127) ? 255 : 2 * (256-(uint8_t)voltage)) : 0;
     if( voltage < 0 ) {
       PORTD &= ~MTR_LOW_A_PIN;
       PORTD |= MTR_LOW_B_PIN;
@@ -112,18 +120,17 @@ void set_voltage(int8_t voltage) {
 
 int8_t current_limit(int8_t setpoint) {
 
+  static uint8_t in_limit;
+  // Maximum voltage we can reach due to v_now bus voltage
+  uint8_t max_volt;
   static int8_t correction;
   static uint8_t count;
-  int16_t error;
   int8_t setpoint_sign = setpoint > 0 ? 1 : -1;
   // make setpoint a magnitude
-  setpoint = setpoint > 0 ? setpoint : -setpoint;
-
-  // calculate difference between limit and actual current
-  error = i_limit_now - current;
+  setpoint = ABS(setpoint);
 
   // If we are over the current limit
-  if(error < 0) {
+  if(current > I_LIMIT) {
     // Increase the correction factor by one
     correction++;
     // Bound the correction
@@ -141,31 +148,71 @@ int8_t current_limit(int8_t setpoint) {
     // a negative correction, which makes thing very very bad
     if(correction < 0)
       correction = 0;
-    else {
-      if(voltage_limit < 127)
-        voltage_limit++;
-      if(voltage_limit > 127)
-        voltage_limit = 127;
-      count = 0;
-    }
   }
 
-  if(correction > 0) {
-    //count++;
-    //if(count >= I_LIMIT_RATE) {
-      //count = 0;
+  // Decrease current to very small value if the motor is stalled.
+  // This does not protect against a condition where the motor is spinning
+  // but still using a large amount of current.
+  if(in_limit < 255 && clicks == 0 && motor_setpoint != 0)
+    in_limit++;
+  if(in_limit > 0 && clicks != 0 && motor_setpoint != 0)
+      in_limit--;
+  if(in_limit > 0 && current > I_LIMIT_MIN) {
+    count++;
+    if(count >= I_LIMIT_RATE) {
+      count = 0;
       if(voltage_limit > 1)
         voltage_limit--;
-    //}
+    }
   }
   else {
     if(voltage_limit < 127)
-      voltage_limit++;
+        voltage_limit++;
   }
 
-  //if(speed_limit_now <= 0)
-  //  return 0;
+
+  // Find the maximum safe voltage we can send to the motors given the bus
+  // voltage.  This should cap the voltage to the motors at 12V, their rated
+  // voltage, and disable motors if voltage is > 17.5V
+  if(v_now <= 120)
+    max_volt = 127;
+  else if(v_now > 175)
+    max_volt = 0;
+  else
+    max_volt = 127 - ((uint8_t)(v_now - 120)* 3) / 4;
+
+  if(voltage_limit > max_volt)
+    voltage_limit = max_volt;
+
+
   return (setpoint - correction) * setpoint_sign;
+}
+
+/**
+ * Hard speed limit for voltage control mode.  Prevents large commands from
+ * accelerating the motors past a certain speed.
+ *
+ * Relatively unstable when there is zero load on the motors.  With a little
+ * load (i.e. weight of the robot) output is much smoother, however there is
+ * plenty of room to improve this as it is quite rough.
+ */
+int8_t speed_limit(int8_t setpoint) {
+
+  static uint8_t correction;
+
+  int16_t error = ABS(clicks) - (SPEED_LIMIT << 2);
+
+  if(error > 0) {
+    correction += (error >> 4) + 1;
+    if(correction > ABS(setpoint))
+      correction = ABS(setpoint);
+  }
+  else if(correction > 0) {
+    correction--;
+  }
+
+  return (setpoint >= 0) ? (setpoint - correction) : (setpoint + correction);
+
 }
 
 /**
@@ -184,7 +231,7 @@ int8_t pid_control(int8_t setpoint) {
     return 0;
 
   last_error = error;
-  // Find the error and shift left for fixed point math.
+  // Find the error, clicks is 4x as large as setpoint in scale
   error = (((int16_t)setpoint << 2) - clicks);
   // Find the error derivative
   d_error = (error - last_error);
@@ -192,10 +239,10 @@ int8_t pid_control(int8_t setpoint) {
   // Calculate the output by incrementing it by the P and D errors
   hires_speed += error * KP + d_error * KD;
   // Bound output
-  if(hires_speed > 8128)
-    hires_speed = 8128;
-  if(hires_speed < -8128)
-    hires_speed = -8128;
+  if(hires_speed > MAX_FIXED_POINT_OUTPUT)
+    hires_speed = MAX_FIXED_POINT_OUTPUT;
+  if(hires_speed < -MAX_FIXED_POINT_OUTPUT)
+    hires_speed = -MAX_FIXED_POINT_OUTPUT;
 
   // Scale back down from fixed point to integer for output.
   return hires_speed >> 6;
@@ -226,16 +273,21 @@ int8_t soft_pid_control(int8_t setpoint) {
   error = (((int16_t)setpoint << 2) - clicks);
   d_error = (error - last_error);
 
-  // Use a decaying sum to approximate the integral error.
-  // @TODO calculate if this needs to be bounded.
+  // Use a decaying sum to approximate the integral error.  Decrease previous
+  // sum by about 2% each cycle.  This brings it down to about 1/8th the
+  // original value after 100 cycles.
   i_error = (i_error * 63) / 64 + error;
+  if(i_error > I_ERROR_MAX)
+    i_error = I_ERROR_MAX;
+  if(i_error < -I_ERROR_MAX)
+    i_error = -I_ERROR_MAX;
 
   // PID calculation and bounding
   hires_speed = error * KPS + i_error * KIS + d_error * KDS;
-  if(hires_speed > 8128)
-    hires_speed = 8128;
-  if(hires_speed < -8128)
-    hires_speed = -8128;
+  if(hires_speed > MAX_FIXED_POINT_OUTPUT)
+    hires_speed = MAX_FIXED_POINT_OUTPUT;
+  if(hires_speed < -MAX_FIXED_POINT_OUTPUT)
+    hires_speed = -MAX_FIXED_POINT_OUTPUT;
 
   return hires_speed >> 6;
   //final_speed = hires_speed >> 6;

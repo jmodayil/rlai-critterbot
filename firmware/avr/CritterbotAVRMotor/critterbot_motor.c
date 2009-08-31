@@ -12,6 +12,7 @@ uint8_t adc_mux;
 volatile uint8_t dat, dummy, current, temperature;
 volatile uint8_t v_now;
 volatile uint8_t motor_mode;
+extern int8_t voltage_limit;
 
 /*
  * SPI interrupt routine, listens for incoming packets from the arm
@@ -194,6 +195,9 @@ int main(void) {
       command = current_limit(motor_setpoint);
       if(motor_mode == 0) {
         command = soft_pid_control(command);
+      }
+      if(motor_mode == 1) {
+        command = speed_limit(command);
       }
       set_voltage(command);
 

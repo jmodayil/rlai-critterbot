@@ -24,6 +24,7 @@ void motor_init(void);
 void set_voltage(int8_t);
 int8_t power_limit(int8_t);
 int8_t current_limit(int8_t);
+int8_t speed_limit(int8_t);
 int8_t pid_control(int8_t);
 int8_t soft_pid_control(int8_t);
 
