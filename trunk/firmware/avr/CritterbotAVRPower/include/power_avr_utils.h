@@ -18,6 +18,10 @@
 
 #define ADC_AVG_SAMPLES 4
 
+#define BAT40V_CORRECTION 3
+#define BAT160V_CORRECTION 3
+#define BAT280V_CORRECTION 3
+
 void bat40_enable();
 void bat40_disable();
 void bat160_enable();

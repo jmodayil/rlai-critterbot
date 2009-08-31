@@ -1,4 +1,4 @@
-#Fri Jun 26 15:12:25 EDT 2009
+#Mon Jul 20 13:07:17 EDT 2009
 avrtarget/ClockFrequency=8000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
@@ -8,7 +8,7 @@ avrtarget/UseExtendedRAMforHeap=true
 avrtarget/avrdude/BitBangDelay=
 avrtarget/avrdude/Bitclock=
 avrtarget/avrdude/EEPROMFile=
-avrtarget/avrdude/EEPROMFromConfig=true
+avrtarget/avrdude/EEPROMFromConfig=false
 avrtarget/avrdude/FlashFile=
 avrtarget/avrdude/FlashFromConfig=true
 avrtarget/avrdude/Fuses/ByteValues=226\:223\:255

@@ -10,6 +10,12 @@
 
 #include <avr/io.h>
 
+// Port A connections
+#define DOCK_EN_PORT    PORTA
+#define DOCK_EN_DDR     DDRA
+#define DOCK_EN_PIN     PINA
+#define DOCK_EN         0x80
+
 // Port B connections
 #define SPI_PORT        PORTB
 #define SPI_DDR         DDRB
