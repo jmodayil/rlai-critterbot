@@ -74,6 +74,10 @@ void general_init(void) {
   V3INHIB_PORT |= V3INHIB;
   V3INHIB_DDR |= V3INHIB;
 
+  // Enable the dock pullup
+  DOCK_EN_DDR |= DOCK_EN;
+  DOCK_EN_PORT |= DOCK_EN;
+
   // Pullups on for switch input
   SW_PORT |= (SW1 | SW2);
   // LED1 is output
@@ -249,7 +253,6 @@ int main(void) {
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
   }
-
   // If we were shutdown and partially charged, we won't continue unless
   // the charger is plugged in!
   if(charge_state != 0 && !(system_state & CHARGE_OK)) {

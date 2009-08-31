@@ -37,8 +37,10 @@ void charge( void ) {
       // state to resume from.
       charge_state = 200;
     // All is okay if we finished charging when it was unplugged.
-    if(charge_state == 10)
+    if(charge_state == 10) {
       charge_state = 0;
+      LED1_PORT &= ~LED1;
+    }
     return;
   }
   // Due to the above test, we should never get this far unless we are in
@@ -68,6 +70,7 @@ void charge( void ) {
       break;
     // Charger 40 on normal
     case 2:
+      charger40_enable();
       stat = charger40_status();
       switch(stat) {
         case 0:
@@ -102,6 +105,8 @@ void charge( void ) {
       break;
     // Charger 40 top off, charger 160 normal or top off
     case 4:
+      charger40_enable();
+      charger160_enable();
       // Eventually we will get to this state if the batteries are unplugged
       // by this point all batteries should be very low, so reset to charge_state
       // 0 and we'll stay there happily.
@@ -169,6 +174,7 @@ void charge( void ) {
     // Charger 160 normal
     case 5:
       charger40_disable();
+      charger160_enable();
       stat = charger160_status();
       switch(stat) {
         case 0:
@@ -202,6 +208,8 @@ void charge( void ) {
       break;
     // Charger 160 top off, charger 280 normal
     case 7:
+      charger160_enable();
+      charger280_enable();
       stat = charger160_status();
       switch(stat) {
         case 0:
@@ -254,6 +262,7 @@ void charge( void ) {
     // Charger 280 normal
     case 8:
       charger160_disable();
+      charger280_enable();
       stat = charger280_status();
       switch(stat) {
         case 0:
@@ -281,6 +290,7 @@ void charge( void ) {
       break;
     // Charger 280 top off
     case 9:
+      charger280_enable();
       stat = charger280_status();
       switch(stat) {
         case 0:

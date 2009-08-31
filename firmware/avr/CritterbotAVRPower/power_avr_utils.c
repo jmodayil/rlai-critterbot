@@ -163,20 +163,26 @@ uint8_t get_adc(uint8_t channel) {
   return temp;
 }
 
+/* Returns the roughly correct battery voltage in 1/10th of a Volt,
+ * averaged over a number of samples
+ */
 uint8_t get_bat40_voltage(void) {
   static uint8_t avg[ADC_AVG_SAMPLES];
-  uint8_t i;
+  uint8_t i, temp;
   uint16_t total;
 
-  if(avg[0] == 0) {
-    for(i = 0; i < ADC_AVG_SAMPLES; i++)
-      avg[i] = get_adc(BAT40SENSE) - 3;
-  }
-  else {
-    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
-      avg[i] = avg[i+1];
-    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT40SENSE) - 3;
-  }
+  // Shift our array a bit, yeah, we could keep a circular pointer but hey,
+  // this works too.
+  for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+    avg[i] = avg[i+1];
+  // If the battery is not connected, get_adc may return a value lower than
+  // the correction, this results in extremely high incorrect readings,
+  // so make sure that doesn't happen here.
+  temp = get_adc(BAT40SENSE);
+  if(temp < BAT40V_CORRECTION)
+    temp = BAT40V_CORRECTION;
+  avg[ADC_AVG_SAMPLES - 1] = temp - BAT40V_CORRECTION;
+
   total = 0;
   for(i = 0; i < ADC_AVG_SAMPLES; i++)
     total += avg[i];
@@ -185,18 +191,16 @@ uint8_t get_bat40_voltage(void) {
 
 uint8_t get_bat160_voltage(void) {
   static uint8_t avg[ADC_AVG_SAMPLES];
-  uint8_t i;
+  uint8_t i, temp;
   uint16_t total;
 
-  if(avg[0] == 0) {
-    for(i = 0; i < ADC_AVG_SAMPLES; i++)
-      avg[i] = get_adc(BAT160SENSE) - 3;
-  }
-  else {
-    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
-      avg[i] = avg[i+1];
-    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT160SENSE) - 3;
-  }
+  for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+    avg[i] = avg[i+1];
+  temp = get_adc(BAT160SENSE);
+  if(temp < BAT40V_CORRECTION)
+    temp = BAT40V_CORRECTION;
+  avg[ADC_AVG_SAMPLES - 1] = temp - BAT160V_CORRECTION;
+
   total = 0;
   for(i = 0; i < ADC_AVG_SAMPLES; i++)
     total += avg[i];
@@ -205,18 +209,16 @@ uint8_t get_bat160_voltage(void) {
 
 uint8_t get_bat280_voltage(void) {
   static uint8_t avg[ADC_AVG_SAMPLES];
-  uint8_t i;
+  uint8_t i, temp;
   uint16_t total;
 
-  if(avg[0] == 0) {
-    for(i = 0; i < ADC_AVG_SAMPLES; i++)
-      avg[i] = get_adc(BAT280SENSE) - 3;
-  }
-  else {
-    for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
-      avg[i] = avg[i+1];
-    avg[ADC_AVG_SAMPLES - 1] = get_adc(BAT280SENSE) - 3;
-  }
+  for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
+    avg[i] = avg[i+1];
+  temp = get_adc(BAT280SENSE);
+  if(temp < BAT280V_CORRECTION)
+    temp = BAT280V_CORRECTION;
+  avg[ADC_AVG_SAMPLES - 1] = temp - BAT280V_CORRECTION;
+
   total = 0;
   for(i = 0; i < ADC_AVG_SAMPLES; i++)
     total += avg[i];
@@ -242,12 +244,12 @@ uint8_t get_vsys(void) {
 
   if(avg[0] == 0) {
     for(i = 0; i < ADC_AVG_SAMPLES; i++)
-      avg[i] = get_adc(VSYS) - 3;
+      avg[i] = get_adc(VSYS);
   }
   else {
     for(i = 0; i < ADC_AVG_SAMPLES - 1; i++)
       avg[i] = avg[i+1];
-    avg[ADC_AVG_SAMPLES - 1] = get_adc(VSYS) - 3;
+    avg[ADC_AVG_SAMPLES - 1] = get_adc(VSYS);
   }
   total = 0;
   for(i = 0; i < ADC_AVG_SAMPLES; i++)
