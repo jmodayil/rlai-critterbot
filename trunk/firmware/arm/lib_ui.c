@@ -69,7 +69,7 @@ ui_cmd_item ui_commands[] = {
   {"report", ui_report, "report [led|accel|adc0-4|error]"},
   {"mode", ui_mode, "mode <led [gs|dc]> - broken"},
   {"test", ui_test, "test [ramfunc|int|stress]"},
-  {"bootloader", ui_bootloader, "bootloader - do not use"},
+  {"bootloader", ui_bootloader, "bootloader [program] - reprogram the chip"},
   {"reset", ui_reset, "reset"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
   {"error", ui_error, "error [clear]"},
