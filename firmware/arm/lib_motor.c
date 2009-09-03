@@ -211,8 +211,8 @@ void motor_set_speed_slew(signed char speed100, signed char speed220,
   //motor_slew_interval[1] = ((float)(speed220 - motor_speed[1])) / motor_slew_steps;
   //motor_slew_interval[2] = ((float)(speed340 - motor_speed[2])) / motor_slew_steps;
   motor_slew_interval[0] = ((speed100 - motor_speed[0]) << 16) / motor_slew_steps;
-  motor_slew_interval[1] = ((speed100 - motor_speed[1]) << 16) / motor_slew_steps;
-  motor_slew_interval[2] = ((speed100 - motor_speed[2]) << 16) / motor_slew_steps;
+  motor_slew_interval[1] = ((speed220 - motor_speed[1]) << 16) / motor_slew_steps;
+  motor_slew_interval[2] = ((speed340 - motor_speed[2]) << 16) / motor_slew_steps;
   motor_speed_float[0] = motor_speed[0] << 16;
   motor_speed_float[1] = motor_speed[1] << 16;
   motor_speed_float[2] = motor_speed[2] << 16;
