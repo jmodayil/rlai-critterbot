@@ -14,9 +14,13 @@
 
 volatile uint8_t system_voltage, rstate;
 
+/** system_state is a bit-map representing the state of the system, see
+  *  critterbot_power.h */
 uint8_t system_state;
 uint8_t bat40i, bat160i, bat280i;
 uint8_t bat40v, bat160v, bat280v;
+uint8_t ledCounter;
+uint8_t ledBit;
 
 ISR(SPI_STC_vect)
 {
@@ -158,6 +162,8 @@ int battery_level_okay(void) {
     diff = 1;
   if (bat280v > bat160v + 2)
     diff = 1;
+  /* If any of the batteries differ, increment the count (to obtain 
+   *  hysteresis) */
   if (diff == 1) {
     if (count < 10)
       count++;
@@ -166,15 +172,19 @@ int battery_level_okay(void) {
     if (count > 0)
       count--;
   }
+  /* Once we sufficiently often see a difference in voltage, clear the BAT_OK
+     flag */
   if (count >= 7) {
     system_state &= ~BAT_OK;
     return 0;
   }
+  /* Otherwise set the BAT_OK flag */
   else if (count <= 3) {
     system_state |= BAT_OK;
     return 1;
   }
   else {
+    /* Return whether the batteries are okay according to system_state */
     return (system_state & BAT_OK) >> 2;
   }
 }
@@ -282,9 +292,10 @@ int main(void) {
 
     switch (system_state) {
     // Voltage is low and batteries unbalanced, can't charge
-    case 0:
+    // See critterbot_power.h for a system_state breakdown
+    case 0: 
     // Unbalanced batteries, can't charge
-    case 1:
+    case 1: // VOLTAGE_OK
       bat40_disable();
       bat160_disable();
       bat280_disable();
@@ -294,7 +305,7 @@ int main(void) {
       break;
 
       // Low battery, can't charge
-    case 4:
+    case 4: // BAT_OK
       // Suppose batteries should be enabled here.
       bat40_enable();
       bat160_enable();
@@ -305,7 +316,7 @@ int main(void) {
       break;
 
       // Normal running mode
-    case 5:
+    case 5: // BAT_OK, VOLTAGE_OK
       bat40_enable();
       bat160_enable();
       bat280_enable();
@@ -321,9 +332,9 @@ int main(void) {
       break;
 
       // Unbalanced batteries but able to charge
-    case 3:
+    case 3: // VOLTAGE_OK, CHARGE_OK
       // Balanced batteries and able to charge.
-    case 7:
+    case 7: // VOLTAGE_OK, CHARGE_OK, BAT_OK
       if (!(SW_PIN & SW1)) {
         cpu_enable();
       }
@@ -337,9 +348,9 @@ int main(void) {
         motor_fan_off();
       break;
 
-    // Invalid states
-    case 2:
-    case 6:
+    // Invalid states (because CHARGE_OK occurs only if VOLTAGE_OK)
+    case 2: // CHARGE_OK
+    case 6: // CHARGE_OK, BAT_OK
     // For now any charge related error will cause us to get here.  An since this shuts off the cpu,
     // we will never get any useful indication of the charge error, this should be remedied in ARM
     // code and the LED displays.
@@ -360,7 +371,33 @@ int main(void) {
 
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
+
+    // Added by MGB: display charge_staet
+    led_charge_state();
+      
   }
 
   return 0;
+}
+
+void led_charge_state() {
+  uint8_t value;
+  // Find the ledDigit'th bit
+  value = charge_state & (1 << ledDigit);
+
+  ledCounter++;
+  if (ledCounter >= 25) {
+    // Display digit 'ledDigit'
+    ledDigit++;
+    if (ledDigit >= 8)
+      ledDigit = 0;
+    
+    // Turn the LED off
+    LED1_PORT &= ~LED1;
+  }
+
+  // if bit ledDigit was on, flash the LED for half of the second
+  else if (value) {
+    LED1_PORT |= LED1;
+  }
 }
