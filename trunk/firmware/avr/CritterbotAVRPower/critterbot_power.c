@@ -382,21 +382,26 @@ int main(void) {
 
 void led_charge_state() {
   uint8_t value;
-  // Find the ledDigit'th bit
-  value = charge_state & (1 << ledDigit);
 
   ledCounter++;
+  if (ledCounter >= 50) {
+    // Display digit 'ledBit'
+    ledBit++;
+    if (ledBit >= 8)
+      ledBit = 0;
+
+    ledCounter = 0;
+  }
+
+  // Find the ledBit'th bit
+  value = charge_state & (1 << ledBit);
+
   if (ledCounter >= 25) {
-    // Display digit 'ledDigit'
-    ledDigit++;
-    if (ledDigit >= 8)
-      ledDigit = 0;
-    
     // Turn the LED off
     LED1_PORT &= ~LED1;
   }
 
-  // if bit ledDigit was on, flash the LED for half of the second
+  // if bit ledBit was on, flash the LED for half of the second
   else if (value) {
     LED1_PORT |= LED1;
   }
