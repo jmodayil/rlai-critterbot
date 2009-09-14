@@ -261,6 +261,8 @@ uint8_t get_vsys(void) {
 }
 
 void set_cpu_fan(uint8_t vsys) {
+  /* Dividing the operation as 200 - vsys + 70 ensures that we don't use
+    a 16 bit operation */
   uint8_t temp = 200 - vsys;
   OCR2B = temp + 70;
 }

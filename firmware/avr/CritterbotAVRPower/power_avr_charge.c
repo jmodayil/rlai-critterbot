@@ -39,7 +39,7 @@ void charge( void ) {
     // All is okay if we finished charging when it was unplugged.
     if(charge_state == 10) {
       charge_state = 0;
-      LED1_PORT &= ~LED1;
+      // LED1_PORT &= ~LED1;
     }
     return;
   }
@@ -324,7 +324,7 @@ void charge( void ) {
       charger40_disable();
       charger160_disable();
       charger280_disable();
-      LED1_PORT |= LED1;
+      // LED1_PORT |= LED1;
       break;
     // Error!
     default:
