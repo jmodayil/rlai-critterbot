@@ -273,6 +273,7 @@ int main(void) {
   // If we were shutdown and partially charged, we won't continue unless
   // the charger is plugged in!
   if(charge_state != 0 && !(system_state & CHARGE_OK)) {
+    motor_fan_off();
     // HA!  Take that state machine!!!
     while(1);
   }

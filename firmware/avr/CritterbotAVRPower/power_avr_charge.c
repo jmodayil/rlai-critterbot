@@ -31,11 +31,15 @@ void charge( void ) {
   // Signal an error if we were in the middle of charging.
   if(!(system_state & CHARGE_OK)) {
     // Error if we were charging and the charger was unplugged.
-    if(charge_state > 0 && charge_state < 10)
+    if(charge_state > 0 && charge_state < 10) {
       // We explicitly don't want to save this change to eeprom.
       // Charging was interrupted and we want to preserve the previous
       // state to resume from.
       charge_state = 200;
+      charger40_disable();
+      charger160_disable();
+      charger280_disable();
+    }
     // All is okay if we finished charging when it was unplugged.
     if(charge_state == 10) {
       charge_state = 0;
@@ -43,6 +47,10 @@ void charge( void ) {
     }
     return;
   }
+  else if (charge_state == 200) // and system_state & CHARGE_OK implicitly
+    // If we are plugged back in after being disconnected, resume charge
+    read_charge_state();
+
   // Due to the above test, we should never get this far unless we are in
   // system_state 3 or 7.
 
@@ -57,16 +65,20 @@ void charge( void ) {
         break;
       // If the batteries are uneven, start charging
       if(!(system_state & BAT_OK))
-        charge_state = 1;
+        set_charge_state(1);
       // Otherwise, charge only if the battery voltage has fallen a little
-      else
-        if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
-          charge_state = 1;
+      else if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
+        set_charge_state(1);
+      else {
+        charger40_disable();
+        charger160_disable();
+        charger280_disable();
+      }
       break;
     // Start charger 40
     case 1:
       charger40_enable();
-      set_charge_state(2);
+      charge_state = 2;
       break;
     // Charger 40 on normal
     case 2:
@@ -82,7 +94,7 @@ void charge( void ) {
           charge_state = 200;
           break;
         case 2:
-          charge_state = 3;;
+          set_charge_state(3);
           break;
         case 3:
           // To get here means charger 40 went directly into shutdown before
@@ -100,8 +112,9 @@ void charge( void ) {
       break;
     // Charger 40 top off, start charger 160
     case 3:
+      charger40_enable();
       charger160_enable();
-      set_charge_state(4);
+      charge_state = 4;
       break;
     // Charger 40 top off, charger 160 normal or top off
     case 4:
@@ -184,7 +197,7 @@ void charge( void ) {
           charge_state = 200;
           break;
         case 2:
-          charge_state = 6;
+          set_charge_state(6);
           break;
         case 3:
           // This would mean charger 160 either went from full charge to disabled,
@@ -202,8 +215,9 @@ void charge( void ) {
       break;
     // Charger 160 top off, start charger 280 or top off
     case 6:
+      charger160_enable();
       charger280_enable();
-      set_charge_state(7);
+      charge_state = 7;
       break;
     // Charger 160 top off, charger 280 normal
     case 7:
