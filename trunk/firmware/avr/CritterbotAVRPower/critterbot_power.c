@@ -337,6 +337,7 @@ int main(void) {
     case 7: // VOLTAGE_OK, CHARGE_OK, BAT_OK
       if (!(SW_PIN & SW1)) {
         cpu_enable();
+        set_cpu_fan(system_voltage);
       }
       else {
         cpu_disable();
