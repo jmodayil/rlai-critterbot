@@ -12,6 +12,8 @@
 #include <avr/interrupt.h>
 #include <util/delay_basic.h>
 
+void led_charge_state();
+
 volatile uint8_t system_voltage, rstate;
 
 /** system_state is a bit-map representing the state of the system, see
@@ -103,6 +105,7 @@ void general_init(void) {
   //LED1_PORT |= LED1;
   // AVRRESET high
   //AVRRESET_PORT |= AVRRESET_PIN;
+  system_state = 0;
 }
 
 void fan_init(void) {
@@ -242,6 +245,8 @@ int charge_okay(void) {
   }
 }
 
+uint8_t init_charge_state;
+
 int main(void) {
 
   uint8_t i;
@@ -250,6 +255,8 @@ int main(void) {
   general_init();
   spi_init_slave();
   fan_init();
+
+  init_charge_state = charge_state;
 
   for (i = 0; i < 55; i++) {
     // Get a sufficient sample of battery and system voltages to begin with
@@ -373,7 +380,7 @@ int main(void) {
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
 
-    // Added by MGB: display charge_staet
+    // Added by MGB: display charge_state
     led_charge_state();
       
   }
@@ -382,28 +389,32 @@ int main(void) {
 }
 
 void led_charge_state() {
-  uint8_t value;
+  uint8_t max_time = charge_state + 1 + 10;
+
+  if (charge_state == 200) max_time = 25;
+  if (system_state & CHARGER_COMM_ERROR) max_time = 30;
+  if (system_state & CHARGER40_ERROR) max_time = 35;
+  if (system_state & CHARGER160_ERROR) max_time = 40;
+  if (system_state & CHARGER280_ERROR) max_time = 45;
 
   ledCounter++;
-  if (ledCounter >= 50) {
+  if (ledCounter >= 25) {
     // Display digit 'ledBit'
     ledBit++;
-    if (ledBit >= 8)
+    if (ledBit >= max_time)
       ledBit = 0;
 
     ledCounter = 0;
   }
 
-  // Find the ledBit'th bit
-  value = charge_state & (1 << ledBit);
-
-  if (ledCounter >= 25) {
-    // Turn the LED off
+  if (ledBit >= 0 && ledBit < 5)
+    LED1_PORT |= LED1;
+  else if (ledBit >= 5 && ledBit < 10)
+    LED1_PORT &= ~LED1;
+  else if (ledCounter >= 12) {
+    // Turn the LED off for half a cycle
     LED1_PORT &= ~LED1;
   }
-
-  // if bit ledBit was on, flash the LED for half of the second
-  else if (value) {
+  else
     LED1_PORT |= LED1;
-  }
 }
