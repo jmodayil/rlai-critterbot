@@ -120,8 +120,7 @@ void charge( void ) {
       switch(stat) {
         case 0:
           // Charger 40 was trickling, but went back to a full charge.
-          system_state |= CHARGER40_ERROR;
-          charge_state = 200;
+          // This is okay because of what happens on resume, so no errors.
           break;
         case 1:
           system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR);
@@ -213,9 +212,8 @@ void charge( void ) {
       stat = charger160_status();
       switch(stat) {
         case 0:
-          // Charger 160 should really not be fully charging here.
-          system_state |= CHARGER160_ERROR;
-          charge_state = 200;
+          // Correction:  To account for resuming charging, having charger160
+          // in full charge mode here is acceptable.
           break;
         case 1:
           system_state |= (CHARGER_COMM_ERROR | CHARGER160_ERROR);
@@ -294,8 +292,8 @@ void charge( void ) {
       stat = charger280_status();
       switch(stat) {
         case 0:
-          system_state |= CHARGER280_ERROR;
-          charge_state = 200;
+          // Ff we were interrupted and are resuming, charger280 may
+          // still be in full charge mode for a little bit, so this is okay.
           break;
         case 1:
           system_state |= (CHARGER_COMM_ERROR | CHARGER280_ERROR);
