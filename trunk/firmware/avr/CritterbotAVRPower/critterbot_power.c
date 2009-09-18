@@ -272,10 +272,12 @@ int main(void) {
   }
   // If we were shutdown and partially charged, we won't continue unless
   // the charger is plugged in!
-  if(charge_state != 0 && !(system_state & CHARGE_OK)) {
+  while(charge_state != 0 && !(system_state & CHARGE_OK)) {
+    system_voltage = get_vsys();
+    system_voltage_okay();
+    charge_okay();
     motor_fan_off();
-    // HA!  Take that state machine!!!
-    while(1);
+    cpu_fan_off();
   }
 
   v3_bus_enable();

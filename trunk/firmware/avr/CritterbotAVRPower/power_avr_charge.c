@@ -35,10 +35,7 @@ void charge( void ) {
       // We explicitly don't want to save this change to eeprom.
       // Charging was interrupted and we want to preserve the previous
       // state to resume from.
-      charge_state = 200;
-      charger40_disable();
-      charger160_disable();
-      charger280_disable();
+      charge_state = 201;
     }
     // All is okay if we finished charging when it was unplugged.
     if(charge_state == 10) {
@@ -47,7 +44,7 @@ void charge( void ) {
     }
     return;
   }
-  else if (charge_state == 200) // and system_state & CHARGE_OK implicitly
+  else if (charge_state == 201) // and system_state & CHARGE_OK implicitly
     // If we are plugged back in after being disconnected, resume charge
     read_charge_state();
 
@@ -59,7 +56,24 @@ void charge( void ) {
   // Immediately transition to a new one.
   switch(charge_state) {
     case 0:
+      charger40_disable();
+      charger160_disable();
+      charger280_disable();
       // Don't charge if any of the batteries doesn't appear to be there.
+      // *************** IMPORTANT *************
+      // Look at this code if the batteries become fully drained and shut down
+      // and the robot does not seem to be charging them.  More detail:
+      //
+      // This may actually be bad.  If the batteries are fully discharged they
+      // shut off, reading 0 volts.  Apparently we are able to charge despite
+      // this, my best guess is when the AVR first powers up there is a brief
+      // moment when all the chargers are enabled.  This causes a short burst
+      // of voltage to be applied to the batteries, and either capacitance
+      // means the battery voltages read here still appear high enough, or
+      // the batteries turn on again because of the applied power.  Either way
+      // this is not the ideal situation, but probably requires electrical
+      // modifications to fix.  This also means we can't detect when batteries
+      // are actually not connected, and will try to change anyway.
       if(bat40v < MIN_BAT_VOLTAGE || bat160v < MIN_BAT_VOLTAGE ||
           bat280v < MIN_BAT_VOLTAGE)
         break;
@@ -69,11 +83,6 @@ void charge( void ) {
       // Otherwise, charge only if the battery voltage has fallen a little
       else if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
         set_charge_state(1);
-      else {
-        charger40_disable();
-        charger160_disable();
-        charger280_disable();
-      }
       break;
     // Start charger 40
     case 1:
