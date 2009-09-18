@@ -246,6 +246,7 @@ int charge_okay(void) {
 }
 
 void initial_sampling() {
+  uint8_t i;
   for (i = 0; i < 55; i++) {
     // Get a sufficient sample of battery and system voltages to begin with
     bat40v = get_bat40_voltage();
@@ -262,14 +263,10 @@ void initial_sampling() {
 
 int main(void) {
 
-  uint8_t i;
-
   charger_init();
   general_init();
   spi_init_slave();
   fan_init();
-
-  init_charge_state = charge_state;
 
   initial_sampling();
   
