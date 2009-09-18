@@ -245,19 +245,7 @@ int charge_okay(void) {
   }
 }
 
-uint8_t init_charge_state;
-
-int main(void) {
-
-  uint8_t i;
-
-  charger_init();
-  general_init();
-  spi_init_slave();
-  fan_init();
-
-  init_charge_state = charge_state;
-
+void initial_sampling() {
   for (i = 0; i < 55; i++) {
     // Get a sufficient sample of battery and system voltages to begin with
     bat40v = get_bat40_voltage();
@@ -270,6 +258,21 @@ int main(void) {
     // 20ms delay (at 8Mhz)
     _delay_loop_2(40000);
   }
+}
+
+int main(void) {
+
+  uint8_t i;
+
+  charger_init();
+  general_init();
+  spi_init_slave();
+  fan_init();
+
+  init_charge_state = charge_state;
+
+  initial_sampling();
+  
   // If we were shutdown and partially charged, we won't continue unless
   // the charger is plugged in!
   while(charge_state != 0 && !(system_state & CHARGE_OK)) {
@@ -280,6 +283,7 @@ int main(void) {
     cpu_fan_off();
   }
 
+  initial_sampling();
   v3_bus_enable();
 
   while (1) {

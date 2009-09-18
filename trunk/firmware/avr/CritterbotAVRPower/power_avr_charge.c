@@ -99,7 +99,7 @@ void charge( void ) {
           break;
         case 1:
           // This is never a state the charger should be in.
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR);
           charge_state = 200;
           break;
         case 2:
@@ -113,8 +113,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -145,7 +145,7 @@ void charge( void ) {
           // This is okay because of what happens on resume, so no errors.
           break;
         case 1:
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR);
           charge_state = 200;
           break;
         case 2:
@@ -157,8 +157,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -168,7 +168,7 @@ void charge( void ) {
           // We should stay here
           break;
         case 1:
-          system_state |= (CHARGER_COMM_ERROR & CHARGER160_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER160_ERROR);
           charge_state = 200;
           break;
         case 2:
@@ -186,8 +186,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -216,8 +216,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR & CHARGER160_ERROR
-              & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR | 
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -250,8 +250,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -274,8 +274,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -303,8 +303,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }
@@ -334,8 +334,8 @@ void charge( void ) {
           break;
         default:
           // BAD BAD BAD
-          system_state |= (CHARGER_COMM_ERROR & CHARGER40_ERROR &
-              CHARGER160_ERROR & CHARGER280_ERROR);
+          system_state |= (CHARGER_COMM_ERROR | CHARGER40_ERROR |
+              CHARGER160_ERROR | CHARGER280_ERROR);
           charge_state = 200;
           break;
       }

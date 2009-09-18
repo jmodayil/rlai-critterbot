@@ -264,7 +264,9 @@ void set_cpu_fan(uint8_t vsys) {
   /* Dividing the operation as 200 - vsys + 70 ensures that we don't use
     a 16 bit operation */
   uint8_t temp = 200 - vsys;
-  OCR2B = temp + 70;
+  // Increase constant to increase fan speed
+  // No more than 150 (MGB) 
+  OCR2B = temp + 100;
 }
 
 void cpu_fan_off(void) {
