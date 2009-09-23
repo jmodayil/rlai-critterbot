@@ -43,6 +43,7 @@ unsigned char immobileCounter;
 char recharger_enabled;
 
 int recharger_init() {
+  recharger_enabled = 0;
   // Reset the system to the initial state
   return recharger_reset();
 }
@@ -83,9 +84,11 @@ void recharger_disable(void) {
 }
 
 int recharger_event() {
+  if (1)
+    return 0;
+
   if (!recharger_enabled && 
       motor_get_voltage() < RECHARGER_LOW_VOLTAGE_TRIGGER) {
-    
     recharger_reset();
     recharger_enable();
   }

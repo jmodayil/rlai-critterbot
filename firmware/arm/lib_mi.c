@@ -213,7 +213,7 @@ void mi_get_commands(void) {
           leddrive_clear();
           break;
         case CBATTERY:
-          leddrive_rainbow();
+          leddrive_batstatus();
           break;
         case CBALL:
           leddrive_ball();

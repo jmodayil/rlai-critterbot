@@ -24,7 +24,7 @@ event_s boot_event_s = {
   0
 };
 
-BOOT_COPY_SECTION unsigned char boot_data[BOOT_MAX_CODE_SIZE];
+BOOT_COPY_SECTION unsigned int boot_data[BOOT_MAX_CODE_SIZE/sizeof(int)];
 unsigned int boot_data_head;
 unsigned int boot_data_size;
 volatile unsigned int boot_receiving = 0;
@@ -142,7 +142,7 @@ void boot_verify()
   
   unsigned short my_crc, file_crc;
 
-  my_crc = get_crc( boot_data, boot_data_size - 2);
+  my_crc = get_crc( (unsigned char*)boot_data, boot_data_size - 2);
   file_crc = boot_data[boot_data_size - 2] << 8;
   file_crc += boot_data[boot_data_size - 1];
   if(my_crc == file_crc) {
