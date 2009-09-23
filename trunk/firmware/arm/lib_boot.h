@@ -16,7 +16,8 @@
 
 #ifdef BOOT_LOAD_TO_RAM_AND_COPY
 // This definition MUST match the linker script's BOOTRAM size!
-#define BOOT_MAX_CODE_SIZE  0xA200
+// Also, this should be a number divisible by 4
+#define BOOT_MAX_CODE_SIZE  0xA000
 // @@@ fixme
 #define BOOT_BUFFER         (boot_data)
 #elif defined(BOOT_LOAD_TO_FLASH)
@@ -46,7 +47,7 @@
   */
 #define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | RESET_KEY)
 
-extern unsigned char boot_data[];
+extern unsigned int boot_data[];
 extern unsigned int boot_data_head;
 extern unsigned int boot_data_size;
 extern volatile unsigned int boot_receiving;
