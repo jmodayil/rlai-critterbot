@@ -127,6 +127,9 @@ public class CritterStateDrop implements SimulatorDrop
   
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
+  // @todo this needs to be made to correspond with the C++ drops
+  public enum ChargeState { UNPLUGGED };
+
   /** This replaces the USeconds construct in Disco, although
    *  we do lose 3 characters of precision on the time.
    */
@@ -138,6 +141,8 @@ public class CritterStateDrop implements SimulatorDrop
   /** The current power source of the robot */
   public PowerSource power_source;
 
+  public ChargeState charge_state;
+  
   /** The bus voltage (currently unused) */
   public int bus_voltage;
   /** The state of the three batteries  */
@@ -182,6 +187,7 @@ public class CritterStateDrop implements SimulatorDrop
     return (Integer.SIZE + // data_source (as an int)
            time.getSize() +
            Integer.SIZE + // power_source (as an int)
+           Integer.SIZE + // charge_state (as an int)
            Integer.SIZE + // bus_voltage
            3 * Integer.SIZE + // batv40 + batv160 + batv280
            motor100.getSize() +
@@ -206,6 +212,7 @@ public class CritterStateDrop implements SimulatorDrop
   public CritterStateDrop() {
     power_source = PowerSource.SHORE;
     data_source  = DataSource.SIMULATOR;
+    charge_state = ChargeState.UNPLUGGED;
     
     ir_distance = new int[IR_DISTANCE_SIZE];
     ir_light    = new int[IR_LIGHT_SIZE];
@@ -232,7 +239,8 @@ public class CritterStateDrop implements SimulatorDrop
     time.writeData(pOut);
     pOut.writeInt(data_source.ordinal());
     pOut.writeInt(power_source.ordinal());
-
+    pOut.writeInt(charge_state.ordinal());
+    
     pOut.writeInt(bus_voltage);
     pOut.writeInt(batv40);
     pOut.writeInt(batv160);
@@ -275,6 +283,8 @@ public class CritterStateDrop implements SimulatorDrop
       DataSource.LOGFILE).toArray()[pIn.readInt()];
     power_source = (PowerSource)EnumSet.range(PowerSource.SHORE,
       PowerSource.BAT280).toArray()[pIn.readInt()];
+    charge_state = (ChargeState)EnumSet.range(ChargeState.UNPLUGGED,
+            ChargeState.UNPLUGGED).toArray()[pIn.readInt()];
     
     // Read in all the data, one variable at a time
     bus_voltage = pIn.readInt();
