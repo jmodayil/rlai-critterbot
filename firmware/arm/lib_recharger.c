@@ -84,14 +84,20 @@ void recharger_disable(void) {
 }
 
 int recharger_event() {
-  if (1)
-    return 0;
-
+  #if 0
+  // Commented out until the charger function works; may be moved to
+  //  lib_monitor.c
   if (!recharger_enabled && 
       motor_get_voltage() < RECHARGER_LOW_VOLTAGE_TRIGGER) {
     recharger_reset();
     recharger_enable();
   }
+  // Disable the recharger routine once the voltage goes up again 
+  else if (recharger_enabled && motor_get_voltage() > 
+    RECHARGER_LOW_VOLTAGE_TRIGGER + RECHARGER_VOLTAGE_HYSTERESIS) {
+    recharger_disable();
+  }
+  #endif
 
   if (recharger_enabled) {
     // Run the FSA every so often

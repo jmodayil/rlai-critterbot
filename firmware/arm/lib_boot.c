@@ -24,7 +24,10 @@ event_s boot_event_s = {
   0
 };
 
-BOOT_COPY_SECTION unsigned int boot_data[BOOT_MAX_CODE_SIZE/sizeof(int)];
+// Create as an int so that we get word alignment 
+BOOT_COPY_SECTION unsigned int boot_data_int[BOOT_MAX_CODE_SIZE/sizeof(int)];
+unsigned char * boot_data = (unsigned char *) boot_data_int;
+
 unsigned int boot_data_head;
 unsigned int boot_data_size;
 volatile unsigned int boot_receiving = 0;

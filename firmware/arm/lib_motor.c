@@ -38,6 +38,22 @@ static int motor_mode;
 
 static unsigned int motor_timeout_count;
 
+char motor_enabled_drive;
+
+int motor_enable_drive() {
+  int was_enabled = motor_enabled_drive;
+  motor_enabled_drive = 1;
+
+  return was_enabled;
+}
+
+int motor_disable_drive() {
+  int was_enabled = motor_enabled_drive;
+  motor_enabled_drive = 0;
+
+  return was_enabled;
+}
+
 int motor_init() {
 
   int i;
@@ -62,6 +78,8 @@ int motor_init() {
   power_packet.finished = 1;
   
   power_init_packet();
+
+  motor_enabled_drive = 1;
 
   return 0;  
 }
@@ -109,8 +127,12 @@ int motor_event() {
       motor_tx_data[i][0] = MOTOR_PWM_HEADER;
     // If we're in a non-zero charge state, i.e. plugged in, don't move!
     // And, perhaps innapropriatly for this part of the code, display voltage state on LED's
-    if(motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
-      motor_get_charge_state() != POWER_CHARGE_COMPLETE) {
+    // Also paralyze the robot if the drive is not enabled
+    // @todo The charge-related paralysis should be done via 
+    //   motor_disable_drive (MGB)
+    if(!motor_enabled_drive || ( 
+      motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
+      motor_get_charge_state() != POWER_CHARGE_COMPLETE)) {
       motor_tx_data[i][1] = 0;
       leddrive_chargestatus();
     }
