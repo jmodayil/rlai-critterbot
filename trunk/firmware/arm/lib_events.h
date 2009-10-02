@@ -33,8 +33,9 @@
 #define EVENT_ID_THERMO 11
 #define EVENT_ID_UI 12
 #define EVENT_ID_RECHARGER 13
+#define EVENT_ID_MONITOR 14
 
-#define EVENT_MAX 13
+#define EVENT_MAX 14
 
 
 unsigned int init_flags;
@@ -53,7 +54,8 @@ unsigned int event_flags;
     1 << EVENT_ID_ADCSPI | \
     1 << EVENT_ID_THERMO | \
     1 << EVENT_ID_UI | \
-    1 << EVENT_ID_RECHARGER \
+    1 << EVENT_ID_RECHARGER | \
+    1 << EVENT_ID_MONITOR \
     )
 
 // Events started at boot time 
@@ -66,7 +68,8 @@ unsigned int event_flags;
     1 << EVENT_ID_ADC | \
     1 << EVENT_ID_THERMO | \
     1 << EVENT_ID_UI | \
-    1 << EVENT_ID_RECHARGER \
+    1 << EVENT_ID_RECHARGER | \
+    1 << EVENT_ID_MONITOR \
     )
 
 /*

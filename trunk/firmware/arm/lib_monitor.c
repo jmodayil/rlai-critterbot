@@ -10,8 +10,19 @@
 
 #include "lib_motor.h"
 #include "lib_monitor.h"
+#include "lib_events.h"
+
+event_s monitor_event_s = {
+  monitor_init,
+  monitor_event,
+  0
+};
 
 int monitor_bad_motor_temp = 0;
+
+int monitor_init() {
+  return 0;
+}
 
 int monitor_event() {
   // The method calls here should be in increasing order of priority.

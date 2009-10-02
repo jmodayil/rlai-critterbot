@@ -15,6 +15,7 @@
 #define MONITOR_MIN_MOTOR_TEMPERATURE 95
 #define MONITOR_TEMPERATURE_HYSTERESIS 20
 
+int monitor_init();
 int monitor_event();
 
 int monitor_motor_temp();
