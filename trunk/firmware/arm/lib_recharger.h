@@ -54,6 +54,8 @@
 #define SHORE_POWER_MIN_VOLTAGE     170
 // Voltage (in 10ths of volts) at which we trigger the charger finder
 #define RECHARGER_LOW_VOLTAGE_TRIGGER 130
+// Disable the charger once we reach low_voltage + hysteresis
+#define RECHARGER_VOLTAGE_HYSTERESIS   5
 
 /** Event handler for the charger finder. */
 int recharger_event( void );

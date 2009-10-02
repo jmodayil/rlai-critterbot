@@ -141,4 +141,8 @@ unsigned char motor_temp(int motor);
  */
 signed char motor_command(int motor);
 
+/** Disables/enables sending motor commands to the motors. */
+int motor_disable_drive();
+int motor_enable_drive();
+
 #endif /* LIB_MOTOR_H */

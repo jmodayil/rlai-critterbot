@@ -47,7 +47,7 @@
   */
 #define BOOT_RESET_SETTINGS (AT91C_RSTC_PROCRST | AT91C_RSTC_PERRST | RESET_KEY)
 
-extern unsigned int boot_data[];
+extern unsigned char * boot_data;
 extern unsigned int boot_data_head;
 extern unsigned int boot_data_size;
 extern volatile unsigned int boot_receiving;
