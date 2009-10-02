@@ -35,6 +35,7 @@ extern event_s motor_event_s;
 extern event_s adc_event_s;
 extern event_s adcspi_event_s;
 extern event_s recharger_event_s;
+extern event_s monitor_event_s; 
 
 event_s *events[EVENT_MAX+1];
 
@@ -110,6 +111,7 @@ void events_init()
   events[11] = &thermo_event_s;
   events[12] = &ui_event_s;
   events[13] = &recharger_event_s;
+  events[14] = &monitor_event_s;
 
   // Set the first init for everyone
   for (i = 0; i <= EVENT_MAX; i++)
