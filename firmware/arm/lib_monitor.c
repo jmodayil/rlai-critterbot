@@ -36,6 +36,8 @@ int monitor_event() {
 
 int monitor_battery_charge() {
   int voltage = motor_get_voltage();
+
+  return 0;
 }
 
 int monitor_motor_temp() {
@@ -69,7 +71,12 @@ int monitor_motor_temp() {
 
   // Let's make sure the motors are paralyzed if the temperature is too 
   //  low
-  if (monitor_bad_motor_temp)
+  if (monitor_bad_motor_temp) {
     motor_disable_drive();
+    return 1;
+  }
+  else {
+    return 0;
+  }
 }
 
