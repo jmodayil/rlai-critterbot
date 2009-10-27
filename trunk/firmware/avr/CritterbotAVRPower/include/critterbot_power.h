@@ -11,6 +11,8 @@
 #define SPI_PACKET_HEADER 0x7A
 #define SPI_PADDING 0x7D
 
+#define POWER_CHARGING_DISABLED 0x1
+
 #define CHARGE_VOLTAGE_DELAY 10
 #define SYS_LOW_VOLT_THRESH 120
 #define CHARGE_THRESH 172
@@ -26,6 +28,7 @@
 
 
 extern volatile uint8_t system_voltage, rstate;
+extern volatile uint8_t commands;
 extern uint8_t system_state;
 extern uint8_t bat40i, bat160i, bat280i;
 extern uint8_t bat40v, bat160v, bat280v;

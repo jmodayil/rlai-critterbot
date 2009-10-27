@@ -16,6 +16,9 @@ void led_charge_state();
 
 volatile uint8_t system_voltage, rstate;
 
+/** Commands sent by the ARM */ 
+volatile uint8_t commands; 
+
 /** system_state is a bit-map representing the state of the system, see
   *  critterbot_power.h */
 uint8_t system_state;
@@ -40,6 +43,9 @@ ISR(SPI_STC_vect)
   case 1:
     dummy = (uint8_t) SPDR;
     SPDR = charge_state;
+
+    commands = dummy;
+
     rstate = 2;
     break;
   case 2:
@@ -106,6 +112,7 @@ void general_init(void) {
   // AVRRESET high
   //AVRRESET_PORT |= AVRRESET_PIN;
   system_state = 0;
+  commands = 0;
 }
 
 void fan_init(void) {
