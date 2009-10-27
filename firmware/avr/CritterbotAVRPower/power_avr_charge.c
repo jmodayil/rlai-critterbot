@@ -27,6 +27,8 @@ void read_charge_state(void) {
 void charge( void ) {
 
   uint8_t stat;
+  uint8_t charging_disabled = (commands & POWER_CHARGING_DISABLED);
+
   // Stop things and reset if the charger gets unplugged.
   // Signal an error if we were in the middle of charging.
   if(!(system_state & CHARGE_OK)) {
@@ -77,12 +79,17 @@ void charge( void ) {
       if(bat40v < MIN_BAT_VOLTAGE || bat160v < MIN_BAT_VOLTAGE ||
           bat280v < MIN_BAT_VOLTAGE)
         break;
-      // If the batteries are uneven, start charging
-      if(!(system_state & BAT_OK))
-        set_charge_state(1);
-      // Otherwise, charge only if the battery voltage has fallen a little
-      else if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
-        set_charge_state(1);
+      
+      // If charging is not disabled, determine whether we should start
+      //  charging now
+      if (!charging_disabled) {
+        // If the batteries are uneven, start charging
+        if(!(system_state & BAT_OK))
+          set_charge_state(1);
+        // Otherwise, charge only if the battery voltage has fallen a little
+        else if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
+          set_charge_state(1);
+      }
       break;
     // Start charger 40
     case 1:
