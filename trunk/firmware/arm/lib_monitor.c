@@ -18,9 +18,10 @@ event_s monitor_event_s = {
   0
 };
 
-int monitor_bad_motor_temp = 0;
+int monitor_bad_motor_temp;
 
 int monitor_init() {
+  monitor_bad_motor_temp = 0;
   return 0;
 }
 

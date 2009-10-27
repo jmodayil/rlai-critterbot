@@ -39,6 +39,7 @@ static int motor_mode;
 static unsigned int motor_timeout_count;
 
 char motor_enabled_drive;
+char motor_enabled_charging;
 
 int motor_enable_drive() {
   int was_enabled = motor_enabled_drive;
@@ -52,6 +53,28 @@ int motor_disable_drive() {
   motor_enabled_drive = 0;
 
   return was_enabled;
+}
+
+int motor_enable_charging() {
+  int was_enabled = motor_enabled_charging;
+  motor_enabled_charging = 1;
+
+  return was_enabled;
+}
+
+int motor_disable_charging() {
+  int was_enabled = motor_enabled_charging;
+  motor_enabled_charging = 0;
+
+  return was_enabled;
+}
+
+int motor_is_drive_enabled() { 
+  return motor_enabled_drive;
+}
+
+int motor_is_charging_enabled() { 
+  return motor_enabled_charging;
 }
 
 int motor_init() {
@@ -80,6 +103,7 @@ int motor_init() {
   power_init_packet();
 
   motor_enabled_drive = 1;
+  motor_enabled_charging = 1;
 
   return 0;  
 }
@@ -116,6 +140,11 @@ int motor_event() {
 
   // What was the bus voltage on the last cycle?
   volt = motor_get_voltage();
+
+  // Add a don't charge command if necessary (note the inversion from
+  //  enabled_charging to charging_disabled)
+  power_tx_data[1] = (!motor_enabled_charging? POWER_CHARGING_DISABLED : 0x0);
+
   // Now we queue the new commands to the motors and power controller.
   spi_send_packet(&power_packet); 
 

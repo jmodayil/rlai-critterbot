@@ -1,0 +1,90 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+
+\author{Marc G. Bellemare}
+\title{Critterbot Protocols}
+
+\newcommand{\kw}[1]{\textbf{#1}}
+
+\begin{document}
+
+\maketitle
+
+\section{ARM-Power AVR protocol}
+
+\begin{enumerate}
+  \item{SPI-based.}
+  \item{\kw{Packet size}: 6 bytes.}
+  \item{\kw{Defined in}: critterbot\_power.c (AVR), lib\_motor.c (ARM)}
+\end{enumerate}
+
+The packet format is given below.
+
+\subsection{ARM to Power AVR}
+
+\begin{enumerate}
+  \item{\kw{Byte 0}: MOTOR\_PACKET\_HEADER (0x7A)}
+  \item{\kw{Byte 1}: Flags: POWER\_CHARGING\_DISABLED} 
+  \item{kw{Bytes 2-5}: 0.}
+\end{enumerate}
+
+\subsection{Power AVR to ARM}
+
+\begin{enumerate}
+  \item{\kw{Byte 0}: system voltage}
+  \item{\kw{Byte 1}: charge state}
+  \item{\kw{Byte 2}: battery 40 voltage}
+  \item{\kw{Byte 3}: battery 160 voltage}
+  \item{\kw{Byte 4}: battery 280 voltage}
+  \item{\kw{Byte 5}: SPI padding (0x7D)}
+\end{enumerate}
+
+\subsection{Additional information}
+
+The packet is aligned to MOTOR\_PACKET\_HEADER. The AVR will attempt to keep itself aligned with
+the ARM by resetting the receive state until it receives MOTOR\_PACKET\_HEADER.
+
+
+\section{Walter-ARM protocol}
+
+\begin{enumerate}
+  \item{Serial link based.}
+  \item{\kw{Packet size}: ?} 
+  \item{\kw{Defined in}: lib\_mi.c (ARM), ? (Walter)}
+\end{enumerate}
+
+\subsection{ARM to Walter}
+
+Each entry is a byte (8 bits) unless otherwise specified. Byte offsets are provided in the first 
+column. 
+
+\begin{center}
+\begin{tabular}{|c||c|c|c|c|}
+\hline
+0-5 & MI\_HEADER1-4 & system voltage & charge state & \\
+\hline
+6-8 & bat40 voltage & bat160 voltage & bat280 voltage & \\
+\hline
+\hline
+9-12 & motor 0 command & wheel velocity & current & temperature \\
+13-16 & motor 1 command & wheel velocity & current & temperature \\
+17-20 & motor 2 command & wheel velocity & current & temperature \\
+\hline
+\hline
+21-23 & accel0-2 & accel0-1 4 LSBs & accel2 4 LSBs & \\
+\hline
+24-28 & magnetometer (3 axes) & Gyroscope & \multicolumn{2}{c|}{2 LSBs for the four previous variables} \\
+\hline
+29-41 & IR distance (10) & IR0-3 2 LSBs & IR4-7 2 LSBs & IR8-9 2 LSBs \\
+\hline
+42-46 & Light sensors (4) & Light sensors 2 LSBs & & \\
+\hline
+47-62 & \multicolumn{2}{c|}{Thermal sensors (8), upper byte} & \multicolumn{2}{c|}{Thermal sensors (8), lower byte} \\
+\hline
+63- & \multicolumn{4}{c|}{To be continued...} \\
+\hline
+\end{tabular}
+\end{center}
+
+\end{document}

@@ -18,5 +18,8 @@
 #define POWER_CHARGE_COMPLETE      10
 #define POWER_CHARGE_ERROR         200 
 
+// A flag sent to the AVR to indicate that we should not charge
+#define POWER_CHARGING_DISABLED    0x01
+
 #endif /* LIB_POWER_H */
 

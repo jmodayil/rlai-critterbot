@@ -145,4 +145,14 @@ signed char motor_command(int motor);
 int motor_disable_drive();
 int motor_enable_drive();
 
+/** Disables charging (via a notification to the power AVR). Charging will
+  * remain disabled until enable_charging() is called.
+  */
+int motor_disable_charging();
+/** Enables charging */
+int motor_enable_charging();
+
+int motor_is_drive_enabled();
+int motor_is_charging_enabled();
+
 #endif /* LIB_MOTOR_H */
