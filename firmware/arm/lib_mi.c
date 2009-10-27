@@ -147,6 +147,7 @@ void mi_get_commands(void) {
   
   ALIGNMENT_ERROR:
 
+  /** Potentially wrong! */
   if(MI_COMMAND_LENGTH > armgetnumchars())
     return;
     
@@ -179,6 +180,8 @@ void mi_get_commands(void) {
     }
   }
  
+  robot_command.avr_commands = armgetchar();
+
   if (!mi_disabled_commands) {
     switch(robot_command.motor_mode) {
       // The various minus signs here are to correct the coordinate system.
@@ -234,6 +237,12 @@ void mi_get_commands(void) {
           break;
       }
     }
+
+    // Enabling charging has priority over disabling
+    if (robot_command.avr_commands & MI_AVR_ENABLE_CHARGING)
+      motor_enable_charging();
+    else if (robot_command.avr_commands & MI_AVR_DISABLE_CHARGING)
+      motor_disable_charging();
   }
   else { // mi_disabled_commands
     if(robot_command.motor_mode == MOTOR_EXIT && 

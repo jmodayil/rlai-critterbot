@@ -6,7 +6,10 @@
 #define MI_HEADER3 0xBE
 #define MI_HEADER4 0xEF
 
-#define MI_COMMAND_LENGTH 57
+#define MI_COMMAND_LENGTH 58
+
+#define MI_AVR_ENABLE_CHARGING  0x01
+#define MI_AVR_DISABLE_CHARGING 0x02
 
 extern struct command_packet robot_command;
 
@@ -39,6 +42,8 @@ struct command_packet {
 
   enum { CNONE, CCLEAR, CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0x67 }
    led_mode;
+
+   int avr_commands;
 };
 
 

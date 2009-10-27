@@ -76,6 +76,8 @@ void recharger_enable(void) {
   recharger_enabled = 1;
   // Prevent interference from the MI
   mi_disable_commands();
+  // Make sure we can actually go and recharge
+  motor_enable_charging();
 }
 
 void recharger_disable(void) { 
