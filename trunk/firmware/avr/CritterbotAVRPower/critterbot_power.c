@@ -392,7 +392,8 @@ int main(void) {
     _delay_loop_2(40000);
 
     // Added by MGB: display charge_state
-    led_charge_state();
+    // Disabled so we can display disabled-charging state
+    //   led_charge_state();
       
   }
 

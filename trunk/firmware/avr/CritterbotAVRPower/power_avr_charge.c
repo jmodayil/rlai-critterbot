@@ -27,7 +27,13 @@ void read_charge_state(void) {
 void charge( void ) {
 
   uint8_t stat;
-  uint8_t charging_disabled = (commands & POWER_CHARGING_DISABLED);
+  uint8_t charging_disabled = (commands & POWER_CHARGING_DISABLED &&
+     system_voltage > OVERRIDE_CHARGING_DISABLED_VOLTAGE);
+ 
+  if (!charging_disabled)
+    LED1_PORT |= LED1;
+  else
+    LED1_PORT &= ~LED1;
 
   // Stop things and reset if the charger gets unplugged.
   // Signal an error if we were in the middle of charging.
