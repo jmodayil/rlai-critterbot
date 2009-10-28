@@ -165,6 +165,8 @@ void mi_get_commands(void) {
   m2 = ((signed char)((unsigned char)armgetchar()));
   m3 = ((signed char)((unsigned char)armgetchar()));
   robot_command.led_mode = armgetchar();
+  robot_command.avr_commands = armgetchar();
+
   
   if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
     !mi_disabled_commands) { 
@@ -180,8 +182,6 @@ void mi_get_commands(void) {
     }
   }
  
-  robot_command.avr_commands = armgetchar();
-
   if (!mi_disabled_commands) {
     switch(robot_command.motor_mode) {
       // The various minus signs here are to correct the coordinate system.

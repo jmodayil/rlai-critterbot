@@ -62,6 +62,7 @@ void ui_setall (char * cmdstr);
 void ui_motor (char * cmdstr);
 void ui_mi (char * cmdstr);
 void ui_recharge (char * cmdstr);
+void ui_avr(char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);
@@ -75,6 +76,7 @@ int ui_init();
   * Does a non-blocking check for input, which it immediately processes.
   */
 int ui_event();
+
 
 /** Reports general status and information on the serial port.
   * Don't rely on this function to produce structured output.
