@@ -76,6 +76,7 @@ ui_cmd_item ui_commands[] = {
   {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
   {"mi", ui_mi, "mi on"},
   {"recharge", ui_recharge, "recharger [start|stop]"},
+  {"avr", ui_avr, "avr [command]"},
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -814,6 +815,16 @@ void ui_recharge (char * cmdstr) {
   else if (strncmp (ui_strarg, "stop", sizeof(ui_strarg)) == 0) {
     recharger_disable();
   }
+}
+
+void ui_avr (char * cmdstr) {
+  int command;
+
+  if (armsscanf (cmdstr, "%s %d", ui_cmdname, &command) < 2)
+    return;
+
+  if (command) motor_enable_charging();
+  else motor_disable_charging();
 }
 
 void ui_pid ( char * cmdstr)
