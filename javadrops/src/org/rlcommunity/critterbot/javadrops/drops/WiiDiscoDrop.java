@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.rlcommunity.critterbot.javadrops.InterfaceInputStream;
 import org.rlcommunity.critterbot.javadrops.InterfaceOutputStream;
-import org.rlcommunity.critterbot.javadrops.drops.SimulatorDrop;
 
 public class WiiDiscoDrop implements SimulatorDrop {
 
@@ -20,12 +19,10 @@ public class WiiDiscoDrop implements SimulatorDrop {
 		NUM_WII_BUTTONS
 	};
 	
-	@Override
 	public int getSize() {
 		return 2 + 4*2;
 	}
 
-	@Override
 	public void readData(InterfaceInputStream pIn, int pDropSize)
 			throws IOException {
 		
@@ -39,7 +36,6 @@ public class WiiDiscoDrop implements SimulatorDrop {
 
 	}
 
-	@Override
 	public void writeData(InterfaceOutputStream pOut) throws IOException {
 		// TODO Auto-generated method stub
 		pOut.writeInt(dpadX);
