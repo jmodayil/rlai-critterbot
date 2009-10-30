@@ -298,8 +298,9 @@ void ui_status(char * cmdstr)
       motor_get_bat160(), motor_get_bat280());
   armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
       motor_clicks(1), motor_clicks(2));
-  armprintf ("AVR control: %s %s\r", motor_is_drive_enabled?"":"disabled drive",
-    motor_is_charging_enabled?"":"disabled charging");
+  armprintf ("AVR control: %s %s\r", 
+    motor_is_drive_enabled()?"":"disabled drive",
+    motor_is_charging_enabled()?"":"disabled charging");
   armprintf("\r");
 }
 

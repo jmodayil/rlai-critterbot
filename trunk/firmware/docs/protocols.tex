@@ -50,8 +50,8 @@ the ARM by resetting the receive state until it receives MOTOR\_PACKET\_HEADER.
 
 \begin{enumerate}
   \item{Serial link based.}
-  \item{\kw{Packet size}: ?} 
-  \item{\kw{Defined in}: lib\_mi.c (ARM), ? (Walter)}
+  \item{\kw{Packet size}: 82 bytes (including 4-bytes header and 2-bytes CRC).} 
+  \item{\kw{Defined in}: lib\_mi.c (ARM), CritterDriver.cpp (Walter)}
 \end{enumerate}
 
 \subsection{ARM to Walter}
@@ -72,17 +72,19 @@ column.
 17-20 & motor 2 command & wheel velocity & current & temperature \\
 \hline
 \hline
-21-23 & accel0-2 & accel0-1 4 LSBs & accel2 4 LSBs & \\
+21-25 & accel0-2 & accel0-1 4 LSBs & accel2 4 LSBs & \\
 \hline
-24-28 & magnetometer (3 axes) & Gyroscope & \multicolumn{2}{c|}{2 LSBs for the four previous variables} \\
+26-30 & magnetometer (3 axes) & Gyroscope & \multicolumn{2}{c|}{2 LSBs for the four previous variables} \\
 \hline
-29-41 & IR distance (10) & IR0-3 2 LSBs & IR4-7 2 LSBs & IR8-9 2 LSBs \\
+31-43 & IR distance (10) & IR0-3 2 LSBs & IR4-7 2 LSBs & IR8-9 2 LSBs \\
 \hline
-42-46 & Light sensors (4) & Light sensors 2 LSBs & & \\
+44-48 & Light sensors (4) & Light sensors 2 LSBs & & \\
 \hline
-47-62 & \multicolumn{2}{c|}{Thermal sensors (8), upper byte} & \multicolumn{2}{c|}{Thermal sensors (8), lower byte} \\
+49-64 & \multicolumn{2}{c|}{Thermal sensors (8), upper byte} & \multicolumn{2}{c|}{Thermal sensors (8), lower byte} \\
 \hline
-63- & \multicolumn{4}{c|}{To be continued...} \\
+65-75 & IR light (8) & IR light 0-3 2 LSBs & IR light 4-7 2 LSBs & \\
+\hline
+76-81 & Error status (4 bytes) & ARM CPU usage & CRC (2 bytes) & \\ 
 \hline
 \end{tabular}
 \end{center}
