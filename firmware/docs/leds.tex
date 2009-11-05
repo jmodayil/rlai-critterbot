@@ -1,0 +1,38 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+
+\newcommand{\kw}[1]{{\bf #1}}
+
+\author{Marc G. Bellemare}
+\title{LED Signals Reference Sheet}
+
+\begin{document}
+
+\maketitle
+
+This is a document to provide information about the various LED signals 
+emitted by the robot.
+
+\section{Notes}
+
+The LEDs are an \emph{indication} of the robot's state. They should not be
+held for ground truth. In particular:
+
+\begin{itemize}
+  \item{The last LED command is displayed on the LEDs. For example, if the robot is first put in Machine Interface mode then asked to display charge status, only the latter will show.}
+  \item{The LEDs will report inaccurate information if the ARM itself has inaccurate information. For instance, if the AVR-ARM communication is broken the battery charge display may be inaccurate.}
+\end{itemize}
+
+\section{LED Signals}
+
+\begin{enumerate}
+  \item{\kw{Four blinking green lights.} The robot is in Machine Interface mode.}
+  \item{\kw{Four blinking red lights.} The robot is in Machine Interface mode.}
+  \item{\kw{All briefly flashing orange lights.} Error status.}
+  \item{\kw{Solid green partial circle.} Battery levels information. The current charge is proportional to the system voltage.}
+  \item{\kw{Cyclical yellow partial circle.} Charge status. As the charge progresses the partial circle will fill out more and more.}
+  \item{\kw{Red and blue rotating lights.} Emergency status.}
+\end{enumerate}
+
+\end{document}

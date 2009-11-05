@@ -1,2 +1,2 @@
 clean:
-	rm -f compiler/*.{aux,dvi,log}
+	rm -f protocols.{aux,dvi,log,pdf}
