@@ -19,13 +19,23 @@ event_s monitor_event_s = {
 };
 
 int monitor_bad_motor_temp;
+int monitor_burnin_time;
 
 int monitor_init() {
   monitor_bad_motor_temp = 0;
+  monitor_burnin_time = MONITOR_INITIAL_BURN_IN_LENGTH;
+
   return 0;
 }
 
 int monitor_event() {
+  // The monitor should wait for the sensor data to be accurate before
+  //   doing anything
+  if (monitor_burnin_time > 0) {
+    monitor_burnin_time--;
+    return 1;
+  }
+
   // The method calls here should be in increasing order of priority.
   // Verify the battery voltage
   monitor_battery_charge();
