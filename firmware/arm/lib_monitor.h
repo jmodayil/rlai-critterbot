@@ -14,6 +14,7 @@
 // For testing purposes only
 #define MONITOR_MIN_MOTOR_TEMPERATURE 65
 #define MONITOR_TEMPERATURE_HYSTERESIS 20
+#define MONITOR_INITIAL_BURN_IN_LENGTH 100
 
 int monitor_init();
 int monitor_event();

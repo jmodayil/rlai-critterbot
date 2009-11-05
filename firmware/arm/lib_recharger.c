@@ -78,11 +78,15 @@ void recharger_enable(void) {
   mi_disable_commands();
   // Make sure we can actually go and recharge
   motor_enable_charging();
+  
+  // Set the LEDs to 'busy' ... this may not be the best place for this
+  leddrive_busy();
 }
 
 void recharger_disable(void) { 
   recharger_enabled = 0;
   mi_enable_commands();
+  leddrive_clear();
 }
 
 int recharger_event() {
@@ -108,8 +112,6 @@ int recharger_event() {
       counter = 0;
     }
 
-    // Set the LEDs to 'busy' ... this may not be the best place for this
-    leddrive_busy();
   }
   return 0;
 }

@@ -112,6 +112,7 @@ int motor_event() {
   
   unsigned int volt;
   int i;
+  int is_charging;
 
   // Stop moving if we haven't received a command for a while
   if(++motor_timeout_count == MOTOR_TIMEOUT) {
@@ -159,14 +160,19 @@ int motor_event() {
     // Also paralyze the robot if the drive is not enabled
     // @todo The charge-related paralysis should be done via 
     //   motor_disable_drive (MGB)
-    if(!motor_enabled_drive || ( 
-      motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
-      motor_get_charge_state() != POWER_CHARGE_COMPLETE)) {
-      motor_tx_data[i][1] = 0;
+    is_charging = 
+      (motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
+       motor_get_charge_state() != POWER_CHARGE_COMPLETE);
+
+    if (is_charging) {
       leddrive_chargestatus();
     }
+
+    if(!motor_enabled_drive || is_charging)
+      motor_tx_data[i][1] = 0;
     else
       motor_tx_data[i][1] = (unsigned char) motor_speed[i];
+
     motor_tx_data[i][2] = volt;  
     spi_send_packet(&motor_packet[i]);
   }

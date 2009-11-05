@@ -233,8 +233,9 @@ void fadeangle(int angle, unsigned char r,unsigned char g,unsigned char b){
 void led_chargemax(int max) {
   switch(max) {
   case 0:
-    leddrive_charge_max = 0;
-    // We shouldn't be here I think?
+    leddrive_charge_max = 16;
+    // We shouldn't be here I think? but let's set it to a valid value
+    //   anyway
     break;
   case 1:
   case 2:
