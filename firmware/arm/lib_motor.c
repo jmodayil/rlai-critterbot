@@ -103,7 +103,9 @@ int motor_init() {
   power_init_packet();
 
   motor_enabled_drive = 1;
-  motor_enabled_charging = 1;
+  // Disable charging unless otherwise specified - avoid accidental charges
+  //   when the robot is reset on the dock
+  motor_enabled_charging = 0;
 
   return 0;  
 }
