@@ -29,18 +29,22 @@ int beaconSensor[IR_LIGHT_SIZE];
 // Could be removed as it is a fn of beaconSensor and irHistory[0]
 int lastBeaconSensor[IR_LIGHT_SIZE];
 
+int beaconFrequency[IR_LIGHT_SIZE];
+
 // State information
 int rotationComponent;
 unsigned char fsaState;
 unsigned char lastFSAState;
 char convolutionFactor;
+int time;
 
 unsigned char counter;
-unsigned char wanderCounter;
+short wanderCounter;
 unsigned char wanderDirection;
 unsigned char immobileCounter;
 
 char recharger_enabled;
+char alignAvoid;
 
 int recharger_init() {
   recharger_enabled = 0;
@@ -52,7 +56,7 @@ int recharger_reset() {
   int i, j;
 
   convolutionFactor = 1;
-  wanderCounter = 0;
+  wanderCounter = CF_WANDER_LENGTH;
 
   for (i = 0; i < IR_LIGHT_SIZE; i++) {
     for (j = 0; j < IR_HISTORY_SIZE; j++) {
@@ -61,8 +65,13 @@ int recharger_reset() {
 
     beaconSensor[i] = 0;
     lastBeaconSensor[i] = 0;
+    beaconFrequency[i] = 0;
   }
-
+	
+   counter = 0;
+   time = 0;   
+   alignAvoid = 1;
+  
   // We first set the fsaState so that the last state points to FSA_WANDER and
   //  not some random junk
   fsaState = FSA_WANDER;
@@ -90,20 +99,6 @@ void recharger_disable(void) {
 }
 
 int recharger_event() {
-  #if 0
-  // Commented out until the charger function works; may be moved to
-  //  lib_monitor.c
-  if (!recharger_enabled && 
-      motor_get_voltage() < RECHARGER_LOW_VOLTAGE_TRIGGER) {
-    recharger_reset();
-    recharger_enable();
-  }
-  // Disable the recharger routine once the voltage goes up again 
-  else if (recharger_enabled && motor_get_voltage() > 
-    RECHARGER_LOW_VOLTAGE_TRIGGER + RECHARGER_VOLTAGE_HYSTERESIS) {
-    recharger_disable();
-  }
-  #endif
 
   if (recharger_enabled) {
     // Run the FSA every so often
@@ -119,11 +114,33 @@ int recharger_event() {
 void recharger_enter_state(int newState) { 
   lastFSAState = fsaState;
   fsaState = newState;
+
+  switch (newState) {
+    case FSA_WANDER:
+      wanderCounter = CF_WANDER_LENGTH;
+      // Fall through
+    case FSA_ALIGN:
+      alignAvoid = 1;
+      break;
+    case FSA_ROTATE:
+      immobileCounter = CF_ROTATE_DOCK_IMMOBILE_TIMEOUT;
+      wanderCounter = CF_ROTATE_DOCK_FAIL_TIMEOUT;
+      break;
+    case FSA_DOCK:
+      immobileCounter = CF_ROTATE_DOCK_IMMOBILE_TIMEOUT;
+      wanderCounter = CF_ROTATE_DOCK_FAIL_TIMEOUT;
+      break;
+  }
+
 }
+
 
 void recharger_step() {
   // First update the IR and convolution data
   recharger_update_history();
+
+  // Do nothing until we have one full history of data
+  if (++time < IR_HISTORY_SIZE) return;
 
   // Take an action based on the current state
   // @todo This could be an array!
@@ -140,18 +157,18 @@ void recharger_step() {
     case FSA_CLOSE:
       recharger_fsa_close();
       break;
-    case FSA_ROTATE_DOCK:
-      recharger_fsa_rotate_dock();
+    case FSA_ROTATE:
+      recharger_fsa_rotate();
       break;
-    case FSA_DONE:
-      recharger_fsa_done();
+    case FSA_DOCK:
+      recharger_fsa_dock();
       break;
   }
 }
 
 void recharger_fsa_wander() {
   // If we can see the beacon, start moving towards it
-  if (recharger_sees_beacon())
+  if (recharger_sees_beacon() && wanderCounter == 0)
     // Note: we may not be aligned with the becaon, in which case we will
     //  first align ourselves with it (but this gets called from recharger_fsa_forward)
     // The reason is to set up lastFSAState properly
@@ -214,28 +231,38 @@ void recharger_fsa_align() {
   // Find the direction of the beacon (max. beacon value)
   int beaconDirection = recharger_beacon_dir();
 
+
   if (beaconDirection == FSA_TARGET_SENSOR) { // If aligned, drive forward
     recharger_enter_state(lastFSAState); // No action
   }
-  else if (beaconDirection <= 4) // Rotate right
-    recharger_act_avoid(0, 0, FSA_ROTATE_VELOCITY);
-  else // Rotate left
-    recharger_act_avoid(0, 0, -FSA_ROTATE_VELOCITY);
+  else {
+    int rotVelocity;	
+    if (beaconDirection <= 4) // Rotate right
+      rotVelocity = FSA_ROTATE_VELOCITY;
+    else // Rotate left
+      rotVelocity = -FSA_ROTATE_VELOCITY;
+    
+    if (alignAvoid)
+      recharger_act_avoid(0, 0, rotVelocity);
+    else
+      recharger_act_avoid(0, 0, rotVelocity);
+  }
 }
 
 void recharger_fsa_forward() {
   // If the beacon disappears, wander around
   if (!recharger_sees_beacon())
     recharger_enter_state(FSA_WANDER);
-  if (recharger_beacon_dir() != FSA_TARGET_SENSOR)
-    recharger_enter_state(FSA_ALIGN);
-  if (beaconSensor[FSA_TARGET_SENSOR] >= IR_SATURATION_THRESHOLD) {
+  else if (beaconSensor[FSA_TARGET_SENSOR] >= IR_SATURATION_THRESHOLD) {
     immobileCounter = 5;
     recharger_enter_state(FSA_CLOSE);
   }
+  else if (recharger_beacon_dir() != FSA_TARGET_SENSOR)
+    recharger_enter_state(FSA_ALIGN);
   else {
     recharger_act_forward(FSA_FORWARD_VELOCITY, FSA_MAX_ROTATION_COMPONENT, 1);
   }
+
 }
 
 void recharger_act_forward(int forwardVel, int rotationVel, 
@@ -282,11 +309,12 @@ void recharger_fsa_close() {
     recharger_enter_state(FSA_WANDER);
   if (recharger_beacon_dir() != FSA_TARGET_SENSOR) {
     fsaState = FSA_ALIGN;
+    alignAvoid = 0;
   }
   else if (!recharger_is_moving()) {
     if (--immobileCounter <= 0) {
-      recharger_enter_state(FSA_ROTATE_DOCK);
-      immobileCounter = 5;
+      recharger_enter_state(FSA_ROTATE);
+//      immobileCounter = 5;
     }
   }
   else
@@ -295,21 +323,59 @@ void recharger_fsa_close() {
       FSA_MAX_ROTATION_COMPONENT, 0);
 }
 
-void recharger_fsa_rotate_dock() {
-  int isDocked = (motor_get_voltage() > SHORE_POWER_MIN_VOLTAGE);
+void recharger_fsa_rotate() {
+  if (1) {
+      recharger_enter_state(FSA_DOCK);
+	return;
+    }
+
+  if (!recharger_is_moving()) {
+    if (--immobileCounter <= 0) {
+      recharger_enter_state(FSA_DOCK);
+    }
+  }
+  /* else if (getBeaconDirection() == 2)
+    enterFSAState(FSA_DOCK); */
+  // If we haven't stopped after a while, assume a fail
+  else if (--wanderCounter <= 0) {
+    recharger_enter_state(FSA_WANDER);
+  }
+  else // Rotate left 
+    recharger_act(0, 0, -FSA_SLOW_ROTATE_VELOCITY);
+
+}
+
+void recharger_fsa_dock() {
+ int isDocked = (motor_get_voltage() > SHORE_POWER_MIN_VOLTAGE);
+
   if (isDocked) {
     recharger_enter_state(FSA_DONE);
-    immobileCounter = 0;
+
+    return;
   }
   else if (!recharger_is_moving()) {
     if (--immobileCounter <= 0) {
-      recharger_enter_state(FSA_DONE);
-      immobileCounter = 0;
+      recharger_enter_state(FSA_WANDER);
     }
   }
-  else // Rotate left
+  // Give up after a while if we couldn't dock 
+  else if (--wanderCounter <= 0) {
+    recharger_enter_state(FSA_WANDER);
+  }
+  else // If all is good, reset the immobile counter
+    immobileCounter = CF_ROTATE_DOCK_IMMOBILE_TIMEOUT;
+
+	int chouillard = 0;
+  // Lateral movement into the dock 
+  if (chouillard <= 20)
+    recharger_act(0, FSA_SLOW_FORWARD_VELOCITY, 0);
+  else
     recharger_act(0, 0, -FSA_SLOW_ROTATE_VELOCITY);
+
+  chouillard++;
+  if (chouillard > 40) chouillard = 0;
 }
+
 
 void recharger_fsa_done() {
   // Disable routine after a little while
@@ -319,41 +385,41 @@ void recharger_fsa_done() {
 }
 
 void recharger_update_history() {
-  int beaconValue;
-  int i, j, beaconSum;
+  int i, j;
   int halfHistorySize = IR_HISTORY_SIZE / 2;
+ int oldConvolutionFactor;
 
-  // Update the IR history and frequency data
   for (i = 0; i < IR_LIGHT_SIZE; i++) {
+    // Determine whether we should add or remove the last value
+    oldConvolutionFactor = convolutionFactor * 
+      ((IR_HISTORY_SIZE % 2)?-1:1);
+
+    // Update the convolution values
+    beaconFrequency[i] -= 
+      irHistory[i][IR_HISTORY_SIZE-1] * oldConvolutionFactor;
+
     // Shift all the values (lazy)
     for (j = IR_HISTORY_SIZE-1; j > 0; j--) {
       irHistory[i][j] = irHistory[i][j-1];
     }
 
     irHistory[i][0] = adcspi_get_output(IR_LIGHT_ADC_DEVICE, i);
+    beaconFrequency[i] += irHistory[i][0] * convolutionFactor;
     
     lastBeaconSensor[i] = beaconSensor[i];
-
-    // Compute the new convolution values
-    beaconSum = 0;
-    for (j = 0; j < halfHistorySize * 2; j += 2) {
-      beaconSum += irHistory[i][j];
-      beaconSum -= irHistory[i+1][j];
-    }
-
-    // Drop the last history bit if we have an odd number of steps
-
-    // Compute the value as the absolute average signal 
-    beaconValue = beaconSum / halfHistorySize;
-    beaconSensor[i] = ABS(beaconValue);
+    // For now, the convolution is not picking up the beacon signal, so we use
+    //  raw intensities
+    beaconSensor[i] = abs(beaconFrequency[i] / (halfHistorySize));
   }
+
+
 
   convolutionFactor *= -1;
 }
 
 /** A map of IR sensor to x, y, theta offsets. Each of these is added if the
   *  corresponding IR distance sensor is above a threshold.
-  */
+  
 char avoid_offsets[IR_DISTANCE_SIZE][3] = {
   { -FSA_AVOID_VELOCITY, 0, 0 },
   { -FSA_AVOID_VELOCITY, - FSA_AVOID_VELOCITY/2, 0 },
@@ -365,19 +431,78 @@ char avoid_offsets[IR_DISTANCE_SIZE][3] = {
   { 0, 0, FSA_AVOID_ROTATE_VELOCITY },
   { 0, 0, FSA_AVOID_ROTATE_VELOCITY },
   { 0, 0, -FSA_AVOID_ROTATE_VELOCITY } };
+*/
 
 void recharger_act_avoid(int x, int y, int theta) {
-    int i;
+
+  int baseX, baseY, baseTheta;
+  char hasAvoid = 0;
+
+  baseX = x;
+  baseY = y;
+  baseTheta = theta;
+  x = y = theta = 0;
   
-    // Modify the requested x, y, theta velocities based on the ir distance
-    //  sensor readings
-    for (i = 0; i < IR_DISTANCE_SIZE; i++) {
-      unsigned char value = adcspi_get_output(IR_DISTANCE_ADC_DEVICE, i);
-      if (value > IR_DISTANCE_AVOID_THRESHOLD) {
-        x += avoid_offsets[i][0];
-        y += avoid_offsets[i][1];
-        theta += avoid_offsets[i][2];
-      }
+
+ // Wall avoidance code, taken from Photovore by Mike Sokolsky
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 0) > IR_DISTANCE_AVOID_THRESHOLD) {
+      x -= FSA_AVOID_VELOCITY;
+      y += 0;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 1) > IR_DISTANCE_AVOID_THRESHOLD) {
+      x -= FSA_AVOID_VELOCITY;
+      y -= FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 2) > IR_DISTANCE_AVOID_THRESHOLD) {
+
+      x += 0;
+      y -= FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 3) > IR_DISTANCE_AVOID_THRESHOLD) {
+
+      x += 0;
+      y -= FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 4) > IR_DISTANCE_AVOID_THRESHOLD) {
+
+      x += 0;
+      y += FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 5) > IR_DISTANCE_AVOID_THRESHOLD) {
+      x += 0;
+      y += FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 6) > IR_DISTANCE_AVOID_THRESHOLD) {
+      x -= FSA_AVOID_VELOCITY;
+      y += FSA_AVOID_VELOCITY/2;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 7) > IR_DISTANCE_AVOID_THRESHOLD) {
+
+      theta += FSA_AVOID_ROTATE_VELOCITY;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 8) > IR_DISTANCE_AVOID_THRESHOLD) {
+      theta += FSA_AVOID_ROTATE_VELOCITY;
+      hasAvoid = 1;
+    }
+    if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 9) > IR_DISTANCE_AVOID_THRESHOLD) {
+      x += FSA_AVOID_VELOCITY/2;
+      y += FSA_AVOID_VELOCITY/2;
+
+      hasAvoid = 1;
+    }
+
+    if (!hasAvoid) {
+      x = baseX;
+      y = baseY;
+      theta = baseTheta;
     }
 
     recharger_act(x, y, theta);
