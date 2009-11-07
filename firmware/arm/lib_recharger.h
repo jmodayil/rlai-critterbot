@@ -22,7 +22,7 @@
 
 #define CF_EVENT_INTERVAL 5
 #define CF_WANDER_LENGTH  20
-// How many steps to compute the convollution over. This should be even.
+// How many steps to compute the convolution over. This should be even.
 #define IR_HISTORY_SIZE   4
 
 #define FSA_WANDER        0
@@ -37,13 +37,13 @@
 //  in the direction of the target
 #define FSA_TARGET_SENSOR 0
 
-#define FSA_FORWARD_VELOCITY      -20
-#define FSA_SLOW_FORWARD_VELOCITY -8
+#define FSA_FORWARD_VELOCITY      20
+#define FSA_SLOW_FORWARD_VELOCITY 8
 #define FSA_ROTATE_VELOCITY       10
 #define FSA_SLOW_ROTATE_VELOCITY   4
 #define FSA_MAX_ROTATION_COMPONENT 0
 
-#define FSA_AVOID_VELOCITY        (FSA_FORWARD_VELOCITY - 5)
+#define FSA_AVOID_VELOCITY        (FSA_FORWARD_VELOCITY)
 #define FSA_AVOID_ROTATE_VELOCITY (FSA_SLOW_ROTATE_VELOCITY)
 
 // Threshold below which we assume we don't see the beacon
@@ -52,7 +52,8 @@
 #define IR_SATURATION_THRESHOLD 150
 #define FSA_GRADIENT_THRESHOLD  30
 
-#define IR_DISTANCE_AVOID_THRESHOLD 230
+// 230 in CritterStateDrop terms, but 230*4 here
+#define IR_DISTANCE_AVOID_THRESHOLD (230*4)
 
 #define SHORE_POWER_MIN_VOLTAGE     170
 // Voltage (in 10ths of volts) at which we trigger the charger finder

@@ -37,6 +37,7 @@ unsigned char fsaState;
 unsigned char lastFSAState;
 char convolutionFactor;
 int time;
+int chouillard=0;
 
 unsigned char counter;
 short wanderCounter;
@@ -83,10 +84,12 @@ int recharger_reset() {
 
 void recharger_enable(void) {
   recharger_enabled = 1;
+  time = 0;
   // Prevent interference from the MI
   mi_disable_commands();
   // Make sure we can actually go and recharge
-  motor_enable_charging();
+  // @todo re-enable
+  //motor_enable_charging();
   
   // Set the LEDs to 'busy' ... this may not be the best place for this
   leddrive_busy();
@@ -143,6 +146,7 @@ void recharger_step() {
   if (++time < IR_HISTORY_SIZE) return;
 
   // Take an action based on the current state
+
   // @todo This could be an array!
   switch (fsaState) {
     case FSA_WANDER:
@@ -176,10 +180,11 @@ void recharger_fsa_wander() {
   else {
     if (wanderCounter <= 0) {
         // Pick a new, random direction
-        wanderDirection = armrandom() & 3;
+        wanderDirection = armrandom() % 5;
         wanderCounter = CF_WANDER_LENGTH;
     }
 
+    wanderCounter--;
     int x, y;
     switch (wanderDirection) {
       case 0: // Forward
@@ -193,6 +198,9 @@ void recharger_fsa_wander() {
         break;
       case 3: // Right
         x = 0; y = -FSA_FORWARD_VELOCITY;
+        break;
+      case 5:
+        x = 0; y = 0;
         break;
       default:
         wanderDirection = 0;
@@ -231,12 +239,11 @@ void recharger_fsa_align() {
   // Find the direction of the beacon (max. beacon value)
   int beaconDirection = recharger_beacon_dir();
 
-
   if (beaconDirection == FSA_TARGET_SENSOR) { // If aligned, drive forward
     recharger_enter_state(lastFSAState); // No action
   }
   else {
-    int rotVelocity;	
+    int rotVelocity;
     if (beaconDirection <= 4) // Rotate right
       rotVelocity = FSA_ROTATE_VELOCITY;
     else // Rotate left
@@ -245,7 +252,7 @@ void recharger_fsa_align() {
     if (alignAvoid)
       recharger_act_avoid(0, 0, rotVelocity);
     else
-      recharger_act_avoid(0, 0, rotVelocity);
+      recharger_act(0, 0, rotVelocity);
   }
 }
 
@@ -365,15 +372,17 @@ void recharger_fsa_dock() {
   else // If all is good, reset the immobile counter
     immobileCounter = CF_ROTATE_DOCK_IMMOBILE_TIMEOUT;
 
-	int chouillard = 0;
+	chouillard = 0;
   // Lateral movement into the dock 
   if (chouillard <= 20)
-    recharger_act(0, FSA_SLOW_FORWARD_VELOCITY, 0);
-  else
+    recharger_act(0, -FSA_SLOW_FORWARD_VELOCITY, 0);
+  else if (chouillard <= 40)
     recharger_act(0, 0, -FSA_SLOW_ROTATE_VELOCITY);
+  else // Temporary power-limiting workaround
+    recharger_act(0, 0, 0);
 
   chouillard++;
-  if (chouillard > 40) chouillard = 0;
+  if (chouillard > 60) chouillard = 0;
 }
 
 
@@ -387,29 +396,33 @@ void recharger_fsa_done() {
 void recharger_update_history() {
   int i, j;
   int halfHistorySize = IR_HISTORY_SIZE / 2;
- int oldConvolutionFactor;
+  int c, oldConvolutionFactor;
+  int v;
 
   for (i = 0; i < IR_LIGHT_SIZE; i++) {
     // Determine whether we should add or remove the last value
     oldConvolutionFactor = convolutionFactor * 
       ((IR_HISTORY_SIZE % 2)?-1:1);
 
-    // Update the convolution values
-    beaconFrequency[i] -= 
-      irHistory[i][IR_HISTORY_SIZE-1] * oldConvolutionFactor;
-
     // Shift all the values (lazy)
     for (j = IR_HISTORY_SIZE-1; j > 0; j--) {
       irHistory[i][j] = irHistory[i][j-1];
+      beaconFrequency[i] = 0;
     }
 
     irHistory[i][0] = adcspi_get_output(IR_LIGHT_ADC_DEVICE, i);
-    beaconFrequency[i] += irHistory[i][0] * convolutionFactor;
+    
+    c = 1;
+    for (j = 0; j < IR_HISTORY_SIZE; j++) {
+      beaconFrequency[i] += irHistory[i][j] * c;
+      c = -c;
+    }
     
     lastBeaconSensor[i] = beaconSensor[i];
     // For now, the convolution is not picking up the beacon signal, so we use
     //  raw intensities
-    beaconSensor[i] = abs(beaconFrequency[i] / (halfHistorySize));
+    v = beaconFrequency[i] / halfHistorySize;
+    beaconSensor[i] = ABS(v);
   }
 
 
@@ -434,6 +447,7 @@ char avoid_offsets[IR_DISTANCE_SIZE][3] = {
 */
 
 void recharger_act_avoid(int x, int y, int theta) {
+  int i;
 
   int baseX, baseY, baseTheta;
   char hasAvoid = 0;
@@ -446,41 +460,41 @@ void recharger_act_avoid(int x, int y, int theta) {
 
  // Wall avoidance code, taken from Photovore by Mike Sokolsky
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 0) > IR_DISTANCE_AVOID_THRESHOLD) {
-      x -= FSA_AVOID_VELOCITY;
+      x += FSA_AVOID_VELOCITY;
       y += 0;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 1) > IR_DISTANCE_AVOID_THRESHOLD) {
-      x -= FSA_AVOID_VELOCITY;
-      y -= FSA_AVOID_VELOCITY/2;
+      x += FSA_AVOID_VELOCITY;
+      y += FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 2) > IR_DISTANCE_AVOID_THRESHOLD) {
 
       x += 0;
-      y -= FSA_AVOID_VELOCITY/2;
+      y += FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 3) > IR_DISTANCE_AVOID_THRESHOLD) {
 
       x += 0;
-      y -= FSA_AVOID_VELOCITY/2;
+      y += FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 4) > IR_DISTANCE_AVOID_THRESHOLD) {
 
       x += 0;
-      y += FSA_AVOID_VELOCITY/2;
+      y -= FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 5) > IR_DISTANCE_AVOID_THRESHOLD) {
       x += 0;
-      y += FSA_AVOID_VELOCITY/2;
+      y -= FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 6) > IR_DISTANCE_AVOID_THRESHOLD) {
-      x -= FSA_AVOID_VELOCITY;
-      y += FSA_AVOID_VELOCITY/2;
+      x += FSA_AVOID_VELOCITY;
+      y -= FSA_AVOID_VELOCITY/2;
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 7) > IR_DISTANCE_AVOID_THRESHOLD) {
@@ -493,8 +507,8 @@ void recharger_act_avoid(int x, int y, int theta) {
       hasAvoid = 1;
     }
     if(adcspi_get_output(IR_DISTANCE_ADC_DEVICE, 9) > IR_DISTANCE_AVOID_THRESHOLD) {
-      x += FSA_AVOID_VELOCITY/2;
-      y += FSA_AVOID_VELOCITY/2;
+      x -= FSA_AVOID_VELOCITY/2;
+      y -= FSA_AVOID_VELOCITY/2;
 
       hasAvoid = 1;
     }
