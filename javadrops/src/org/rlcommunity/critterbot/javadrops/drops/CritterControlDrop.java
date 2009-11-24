@@ -124,6 +124,11 @@ public class CritterControlDrop implements SimulatorDrop
         pOut.writeInt(y_vel);
         pOut.writeInt(theta_vel);
         break;
+      case WHEEL_VOLTAGE:
+        pOut.writeInt(m100_vel);
+        pOut.writeInt(m220_vel);
+        pOut.writeInt(m340_vel);
+        break;
       default:
         throw new IOException("Unknown motor mode.");
     }
@@ -146,7 +151,7 @@ public class CritterControlDrop implements SimulatorDrop
     // Read motor mode and convert it to an enum
     // Unfortunately, Java hates integer enums, so we have to circumvent this
     motor_mode = (MotorMode)EnumSet.range(MotorMode.WHEEL_SPACE, 
-      MotorMode.XYTHETA_SPACE).toArray()[pIn.readInt()];
+      MotorMode.WHEEL_VOLTAGE).toArray()[pIn.readInt()];
 
     // Read in the three velocities
     switch (motor_mode)
@@ -161,6 +166,12 @@ public class CritterControlDrop implements SimulatorDrop
         y_vel = pIn.readInt();
         theta_vel = pIn.readInt();
         break;
+        case WHEEL_VOLTAGE:
+        m100_vel = pIn.readInt();
+        m220_vel = pIn.readInt();
+        m340_vel = pIn.readInt();
+        break;
+
       default:
         throw new IOException("Unknown motor mode.");
     }
