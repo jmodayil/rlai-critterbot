@@ -172,6 +172,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 angleVelocity = pDrop.theta_vel / ANG_VELOCITY_SCALE;
                 break;
             case WHEEL_SPACE:
+              // @todo Not quite right - wheel voltage should be a different control mechanism
+            case WHEEL_VOLTAGE:
                 double m100 = pDrop.m100_vel;
                 double m220 = pDrop.m220_vel;
                 double m340 = pDrop.m340_vel;
