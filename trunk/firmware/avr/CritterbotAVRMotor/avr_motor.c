@@ -23,7 +23,8 @@
 // Current limit
 #define I_LIMIT 30
 // Current limit for stalled motor condition
-#define I_LIMIT_MIN 1
+// MGB: changed to 2 to prevent robot paralysis
+#define I_LIMIT_MIN 2
 // Ratio for scaling down current in a stalled condition.  A rate of 1 will
 // scale down to I_LIMIT_MIN in 255 cycles, higher rates multiply this.
 #define I_LIMIT_RATE 6
