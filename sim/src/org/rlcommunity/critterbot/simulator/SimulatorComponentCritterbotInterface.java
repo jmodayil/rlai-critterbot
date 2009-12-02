@@ -193,11 +193,6 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 yvel /= WHEEL_VOLTAGE_SCALE;
                 tvel /= WHEEL_VOLTAGE_SCALE;
 
-                // Bound the three components between -1 and 1
-                xvel = Math.min(1.0, Math.max(-1.0, xvel));
-                yvel = Math.min(1.0, Math.max(-1.0, yvel));
-                tvel = Math.min(1.0, Math.max(-1.0, tvel));
-
                 driveData.setDriveMode(ObjectStateOmnidrive.DriveMode.VOLTAGE);
 
                 velocity = new Vector2D(xvel, yvel);

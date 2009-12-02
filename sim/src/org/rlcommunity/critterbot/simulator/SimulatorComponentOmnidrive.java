@@ -96,10 +96,17 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
           break;
         case VOLTAGE:
           // Voltage mode directly drives the force
+          // Bound the three components between -1 and 1
+          Vector2D voltageXY = new Vector2D(driveState.getVelocity());
+          voltageXY.x = Math.min(1.0, Math.max(-1.0, voltageXY.x));
+          voltageXY.y = Math.min(1.0, Math.max(-1.0, voltageXY.y));
+          double voltageT = Math.min(1.0, Math.max(-1.0, driveState.getAngVelocity()));
+
           // Sqrt(2) multiplier because simpleXYPID caps the x and y coordinates
           //  independently
-          fPID = new Force(driveState.getVelocity().times(driveState.getMaxForce()));
-          torquePID = driveState.getAngVelocity() * driveState.getMaxForce();
+          fPID = new Force(voltageXY.times(Math.sqrt(2)*driveState.getMaxForce()));
+          // @todo Get a proper value of max torque, rather than computing it here
+          torquePID = voltageT * driveState.getMaxForce() / torqueGain * 3;
           break;
         default:
           throw new UnsupportedOperationException(
