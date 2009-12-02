@@ -75,6 +75,8 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
 
     public static final double XY_VELOCITY_SCALE = 100.0;
     public static final double ANG_VELOCITY_SCALE = 9.0;
+    public static final double WHEEL_VOLTAGE_SCALE = 127.0;
+    
     // All of these need to be made proper
     public static final double GYRO_SCALE = 1024.0 / (Math.PI * 2);
     public static final double LIGHT_SCALE = 1.0;
@@ -160,9 +162,17 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
         Vector2D velocity = null;
         Double angleVelocity = null;
 
+        double xvel, yvel, tvel;
+        
+        double m100 = pDrop.m100_vel;
+        double m220 = pDrop.m220_vel;
+        double m340 = pDrop.m340_vel;
+
         // Based on the motor mode, set velocities appropriately
         switch (pDrop.motor_mode) {
             case XYTHETA_SPACE:
+                driveData.setDriveMode(ObjectStateOmnidrive.DriveMode.XYTHETA);
+
                 // The drop x,y velocity has units in cm/s
                 velocity = new Vector2D(
                         pDrop.x_vel / XY_VELOCITY_SCALE,
@@ -171,19 +181,36 @@ public class SimulatorComponentCritterbotInterface implements SimulatorComponent
                 //  per second, which is 1/9th of a radian per second
                 angleVelocity = pDrop.theta_vel / ANG_VELOCITY_SCALE;
                 break;
-            case WHEEL_SPACE:
-              // @todo Not quite right - wheel voltage should be a different control mechanism
             case WHEEL_VOLTAGE:
-                double m100 = pDrop.m100_vel;
-                double m220 = pDrop.m220_vel;
-                double m340 = pDrop.m340_vel;
+                // Transform the target velocities into xy-theta
+                xvel = m100 * MS2XYT[0][0] + m220 * MS2XYT[0][1] + m340 * MS2XYT[0][2];
+                yvel = m100 * MS2XYT[1][0] + m220 * MS2XYT[1][1] + m340 * MS2XYT[1][2];
+                tvel = m100 * MS2XYT[2][0] + m220 * MS2XYT[2][1] + m340 * MS2XYT[2][2];
 
-                double xvel = m100 * MS2XYT[0][0] + m220 * MS2XYT[0][1] + m340 * MS2XYT[0][2];
-                double yvel = m100 * MS2XYT[1][0] + m220 * MS2XYT[1][1] + m340 * MS2XYT[1][2];
-                double tvel = m100 * MS2XYT[2][0] + m220 * MS2XYT[2][1] + m340 * MS2XYT[2][2];
+                // Scale the target velocities (which should be between -127 and 127?) to
+                //  between -1 and 1
+                xvel /= WHEEL_VOLTAGE_SCALE;
+                yvel /= WHEEL_VOLTAGE_SCALE;
+                tvel /= WHEEL_VOLTAGE_SCALE;
 
+                // Bound the three components between -1 and 1
+                xvel = Math.min(1.0, Math.max(-1.0, xvel));
+                yvel = Math.min(1.0, Math.max(-1.0, yvel));
+                tvel = Math.min(1.0, Math.max(-1.0, tvel));
+
+                driveData.setDriveMode(ObjectStateOmnidrive.DriveMode.VOLTAGE);
+
+                velocity = new Vector2D(xvel, yvel);
+                angleVelocity = tvel;
+                break;
+            case WHEEL_SPACE:
+                xvel = m100 * MS2XYT[0][0] + m220 * MS2XYT[0][1] + m340 * MS2XYT[0][2];
+                yvel = m100 * MS2XYT[1][0] + m220 * MS2XYT[1][1] + m340 * MS2XYT[1][2];
+                tvel = m100 * MS2XYT[2][0] + m220 * MS2XYT[2][1] + m340 * MS2XYT[2][2];
+
+                driveData.setDriveMode(ObjectStateOmnidrive.DriveMode.XYTHETA);
                 velocity = new Vector2D(xvel / XY_VELOCITY_SCALE, yvel / XY_VELOCITY_SCALE);
-                angleVelocity = tvel / ANG_VELOCITY_SCALE;
+                angleVelocity = tvel;
                 break;
             default:
                 System.err.println("Unimplemented motor mode: " + pDrop.motor_mode);

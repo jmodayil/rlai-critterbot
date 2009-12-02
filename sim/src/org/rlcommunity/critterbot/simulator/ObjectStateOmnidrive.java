@@ -21,20 +21,23 @@ package org.rlcommunity.critterbot.simulator;
  *
  * @author Marc G. Bellemare
  */
-import org.rlcommunity.critterbot.javadrops.drops.CritterControlDrop;
 
-import java.awt.Graphics;
 import java.awt.Color;
 
 public class ObjectStateOmnidrive implements ObjectState {
 
-    /** Target velocity */
+    public enum DriveMode { XYTHETA, VOLTAGE };
+    
+    /** Target velocity (or force, if in voltage mode) */
     protected Vector2D aVel;
-    /** Target angular velocity */
+    /** Target angular velocity (or torque, if in voltage mode) */
     protected double aAngVel;
     /** For PID control, not quite what we want */
     protected Force aForce;
     protected int aTimeSinceCommand;
+    /** How the wheels are controlled */
+    protected DriveMode aDriveMode;
+    
     /** 'Persistent' data */
     /** How much the PID should compensate for velocity errors; for now
      * a single value, most likely to be changed when other parts are in place
@@ -68,6 +71,21 @@ public class ObjectStateOmnidrive implements ObjectState {
         aMaxForce = pMaxForce;
         aThrustError = pThrustError;
         aTorqueError = pTorqueError;
+
+        aDriveMode = DriveMode.XYTHETA;
+    }
+
+    /**
+     * Returns the selected drive mode.
+     * 
+     * @return Drive mode
+     */
+    public DriveMode getDriveMode() {
+      return aDriveMode;
+    }
+
+    public void setDriveMode(DriveMode pMode) {
+      aDriveMode = pMode;
     }
 
     /** Returns the target velocity for this omni-drive
@@ -178,6 +196,7 @@ public class ObjectStateOmnidrive implements ObjectState {
         return SimulatorComponentOmnidrive.NAME;
     }
 
+    @Override
     public Object clone() {
         ObjectStateOmnidrive newDrive = new ObjectStateOmnidrive();
         newDrive.copyFrom(this);
@@ -194,6 +213,8 @@ public class ObjectStateOmnidrive implements ObjectState {
         this.aPIDCoefficient = org.aPIDCoefficient;
         this.aThrustError = org.aThrustError;
         this.aTorqueError = org.aTorqueError;
+
+        this.aDriveMode = org.aDriveMode;
     }
 
     public void draw(SimulatorGraphics g, SimulatorObject parent) {

@@ -85,13 +85,30 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
       double dir = thisObject.getDirection();
    
       // Produce a force to provide the required velocity (which is in m/s)
+      // Also produce a torque to provide the required angular velocity
       Vector2D localVel = kinState.getVelocity().rotate(-dir);
-      Force fPID = simpleXYPid(driveState, kinState, localVel);
+      Force fPID;
+      double torquePID;
+      switch (driveState.getDriveMode()) {
+        case XYTHETA:
+          fPID = simpleXYPID(driveState, kinState, localVel);
+          torquePID = simpleTPID(driveState, kinState);
+          break;
+        case VOLTAGE:
+          // Voltage mode directly drives the force
+          // Sqrt(2) multiplier because simpleXYPID caps the x and y coordinates
+          //  independently
+          fPID = new Force(driveState.getVelocity().times(driveState.getMaxForce()));
+          torquePID = driveState.getAngVelocity() * driveState.getMaxForce();
+          break;
+        default:
+          throw new UnsupportedOperationException(
+                  "Cannot handle drive mode: "+driveState.getDriveMode());
+      }
+
       nextDriveState.setForce(fPID);
       fPID.vec.timesEquals(thrustGain);
 
-      // Produce a torque to provide the required angular velocity
-      double torquePID = simpleTPID(driveState, kinState);
 
       double thrustError = driveState.getThrustError();
       double torqueError = driveState.getTorqueError();
@@ -133,7 +150,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     *  (for now) achieves the desired velocity, rather than creating some
     *  force.
     */
-  public Force simpleXYPid(ObjectStateOmnidrive driveData, 
+  public Force simpleXYPID(ObjectStateOmnidrive driveData,
     ObjectStateDynamics dynData, Vector2D curVel)
   {
     double maxForce = driveData.getMaxForce();
@@ -150,7 +167,7 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     err.y = err.y * coeff;
     
     // Add the previous force to the error velocity vector, but only if they
-    //  are pointing in the same directory
+    //  are pointing in the same direction
     if (fVec.dot(err) > 0)
         err.plusEquals(fVec);
 
@@ -169,6 +186,8 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
   public double simpleTPID(ObjectStateOmnidrive driveData,
     ObjectStateDynamics dynData)
   {
+    // Somewhat arbitrary maximum
+    double maxForce = driveData.getMaxForce()/torqueGain*3;
     double targetVel = driveData.getAngVelocity();
     double curVel = dynData.getAngVelocity();
 
@@ -180,6 +199,12 @@ public class SimulatorComponentOmnidrive implements SimulatorComponent
     // @todo take this out, of course
     res += curVel * 0.5;
 
+    // @todo not the best - should be independent from maxForce, e.g. maxTorque
+    if (res > maxForce)
+      res = maxForce;
+    else if (res < -maxForce)
+      res = -maxForce;
+    
     return res;
   }
 }
