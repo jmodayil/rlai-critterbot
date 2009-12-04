@@ -1,0 +1,129 @@
+\documentclass[12pt]{article}
+
+\usepackage{fullpage}
+\usepackage{epsfig}
+\usepackage{graphicx}
+
+\newcommand{\code}[1]{\texttt{#1}}
+
+\newcommand{\keyword}[1]{\textit{#1}}
+
+\author{Marc G. Bellemare}
+\title{Extending the RLAI Robotic Simulator}
+
+\begin{document}
+
+\maketitle
+
+This document is not yet complete. You should probably not rely on it.
+
+\section{Purpose of This Tutorial}
+
+The purpose of this tutorial is to describe how to extend the RLAI Robotic
+Simulator. In particular, it details:
+
+\begin{itemize}
+\item{How to create new environment descriptions}
+\item{How to create new Simulator components}
+\item{itemize}
+
+It does not, however, discuss how to use the Simulator or how to create agents.
+For this, you may want to refer to the other tutorials, available from the
+same location as this tutorial.
+
+
+\section{High-Level Description of the Simulator Mechanics}
+
+\subsection{Operation and components}
+
+The Simulator core is its \keyword{engine} (class: \code{SimulatorEngine}). 
+The Simulator operates at a set 
+frequency (by default, 100 time steps per second). On each time step, the
+engine updates the world to correspond to the next step. This update is done
+by calling the apply() method of each \keyword{component} 
+(class: \code{SimulatorComponent}). in turn. A component 
+is a module of the simulator responsible for a specific task. A brief list
+of components (and their corresponding class) includes:
+
+\begin{itemize}
+  \item{Dynamics: \code{SimulatorComponentDynamics}}
+  \item{Visible light: \code{SimulatorComponentLight}}
+  \item{Gyroscope: \code{SimulatorComponentGyroscope}}
+  \item{...}
+\end{itemize}
+
+The \code{apply} method of each component is the core of the Simulator's
+computation.
+
+\subsection{Objects}
+
+Aside from a few exceptions, everything that exists in the simulator is an
+\keyword{object} (class: \code{SimulatorObject}). An object has a position,
+a direction, a label and (possibly) a shape (as a \code{Polygon}). Most 
+importantly, each object has a list of properties (states, class 
+\code{ObjectState}). An object may also have children to form complex objects
+from parts. For example, the simulated Critterbot is composed of a main body
+to which are attached sensor objects.
+
+\subsection{Object properties: ObjectState}
+
+The specific nature of an object depends on its properties. In general, each
+component acts on one or two properties of an object. For example, the 
+component \code{SimulatorComponentDynamics} acts upon 
+\code{ObjectStateDynamics} and \code{SimulatorComponentLight} acts upon
+\code{ObjectStateLightSource} and \code{ObjectStateLightSensor}. The general
+contract of an ObjectState is to provide member variables for its associated
+component. \code{ObjectStateLightSource} provides light source-related 
+variables corresponding to the object to which it is attached.
+
+
+With the above tools in hand - objects, components and object states - we
+can now consider extending the computational aspects of the Simulator.
+
+\section{Creating new components}
+
+For this section, we will study the Critterbot gyroscope and its associated
+component.
+
+\subsection{Creating ObjectStateGyroscope}
+
+\code{ObjectStateGyroscope} contains various variables and methods of interest.
+In this case, gyroscope-related state information only includes the actual 
+gyroscope reading (\code{aVelocity}). There is also a variable for the 
+relative error of the gyroscope.
+
+\code{ObjectStateGyroscope} implements the following methods inherited from 
+\code{ObjectState}:
+
+\begin{enumerate}
+  \item{\code{getName()}. Returns a unique identifier for this ObjectState.}
+  \item{\code{clone()}. Creates a copy of this ObjectState.}
+  \item{\code{draw()}. This method handles drawing additional state information;
+    for example, the bump sensors may be displayed as shrinking red circles
+    using this method.}
+  \item{\code{clearTransient()}. If this `ObjectState' uses any intermediate
+    data structures during the computation of its value, this mehtod should 
+    re-initialize them.}
+\end{enumerate}
+
+\code{getName} is usually implemented by returning a static key. This is used
+to retrieve the corresponding ObjectState in an object.  Here, we return
+\code{ObjectStateGyroscope.NAME}.
+
+\code{clone} creates a new \code{ObjectStateGyroscope} and uses the
+\code{copyFrom} method to ensure a deep clone.
+\code{draw} is left empty - we do not display any gyroscope information.
+\code{clearTransient} sets the reported velocity to 0.
+
+
+\subsection{Creating SimulatorComponentGyroscope}
+
+
+Next: 
+  - describe the bits of SimulatorComponent in a similar fashion as above
+    (member variables, inherited methods, extra stuff if necessary).
+  - conclude by saying this determines the gyroscope computation (we can now
+    add this to read objects' velocities)
+  - describe how to add a gyroscope to an object (using addState)
+
+\end{document}
