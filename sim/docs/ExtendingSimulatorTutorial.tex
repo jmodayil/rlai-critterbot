@@ -125,7 +125,7 @@ the robot's rotational velocity, which we will obtain from
 \code{ObjectStateDynamics}.
 
 \code{SimulatorComponentGyroscope} implements a single method inherited from
-\oode{SimulatorComponent}: \code{apply()}. The apply method is the simulator's
+\code{SimulatorComponent}: \code{apply()}. The apply method is the simulator's
 computational core. Recall that it is called at every iteration of the 
 simulator (e.g. every 100th of a second). The apply method takes three 
 parameters: two \code{SimulatorState} objects and an integer \code{delta},
@@ -168,5 +168,72 @@ would provide it with a gyroscope.
 
 Similarly, the \code{SimulatorEngine} has a method \code{addComponent} which
 lets you specify which components should be run.
+
+
+\section{Creating Simulator Environments}
+
+In this section, we show how new environments may be specified. The 
+\code{SimulatorEngine} class' constructor is provided with an 
+\code{EnvironmentDescription}, which encapsulates methods for building
+environments.
+
+\subsection{EnvironmentDescription}
+
+The interface \code{EnvironmentDescription} is found in the package
+\code{org.rlcommunity.critterbot.simulator.environments}. It provides two 
+methods, 
+\code{generateObjects()} and \code{usesSVG()}. The latter should return true
+if the environment depends on SVG for drawing its components (as opposed to
+awt, Java's drawing interface). Throughout this tutorial we assume that 
+we do not use SVG drawing and thus assume that this method returns false.
+
+The \code{generateObjects()} method's contract is to return a list of 
+\code{SimulatorObject}s that should be included in the system. The objects'
+position should be initialized as necessary, as well as their 
+\code{ObjectState}. The engine will clone this list to create the next time
+step's state, which is why it is important that the \code{clone()} method
+of various \code{ObjectState} should carry over information.
+
+\subsection{CommonObjects}
+
+The class \code{CommonObjects} contains static methods that return predefined
+objects: \code{generateCritterbot()}, \code{generateBall()}... It also provides
+the helper functions \code{addObject()} and \code{addObjectRandomPosition()},
+that automatically add the object to an existing list, as well as setting
+the position (and direction) accordingly. For an example using the latter
+method, see \code{SimpleEnvironment}.
+
+One particularity of creating objects in the simulator is that we must assign
+them a unique identifier. In the future, this process should be automated.
+For now, the \code{EnvironmentDescription} method must keep track of 
+identifiers. However, the \code{CommonObject} class simplifies this process
+by returning the next usable identifier. This is particularly useful in the
+case of objects composed of other objects, such as the Critterbot.
+
+\subsection{An example: BasketBallEnvironment}
+
+The reader is invited to look at \code{BasketBallEnvironment}, found in the
+same package as \code{EnvironmentDescription}. The implementation of the
+\code{generateObjects()} method should be straightforward: each object
+is created in turn using calls to \code{CommonObjects}. Objects are given
+names for easy identification. In this example, we create a ball of size
+0.05 and place it at a random location of our choosing (we could also use
+\code{addObjectRandomPosition()}. Once we have added all the objects we
+need, we simply return the \code{objects} list.
+
+\begin{figure}\label{fig:basketball}
+\centerline{
+\psfig{file=images/BasketBallEnvironment.pdf,width=3in}
+}
+\caption{The results of using the BasketBallEnvironment class to generate 
+a simulated world.}
+\end{figure}
+
+Once constructed, we can pass our environment description to the simulator
+engine, which will then use it to generate a world. See \code{SimulatorMain}
+for an example. Figure \ref{fig:basketball} shows the results of using the
+\code{BasketBallEnvironment} class in \code{SimulatorMain}.
+
+% @todo include BasketBall picture
 
 \end{document}
