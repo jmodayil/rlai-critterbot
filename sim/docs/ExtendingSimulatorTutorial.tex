@@ -40,7 +40,7 @@ The Simulator core is its \keyword{engine} (class: \code{SimulatorEngine}).
 The Simulator operates at a set 
 frequency (by default, 100 time steps per second). On each time step, the
 engine updates the world to correspond to the next step. This update is done
-by calling the apply() method of each \keyword{component} 
+by calling the \code{apply()} method of each \keyword{component} 
 (class: \code{SimulatorComponent}). in turn. A component 
 is a module of the simulator responsible for a specific task. A brief list
 of components (and their corresponding class) includes:
@@ -126,7 +126,11 @@ the robot's rotational velocity, which we will obtain from
 
 \code{SimulatorComponentGyroscope} implements a single method inherited from
 \oode{SimulatorComponent}: \code{apply()}. The apply method is the simulator's
-computational core. It is provided with two \code{SimulatorState} objects.
+computational core. Recall that it is called at every iteration of the 
+simulator (e.g. every 100th of a second). The apply method takes three 
+parameters: two \code{SimulatorState} objects and an integer \code{delta},
+the number of milliseconds that we are requesting the system to simulate
+(10 by default).
 
 The first \code{SimulatorState} encapsulates the current time step information,
 and (by convention) should not be modified by the apply method. The second
@@ -137,15 +141,32 @@ should be read-only, and the second write-only.
 
 In our case, we wish to modify the gyroscope reading of all
 objects in the second \code{SimulatorState} to reflect rotational velocities
-at the current time step. A third variable is provided to us, \code{delta},
-the number of milliseconds that we are requesting the system to simulate.
-\code{delta} is 10 by default. 
+at the current time step. 
 
 The gyroscope \code{apply()} method is actually straightforward. It requests
 the list of all objects with a gyroscope at time $t$ (the current time step).
+It then finds the destination \code{ObjectStateGyrsocope} (at time $t+1$)
+as well as the source \code{ObjectStateDynamics} (time $t$), and produces a 
+gyroscope reading from the latter. Gaussian noise is added based on the
+gyroscope error variable.
 
-each containing all of the information 
+Together, the \code{ObjectStateGyroscope} and 
+\code{SimulatorComponentGyroscope} allow us to compute and store gyroscope
+readings. 
 
-(work in progress)
+Adding a gyroscope-type sensor to an object (such as an instance of
+the Critterbot) is simple. The class \code{SimulatorObject} contains a method
+\code{addState()}. This method attaches a given \code{ObjectState} to a
+\code{SimulatorObject}. So, if we had an existing Critterbot (called critterbot)
+the line of code
+
+\begin{verbatim}
+critterbot.addState(new ObjectStateGyroscope());
+\end{verbatim}
+
+would provide it with a gyroscope.
+
+Similarly, the \code{SimulatorEngine} has a method \code{addComponent} which
+lets you specify which components should be run.
 
 \end{document}
