@@ -26,15 +26,26 @@ import java.util.Random;
 
 public class SimulatorComponentGyroscope implements SimulatorComponent {
 
-    public static final String NAME = "gyroscope";
+    /** That which we call a gyroscope */
+    public static final String NAME = ObjectStateGyroscope.NAME;
 
+    /** A random number generator to produce noise */
     protected Random aRandom;
-    
+
+    /** Creates a new gyroscope SimulatorComponent with an internal
+     *   random number generator.
+     *
+     * @deprecated
+     */
     public SimulatorComponentGyroscope() {
         this(new Random());
         System.err.println ("Deprecated: using local Random object.");
     }
 
+    /** Creates a new gyroscope SimulatorComponent.
+     *
+     * @param pRandom A random number generator  (used for noise).
+     */
     public SimulatorComponentGyroscope(Random pRandom) {
         aRandom = pRandom;
     }
@@ -49,28 +60,35 @@ public class SimulatorComponentGyroscope implements SimulatorComponent {
       */
     public void apply(SimulatorState pCurrent, SimulatorState pNext, int delta) 
     {
+      // Request the list of all gyroscopes in the world, at time t
       List<SimulatorObject> sensors = 
         pCurrent.getObjects(ObjectStateGyroscope.NAME);
 
-      // For each accelerometer ...
+      // For each gyroscope ...
       for (SimulatorObject sensor : sensors)
       {
+        // Find the object at time t+1 corresponding to the object that has the gyroscope property
         SimulatorObject nextSensor = pNext.getObject(sensor);
         if (nextSensor == null) continue;
 
         assert(nextSensor.getState(ObjectStateGyroscope.NAME) != null);
 
+        // Obtain the gyroscope ObjectState for times t+1 and t
         ObjectStateGyroscope nextGyroData = (ObjectStateGyroscope)
           nextSensor.getState(ObjectStateGyroscope.NAME);
 
         ObjectStateGyroscope gyroData = (ObjectStateGyroscope)
           sensor.getState(ObjectStateGyroscope.NAME);
 
+        // Also get the dynamics at time t; if there is no such thing,
+        //  we cannot measure rotational velocity and will ignore this sensor
         ObjectState os = sensor.getState(SimulatorComponentDynamics.NAME);
         if (os == null) continue;
 
         ObjectStateDynamics dynData = (ObjectStateDynamics)os;
 
+        // We set the value of the gyroscope at time t+1 to reflect the
+        //  rotational velocity at time t, plus noise
         double vel = dynData.getAngVelocity();
         double noise = gyroData.getError();
         

@@ -25,7 +25,7 @@ Simulator. In particular, it details:
 \begin{itemize}
 \item{How to create new environment descriptions}
 \item{How to create new Simulator components}
-\item{itemize}
+\end{itemize}
 
 It does not, however, discuss how to use the Simulator or how to create agents.
 For this, you may want to refer to the other tutorials, available from the
@@ -83,7 +83,7 @@ can now consider extending the computational aspects of the Simulator.
 \section{Creating new components}
 
 For this section, we will study the Critterbot gyroscope and its associated
-component.
+component as a running example.
 
 \subsection{Creating ObjectStateGyroscope}
 
@@ -118,12 +118,34 @@ to retrieve the corresponding ObjectState in an object.  Here, we return
 
 \subsection{Creating SimulatorComponentGyroscope}
 
+\code{SimulatorComponentGyroscope} contains methods that compute gyroscope
+state information (stored in \code{ObjectStateGyroscope}), possibly based
+on other state information. In this case, the gyroscope readings depend on
+the robot's rotational velocity, which we will obtain from 
+\code{ObjectStateDynamics}.
 
-Next: 
-  - describe the bits of SimulatorComponent in a similar fashion as above
-    (member variables, inherited methods, extra stuff if necessary).
-  - conclude by saying this determines the gyroscope computation (we can now
-    add this to read objects' velocities)
-  - describe how to add a gyroscope to an object (using addState)
+\code{SimulatorComponentGyroscope} implements a single method inherited from
+\oode{SimulatorComponent}: \code{apply()}. The apply method is the simulator's
+computational core. It is provided with two \code{SimulatorState} objects.
+
+The first \code{SimulatorState} encapsulates the current time step information,
+and (by convention) should not be modified by the apply method. The second
+\code{SimulatorState} object is provided as a mean of specifying the resulting
+next time step. As a rule of thumb, data in the next time step's 
+\code{SimulatorState} should not be read. This means that the first object
+should be read-only, and the second write-only. 
+
+In our case, we wish to modify the gyroscope reading of all
+objects in the second \code{SimulatorState} to reflect rotational velocities
+at the current time step. A third variable is provided to us, \code{delta},
+the number of milliseconds that we are requesting the system to simulate.
+\code{delta} is 10 by default. 
+
+The gyroscope \code{apply()} method is actually straightforward. It requests
+the list of all objects with a gyroscope at time $t$ (the current time step).
+
+each containing all of the information 
+
+(work in progress)
 
 \end{document}
