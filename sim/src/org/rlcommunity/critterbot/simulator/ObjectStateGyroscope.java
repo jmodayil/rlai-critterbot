@@ -23,7 +23,7 @@ package org.rlcommunity.critterbot.simulator;
 
 public class ObjectStateGyroscope implements ObjectState
 {
-  public static final String NAME = SimulatorComponentGyroscope.NAME; 
+  public static final String NAME = "gyroscope";
 
   /** The angular velocity measured by the gyroscope */
   protected double aVelocity; 
