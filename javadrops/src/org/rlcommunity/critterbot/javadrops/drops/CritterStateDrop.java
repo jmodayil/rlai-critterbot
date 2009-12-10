@@ -128,7 +128,9 @@ public class CritterStateDrop implements SimulatorDrop
   public enum PowerSource { SHORE, BAT40, BAT160, BAT280 };
 
   // @todo this needs to be made to correspond with the C++ drops
-  public enum ChargeState { UNPLUGGED };
+  public enum ChargeState { UNPLUGGED, CHARGE_40, CHARGE_40_160,
+    CHARGE_160, CHARGE_160_280, CHARGE_280, CHARGE_TOPOFF,
+    CHARGE_COMPLETE, CHARGE_ERROR};
 
   /** This replaces the USeconds construct in Disco, although
    *  we do lose 3 characters of precision on the time.
@@ -239,7 +241,7 @@ public class CritterStateDrop implements SimulatorDrop
     time.writeData(pOut);
     pOut.writeInt(data_source.ordinal());
     pOut.writeInt(power_source.ordinal());
-    pOut.writeInt(charge_state.ordinal());
+    pOut.writeInt(ChargeStateToInt(charge_state));
     
     pOut.writeInt(bus_voltage);
     pOut.writeInt(batv40);
@@ -268,6 +270,42 @@ public class CritterStateDrop implements SimulatorDrop
     pOut.writeInt(cycle_time);
   }
 
+  protected int ChargeStateToInt(ChargeState pState) {
+      switch (pState) {
+          case UNPLUGGED: return 0;
+          case CHARGE_40: return 2;
+          case CHARGE_40_160: return 4;
+          case CHARGE_160: return 5;
+          case CHARGE_160_280: return 7;
+          case CHARGE_280: return 8;
+          case CHARGE_TOPOFF: return 9;
+          case CHARGE_COMPLETE: return 10;
+          case CHARGE_ERROR: return 200;
+          default: throw new IllegalArgumentException("Unhandled charge state: "+pState);
+      }
+  }
+
+  /** The charge states are ordered but not contiguous */
+  protected ChargeState IntToChargeState(int pInt) {
+      switch (pInt) {
+          case 0: return ChargeState.UNPLUGGED;
+          case 2: return ChargeState.CHARGE_40;
+          case 4: return ChargeState.CHARGE_40_160;
+          case 5: return ChargeState.CHARGE_160;
+          case 7: return ChargeState.CHARGE_160_280;
+          case 8: return ChargeState.CHARGE_280;
+          case 9: return ChargeState.CHARGE_TOPOFF;
+          case 10: return ChargeState.CHARGE_COMPLETE;
+          case 200: return ChargeState.CHARGE_ERROR;
+          // Not quite correct, but better than throwing an exception,
+          //  especially because other charge states *actually* exist
+          default: {
+              System.err.println ("Unknown charge state "+pInt);
+              return ChargeState.UNPLUGGED;
+          }
+      }
+  }
+
   /** Reads in a drop from the input stream.
    *
    * @param pIn The input stream from which the drop should be read.
@@ -283,8 +321,7 @@ public class CritterStateDrop implements SimulatorDrop
       DataSource.LOGFILE).toArray()[pIn.readInt()];
     power_source = (PowerSource)EnumSet.range(PowerSource.SHORE,
       PowerSource.BAT280).toArray()[pIn.readInt()];
-    charge_state = (ChargeState)EnumSet.range(ChargeState.UNPLUGGED,
-            ChargeState.UNPLUGGED).toArray()[pIn.readInt()];
+    charge_state = IntToChargeState(pIn.readInt());
     
     // Read in all the data, one variable at a time
     bus_voltage = pIn.readInt();
