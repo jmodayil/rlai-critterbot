@@ -10,6 +10,8 @@
 #ifndef LIB_MONITOR_H
 #define LIB_MONITOR_H
 
+#define MONITOR_STATUS_MOTOR_TEMP   0x1
+
 // #define MONITOR_MIN_MOTOR_TEMPERATURE 65
 // For testing purposes only
 #define MONITOR_MIN_MOTOR_TEMPERATURE 65
@@ -21,5 +23,8 @@ int monitor_event();
 
 int monitor_motor_temp();
 int monitor_battery_charge();
+
+/** Returns the status of the monitor. */
+int monitor_status();
 
 #endif /* LIB_MONITOR_H */

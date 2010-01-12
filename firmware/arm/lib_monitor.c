@@ -91,3 +91,8 @@ int monitor_motor_temp() {
   }
 }
 
+int monitor_status() {
+  int status_flag = 0;
+  if (monitor_bad_motor_temp)
+    status_flag |= MONITOR_STATUS_MOTOR_TEMP;
+}
