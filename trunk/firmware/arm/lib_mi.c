@@ -8,6 +8,7 @@
 #include "lib_events.h"
 #include "lib_leddrive.h"
 #include "lib_thermo.h"
+#include "lib_monitor.h"
 
 struct command_packet robot_command;
 extern unsigned short crctable[256];
@@ -134,6 +135,7 @@ void mi_send_status(void) {
   putwcrc(error_reg >> 8);
   putwcrc(error_reg);
   putwcrc(events_time());
+  putwcrc(monitor_status());
 
   armputchar(crc >> 8);
   armputchar(crc & 0xFF);
