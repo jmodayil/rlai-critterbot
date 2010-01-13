@@ -132,7 +132,7 @@ public class CritterStateDrop implements SimulatorDrop
     CHARGE_160, CHARGE_160_280, CHARGE_280, CHARGE_TOPOFF,
     CHARGE_COMPLETE, CHARGE_ERROR};
 
-  public enum MonitorState { MOTOR_TEMPERATURE };
+  public static final int MONITOR_STATE_MOTOR_TEMPERATURE = 0x01;
   
   /** This replaces the USeconds construct in Disco, although
    *  we do lose 3 characters of precision on the time.
@@ -174,8 +174,8 @@ public class CritterStateDrop implements SimulatorDrop
   public int error_flags;
   public int cycle_time;
 
-  /** State of the ARM monitor */
-  public MonitorState monitor_state;
+  /** State of the ARM monitor (bit map). */
+  public int monitor_state;
   
   public static final int IR_DISTANCE_SIZE   = 10;
   public static final int IR_LIGHT_SIZE      = 8;
@@ -274,7 +274,7 @@ public class CritterStateDrop implements SimulatorDrop
 
     pOut.writeInt(error_flags);
     pOut.writeInt(cycle_time);
-    pOut.writeInt(monitor_state.ordinal());
+    pOut.writeInt(monitor_state);
   }
 
   protected int ChargeStateToInt(ChargeState pState) {
@@ -356,7 +356,6 @@ public class CritterStateDrop implements SimulatorDrop
 
     error_flags = pIn.readInt();
     cycle_time = pIn.readInt();
-    monitor_state = (MonitorState)EnumSet.range(MonitorState.MOTOR_TEMPERATURE,
-      MonitorState.MOTOR_TEMPERATURE).toArray()[pIn.readInt()];
+    monitor_state = pIn.readInt();
   }
 }
