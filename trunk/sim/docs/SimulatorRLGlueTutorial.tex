@@ -23,7 +23,7 @@ After performing the installation (Section \ref{sec:installation}),  I suggest
 running the simulator in Standalone mode (Section \ref{subsec:standalone}) 
 once initially to get an idea of the environment in which the robot lives.
 
-This tutorial is divided into four parts in ordering of increasing depth of
+This tutorial is divided into four parts in order of increasing depth of
 use. The first part is concerned with the actual simulator package - how
 to install and run the simulator. The second part explains how to use the 
 simulator, in particular how to write an agent and an RL environment. It
@@ -32,7 +32,9 @@ third part details how to create new simulator environments (e.g. the
 constituent parts of the simulator, as opposed to the RL-specific aspects)
 and how to modify existing objects and create new ones. The last part focuses
 on adding functionality to the simulator, for example how to design new 
-sensors or how to improve the physics engine.
+sensors or how to improve the physics engine. Part three and four can be
+found in the tutorial, `Extending the Simulator', available from the same
+location as this tutorial.
 
 \subsection{Notes}
 
@@ -41,7 +43,7 @@ Running the simulator requires the following:
 \begin{itemize}
 \item{Java 1.5}
 \item{A POSIX operating system such as Mac OS X, Linux or BSD (for running the additonal scripts)}
-item{RL-Glue Core 3.0}
+\item{RL-Glue Core 3.0}
 \end{itemize}
 
 This tutorial does not discuss RL-Glue, on which this version of the simulator
@@ -143,7 +145,12 @@ by moving to the \code{example} directory and executing the script
 rlaisim/RLAIRobotSimulator> cd example
 rlaisim/RLAIRobotSimulator/example> bash compile.sh
 
-Compiled src/environment/DiscreteActionMapping.java src/environment/LightBasedRewardFunction.java src/environment/LightSensorsObservationMapping.java src/environment/SampleEnvironmentDescription.java src/environment/SampleSimulatorEnvironment.java src/environment/StandaloneSimulatorLoader.java
+Compiled src/environment/DiscreteActionMapping.java 
+  src/environment/LightBasedRewardFunction.java 
+  src/environment/LightSensorsObservationMapping.java 
+  src/environment/SampleEnvironmentDescription.java 
+  src/environment/SampleSimulatorEnvironment.java 
+  src/environment/StandaloneSimulatorLoader.java
 Compiled src/agent/RandomAgent.java
 Compiled src/experiment/SampleExperiment.java
 
@@ -163,7 +170,7 @@ The following will start the simulator in standalone mode:
 rlaisim/RLAIRobotSimulator/example> bash runStandalone.sh 
 \end{verbatim}
 
-The \verb+runStandalone.sh+ script will compile the simulator loader,
+The \verb+runStandalone.sh+ script will compile the simulator loader,\\
 \verb+src/environment/StandaloneSimulatorLoader.java+, and execute it. The 
 specifics of this program will be detailed later in this tutorial.
 
@@ -196,6 +203,16 @@ rlaisim/RLAIRobotSimulator/example> bash runStandalone.sh -nc -s 2.0
 
 will run the simulator without recompiling the source files in the
 \code{example} directory and run at twice the real-time simulator speed.
+Beware of running faster than your CPU allows; if this happens, the simulator
+will let you know with the following error message:
+
+\begin{verbatim}
+Simulator is running behind... (actual time scale: 1.64, req. 2.0)
+\end{verbatim}
+
+In such a case, the simulator will run as fast as it can given your system's 
+resources (here, at 1.64 times the normal speed). The simulator is often 
+slower during its initialization, which may result in harmless warnings.
 
 \subsection{Running via RL-Glue}
 
@@ -250,13 +267,14 @@ files in \code{example/src/environment} to
 \code{RLGlueSim/src/org/rlcommunity/environments/rlaisim/examples}:
 
 \begin{verbatim}
-RLAIRobotSimulator> mkdir -p RLGlueSim/src/org/rlcommunity/environments/rlaisim/examples
+RLAIRobotSimulator> mkdir -p 
+  RLGlueSim/src/org/rlcommunity/environments/rlaisim/examples
 RLAIRobotSimulator> cp example/src/environment/* 
   RLGlueSim/src/org/rlcommunity/environments/rlaisim/examples
 \end{verbatim}
 
-The ant script provided in the \code{RLGlueSim} is already configured to 
-generate RL-Viz compatible jar files. In other words, after doing
+The ant script provided in the \code{RLGlueSim} directory is already configured 
+to generate RL-Viz compatible jar files. In other words, after doing
 
 \begin{verbatim}
 RLAIRobotSimulator> cd RLGlueSim
@@ -281,11 +299,11 @@ an experiment. The specific description and purpose of each of these
 components may be found in the RL-Glue documentation. In this section, we
 will discuss how to create the first two - the RL environment and the agent -
 as well as how to modify the Simulator environment. The ``RL environment''
-refers to the part of the system which interacts with the agen via the RL-Glue.
+refers to the part of the system which interacts with the agent via RL-Glue.
 The ``Simulator environment'', on the other hand, refers to the components
 of the simulator engine itself and to the objects that ``live'' in the
 simulator. The RL environment is in charge of defining the action and 
-observation space provided to the agent, whereas the Simulator environment
+observation spaces provided to the agent, whereas the Simulator environment
 defines which objects are loaded and where they should initially be placed.
 
 \subsection{Creating an Agent}
@@ -306,7 +324,8 @@ features.
 
 The package has been designed to abstract most of the simulator-related
 aspects from the actual RL environment implementation. There are four 
-components necessary to create a new environment:
+components necessary to create a new environment, whose source can be found 
+within the \code{RLGlueSim/src} directory:
 
 \begin{enumerate}
 \item{A \code{SimulatorActionMapping} that converts RL actions to commands to the robot in the simulator}
@@ -345,7 +364,7 @@ translational component to actions 4 and 5.
 A \code{SimulatorActionMapping} must also provide range information about the
 allowed RL actions. 
 
-The Javadocs on the CritterControlDrop describes the different fields
+The Javadocs on the CritterControlDrop describe the different fields
 that may be set.
 
 \subsubsection[LightSensorsObservationMapping]{LightSensorsObservationMapping (implements SimulatorObservationMapping)}
@@ -383,7 +402,7 @@ information, found under the fields \verb+batv40+, \verb+batv160+ and
 \verb+batv280+ in the \code{CritterStateDrop}.
 
 Similar to the \code{SimulatorActionMapping} and 
-\code{SimulatorObservationMapping}, a \code{SimulatorRewardFunction}
+\code{SimulatorObservationMapping}, a \\ \code{SimulatorRewardFunction}
 implementer must provide a range for its reward function.
 
 \subsubsection[SampleSimulatorEnvironment]{SampleSimulatorEnvironment (implements EnvironmentDescription)} 
@@ -420,4 +439,76 @@ following methods must be implemented:
 \item{\code{isTerminal} - returns whether the environment has reached a terminal state.}
 \end{itemize}
 
+\subsubsection{Accessing simulator information}
+
+You may be wondering how to obtain the $x,y\theta$ coordinates of the robot,
+or how to teleport objects around in the simulator. In general, this may be
+done by keeping a Java pointer to the \code{SimulatorEngine} and accessing its
+data as needed. The Maze example (see below) obtains the $x,y$ 
+coordinates of the robot and returns them as the RL-Glue observation.
+
+\subsection{Advanced topics}
+
+\subsubsection{Additional parameters}
+
+The class \code{AbstractSimulatorEnvironment} receives its parameters through
+a \code{ParameterHolder} (from \code{RLVizLib}). There are currently five 
+parameters that you may wish to modify:
+
+\begin{enumerate}
+\item{\code{simulator-use-gui} - whether to display the GUI}
+\item{\code{simulator-use-visualizer} - whether to display the data visualizer}
+\item{\code{millis-per-step} - how many milliseconds a simulator time step lasts (changing this is not recommended)}
+\item{\code{simulator-steps-per-rl-step} - how many simulator steps are taken between each RL step}
+\item{\code{simulator-time-scale} - sets the simulator speed} 
+\end{enumerate}
+
+You may find it easier to change \code{simulator-steps-per-rl-step} to a higher
+value, for example 10. In this case, the agent will be able to pick a new
+action every 100ms, rather than 10. As an example of how to do so, add
+the following line to the end of 
+\code{SampleSimulatorEnvironment.getDefaultParameters()} (before the return
+statement):
+
+\begin{verbatim}
+p.setIntegerParam("simulator-steps-per-rl-step", 100);
+\end{verbatim}
+
+If you call \code{run.sh} again, you should notice that the random agent
+now takes great leaps (each lasting one second).
+
+\subsubsection{The maze example}
+
+The directory
+
+\begin{verbatim}
+example/src/environment/maze
+\end{verbatim}
+
+contains the source code to a slightly more interesting RL task. In the Maze
+task, the robot begins at its charger and must reach the light source,
+depicted as a yellow circle. Its action space is restricted to forward,
+backward and lateral movements but it may rotate by pushing itself against
+walls. Its observation space is composed of its $x$, $y$ and $\theta$
+coordinates. The reward function gives the robot -1 at every step, and 0
+at the goal. Upon reaching the light, the robot is put back in its starting
+position.
+
+To run the maze environment, you simply need to do the following:
+
+1. Modify \code{compile.sh} to compile the maze source code by replacing the
+definition of \code{sampleEnvironmentSrc} by
+
+\begin{verbatim}
+sampleEnvironmentSrc="$srcPath/environment/*.java $srcPath/environment/maze/*.java"
+\end{verbatim}
+
+2. Change the environment class in \code{run.sh} to be
+
+\begin{verbatim}
+envMainClass=environment.maze.MazeEnvironment
+\end{verbatim}
+
+and that's it! Call \code{run.sh} should then result in the maze environment being
+loaded.
 \end{document}
