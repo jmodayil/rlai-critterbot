@@ -43,7 +43,7 @@
 #define FSA_SLOW_ROTATE_VELOCITY   4
 #define FSA_MAX_ROTATION_COMPONENT 0
 
-#define FSA_AVOID_VELOCITY        (FSA_FORWARD_VELOCITY)
+#define FSA_AVOID_VELOCITY        (-FSA_FORWARD_VELOCITY + 5)
 #define FSA_AVOID_ROTATE_VELOCITY (FSA_SLOW_ROTATE_VELOCITY)
 
 // Threshold below which we assume we don't see the beacon

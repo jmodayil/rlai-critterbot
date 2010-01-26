@@ -75,7 +75,7 @@ ui_cmd_item ui_commands[] = {
   {"error", ui_error, "error [clear]"},
   {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
   {"mi", ui_mi, "mi on"},
-  {"recharge", ui_recharge, "recharger [start|stop]"},
+  {"recharge", ui_recharge, "recharge [start|stop]"},
   {"avr", ui_avr, "avr [command]"},
 };
 
