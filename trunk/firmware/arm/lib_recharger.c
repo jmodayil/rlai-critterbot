@@ -37,7 +37,7 @@ unsigned char fsaState;
 unsigned char lastFSAState;
 char convolutionFactor;
 int time;
-int chouillard=0;
+int docking_cycle=0;
 
 unsigned char counter;
 short wanderCounter;
@@ -236,6 +236,8 @@ int recharger_beacon_dir() {
 }
 
 void recharger_fsa_align() {
+  int rotVelocity;
+  
   // Find the direction of the beacon (max. beacon value)
   int beaconDirection = recharger_beacon_dir();
 
@@ -243,7 +245,6 @@ void recharger_fsa_align() {
     recharger_enter_state(lastFSAState); // No action
   }
   else {
-    int rotVelocity;
     if (beaconDirection <= 4) // Rotate right
       rotVelocity = FSA_ROTATE_VELOCITY;
     else // Rotate left
@@ -331,25 +332,7 @@ void recharger_fsa_close() {
 }
 
 void recharger_fsa_rotate() {
-  if (1) {
-      recharger_enter_state(FSA_DOCK);
-	return;
-    }
-
-  if (!recharger_is_moving()) {
-    if (--immobileCounter <= 0) {
-      recharger_enter_state(FSA_DOCK);
-    }
-  }
-  /* else if (getBeaconDirection() == 2)
-    enterFSAState(FSA_DOCK); */
-  // If we haven't stopped after a while, assume a fail
-  else if (--wanderCounter <= 0) {
-    recharger_enter_state(FSA_WANDER);
-  }
-  else // Rotate left 
-    recharger_act(0, 0, -FSA_SLOW_ROTATE_VELOCITY);
-
+  recharger_enter_state(FSA_DOCK);
 }
 
 void recharger_fsa_dock() {
@@ -372,17 +355,16 @@ void recharger_fsa_dock() {
   else // If all is good, reset the immobile counter
     immobileCounter = CF_ROTATE_DOCK_IMMOBILE_TIMEOUT;
 
-	chouillard = 0;
   // Lateral movement into the dock 
-  if (chouillard <= 20)
+  if (docking_cycle <= 20)
     recharger_act(0, -FSA_SLOW_FORWARD_VELOCITY, 0);
-  else if (chouillard <= 40)
+  else if (docking_cycle <= 40)
     recharger_act(0, 0, -FSA_SLOW_ROTATE_VELOCITY);
   else // Temporary power-limiting workaround
     recharger_act(0, 0, 0);
 
-  chouillard++;
-  if (chouillard > 60) chouillard = 0;
+  docking_cycle++;
+  if (docking_cycle > 50) docking_cycle = 0;
 }
 
 
