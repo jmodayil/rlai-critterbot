@@ -27,8 +27,14 @@ void read_charge_state(void) {
 void charge( void ) {
 
   uint8_t stat;
-  uint8_t charging_disabled = (commands & POWER_CHARGING_DISABLED &&
-     system_voltage > OVERRIDE_CHARGING_DISABLED_VOLTAGE);
+  uint8_t charging_disabled;
+
+  // Find the lowest of the battery voltages 
+  uint8_t minbatv = (bat40v < bat160v? bat40v : bat160v);
+  minbatv = (minbatv < bat280v? minbatv : bat280v);
+
+  charging_disabled  = (commands & POWER_CHARGING_DISABLED &&
+     minbatv > OVERRIDE_CHARGING_DISABLED_VOLTAGE);
  
   if (!charging_disabled)
     LED1_PORT |= LED1;
@@ -88,12 +94,12 @@ void charge( void ) {
       
       // If charging is not disabled, determine whether we should start
       //  charging now
-      if (!charging_disabled) {
-        // If the batteries are uneven, start charging
-        if(!(system_state & BAT_OK))
-          set_charge_state(1);
+      // If the batteries are uneven, start charging
+      if(!(system_state & BAT_OK))
+        set_charge_state(1);
+      else if (!charging_disabled) {
         // Otherwise, charge only if the battery voltage has fallen a little
-        else if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
+        if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
           set_charge_state(1);
       }
       break;
