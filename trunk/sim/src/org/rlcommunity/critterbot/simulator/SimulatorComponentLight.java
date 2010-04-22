@@ -165,7 +165,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                 double dist1 = srcPosition.distance(intersectData.point); 
                                 double dist2 = intersectData.point.distance(sensorPosition);
                                 
-                                double reflectPen = 0.5;
+                                double reflectPen = 0.25;//1.0;//0.5
 
                                 int distancePower = 2;
                                 
@@ -173,7 +173,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                 //intensity =   lightSource.getIntensity() * (1.0 / Math.pow(dist1, 2)) * (1.0 / Math.pow(dist1, 2)) + Math.abs(Math.cos(angleOfIncidence) * Math.cos(angleOfIncidence2));
                                 
                                 //Lambertian reflectance model -- distance seems odd
-                               intensity = reflectPen*lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1+dist2, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
+                              // intensity = reflectPen*lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*Math.cos(angleOfIncidence2))*(1.0 / Math.pow(dist1+dist2, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
+                               intensity = reflectPen*lightSource.getIntensity()*Math.abs((srcPosition.minus(intersectData.point)).dot(intersectData.normal)*(Math.pow(Math.cos(angleOfIncidence2),2)))*(1.0 / Math.pow(dist1+dist2, distancePower));//*(1.0 / Math.pow(dist2, distancePower)));
                                         
                                 //sum up light from multiple sources and from each pixel
                                 sumIntensity += intensity;
@@ -214,9 +215,28 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
             } //loop over pixels
 
+            //Add one ray that is based on direct line of site to the light source
+
+            double lineOSSum = 0;
+             for (int Jsource = 0; Jsource < numSources; Jsource++)
+             {
+                  double intensity = 0;
+
+                  source = sources.get(Jsource);
+                  lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
+                  srcPosition=source.getPosition();
+
+                  if(scene.isVisible(srcPosition, sensorPosition))
+                  {
+                    double dis = srcPosition.distance(sensorPosition);
+                    intensity = lightSource.getIntensity() * (1.0 / (Math.pow(srcPosition.distance(sensorPosition), 2)));
+                  }
+                  lineOSSum += intensity;
+             }
+
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
             double noise = aRandom.nextGaussian() * lightSensor.getError();
-            double doubleReading = sumIntensity / (numPixels+numDirectLightView);
+            double doubleReading = (sumIntensity + lineOSSum) / (numPixels+numDirectLightView+1);
 
             int reading = (int)(doubleReading * (1.0 + noise));
             if(reading < 0) reading =0;
