@@ -13,6 +13,7 @@
 
 package org.rlcommunity.critterbot.simulator;
 
+import com.sun.javadoc.SourcePosition;
 import java.util.Random;
 import java.util.LinkedList;
 
@@ -65,6 +66,9 @@ public class SimulatorComponentLight implements SimulatorComponent {
         SimulatorObject source;
         ObjectStateLightSource lightSource;
         Vector2D srcPosition = null;
+        Ray saveRay = null;
+
+        double lowerAngle, highAngle=0;
 
         LinkedList<SimulatorObject> sensors = pNext.getObjects(ObjectStateLightSensor.NAME);
         int numSensors = sensors.size();
@@ -102,6 +106,8 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
             oldLightSensor.intersections = new LinkedList<RayIntersection>();
             numDirectLightView = 0;
+
+            lowerAngle = intialAngle;
             //for each pixel in the sensor
             for (int Ipixel = 0; Ipixel < numPixels; Ipixel++) {
                 //as we rotate counterclockwise through pixels may cross PI -PI boarder
@@ -165,7 +171,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                 double dist1 = srcPosition.distance(intersectData.point); 
                                 double dist2 = intersectData.point.distance(sensorPosition);
                                 
-                                double reflectPen = 0.25;//1.0;//0.5
+                                double reflectPen = 1.0;//0.5
 
                                 int distancePower = 2;
                                 
@@ -211,13 +217,20 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                 
                     }//loop over sources
                 }//test for object intersection
+
+                highAngle = currentRayAngle;
                 currentRayAngle -= angleBetweenRays; //next ray rotating clockwise
+
+                saveRay = r;
 
             } //loop over pixels
 
             //Add one ray that is based on direct line of site to the light source
 
+            //scene.addSubtree(oldSensor.getRoot());
+
             double lineOSSum = 0;
+            int lineOSCount = 0;
              for (int Jsource = 0; Jsource < numSources; Jsource++)
              {
                   double intensity = 0;
@@ -226,17 +239,40 @@ public class SimulatorComponentLight implements SimulatorComponent {
                   lightSource = (ObjectStateLightSource) source.getState(ObjectStateLightSource.NAME);
                   srcPosition=source.getPosition();
 
-                  if(scene.isVisible(srcPosition, sensorPosition))
+                    scene.removeSubtree(oldSensor.getRoot());
+
+                  Vector2D d = Vector2D.unitVector(oldSensor.getDirection());
+                  Vector2D v = srcPosition.minus(sensorPosition);
+                 // Vector2D r = Vector2D.unitVector(saveRay.)
+
+                  //Vector2D v = Vector2D.unitVector(Math.atan2(sensorPosition.minus(srcPosition).x, sensorPosition.minus(srcPosition).y));
+
+
+                  //Vector2D v = sensorPosition.minus(srcPosition);
+
+                 // double myBoundingAngle = (highAngle + lowerAngle)/2.0;
+                 // double angle = Math.acos(u.dot(v) / (u.length() / v.length()));
+
+                   // if(Ksensor==0)System.out.println("low = " + lowerAngle + " quest = "+ angle + " high = "+highAngle);
+                 // if(scene.isVisible(srcPosition, sensorPosition))
+                  if(angle(v,d) <= angle(saveRay.dir,d) && scene.isVisible(srcPosition, sensorPosition))
                   {
+                    //if(Ksensor==0)System.out.println("i can see the light");
                     double dis = srcPosition.distance(sensorPosition);
                     intensity = lightSource.getIntensity() * (1.0 / (Math.pow(srcPosition.distance(sensorPosition), 2)));
+                    lineOSCount = 1;
                   }
+                  //else
+                    //if(Ksensor==0)System.out.println("i CAN NOT see the light");
+
+                scene.addSubtree(oldSensor.getRoot());
+
                   lineOSSum += intensity;
              }
 
             //sensor reading is average of pixel readings, unless greater than sum intensity in the environment
             double noise = aRandom.nextGaussian() * lightSensor.getError();
-            double doubleReading = (sumIntensity + lineOSSum) / (numPixels+numDirectLightView+1);
+            double doubleReading = (sumIntensity + lineOSSum) / (numPixels+numDirectLightView+lineOSCount);
 
             int reading = (int)(doubleReading * (1.0 + noise));
             if(reading < 0) reading =0;
@@ -248,6 +284,11 @@ public class SimulatorComponentLight implements SimulatorComponent {
         } //loop over sensors
  //System.out.println("------");
 
+    }
+
+    public double angle(Vector2D v1, Vector2D v2)
+    {
+      return Math.acos(v1.dot(v2)/(v1.length()*v2.length()));
     }
 }
 
