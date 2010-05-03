@@ -29,8 +29,15 @@ import org.rlcommunity.critterbot.javadrops.clients.DiscoInterfaceServer;
 import org.rlcommunity.critterbot.javadrops.clients.DumpClient;
 import org.rlcommunity.critterbot.javadrops.clients.KeyboardClient;
 import org.rlcommunity.critterbot.javadrops.drops.*;
+import org.rlcommunity.critterbot.simulator.environments.BasketBallEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.StartsNearWallEnvironment;
 import org.rlcommunity.critterbot.simulator.environments.EnvironmentDescription;
 import org.rlcommunity.critterbot.simulator.environments.FunEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.LightBatteryEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.NIPSEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.OriginalEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.RobotOnlyEnvironment;
+import org.rlcommunity.critterbot.simulator.environments.SimpleEnvironment;
 import org.rlcommunity.critterbot.simulator.visualizer.CritterbotDataVisualizerClient;
 
 public class SimulatorMain {
@@ -43,6 +50,7 @@ public class SimulatorMain {
     static private boolean doPrintHelp = false;
     static private double timeScale = 1.0;
     static private String dumpFilePath = null;
+    static private EnvironmentDescription environment = new FunEnvironment();
 
 
     private static SimulatorEngine createSimulatorEngine(DropInterface dropInterface, 
@@ -135,6 +143,26 @@ public class SimulatorMain {
                 dumpFilePath = args[idx];
                 idx++;
             }
+            else if (flag.equals("-e")) {
+            	String envName = args[idx];
+            	if (envName.startsWith("StartsNearWall"))
+            		environment = new StartsNearWallEnvironment();
+            	else if (envName.startsWith("NIPS"))
+            		environment = new NIPSEnvironment();
+            	else if (envName.startsWith("Original"))
+            		environment = new OriginalEnvironment();
+            	else if (envName.startsWith("BasketBall"))
+            		environment = new BasketBallEnvironment();
+            	else if (envName.startsWith("LightBattery"))
+            		environment = new LightBatteryEnvironment();
+            	else if (envName.startsWith("RobotOnly"))
+            		environment = new RobotOnlyEnvironment();
+            	else if (envName.startsWith("Simple"))
+            		environment = new SimpleEnvironment();
+            	else if (envName.startsWith("Fun"))
+            		environment = new FunEnvironment();
+            	idx++;
+            }
             else if (flag.equals("-h") || flag.equals("--help")) {
                 doPrintHelp = true;
             }
@@ -161,6 +189,7 @@ public class SimulatorMain {
         System.out.println ("  -nk                Disable the keyboard robot controller");
         System.out.println ("  -s [scale]         Set the simulator time scale, default=1.0");
         System.out.println ("  -d [dumpfile]      Data are dumped in [dumpfile]");
+        System.out.println ("  -e [environment]   Name of environment you want to use, default=FunEnvironment");
     }
 
     public static void main(String[] args) {
@@ -176,8 +205,7 @@ public class SimulatorMain {
         createVisualizer(dropInterface);
 
         int millisPerStep = 10;
-        final SimulatorEngine engine = createSimulatorEngine(dropInterface,
-                new FunEnvironment());
+        final SimulatorEngine engine = createSimulatorEngine(dropInterface, environment);
         
         if (useGui) {
             runGUI(engine, keyboardClient);
