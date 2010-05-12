@@ -21,6 +21,8 @@
 #define LEDCTL_PIN_XERR 25
 #define LEDCTL_PIN_MODE 15
 
+#define SOUND_PIN_AMP_ENABLE 8
+
 /** Bootloader flags */
 /* Only one of these should be #defined
  * If using BOOT_LOAD_TO_RAM_AND_COPY, the code will be stored in RAM when

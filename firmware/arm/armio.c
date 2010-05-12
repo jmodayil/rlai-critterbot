@@ -7,6 +7,7 @@
 
 #include "armio.h"
 #include "lib_error.h"
+#include "armconfig.h"
 
 volatile int ia;
 
@@ -473,9 +474,10 @@ int init_serial_port_stdio(void) {
   while(AT91C_BASE_US0->US_RPR == 0) {
     AT91C_BASE_US0->US_RPR = (unsigned int)ser_rx_buf;
   }  
-    // Disable Amplifier
-  AT91C_BASE_PIOA->PIO_PER = 1 << 8;
-  AT91C_BASE_PIOA->PIO_OER = 1 << 8;
-  AT91C_BASE_PIOA->PIO_SODR = 1 << 8;
+    // Enable Amplifier
+  AT91C_BASE_PIOA->PIO_PER = 1 << SOUND_PIN_AMP_ENABLE;
+  AT91C_BASE_PIOA->PIO_OER = 1 << SOUND_PIN_AMP_ENABLE;
+  AT91C_BASE_PIOA->PIO_CODR = 1 << SOUND_PIN_AMP_ENABLE;
+
   return 0;
 }
