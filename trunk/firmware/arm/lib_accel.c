@@ -65,8 +65,6 @@ int accel_init()
   if (val != ACCEL_WHOAMI_VALUE)
   {
     error_set (ERR_ACCEL);
-    armprintf ("This accelerometer is a spy!\r");
-    armprintf ("Got WHOAMI: %x\r", val);
     return 1;
   }
   return 0;
