@@ -187,7 +187,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
 
                             }
                      }
-                        if(Ipixel == numPixels-1)
+                        /* if(Ipixel == numPixels-1)
                         {
                             scene.removeSubtree(oldSensor.getRoot());
                                
@@ -213,7 +213,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
                                     sumIntensity += intensity;
                                 }                        
                              scene.addSubtree(oldSensor.getRoot());
-                        }
+                        } */
                                 
                     }//loop over sources
                 }//test for object intersection
@@ -263,7 +263,7 @@ public class SimulatorComponentLight implements SimulatorComponent {
                     lineOSCount = 1;
                   }
                   //else
-                    //if(Ksensor==0)System.out.println("i CAN NOT see the light");
+                  //  if(Ksensor==0)System.out.println("i CAN NOT see the light");
 
                 scene.addSubtree(oldSensor.getRoot());
 
