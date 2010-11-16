@@ -437,6 +437,7 @@ public class CommonObjects {
             // Make the wall react to dynamics
             ObjectStateDynamics wallDyn = new ObjectStateDynamics(10000, 10000);
             wallDyn.setMaxSpeed(0);
+            wallDyn.setMaxAngularSpeed(0);
             wallPart.addState(wallDyn);
 
             w.addChild(wallPart);
@@ -467,9 +468,10 @@ public class CommonObjects {
 
         basket.setShape(basketShape);
         
-            ObjectStateDynamics baskeyDyn = new ObjectStateDynamics(10000, 10000);
-            baskeyDyn.setMaxSpeed(0);
-            basket.addState(baskeyDyn);
+            ObjectStateDynamics basketDyn = new ObjectStateDynamics(10000, 10000);
+            basketDyn.setMaxSpeed(0);
+            basketDyn.setMaxAngularSpeed(0);
+            basket.addState(basketDyn);
 
 
 
