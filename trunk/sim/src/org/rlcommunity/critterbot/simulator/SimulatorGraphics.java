@@ -297,7 +297,7 @@ public class SimulatorGraphics extends Graphics {
         aGfx.drawImage(pImage, scale(x), scale(y), observer);
     }
 
-    void drawString(String pString, double x, double y) {
+    public void drawString(String pString, double x, double y) {
         aGfx.drawString(pString, scale(x), scale(y));
     }
 
