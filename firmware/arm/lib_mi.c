@@ -17,6 +17,7 @@ unsigned short crc;
 unsigned char mi_test;
 
 unsigned char mi_disabled_commands = 0;
+unsigned char commands_packet_read = 0;
 
 void mi_start(void) {
   leddrive_mi();
@@ -134,7 +135,7 @@ void mi_send_status(void) {
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
   putwcrc(error_reg);
-  putwcrc(events_time());
+  putwcrc(commands_packet_read);
   putwcrc(monitor_status());
 
   armputchar(crc >> 8);
@@ -145,11 +146,11 @@ void mi_send_status(void) {
 void mi_get_commands(void) {
   
   signed char m1, m2, m3;
-  int i, packetread;
+  int i;
 
   
   ALIGNMENT_ERROR:
-  packetread = 0;
+  commands_packet_read = 0;
   while (armgetnumchars() >= MI_MINIMUM_COMMAND_LENGTH) {
 	  if(MI_HEADER1 != armgetchar())
 		goto ALIGNMENT_ERROR;
@@ -182,9 +183,9 @@ void mi_get_commands(void) {
 		  }
 		}
 	  }
-	  packetread = 1;
+	  commands_packet_read++;
   }
-  if (!packetread)
+  if (!commands_packet_read)
 	  return;
   if (!mi_disabled_commands) {
     switch(robot_command.motor_mode) {
