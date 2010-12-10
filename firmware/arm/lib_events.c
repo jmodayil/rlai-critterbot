@@ -222,7 +222,7 @@ void events_do()
     }
   }
   event_time = AT91C_BASE_PITC->PITC_PIIR & 0x0000FFFF;
-  event_time = (event_time * 100 ) / EVENTS_PIV_VALUE;
+  event_time = (event_time * EVENTS_HZ) / EVENTS_PIV_VALUE;
 }
 
 unsigned char events_time() {

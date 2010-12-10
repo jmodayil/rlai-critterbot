@@ -170,7 +170,7 @@ void mi_get_commands(void) {
   robot_command.avr_commands = armgetchar();
 
   
-  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
+  if (robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
     !mi_disabled_commands) { 
     for( i = 0; i < LED_NUM_LEDS; i++ ) {
       LED[i].r = armgetchar();
@@ -179,8 +179,10 @@ void mi_get_commands(void) {
     }
   }  
   else {
-    for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
-      armgetchar();
+    if (robot_command.led_mode == CCUSTOM) {
+      for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
+        armgetchar();
+      }
     }
   }
  
