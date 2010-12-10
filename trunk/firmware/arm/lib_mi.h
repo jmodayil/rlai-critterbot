@@ -6,7 +6,9 @@
 #define MI_HEADER3 0xBE
 #define MI_HEADER4 0xEF
 
-#define MI_COMMAND_LENGTH 58
+// Total packet size: (4+3+1+1+1+16*3)=58
+// Minimum packet size: (4+3+1+1+1)=10
+#define MI_MINIMUM_COMMAND_LENGTH 10
 
 #define MI_AVR_ENABLE_CHARGING  0x01
 #define MI_AVR_DISABLE_CHARGING 0x02

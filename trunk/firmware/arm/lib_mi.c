@@ -145,47 +145,47 @@ void mi_send_status(void) {
 void mi_get_commands(void) {
   
   signed char m1, m2, m3;
-  int i;
+  int i, packetread;
+
   
   ALIGNMENT_ERROR:
+  packetread = 0;
+  while (armgetnumchars() >= MI_MINIMUM_COMMAND_LENGTH) {
+	  if(MI_HEADER1 != armgetchar())
+		goto ALIGNMENT_ERROR;
+	  if(MI_HEADER2 != armgetchar())
+		goto ALIGNMENT_ERROR;
+	  if(MI_HEADER3 != armgetchar())
+		goto ALIGNMENT_ERROR;
+	  if(MI_HEADER4 != armgetchar())
+		goto ALIGNMENT_ERROR;
 
-  /** Potentially wrong! */
-  if(MI_COMMAND_LENGTH > armgetnumchars())
-    return;
-    
-  if(MI_HEADER1 != armgetchar())
-    goto ALIGNMENT_ERROR;
-  if(MI_HEADER2 != armgetchar())
-    goto ALIGNMENT_ERROR;
-  if(MI_HEADER3 != armgetchar())
-    goto ALIGNMENT_ERROR;
-  if(MI_HEADER4 != armgetchar())
-    goto ALIGNMENT_ERROR;
-  
-  robot_command.motor_mode = armgetchar();
-  m1 = ((signed char)((unsigned char)armgetchar()));
-  m2 = ((signed char)((unsigned char)armgetchar()));
-  m3 = ((signed char)((unsigned char)armgetchar()));
-  robot_command.led_mode = armgetchar();
-  robot_command.avr_commands = armgetchar();
+	  robot_command.motor_mode = armgetchar();
+	  m1 = ((signed char)((unsigned char)armgetchar()));
+	  m2 = ((signed char)((unsigned char)armgetchar()));
+	  m3 = ((signed char)((unsigned char)armgetchar()));
+	  robot_command.led_mode = armgetchar();
+	  robot_command.avr_commands = armgetchar();
 
-  
-  if (robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
-    !mi_disabled_commands) { 
-    for( i = 0; i < LED_NUM_LEDS; i++ ) {
-      LED[i].r = armgetchar();
-      LED[i].g = armgetchar();
-      LED[i].b = armgetchar();
-    }
-  }  
-  else {
-    if (robot_command.led_mode == CCUSTOM) {
-      for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
-        armgetchar();
-      }
-    }
+	  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
+		!mi_disabled_commands) {
+		for( i = 0; i < LED_NUM_LEDS; i++ ) {
+		  LED[i].r = armgetchar();
+		  LED[i].g = armgetchar();
+		  LED[i].b = armgetchar();
+		}
+	  }
+	  else {
+		if (robot_command.led_mode == CCUSTOM) {
+		  for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
+			armgetchar();
+		  }
+		}
+	  }
+	  packetread = 1;
   }
- 
+  if (!packetread)
+	  return;
   if (!mi_disabled_commands) {
     switch(robot_command.motor_mode) {
       // The various minus signs here are to correct the coordinate system.
