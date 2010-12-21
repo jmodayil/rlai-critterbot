@@ -336,7 +336,7 @@ void recharger_fsa_rotate() {
 }
 
 void recharger_fsa_dock() {
- int isDocked = (motor_get_voltage() > SHORE_POWER_MIN_VOLTAGE);
+ int isDocked = (power_get_voltage() > SHORE_POWER_MIN_VOLTAGE);
 
   if (isDocked) {
     recharger_enter_state(FSA_DONE);

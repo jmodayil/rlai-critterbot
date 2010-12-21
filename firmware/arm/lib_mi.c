@@ -60,13 +60,13 @@ void mi_send_status(void) {
   armputchar(MI_HEADER2);
   armputchar(MI_HEADER3);
   armputchar(MI_HEADER4);
-  putwcrc(motor_get_voltage());
-  putwcrc(motor_get_charge_state());
-  putwcrc(motor_get_bat40());
-  putwcrc(motor_get_bat160());
-  putwcrc(motor_get_bat280());
+  putwcrc(power_get_voltage());
+  putwcrc(power_get_charge_state());
+  putwcrc(power_get_bat40());
+  putwcrc(power_get_bat160());
+  putwcrc(power_get_bat280());
   for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
-    putwcrc(motor_command(i));
+    putwcrc(motor_voltage(i));
     putwcrc(motor_clicks(i));
     putwcrc(motor_current(i));
     putwcrc(motor_temp(i));
@@ -168,7 +168,7 @@ void mi_get_commands(void) {
 	  robot_command.led_mode = armgetchar();
 	  robot_command.avr_commands = armgetchar();
 
-	  if(robot_command.led_mode == CCUSTOM && motor_get_charge_state() == 0 &&
+	  if(robot_command.led_mode == CCUSTOM && power_get_charge_state() == 0 &&
 		!mi_disabled_commands) {
 		for( i = 0; i < LED_NUM_LEDS; i++ ) {
 		  LED[i].r = armgetchar();
@@ -213,7 +213,7 @@ void mi_get_commands(void) {
         break;
     }
   
-    if(motor_get_charge_state() == 0) { 
+    if(power_get_charge_state() == 0) { 
       switch(robot_command.led_mode) {
         case CNONE:
           break;

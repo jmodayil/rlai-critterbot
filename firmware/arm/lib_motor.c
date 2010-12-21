@@ -142,7 +142,7 @@ int motor_event() {
   }
 
   // What was the bus voltage on the last cycle?
-  volt = motor_get_voltage();
+  volt = power_get_voltage();
 
   // Add a don't charge command if necessary (note the inversion from
   //  enabled_charging to charging_disabled)
@@ -163,8 +163,8 @@ int motor_event() {
     // @todo The charge-related paralysis should be done via 
     //   motor_disable_drive (MGB)
     is_charging = 
-      (motor_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
-       motor_get_charge_state() != POWER_CHARGE_COMPLETE);
+      (power_get_charge_state() != POWER_CHARGE_NOT_CHARGING && 
+       power_get_charge_state() != POWER_CHARGE_COMPLETE);
 
     if (is_charging) {
       leddrive_chargestatus();
@@ -179,10 +179,10 @@ int motor_event() {
     spi_send_packet(&motor_packet[i]);
   }
   // This checks the last packet we received to make sure it is a proper packet
-  for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
-    if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
-      error_set(ERR_MOTOR_ALIGN);
-  }
+//  for(i = 0; i < MOTOR_NUM_MOTORS; i++) {
+//    if((motor_rx_data[i][4] & 0xFF) != MOTOR_SPI_PADDING)
+//      error_set(ERR_MOTOR_ALIGN);
+//  }
   if((power_rx_data[0] & 0xFF) != MOTOR_SPI_PADDING)
     error_set(ERR_POWER_ALIGN);
   return 0; 
@@ -295,7 +295,7 @@ void motor_set_voltage(int pwm100, int pwm220, int pwm340) {
  * Take the raw ADC value received from the power controller and convert it to
  * useful numbers (1/10th of a Volt)
  */
-unsigned char motor_get_voltage() {
+unsigned char power_get_voltage() {
   
   //unsigned int temp;
  
@@ -308,18 +308,18 @@ unsigned char motor_get_voltage() {
   return power_rx_data[1] & 0xFF;
 }
 
-unsigned char motor_get_charge_state() {
+unsigned char power_get_charge_state() {
   return power_rx_data[2] & 0xFF;
 }
 
-unsigned char motor_get_bat40() {
+unsigned char power_get_bat40() {
   return power_rx_data[3] & 0xFF;
 }
-unsigned char motor_get_bat160() {
+unsigned char power_get_bat160() {
   return power_rx_data[4] & 0xFF;
 }
 
-unsigned char motor_get_bat280() {
+unsigned char power_get_bat280() {
   return power_rx_data[5] & 0xFF;
 }
 
@@ -401,15 +401,26 @@ unsigned char motor_temp(int motor) {
 }
 
 /*
- * Returns the last motor command received
+ * Returns the current voltage of the motor in unknown units
  */
-signed char motor_command(int motor) {
+signed char motor_voltage(int motor) {
+
   if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
     return 0;
 
-  if(robot_command.motor_mode != WHEEL_VOLTAGE) 
-    return motor_speed_final[motor];
-  else
-    return motor_speed[motor]; 
+  return motor_rx_data[motor][4] & 0xFF;
 }
+//
+///*
+// * Returns the last motor command received
+// */
+//signed char motor_command(int motor) {
+//  if(motor < 0 || motor >= MOTOR_NUM_MOTORS)
+//    return 0;
+//
+//  if(robot_command.motor_mode != WHEEL_VOLTAGE)
+//    return motor_speed_final[motor];
+//  else
+//    return motor_speed[motor];
+//}
 
