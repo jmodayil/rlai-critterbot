@@ -292,10 +292,10 @@ void ui_status(char * cmdstr)
   //armprintf ("SPI PDC Status: %x\r", AT91C_BASE_SPI->SPI_PTSR);
   armprintf ("On board adc: %d %d %d %d\r", adc_output[4], adc_output[5],
      adc_output[6], adc_output[7]); 
-  armprintf ("System Voltage: %d\r", motor_get_voltage());
-  armprintf ("Charge State: %d\r", motor_get_charge_state());
-  armprintf ("Battery Voltages: %d %d %d\r", motor_get_bat40(),
-      motor_get_bat160(), motor_get_bat280());
+  armprintf ("System Voltage: %d\r", power_get_voltage());
+  armprintf ("Charge State: %d\r", power_get_charge_state());
+  armprintf ("Battery Voltages: %d %d %d\r", power_get_bat40(),
+      power_get_bat160(), power_get_bat280());
   armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
       motor_clicks(1), motor_clicks(2));
   armprintf ("AVR control: %s %s\r", 

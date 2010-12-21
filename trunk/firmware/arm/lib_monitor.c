@@ -46,7 +46,7 @@ int monitor_event() {
 }
 
 int monitor_battery_charge() {
-  int voltage = motor_get_voltage();
+  int voltage = power_get_voltage();
 
   return 0;
 }

@@ -558,7 +558,7 @@ int leddrive_event(void) {
 			break;
     case CHARGESTATUS:
       clearled();
-      led_chargemax(motor_get_charge_state());
+      led_chargemax(power_get_charge_state());
       if(leddrive_charge_max <= 0 || leddrive_charge_max > 16) {
         leddrive_state = ERROR;  
         break;
@@ -598,7 +598,7 @@ int leddrive_event(void) {
       break;
     case BATSTATUS:
 			clearled();
-			battlvl((motor_get_voltage()-115)*2);//
+			battlvl((power_get_voltage()-115)*2);//
 			break;
 		case BALL:
       ledball_crtl();	
