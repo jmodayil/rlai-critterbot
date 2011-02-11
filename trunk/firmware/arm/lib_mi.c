@@ -156,11 +156,11 @@ void mi_get_commands(void) {
 	int num_loop = 0;
 	int read_index = 0;
 	while (armgetnumchars() >= packet_size[state]) {
-		if (num_loop > 10)
+		if (num_loop > 20)
 			break;
 		switch (state) {
 		case HEADER:
-			for (read_index = 0; read_index < 4; read_index++)
+			for (read_index = 0; read_index < 4 || i == 4; read_index++)
 				if (armgetchar() == header[i])
 					i++;
 				else
@@ -223,16 +223,16 @@ void mi_get_commands(void) {
     		  motor_disable_charging();
     	  break;
       case MOTOR_MI_AVR_ENABLE_VREF:
-    	  enable_vref();
+    	  vref_enable();
     	  break;
       case MOTOR_MI_AVR_DISABLE_VREF:
-    	  disable_vref();
+    	  vref_disable();
     	  break;
       case MOTOR_MI_AVR_ENABLE_AMP:
-    	  enable_amplifier();
+    	  amplifier_enable();
     	  break;
       case MOTOR_MI_AVR_DISABLE_AMP:
-    	  disable_amplifier();
+    	  amplifier_disable();
     	  break;
       default:
     	  if (!mi_disabled_commands) {
@@ -244,10 +244,8 @@ void mi_get_commands(void) {
         break;
     }
   }
-    if (!mi_disabled_commands && led_data_read) {
+    if (!mi_disabled_commands) {
       switch(robot_command.led_mode) {
-        case CNONE:
-          break;
         case CCLEAR:
           leddrive_clear();
           break;
@@ -266,8 +264,10 @@ void mi_get_commands(void) {
         case CEMERGENCY:
           leddrive_emerg();
           break;
+        case CNONE:
         case CCUSTOM:
-          leddrive_custom(); 
+          if(led_data_read)
+            leddrive_custom(); 
           break;
         default:
           break;

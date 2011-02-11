@@ -113,6 +113,17 @@ ARM_CODE RAMFUNC void ser_isr(void);
 int init_serial_port_stdio(void);
 
 /*
+ * Initialize the PIO ports to control amplifier and vref power
+ */
+void init_vref_control(void);
+void init_amplifier_control(void);
+
+void vref_enable(void);
+void vref_disable(void);
+void amplifier_enable(void);
+void amplifier_disable(void);
+
+/*
  * Reads a newline terminated string from the serial port.
  *
  * Takes a pointer to the string buffer and the size of the buffer

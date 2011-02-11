@@ -485,7 +485,7 @@ void init_amplifier_control(void) {
 
   AT91C_BASE_PIOA->PIO_PER = 1 << SOUND_PIN_AMP_ENABLE;
   AT91C_BASE_PIOA->PIO_OER = 1 << SOUND_PIN_AMP_ENABLE;
-  amplifier_enable();
+  amplifier_disable();
 }
 
 void amplifier_enable(void) {
@@ -512,5 +512,5 @@ void vref_enable(void) {
 
 void vref_disable(void) {
 
-  AT91C_BASE_PIOA->PIO_CODR = 1 << VREF_DIABLE_PIN;
+  AT91C_BASE_PIOA->PIO_CODR = 1 << VREF_ENABLE_PIN;
 }

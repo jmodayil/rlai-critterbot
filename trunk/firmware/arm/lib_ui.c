@@ -60,15 +60,15 @@ ui_cmd_item ui_commands[] = {
   {"stat_led", ui_statled, "stat_led"},
   {"clearall", ui_clearall, "clear"},
   {"setall", ui_setall, "setall"},
-  {"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
-  {"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
+  //{"set_dot", ui_setdot, "set_dot <led #> <red> <green> <blue>"},
+  //{"get_dot", ui_getdot, "get_dot [led #] - argument optional"},
   {"get_accel", ui_getaccel, "get_accel"},
   {"get_adcspi", ui_getadcspi, "get_adcspi"},
-  {"toggle_adcspi", ui_toggle_adcspi, "toggle_adcspi"},
+  //{"toggle_adcspi", ui_toggle_adcspi, "toggle_adcspi"},
   {"status", ui_status, "status"},
-  {"report", ui_report, "report [led|accel|adc0-4|error]"},
+  //{"report", ui_report, "report [led|accel|adc0-4|error]"},
   {"mode", ui_mode, "mode <led [gs|dc]> - broken"},
-  {"test", ui_test, "test [ramfunc|int|stress]"},
+  //{"test", ui_test, "test [ramfunc|int|stress]"},
   {"bootloader", ui_bootloader, "bootloader [program] - reprogram the chip"},
   {"reset", ui_reset, "reset"},
   {"pid", ui_pid, "pid [start|stop|stat] #"},
@@ -330,7 +330,7 @@ void ui_setall(char * cmdstr)
 }
 
 /** Similar to ui_setled, except that it sets dot correction data */
-void ui_setdot(char * cmdstr)
+/*void ui_setdot(char * cmdstr)
 {
   int ledNum;
   int ledColors[3];
@@ -361,10 +361,10 @@ void ui_setdot(char * cmdstr)
   armprintf ("Applying dot correction...");
   // ledctl_dc();
   armprintf ("Not yet! Use mode led dc.\r");
-}
+}*/
 
 /** Returns the DC of a given led (0-15) */
-void ui_getdot (char * cmdstr)
+/*void ui_getdot (char * cmdstr)
 {
   int ledNum;
   int ledColors[3]; 
@@ -393,7 +393,7 @@ void ui_getdot (char * cmdstr)
       break;
   }
 
-}
+}*/
 
 void ui_getaccel (char * cmdstr)
 {
@@ -422,9 +422,9 @@ void ui_getadcspi (char * cmdstr)
   }
 }
 
-void ui_toggle_adcspi(char * cmdstr)
+/*void ui_toggle_adcspi(char * cmdstr)
 {
-/*  int index;
+  int index;
   
   if (armsscanf(cmdstr, "%s %d", ui_cmdname, &index) < 2)
   {
@@ -435,10 +435,10 @@ void ui_toggle_adcspi(char * cmdstr)
   if (adcspi_is_selected(index))
     adcspi_deselect(index);
   else
-    adcspi_select(index);*/
-}
+    adcspi_select(index);
+}*/
 
-void ui_report (char * cmdstr)
+/*void ui_report (char * cmdstr)
 {
   // Toggle reporting mode
   if (armsscanf (cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
@@ -470,7 +470,7 @@ void ui_report (char * cmdstr)
       armprintf ("Unknown report element: %s\r", ui_strarg);
     }
   }
-}
+}*/
 
 void ui_mode (char * cmdstr)
 {
@@ -560,11 +560,11 @@ void ui_reset(char * cmdstr)
   boot_reset_arm();
 }
 
-RAMFUNC void ui_test_ramfunc(char * cmdstr)
+/*RAMFUNC void ui_test_ramfunc(char * cmdstr)
 {
   armprintf (cmdstr);
   armprintf ("\r");
-}
+}*/
 
 /** This tests the interrupt disable as follows:
   * Disable the interrupt processor line
@@ -577,7 +577,7 @@ RAMFUNC void ui_test_ramfunc(char * cmdstr)
   *  normal functioning; if not, then re-enabling the interrupts failed
   *  (at that point nothing will work).
   */
-void ui_test_int(char * cmdstr)
+/*void ui_test_int(char * cmdstr)
 {
   unsigned int err_status = error_get();
   // We should use __armprintf here because the PDC interrupts will become 
@@ -596,7 +596,7 @@ void ui_test_int(char * cmdstr)
     armprintf ("Event slow reported - interrupts were disabled.\r");
   else
     armprintf ("Interrupts were most likely NOT disabled.\r");
-}
+}*/
 
 // Some dummy variables we might need for testing the serial IO
 int ui_stress_data[4];
@@ -607,7 +607,7 @@ int ui_stress_data[4];
   * Prints out everything that is received until n lines have been read,
   *  where n is ui_stress_data[0]. Same handler for stress tests of type 1
   *  and 2. ui_stress_data[2] contains the stress test type. */
-int ui_stress_handler1()
+/*int ui_stress_handler1()
 {
   // Read a full line
   if (armreadline(ui_command_string, sizeof(ui_command_string)) == EOF)
@@ -643,9 +643,9 @@ int ui_stress_handler1()
     ui_clear_handler(ui_stress_handler1);
   
   return 0;
-}
+}*/
 
-void ui_test_stress(char * cmdstr)
+/*void ui_test_stress(char * cmdstr)
 {
   int stress_type;
   unsigned int data_length;
@@ -721,17 +721,17 @@ void ui_test_stress(char * cmdstr)
       ui_stress_data[2] = stress_type;
       break;
   }
-}
+}*/
 
 extern int swi_fail_count;
 
 /** Tests something, specified by the first argument. E.g.
   * test ramfunc
   */
-void ui_test (char * cmdstr)
+/*void ui_test (char * cmdstr)
 {
   armprintf ("Disabled.");
-  /*
+  
   if (armsscanf(cmdstr, "%s %s", ui_cmdname, ui_strarg) < 2)
   {
     armprintf ("Test what?\r");
@@ -758,8 +758,7 @@ void ui_test (char * cmdstr)
   }
   else
     armprintf ("Invalid argument(s) to %s.\r", "test");
-  */
-}
+}*/
 
 void ui_error ( char * cmdstr) 
 {
@@ -880,9 +879,9 @@ void ui_amp ( char * cmdstr)
    return; 
 
   if(val)
-    enable_amplifier();
+    amplifier_enable();
   else
-    disable_amplifier();
+    amplifier_disable();
 }
 
 void ui_vref ( char * cmdstr)
@@ -892,9 +891,9 @@ void ui_vref ( char * cmdstr)
    return; 
 
   if(val)
-    enable_vref();
+    vref_enable();
   else
-    disable_vref();
+    vref_disable();
 }
 /* int ui_random()
 {
