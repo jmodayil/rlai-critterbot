@@ -46,14 +46,14 @@ void ui_setled (char * cmdstr);
 void ui_getled (char * cmdstr);
 void ui_statled (char * cmdstr);
 void ui_help (char * cmdstr);
-void ui_test (char * cmdstr);
-void ui_setdot (char * cmdstr);
-void ui_getdot (char * cmdstr);
+//void ui_test (char * cmdstr);
+//void ui_setdot (char * cmdstr);
+//void ui_getdot (char * cmdstr);
 void ui_getaccel (char * cmdstr);
 void ui_getadcspi (char * cmdstr);
-void ui_toggle_adcspi (char * cmdstr);
+//void ui_toggle_adcspi (char * cmdstr);
 void ui_status (char * cmdstr);
-void ui_report (char * cmdstr);
+//void ui_report (char * cmdstr);
 void ui_mode (char * cmdstr);
 void ui_pid (char * cmdstr);
 void ui_error (char * cmdstr);
@@ -63,6 +63,8 @@ void ui_motor (char * cmdstr);
 void ui_mi (char * cmdstr);
 void ui_recharge (char * cmdstr);
 void ui_avr(char * cmdstr);
+void ui_amp(char * cmdstr);
+void ui_vref(char * cmdstr);
 
 // Not to be called by the user
 void ui_bootloader (char * cmdstr);
