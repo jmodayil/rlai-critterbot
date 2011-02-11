@@ -474,10 +474,43 @@ int init_serial_port_stdio(void) {
   while(AT91C_BASE_US0->US_RPR == 0) {
     AT91C_BASE_US0->US_RPR = (unsigned int)ser_rx_buf;
   }  
-    // Enable Amplifier
-  AT91C_BASE_PIOA->PIO_PER = 1 << SOUND_PIN_AMP_ENABLE;
-  AT91C_BASE_PIOA->PIO_OER = 1 << SOUND_PIN_AMP_ENABLE;
-  AT91C_BASE_PIOA->PIO_CODR = 1 << SOUND_PIN_AMP_ENABLE;
+
+  init_amplifier_control();
+  init_vref_control();
 
   return 0;
+}
+
+void init_amplifier_control(void) {
+
+  AT91C_BASE_PIOA->PIO_PER = 1 << SOUND_PIN_AMP_ENABLE;
+  AT91C_BASE_PIOA->PIO_OER = 1 << SOUND_PIN_AMP_ENABLE;
+  amplifier_enable();
+}
+
+void amplifier_enable(void) {
+
+  AT91C_BASE_PIOA->PIO_CODR = 1 << SOUND_PIN_AMP_ENABLE;
+}
+
+void amplifier_disable(void) {
+
+  AT91C_BASE_PIOA->PIO_SODR = 1 << SOUND_PIN_AMP_ENABLE;
+}
+
+void init_vref_control(void) {
+
+  AT91C_BASE_PIOA->PIO_PER = 1 << VREF_ENABLE_PIN;
+  AT91C_BASE_PIOA->PIO_OER = 1 << VREF_ENABLE_PIN;
+  vref_enable();
+}
+
+void vref_enable(void) {
+
+  AT91C_BASE_PIOA->PIO_SODR = 1 << VREF_ENABLE_PIN;
+}
+
+void vref_disable(void) {
+
+  AT91C_BASE_PIOA->PIO_CODR = 1 << VREF_DIABLE_PIN;
 }

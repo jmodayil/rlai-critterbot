@@ -22,6 +22,7 @@
 #define LEDCTL_PIN_MODE 15
 
 #define SOUND_PIN_AMP_ENABLE 8
+#define VREF_ENABLE_PIN 7
 
 /** Bootloader flags */
 /* Only one of these should be #defined
