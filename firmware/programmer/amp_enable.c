@@ -43,7 +43,7 @@ main(int argc, char *argv[]) {
   int force = 0;
   int i;
   char buf;
-  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x6A, 0x00, 0x00, 0x00, 0x00}; // 0x02 for enable charging
+  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x6D, 0x00, 0x00, 0x00, 0x00};
   unsigned char leds[48];
 
   if(argc > 1) {
@@ -77,9 +77,10 @@ main(int argc, char *argv[]) {
     return 0;
   }
   printf("OK\n");
-  printf("\n---------------\nDisabling Charging\n");
+  printf("\n---------------\nEnabling Amplifier\n");
   for(i = 0; i < 1; i++) {
     write(port, &data, 9);
+    // Removed due to shortening of command packets
     //write(port, &data, 48);
     usleep(10000);
   }
