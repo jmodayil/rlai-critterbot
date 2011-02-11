@@ -76,7 +76,9 @@ ui_cmd_item ui_commands[] = {
   {"motor", ui_motor, "motor [motor #] [speed #], or\r      [motor1speed] [motor2speed] [motor3speed]"},
   {"mi", ui_mi, "mi on"},
   {"recharge", ui_recharge, "recharge [start|stop]"},
-  {"avr", ui_avr, "avr [command]"},
+  {"avr", ui_avr, "avr [0,1] - disable/enable charging"},
+  {"vref", ui_vref, "vref [0,1] - disable/enable vref"},
+  {"amp", ui_amp, "amp [0,1] - disable/enable amp"},
 };
 
 int ui_ncommands = sizeof(ui_commands)/sizeof(*ui_commands);
@@ -871,6 +873,29 @@ void ui_pid ( char * cmdstr)
   
 }
 
+void ui_amp ( char * cmdstr)
+{
+  int val = 1;
+  if (armsscanf(cmdstr, "%s %d", ui_cmdname, &val) < 2)
+   return; 
+
+  if(val)
+    enable_amplifier();
+  else
+    disable_amplifier();
+}
+
+void ui_vref ( char * cmdstr)
+{
+  int val = 1;
+  if (armsscanf(cmdstr, "%s %d", ui_cmdname, &val) < 2)
+   return; 
+
+  if(val)
+    enable_vref();
+  else
+    disable_vref();
+}
 /* int ui_random()
 {
   return (AT91C_BASE_TC0->TC_CV);
