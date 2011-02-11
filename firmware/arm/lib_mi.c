@@ -145,30 +145,29 @@ void mi_send_status(void) {
 
 void mi_get_commands(void) {
     static enum {
-       HEADER, MOTORDATA, LEDDATA
-    } state = HEADER;
-	unsigned char header[] = { MI_HEADER1, MI_HEADER2, MI_HEADER3, MI_HEADER4 };
-	unsigned char packet_size[] = { 4, 5, 3 * 16 };
+    	HEADER1, HEADER2, HEADER3, HEADER4, MOTORDATA, LEDDATA
+    } state = HEADER1;
+	unsigned char packet_size[] = { 1, 1, 1, 1, 5, 3 * 16 };
 	signed char m1 = 0, m2 = 0, m3 = 0;
-	static int i = 0;
 	char motor_data_read = 0;
 	char led_data_read = 0;
 	int num_loop = 0;
-	int read_index = 0;
+	int led_index = 0;
 	while (armgetnumchars() >= packet_size[state]) {
 		if (num_loop > 20)
 			break;
 		switch (state) {
-		case HEADER:
-			for (read_index = 0; read_index < 4 || i == 4; read_index++)
-				if (armgetchar() == header[i])
-					i++;
-				else
-					i = 0;
-			if (i == 4) {
-				i = 0;
-				state = MOTORDATA;
-			}
+		case HEADER1:
+			state = armgetchar() == MI_HEADER1 ? HEADER2 : HEADER1;
+			break;
+		case HEADER2:
+			state = armgetchar() == MI_HEADER2 ? HEADER3 : HEADER1;
+			break;
+		case HEADER3:
+			state = armgetchar() == MI_HEADER3 ? HEADER4 : HEADER1;
+			break;
+		case HEADER4:
+			state = armgetchar() == MI_HEADER4 ? MOTORDATA : HEADER1;
 			break;
 		case MOTORDATA:
 			robot_command.motor_mode = armgetchar();
@@ -180,14 +179,15 @@ void mi_get_commands(void) {
 		    if (robot_command.led_mode == CCUSTOM)
 		    	state = LEDDATA;
 		    else
-		    	state = HEADER;
+		    	state = HEADER1;
 			break;
 		case LEDDATA:
-			for( i = 0; i < LED_NUM_LEDS; i++ ) {
-			  LED[i].r = armgetchar();
-			  LED[i].g = armgetchar();
-			  LED[i].b = armgetchar();
+			for(led_index = 0; led_index < LED_NUM_LEDS; led_index++) {
+			  LED[led_index].r = armgetchar();
+			  LED[led_index].g = armgetchar();
+			  LED[led_index].b = armgetchar();
 			}
+			state = HEADER1;
 			break;
 			led_data_read = 1;
 		}
