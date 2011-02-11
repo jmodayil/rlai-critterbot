@@ -80,7 +80,8 @@ main(int argc, char *argv[]) {
   printf("\n---------------\nDumping to console.\n");
   for(i = 0; i < 1; i++) {
     write(port, &data, 10);
-    write(port, &data, 48);
+    // Removed due to shortening of command packets
+    //write(port, &data, 48);
     usleep(10000);
   }
   closeport(port);
