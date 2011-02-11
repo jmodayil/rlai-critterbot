@@ -144,76 +144,107 @@ void mi_send_status(void) {
 }
 
 void mi_get_commands(void) {
-  
-  signed char m1, m2, m3;
-  int i;
-
-  
-  ALIGNMENT_ERROR:
-  commands_packet_read = 0;
-  while (armgetnumchars() >= MI_MINIMUM_COMMAND_LENGTH) {
-	  if(MI_HEADER1 != armgetchar())
-		goto ALIGNMENT_ERROR;
-	  if(MI_HEADER2 != armgetchar())
-		goto ALIGNMENT_ERROR;
-	  if(MI_HEADER3 != armgetchar())
-		goto ALIGNMENT_ERROR;
-	  if(MI_HEADER4 != armgetchar())
-		goto ALIGNMENT_ERROR;
-
-	  robot_command.motor_mode = armgetchar();
-	  m1 = ((signed char)((unsigned char)armgetchar()));
-	  m2 = ((signed char)((unsigned char)armgetchar()));
-	  m3 = ((signed char)((unsigned char)armgetchar()));
-	  robot_command.led_mode = armgetchar();
-	  robot_command.avr_commands = armgetchar();
-
-	  if(robot_command.led_mode == CCUSTOM && power_get_charge_state() == 0 &&
-		!mi_disabled_commands) {
-		for( i = 0; i < LED_NUM_LEDS; i++ ) {
-		  LED[i].r = armgetchar();
-		  LED[i].g = armgetchar();
-		  LED[i].b = armgetchar();
+    static enum {
+       HEADER, MOTORDATA, LEDDATA
+    } state = HEADER;
+	unsigned char header[] = { MI_HEADER1, MI_HEADER2, MI_HEADER3, MI_HEADER4 };
+	unsigned char packet_size[] = { 4, 5, 3 * 16 };
+	signed char m1 = 0, m2 = 0, m3 = 0;
+	static int i = 0;
+	char motor_data_read = 0;
+	char led_data_read = 0;
+	int num_loop = 0;
+	int read_index = 0;
+	while (armgetnumchars() >= packet_size[state]) {
+		if (num_loop > 10)
+			break;
+		switch (state) {
+		case HEADER:
+			for (read_index = 0; read_index < 4; read_index++)
+				if (armgetchar() == header[i])
+					i++;
+				else
+					i = 0;
+			if (i == 4) {
+				i = 0;
+				state = MOTORDATA;
+			}
+			break;
+		case MOTORDATA:
+			robot_command.motor_mode = armgetchar();
+			m1 = ((signed char)((unsigned char)armgetchar()));
+			m2 = ((signed char)((unsigned char)armgetchar()));
+			m3 = ((signed char)((unsigned char)armgetchar()));
+			robot_command.led_mode = armgetchar();
+			motor_data_read = 1;
+		    if (robot_command.led_mode == CCUSTOM)
+		    	state = LEDDATA;
+		    else
+		    	state = HEADER;
+			break;
+		case LEDDATA:
+			for( i = 0; i < LED_NUM_LEDS; i++ ) {
+			  LED[i].r = armgetchar();
+			  LED[i].g = armgetchar();
+			  LED[i].b = armgetchar();
+			}
+			break;
+			led_data_read = 1;
 		}
-	  }
-	  else {
-		if (robot_command.led_mode == CCUSTOM) {
-		  for( i = 0; i < LED_NUM_LEDS * 3; i++ ) {
-			armgetchar();
-		  }
-		}
-	  }
-	  commands_packet_read++;
-  }
-  if (!commands_packet_read)
-	  return;
-  if (!mi_disabled_commands) {
-    switch(robot_command.motor_mode) {
+		num_loop++;
+	}
+  if (motor_data_read) {
+    switch (robot_command.motor_mode) {
       // The various minus signs here are to correct the coordinate system.
       // Really this is an easy way to do it, and should be corrected both
       // in the signs of the XYT->Wheel transform and the wheel drivers
       // themselves.
       case WHEEL_SPACE:
-        motor_set_speed_slew(m1, m2, m3);
-        break;
+    	  if (!mi_disabled_commands)
+    		  motor_set_speed_slew(m1, m2, m3);
+    	  break;
       case XYTHETA_SPACE:
-        motor_set_speed_xytheta(m1, m2, m3);
-        break;
+    	  if (!mi_disabled_commands)
+    		  motor_set_speed_xytheta(m1, m2, m3);
+    	  break;
       case WHEEL_VOLTAGE:
-        motor_set_voltage(m1, m2, m3);
+    	  if (!mi_disabled_commands)
+    		  motor_set_voltage(m1, m2, m3);
+    	  break;
       case MOTOR_EXIT:
         if(robot_command.led_mode == LED_EXIT)
           mi_stop();
         break;
+      case MOTOR_MI_AVR_ENABLE_CHARGING:
+    	  motor_enable_charging();
+    	  break;
+      case MOTOR_MI_AVR_DISABLE_CHARGING:
+    	  if (!mi_disabled_commands)
+    		  motor_disable_charging();
+    	  break;
+      case MOTOR_MI_AVR_ENABLE_VREF:
+    	  enable_vref();
+    	  break;
+      case MOTOR_MI_AVR_DISABLE_VREF:
+    	  disable_vref();
+    	  break;
+      case MOTOR_MI_AVR_ENABLE_AMP:
+    	  enable_amplifier();
+    	  break;
+      case MOTOR_MI_AVR_DISABLE_AMP:
+    	  disable_amplifier();
+    	  break;
       default:
-        robot_command.motor_mode = WHEEL_SPACE;
-        motor_set_speed(0, 0); 
-        motor_set_speed(1, 0);
-        motor_set_speed(2, 0);
+    	  if (!mi_disabled_commands) {
+    		  robot_command.motor_mode = WHEEL_SPACE;
+    		  motor_set_speed(0, 0);
+    		  motor_set_speed(1, 0);
+    		  motor_set_speed(2, 0);
+    	  }
         break;
     }
-  
-    if(power_get_charge_state() == 0) { 
+  }
+    if (!mi_disabled_commands && led_data_read) {
       switch(robot_command.led_mode) {
         case CNONE:
           break;
@@ -242,17 +273,4 @@ void mi_get_commands(void) {
           break;
       }
     }
-
-    // Enabling charging has priority over disabling
-    if (robot_command.avr_commands & MI_AVR_ENABLE_CHARGING)
-      motor_enable_charging();
-    else if (robot_command.avr_commands & MI_AVR_DISABLE_CHARGING)
-      motor_disable_charging();
-  }
-  else { // mi_disabled_commands
-    if(robot_command.motor_mode == MOTOR_EXIT && 
-       robot_command.led_mode == LED_EXIT)
-      mi_stop();
-  }
-  return;
 }
