@@ -28,7 +28,11 @@ void putwcrc(unsigned char data);
 
 struct command_packet {
 
-  enum { WHEEL_SPACE, XYTHETA_SPACE, WHEEL_VOLTAGE, MOTOR_EXIT = 0x68} motor_mode;
+  enum { WHEEL_SPACE, XYTHETA_SPACE, WHEEL_VOLTAGE, MOTOR_EXIT = 0x68,
+	  MOTOR_MI_AVR_ENABLE_CHARGING, MOTOR_MI_AVR_DISABLE_CHARGING,
+	  MOTOR_MI_AVR_ENABLE_VREF, MOTOR_MI_AVR_DISABLE_VREF,
+	  MOTOR_MI_AVR_ENABLE_AMP, MOTOR_MI_AVR_DISABLE_AMP,
+  } motor_mode;
   union {
     int m100_vel;
     int x_vel;
@@ -44,8 +48,6 @@ struct command_packet {
 
   enum { CNONE, CCLEAR, CBATTERY, CBALL, CERROR, CEMERGENCY, CBUSY, CCUSTOM, LED_EXIT = 0x67 }
    led_mode;
-
-   int avr_commands;
 };
 
 
