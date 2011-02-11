@@ -50,10 +50,10 @@ main(int argc, char *argv[]) {
     printf("Could not open serial port.\n");
     return -1;
   }
-  printf("Serial port open with file descriptor %d.\n", port);
+  //printf("Serial port open with file descriptor %d.\n", port);
   fcntl(port, F_SETFL, O_NONBLOCK);
   
-  printf("Initializing serial port.\n");
+  //printf("Initializing serial port.\n");
   initport(port);
   
   printf("Listening for data...");
@@ -71,13 +71,13 @@ main(int argc, char *argv[]) {
   
  
   if(force) {
-    printf("Connection seems to be active.\nTry -f to force\n");
+    printf("ARM already seems to be in machine interface mode.\nTry -f to force\n");
     closeport(port);
     close(port);
     return 0;
   }
   printf("OK\n");
-  printf("\n---------------\nEntering machine interface mode.\n");
+  printf("---------------\nEntering machine interface mode.\n");
   for(i = 0; i < 1; i++) {
     write(port, &data, 7);
     usleep(10000);

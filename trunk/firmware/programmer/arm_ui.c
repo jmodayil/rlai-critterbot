@@ -43,7 +43,7 @@ main(int argc, char *argv[]) {
   int force = 0;
   int i;
   char buf;
-  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x68, 0x00, 0x00, 0x00, 0x67, 0x00};
+  unsigned char data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0x68, 0x00, 0x00, 0x00, 0x67};
   unsigned char leds[48];
 
   if(argc > 1) {
@@ -79,7 +79,7 @@ main(int argc, char *argv[]) {
   printf("OK\n");
   printf("\n---------------\nDumping to console.\n");
   for(i = 0; i < 1; i++) {
-    write(port, &data, 10);
+    write(port, &data, 9);
     // Removed due to shortening of command packets
     //write(port, &data, 48);
     usleep(10000);
