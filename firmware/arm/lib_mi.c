@@ -151,23 +151,27 @@ void mi_get_commands(void) {
 	signed char m1 = 0, m2 = 0, m3 = 0;
 	char motor_data_read = 0;
 	char led_data_read = 0;
-	int num_loop = 0;
+	int num_chars_read = 0;
 	int led_index = 0;
 	while (armgetnumchars() >= packet_size[state]) {
-		if (num_loop > 20)
+		if (num_chars_read > SER_RX_BUF_SIZE)
 			break;
 		switch (state) {
 		case HEADER1:
-			state = armgetchar() == MI_HEADER1 ? HEADER2 : HEADER1;
+			state = ( armgetchar() == MI_HEADER1 ) ? HEADER2 : HEADER1;
+      num_chars_read++;
 			break;
 		case HEADER2:
-			state = armgetchar() == MI_HEADER2 ? HEADER3 : HEADER1;
+			state = ( armgetchar() == MI_HEADER2 ) ? HEADER3 : HEADER1;
+      num_chars_read++;
 			break;
 		case HEADER3:
-			state = armgetchar() == MI_HEADER3 ? HEADER4 : HEADER1;
+			state = ( armgetchar() == MI_HEADER3 ) ? HEADER4 : HEADER1;
+      num_chars_read++;
 			break;
 		case HEADER4:
-			state = armgetchar() == MI_HEADER4 ? MOTORDATA : HEADER1;
+			state = ( armgetchar() == MI_HEADER4 ) ? MOTORDATA : HEADER1;
+      num_chars_read++;
 			break;
 		case MOTORDATA:
 			robot_command.motor_mode = armgetchar();
@@ -175,6 +179,7 @@ void mi_get_commands(void) {
 			m2 = ((signed char)((unsigned char)armgetchar()));
 			m3 = ((signed char)((unsigned char)armgetchar()));
 			robot_command.led_mode = armgetchar();
+      num_chars_read += 5;
 			motor_data_read = 1;
 		    if (robot_command.led_mode == CCUSTOM)
 		    	state = LEDDATA;
@@ -187,11 +192,11 @@ void mi_get_commands(void) {
 			  LED[led_index].g = armgetchar();
 			  LED[led_index].b = armgetchar();
 			}
+      num_chars_read += 48;
 			state = HEADER1;
 			break;
 			led_data_read = 1;
 		}
-		num_loop++;
 	}
   if (motor_data_read) {
     switch (robot_command.motor_mode) {
