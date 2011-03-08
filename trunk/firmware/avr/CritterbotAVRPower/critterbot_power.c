@@ -349,6 +349,9 @@ int main(void) {
       motor_fan_off();
       break;
 
+    // JVM & TD: Moved case 2 & 6 here to avoid going into a bad state.
+    case 2:
+    case 6:
       // Unbalanced batteries but able to charge
     case 3: // VOLTAGE_OK, CHARGE_OK
       // Balanced batteries and able to charge.
@@ -367,9 +370,10 @@ int main(void) {
         motor_fan_off();
       break;
 
+    //JVM & TD: Moving cases 2 and 6 to 3 &7 to avoid timing chatter issues.
     // Invalid states (because CHARGE_OK occurs only if VOLTAGE_OK)
-    case 2: // CHARGE_OK
-    case 6: // CHARGE_OK, BAT_OK
+    //case 2: // CHARGE_OK
+    //case 6: // CHARGE_OK, BAT_OK
     // For now any charge related error will cause us to get here.  An since this shuts off the cpu,
     // we will never get any useful indication of the charge error, this should be remedied in ARM
     // code and the LED displays.
