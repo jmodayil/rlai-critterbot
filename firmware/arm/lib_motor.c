@@ -324,6 +324,10 @@ unsigned char power_get_bat280() {
   return power_rx_data[5] & 0xFF;
 }
 
+unsigned char power_get_byte6() {
+  return power_rx_data[6] & 0xFF;
+}
+
 
 void motor_init_packet(int motor) {
 

@@ -104,6 +104,11 @@ unsigned char power_get_bat40();
 unsigned char power_get_bat160();
 unsigned char power_get_bat280();
 
+/* 
+ * We will use an extra byte for information like the power_avr system_state
+ */
+unsigned char power_get_byte6();
+
 
 /*
  * Initialize a motor packet
