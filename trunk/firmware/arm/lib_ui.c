@@ -296,13 +296,14 @@ void ui_status(char * cmdstr)
      adc_output[6], adc_output[7]); 
   armprintf ("System Voltage: %d\r", power_get_voltage());
   armprintf ("Charge State: %d\r", power_get_charge_state());
+  armprintf ("Charge byte6: %d\r", power_get_byte6());
   armprintf ("Battery Voltages: %d %d %d\r", power_get_bat40(),
       power_get_bat160(), power_get_bat280());
   armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
       motor_clicks(1), motor_clicks(2));
   armprintf ("AVR control: %s %s\r", 
-    motor_is_drive_enabled()?"":"disabled drive",
-    motor_is_charging_enabled()?"":"disabled charging");
+    motor_is_drive_enabled()?"(enabled drive)":"(disabled drive)",
+    motor_is_charging_enabled()?"(enabled charging)":"(disabled charging)");
   armprintf("\r");
 }
 
