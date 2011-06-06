@@ -3,6 +3,7 @@
  *
  * Created by Michael Sokolsky
  * Last modified: 30 April 09
+ * Mods by Joseph Modayil Jun 06, 2011
  */
 
 #include "lib_motor.h"
