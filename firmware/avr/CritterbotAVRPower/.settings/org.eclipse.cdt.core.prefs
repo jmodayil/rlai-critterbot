@@ -1,6 +1,11 @@
-#Sat Jul 04 18:55:12 MDT 2009
+#Tue Jun 07 13:53:03 MDT 2011
 eclipse.preferences.version=1
-environment/project/de.innot.avreclipse.configuration.app.release.930530732=<?xml version\="1.0" encoding\="UTF-8"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="PATH" operation\="replace" value\="/usr/local/CrossPack-AVR-20090415/bin\:/usr/local/CrossPack-AVR-20090415/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin"/>\n</environment>\n
+environment/project/de.innot.avreclipse.configuration.app.release.930530732=
+environment/project/de.innot.avreclipse.configuration.app.release.930530732/PATH/delimiter=\:
+environment/project/de.innot.avreclipse.configuration.app.release.930530732/PATH/operation=replace
+environment/project/de.innot.avreclipse.configuration.app.release.930530732/PATH/value=/usr/local/CrossPack-AVR-20090415/bin\:/usr/local/CrossPack-AVR-20090415/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
+environment/project/de.innot.avreclipse.configuration.app.release.930530732/append=true
+environment/project/de.innot.avreclipse.configuration.app.release.930530732/appendContributed=true
 org.eclipse.cdt.core.formatter.alignment_for_arguments_in_method_invocation=16
 org.eclipse.cdt.core.formatter.alignment_for_base_clause_in_type_declaration=80
 org.eclipse.cdt.core.formatter.alignment_for_compact_if=0

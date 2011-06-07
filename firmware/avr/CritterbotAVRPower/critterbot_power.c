@@ -42,7 +42,7 @@ ISR(SPI_STC_vect)
     break;
   case 1:
     dummy = (uint8_t) SPDR;
-    SPDR = charge_state;
+    SPDR = system_state;//charge_state;
 
     commands = dummy;
 
@@ -160,17 +160,20 @@ int battery_level_okay(void) {
   static uint8_t count;
   uint8_t diff = 0;
 
-  if (bat40v > bat160v + 2)
+//volt diff originally 2
+#define VOLT_DIFF 2
+
+  if (bat40v > bat160v + VOLT_DIFF)
     diff = 1;
-  if (bat160v > bat40v + 2)
+  if (bat160v > bat40v + VOLT_DIFF)
     diff = 1;
-  if (bat40v > bat280v + 2)
+  if (bat40v > bat280v + VOLT_DIFF)
     diff = 1;
-  if (bat280v > bat40v + 2)
+  if (bat280v > bat40v + VOLT_DIFF)
     diff = 1;
-  if (bat160v > bat280v + 2)
+  if (bat160v > bat280v + VOLT_DIFF)
     diff = 1;
-  if (bat280v > bat160v + 2)
+  if (bat280v > bat160v + VOLT_DIFF)
     diff = 1;
   /* If any of the batteries differ, increment the count (to obtain 
    *  hysteresis) */
@@ -397,7 +400,7 @@ int main(void) {
 
     // Added by MGB: display charge_state
     // Disabled so we can display disabled-charging state
-    //   led_charge_state();
+    led_charge_state();
       
   }
 
