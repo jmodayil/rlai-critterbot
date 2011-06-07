@@ -12,9 +12,9 @@
 // are below this voltage
 // Changed from 15.5V to 16V by MGB due to the addition of the software switch
 #define MIN_BAT_CHARGE_VOLTAGE 160
-// If the voltage falls below 14V, enable charge irrespective of the disabled
+// If the voltage falls below 14.5V, enable charge irrespective of the disabled
 //  flag
-#define OVERRIDE_CHARGING_DISABLED_VOLTAGE 140
+#define OVERRIDE_CHARGING_DISABLED_VOLTAGE 145
 // Don't charge unless the batteries
 // are above this voltage
 #define MIN_BAT_VOLTAGE 80
