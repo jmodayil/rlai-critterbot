@@ -42,7 +42,7 @@ ISR(SPI_STC_vect)
     break;
   case 1:
     dummy = (uint8_t) SPDR;
-    SPDR = system_state;//charge_state;
+    SPDR = (uint8_t) charge_state;
 
     commands = dummy;
 
@@ -410,7 +410,7 @@ int main(void) {
 void led_charge_state() {
   uint8_t max_time = charge_state + 1 + 10;
 
-  if (charge_state == 200) max_time = 25;
+  if (charge_state >= 200) max_time = 25;
   if (system_state & CHARGER_COMM_ERROR) max_time = 30;
   if (system_state & CHARGER40_ERROR) max_time = 35;
   if (system_state & CHARGER160_ERROR) max_time = 40;
