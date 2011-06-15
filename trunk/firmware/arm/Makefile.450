@@ -16,11 +16,15 @@ PRODUCE_MEMORY_MAP=
 PRODUCE_MEMORY_MAP_LD=-Map=memory.map
 #PRODUCE_MEMORY_MAP_LD=
 
+#Include the SVN version number in the binary
+SVNDEV = -D'SVN_REV="$(shell svnversion -n .)"'
+
+
 # Compiler flags
 COMMONFLAGS = -c -mcpu=arm7tdmi
 ASSONLYFLAGS = -S -mcpu=arm7tdmi
 AFLAGS = -x assembler-with-cpp
-CFLAGS = -Winline -O2 -ffunction-sections -fdata-sections
+CFLAGS = -Winline -O2 -ffunction-sections -fdata-sections $(SVNDEV)
 # Set DEBUGFLAGS to empty for normal compilation
 # DEBUGFLAGS =
 DEBUGFLAGS = -Wall

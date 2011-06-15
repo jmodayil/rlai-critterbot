@@ -15,7 +15,7 @@
 #define POWER_CHARGE_160_280       7
 #define POWER_CHARGE_280           8
 #define POWER_CHARGE_TOPOFF        9
-#define POWER_CHARGE_COMPLETE      10
+#define POWER_CHARGE_COMPLETE      11
 #define POWER_CHARGE_ERROR         200 
 
 // A flag sent to the AVR to indicate that we should not charge

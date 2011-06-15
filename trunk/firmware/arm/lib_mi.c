@@ -142,7 +142,7 @@ void mi_send_status(void) {
       ((adcspi_get_output(3, 6) & 0x03) << 2) |
       (adcspi_get_output(3, 7) & 0x03));
   //putwcrc(error_reg >> 24);
-  power_get_charge_state();// The top byte of the error flags is not used, and the charge state changes from the top of the packet to the bottom in charger error conditions.
+  putwcrc(power_get_charge_state());// The top byte of the error flags is not used, and the charge state changes from the top of the packet to the bottom in charger error conditions.
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
   putwcrc(error_reg);
