@@ -113,18 +113,18 @@ void mi_send_status(void) {
       ((adcspi_get_output(3, 9) & 0x03) << 4) |
       ((adcspi_get_output(3, 10) & 0x03) << 2) |
       (adcspi_get_output(3, 11) & 0x03));
-  // We are going to put our status info into the thermal bytes.
-  putwcrc((unsigned char)(motor_is_charging_enabled()));
-  putwcrc((unsigned char)(0)); //pad
-  putwcrc((unsigned char)(motor_is_drive_enabled()));
-  putwcrc((unsigned char)(0)); //pad
-  putwcrc((unsigned char)(power_get_charge_state()));
-  putwcrc((unsigned char)(0)); //pad
-  putwcrc((unsigned char)(power_get_byte6()));
-  putwcrc((unsigned char)(0)); //pad
-  // Should start from 0 instead of 3/4 when we remove the above debug info
+/*   // We are going to put our status info into the thermal bytes. */
+/*   putwcrc((unsigned char)(motor_is_charging_enabled())); */
+/*   putwcrc((unsigned char)(0)); //pad */
+/*   putwcrc((unsigned char)(motor_is_drive_enabled())); */
+/*   putwcrc((unsigned char)(0)); //pad */
+/*   putwcrc((unsigned char)(power_get_charge_state())); */
+/*   putwcrc((unsigned char)(0)); //pad */
+/*   putwcrc((unsigned char)(power_get_byte6())); */
+/*   putwcrc((unsigned char)(0)); //pad */
+/*  // Should start from 0 instead of 3/4 when we remove the above debug info */
   // Thermal sensors
-  for(i = 4; i < 8; i++) {
+  for(i = 0; i < 8; i++) {
     putwcrc((unsigned char)(thermo_get_val(i)));
     putwcrc((unsigned char)(thermo_get_val(i)>>8));
   }
@@ -141,12 +141,15 @@ void mi_send_status(void) {
       ((adcspi_get_output(3, 5) & 0x03) << 4) |
       ((adcspi_get_output(3, 6) & 0x03) << 2) |
       (adcspi_get_output(3, 7) & 0x03));
-  putwcrc(error_reg >> 24);
+  //putwcrc(error_reg >> 24);
+  power_get_charge_state();// The top byte of the error flags is not used, and the charge state changes from the top of the packet to the bottom in charger error conditions.
   putwcrc(error_reg >> 16);
   putwcrc(error_reg >> 8);
   putwcrc(error_reg);
   putwcrc(commands_packet_read);
-  putwcrc(monitor_status());
+  putwcrc( (motor_is_charging_enabled()? 1:0) << 7 | 
+	   (motor_is_drive_enabled()? 1:0) << 6 | 
+	   (monitor_status() ? 1: 0));
 
   armputchar(crc >> 8);
   armputchar(crc & 0xFF);
