@@ -51,6 +51,12 @@ void charger_init(void);
  * 2 - Top-off charge
  * 3 - Shutdown
  */
+
+#define CHARGER_BASE_CHARGE 0
+#define CHARGER_INVALID 1
+#define CHARGER_TOPOFF_CHARGE 2
+#define CHARGER_SHUTDOWN 3
+
 uint8_t charger40_status(void);
 uint8_t charger160_status(void);
 uint8_t charger280_status(void);
