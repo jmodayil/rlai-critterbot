@@ -283,6 +283,7 @@ void ui_status(char * cmdstr)
   else
     armprintf(events_undefined_reset_name);
   armprintf(" reset.\r");
+  armprintf ("SVN code revision: %s\r", SVN_REV);
   armprintf ("Event prior to reset: %d\r", pre_reset_event);
   //armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
   //armprintf ("Accelerometer status: %s\r", "N/A");
