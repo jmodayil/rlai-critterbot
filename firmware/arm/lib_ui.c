@@ -283,9 +283,9 @@ void ui_status(char * cmdstr)
   else
     armprintf(events_undefined_reset_name);
   armprintf(" reset.\r");
-  armprintf ("Event prior to reset was: %d\r", pre_reset_event);
+  armprintf ("Event prior to reset: %d\r", pre_reset_event);
   //armprintf ("LED status: %s\r", STATUS_STRING(!ledctl_geterr()));
-  armprintf ("Accelerometer status: %s\r", "N/A");
+  //armprintf ("Accelerometer status: %s\r", "N/A");
   armprintf ("Error status: %x\r", error_get());
   armprintf ("Thermos: %d %d %d %d\r", thermo_get_val(0), thermo_get_val(2),
      thermo_get_val(4), thermo_get_val(6));
@@ -301,9 +301,9 @@ void ui_status(char * cmdstr)
       power_get_bat160(), power_get_bat280());
   armprintf ("Motor Speeds: %d %d %d\r", motor_clicks(0), 
       motor_clicks(1), motor_clicks(2));
-  armprintf ("AVR control: %s %s\r", 
-    motor_is_drive_enabled()?"(enabled drive)":"(disabled drive)",
-    motor_is_charging_enabled()?"(enabled charging)":"(disabled charging)");
+  armprintf ("AVR control: drive%s charge%s\r", 
+    motor_is_drive_enabled()?"+":"-",
+    motor_is_charging_enabled()?"+":"-");
   armprintf("\r");
 }
 
