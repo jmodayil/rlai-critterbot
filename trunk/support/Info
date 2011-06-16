@@ -1,0 +1,88 @@
+
+The critterbot system has four layers that are running on four different CPUs.
+
+Level   - Code                                  - Board               - source
+highest - Client Code  (eg. critter_command.py) - Anywhere/Laptop     - rlai-critterbot/support/scripts/python_client
+	|
+	| TCP/IP
+	| 
+        - Critterdriver (runs on Walter/linux/x86 Geode) - Critterbot's middle board )- rlai-critterbot/firmware/arm
+	|
+	| Serial port
+	| 
+	- ARM code  (runs on custom built ARM board - Critterbot's top board)- rlai-critterbot/firmware/arm
+	||
+	|| SPI bus?
+	||	
+lowest	|- AVR motor code - Critterbot's bottom board- rlai-critterbot/firmware/avr/CritterbotAVRMotor/
+	-  AVR power code - Critterbot's bottom board- rlai-critterbot/firmware/avr/CritterbotAVRPower/
+
+Binaries
+   - Working binaries are available in the binaries directory.
+
+Source code
+   - Source code is available via svn from google code. (http://code.google.com/p/rlai-critterbot/)
+
+Code compilation & uploading
+
+AVR-  This code can be compiled on linux machines with the avr-gcc package.  Successful compile/install from sokolsky's Eclipse on gremlin2.
+   -  Uploading requires 
+      + avrdude (install the linux package)
+      + usb support (copy support/scripts/avr/55-avrisp.rules to gremlin2:/etc/udev/rules.d/) , and 
+      + the blue programmer.
+   - Follow the rules on the website for uploading. (http://critterbot.rl-community.org/hardware/the-critterbot-robot/flashing-the-avr-microcontrollers)
+      + Remove all power from the critterbot (batteries, wall power)
+      + unplug the white cable
+      + select the appropriate device (MOTOR/POWER)
+      + Plug in the programmer
+      + Apply tail power to the critterbot.
+      + Upload the code 
+      	       >avrdude -pm324p -cavrisp2 -P usb -Uflash:w:CritterbotAVRPower.hex:a
+	       >avrdude -pm168 -cavrisp2 -P usb -Uflash:w:CritterbotAVRMotor.hex:a
+
+ARM 
+    - The arm code can be compiled with arm-gcc, available as a linux
+package.  
+    - The arm code has a limit that it can only be 40000 bytes
+and still fit on the custom board.  Currently only version of the
+compiler on Walter (arm-elf-gcc-4.1.0) provides a binary of this size.  
+Other compilers are about twice the size.
+    - Follow the instructions on the website for compiling and uploading the software.
+    (http://critterbot.rl-community.org/hardware/the-critterbot-robot/flashing-the-avr-microcontrollers)
+    - This relies on 'kermit' (available as a linux package) and 'program' (in rlai-critterbot/firmware/programmer)
+    - Other arm utilities in the firmware programmer directory (arm_mi/arm_ui) are needed to switch between ui(user-interface) and mi (machine-interface) modes.
+
+Critterdriver
+   - This code was written to replace the previous Disco transport layer.  
+   - It can be compiled from source on any x86 Linux box.
+   - It compiles successfully from sokolsky's account on gremlin2
+   - The executable can be copied to walter:/root
+
+Scripts on Walter
+   - A script is needed to start this program on system boot.
+     (Copy support/scripts/walter/critterservers to walter:/etc/init.d)
+   - The serial port converts carriage returns to newlines, causing some problems when sending critterbot commands.
+      - The serial port correction -icrnl is in the startup script, but might interfere with uploading code.
+   - There are sound servers on walter. (/root/audio/daemons/audio_out_raw_server,audio_out_fft_server)
+   - The sound servers have a git project (gremlin2:/home/hage/gitrepos/crittersound.git)
+   - There is a cron job to enable chargin at night and disable charging by day.
+     (copy the lines below into /var/spool/cron/crontabs/root)
+0 0-7 * * *     /root/scripts/enableCharge
+0 8-23 * * *    /root/scripts/disableCharge
+
+  - The scripts are in support/scripts/walter
+
+
+Client code
+  - A self contained python client is in support/scripts/python_client
+  - Run critterclick to observe sensor data.
+  - The RLPark project has a variety of java based tools for
+    interfacing and learning on top of this critterbot infrastructure.
+
+
+Known issues
+  - The sensor values can shift dramatically if the reference voltage becomes unstable.  It can reset from the arm_ui.
+  - There have been occasional appearances of an SPI BUS crash where sensor values don't change.  Try resetting VREF if this happens.
+  - The sound output is disabled by default as it makes a whining sound.  You can enable/disable the sound amplification from the arm_ui or with an appropriate flag to critter_command.py
+  - The sound input is subject to substantial amounts of noise, due to the wiring of the sound circuitry on the ARM board.  This will not be resolved except by soldering on some new hardware.
+  - The arm-programs to enable and disable charge will not work if Critterdriver is running (it has control of the serial port).

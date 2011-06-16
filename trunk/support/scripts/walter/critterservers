@@ -1,0 +1,40 @@
+#!/sbin/runscript
+# Copyright 1999-2009 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+depend() {
+  need checkroot
+  need modules
+  need checkfs
+  need localmount
+  need net
+  need sshd
+  need alsasound
+}
+
+start() {
+  ebegin "Starting sound servers"
+  #stty -F /dev/ttyS0 -icrnl
+  start-stop-daemon --start --background --exec /root/audio/daemons/audio_out_raw_server > /dev/null
+  start-stop-daemon --start --background --exec /root/audio/daemons/audio_out_fft_server > /dev/null
+  eend $?
+  ebegin "Putting ARM in MI mode"
+  /root/programmer/arm_mi > /dev/null
+  ebegin "Starting Critterdriver"
+  /root/Critterdriver >& /var/log/critterdriver.log &
+  eend $?
+}
+
+stop() {
+  ebegin "Stopping Critterdriver"
+  killall Critterdriver
+  eend $?
+  ebegin "Returning ARM to UI mode"
+  /root/programmer/arm_ui > /dev/null
+  eend $?
+  ebegin "Stopping sound servers"
+  start-stop-daemon --stop --signal 15 --exec /root/audio/daemons/audio_out_raw_server
+  start-stop-daemon --stop --signal 15 --exec /root/audio/deamons/audio_out_fft_server
+  eend $?
+}

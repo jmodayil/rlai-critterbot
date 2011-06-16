@@ -1,0 +1,16 @@
+
+#!/bin/bash
+. /etc/bash/bashrc
+
+file=/tmp/softwareChargeSwitch
+echo "Disabling charge." >$file
+date >>$file
+
+# /root/programmer/arm_mi >>$file 
+# /root/programmer/arm-disable-charge >>$file 
+
+#This command needs the system to be in mi mode, with CritterDriver running.
+
+/root/scripts/critter_command ChargeDisable
+
+echo "Done." >>$file
