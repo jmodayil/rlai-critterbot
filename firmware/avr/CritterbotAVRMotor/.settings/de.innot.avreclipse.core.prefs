@@ -1,4 +1,4 @@
-#Thu Jun 25 16:18:12 MDT 2009
+#Thu Jun 16 12:17:19 MDT 2011
 avrtarget/ClockFrequency=8000000
 avrtarget/ExtRAMSize=0
 avrtarget/ExtendedRAM=false
@@ -26,9 +26,15 @@ avrtarget/avrdude/NoSigCheck=false
 avrtarget/avrdude/NoVerify=false
 avrtarget/avrdude/NoWrite=false
 avrtarget/avrdude/OtherOptions=
-avrtarget/avrdude/ProgrammerID=programmerconfig.1
+avrtarget/avrdude/ProgrammerID=programmerconfig.2
 avrtarget/avrdude/UseCounter=true
 avrtarget/avrdude/WriteEEPROM=false
 avrtarget/avrdude/WriteFlash=true
-avrtarget/perConfig=false
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/ClockFrequency=1000000
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/ExtRAMSize=0
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/ExtendedRAM=false
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/MCUType=atmega168
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/UseEEPROM=false
+avrtarget/de.innot.avreclipse.configuration.app.release.247940306/UseExtendedRAMforHeap=true
+avrtarget/perConfig=true
 eclipse.preferences.version=1

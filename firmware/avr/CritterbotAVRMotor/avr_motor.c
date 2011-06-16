@@ -33,6 +33,10 @@
 // Bound the maximum output of the PID controllers.  This is defined as
 // 64 * 127, the maximum control value shifted by 6.
 #define MAX_FIXED_POINT_OUTPUT 8128
+// Maximum system voltage we allow the robot to move with.  In 1/10th of a volt
+#define MAX_MOVE_VOLTAGE 185
+// Maximum voltage for speed throttling
+#define MAX_VOLTAGE_SETPOINT 100
 
 // Absolute value
 #define ABS(x) ((x) >= 0 ? (x) : -(x))
@@ -177,7 +181,7 @@ int8_t current_limit(int8_t setpoint) {
   // voltage, and disable motors if voltage is > 17.5V
   if(v_now <= 120)
     max_volt = 127;
-  else if(v_now > 175)
+  else if(v_now > MAX_MOVE_VOLTAGE)
     max_volt = 0;
   else
     max_volt = 127 - ((uint8_t)(v_now - 120)* 3) / 4;
@@ -198,7 +202,9 @@ int8_t current_limit(int8_t setpoint) {
  * plenty of room to improve this as it is quite rough.
  */
 int8_t speed_limit(int8_t setpoint) {
-
+  return (setpoint > MAX_VOLTAGE_SETPOINT) ? MAX_VOLTAGE_SETPOINT :
+    (setpoint < -MAX_VOLTAGE_SETPOINT? -MAX_VOLTAGE_SETPOINT : setpoint);
+  /*
   static uint8_t correction;
 
   int16_t error = ABS(clicks) - (SPEED_LIMIT << 2);
@@ -213,7 +219,7 @@ int8_t speed_limit(int8_t setpoint) {
   }
 
   return (setpoint >= 0) ? (setpoint - correction) : (setpoint + correction);
-
+  */
 }
 
 /**
