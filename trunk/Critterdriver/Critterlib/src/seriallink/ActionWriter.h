@@ -24,7 +24,7 @@ private:
 private:
 	pthread_t actionWriterThread;
 	int fid;
-	static unsigned char motorData[10];
+	static unsigned char motorData[9];
 	static unsigned char ledData[NUM_LEDS * 3];
 	static CritterControlDrop::LedMode ledMode;
 	static bool dataWritten;

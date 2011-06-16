@@ -16,8 +16,8 @@ void *writeAction(void *ptr) {
 	return NULL;
 }
 
-unsigned char ActionWriter::motorData[10] = { SER_HEADER1, SER_HEADER2,
-		SER_HEADER3, SER_HEADER4, 0, 0, 0, 0, 0, 0 };
+unsigned char ActionWriter::motorData[9] = { SER_HEADER1, SER_HEADER2,
+		SER_HEADER3, SER_HEADER4, 0, 0, 0, 0, 0 };
 unsigned char ActionWriter::ledData[NUM_LEDS * 3];
 bool ActionWriter::dataWritten = true;
 pthread_mutex_t ActionWriter::flag_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -48,8 +48,6 @@ void ActionWriter::prepareActionData(const CritterControlDrop& controlDrop) {
 	motorData[7] = (char) controlDrop.theta_vel;
 	ledMode = controlDrop.led_mode;
 	motorData[8] = (char) controlDrop.led_mode;
-	// AVR commands are disabled for now
-	motorData[9] = 0;
 	if (controlDrop.led_mode == CritterControlDrop::CUSTOM) {
 		for (int i = 0; i < NUM_LEDS; i++) {
 			ledData[3 * i] = controlDrop.led_val[i].r;
@@ -84,7 +82,7 @@ void ActionWriter::setDataWritten(bool value) {
 }
 
 void ActionWriter::writeActionToSerialLink() {
-	if (10 != write(fid, &motorData, 10))
+	if (9 != write(fid, &motorData, 9))
 		perror("Error writing motor data out to serial port!");
 	if (ledMode == CritterControlDrop::CUSTOM) {
 		if (NUM_LEDS * 3 != write(fid, &ledData, NUM_LEDS * 3))

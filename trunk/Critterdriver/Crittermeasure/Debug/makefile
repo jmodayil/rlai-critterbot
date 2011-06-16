@@ -44,7 +44,7 @@ all: Crittermeasure
 Crittermeasure: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L"/home/degris/workspace/Critterdriver/Critterlib/Debug" -m32 -o"Crittermeasure" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L"/home/sokolsky/Code/Critterdriver/Critterlib/Debug" -m32 -o"Crittermeasure" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
