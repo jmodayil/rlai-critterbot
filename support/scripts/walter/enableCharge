@@ -1,0 +1,13 @@
+#!/bin/bash
+. /etc/bash/bashrc
+
+file=/tmp/softwareChargeSwitch
+echo "Enabling charge." >$file
+date >>$file
+
+# /root/programmer/arm_mi >>$file 
+# /root/programmer/arm-enable-charge >>$file 
+
+/root/scripts/critter_command.py ChargeEnable >> $filecontrolDrop.getDropSize()
+
+echo "Done." >>$file
