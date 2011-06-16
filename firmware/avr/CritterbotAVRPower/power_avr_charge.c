@@ -14,7 +14,7 @@
 uint8_t charge_state;
 uint8_t saved_charge_state;
 
-enum swish {CHARGE_STATE0,CHARGE_STATE1,CHARGE_STATE2,CHARGE_STATE3,CHARGE_STATE4,CHARGE_STATE5,CHARGE_STATE6,CHARGE_STATE7,CHARGE_STATE8,CHARGE_STATE9,CHARGE_STATE10,CHARGE_STATE11};  // These are all normal states for the charger state machine, errors are 200 and above.
+enum swish {FUEL_STATE0,FUEL_STATE1,FUEL_STATE2,FUEL_STATE3,FUEL_STATE4,FUEL_STATE5,FUEL_STATE6,FUEL_STATE7,FUEL_STATE8,FUEL_STATE9,FUEL_STATE10,FUEL_STATE11};  // These are all normal states for the charger state machine, errors are 200 and above.
 
 void set_charge_state(uint8_t new_state) {
   charge_state = new_state;
@@ -55,7 +55,7 @@ void charge( void ) {
     }
     // All is okay if we finished charging when it was unplugged.
     if(charge_state == 11) {
-      charge_state = CHARGE_STATE0;
+      charge_state = FUEL_STATE0;
       // LED1_PORT &= ~LED1;
     }
     return;
@@ -71,7 +71,7 @@ void charge( void ) {
   // writing to the EEPROM to minimize wear since the next state will
   // Immediately transition to a new one.
   switch(charge_state) {
-    case CHARGE_STATE0:
+    case FUEL_STATE0:
       charger40_disable();
       charger160_disable();
       charger280_disable();
@@ -98,20 +98,20 @@ void charge( void ) {
       //  charging now
       // If the batteries are uneven, start charging
       if(!(system_state & BAT_OK))
-        set_charge_state(CHARGE_STATE1);
+        set_charge_state(FUEL_STATE1);
       else if (!charging_disabled) {
         // Otherwise, charge only if the battery voltage has fallen a little
         if(bat40v < MIN_BAT_CHARGE_VOLTAGE)
-          set_charge_state(CHARGE_STATE1);
+          set_charge_state(FUEL_STATE1);
       }
       break;
     // Start charger 40
-    case CHARGE_STATE1:
+    case FUEL_STATE1:
       charger40_enable();
-      charge_state = CHARGE_STATE2;
+      charge_state = FUEL_STATE2;
       break;
     // Charger 40 on normal
-    case CHARGER_TOPOFF_CHARGE:
+    case FUEL_STATE2:
       charger40_enable();
       stat = charger40_status();
       switch(stat) {
@@ -124,7 +124,7 @@ void charge( void ) {
           charge_state = 211;
           break;
         case CHARGER_TOPOFF_CHARGE:
-          set_charge_state(CHARGE_STATE3);
+          set_charge_state(FUEL_STATE3);
           break;
         case CHARGER_SHUTDOWN:
           // To get here means charger 40 went directly into shutdown before
@@ -141,13 +141,13 @@ void charge( void ) {
       }
       break;
     // Charger 40 top off, start charger 160
-    case CHARGE_STATE3:
+    case FUEL_STATE3:
       charger40_enable();
       //      charger160_enable();
-      charge_state = CHARGE_STATE4;
+      charge_state = FUEL_STATE4;
       break;
     // Charger 40 top off
-    case CHARGE_STATE4:
+    case FUEL_STATE4:
       charger40_enable();
       //   charger160_enable();
       // Eventually we will get to this state if the batteries are unplugged
@@ -156,7 +156,7 @@ void charge( void ) {
       if(bat280v < MIN_BAT_VOLTAGE) {
         charger40_disable();
         charger160_disable();
-        set_charge_state(CHARGE_STATE0);
+        set_charge_state(FUEL_STATE0);
         break;
       }
       stat = charger40_status();
@@ -174,7 +174,7 @@ void charge( void ) {
           break;
         case CHARGER_SHUTDOWN:
           // Charger 40 has completed its charge
-          set_charge_state(CHARGE_STATE5);
+          set_charge_state(FUEL_STATE5);
           break;
         default:
           // BAD BAD BAD
@@ -185,13 +185,13 @@ void charge( void ) {
       }
       break;
     // Charger 160 normal
-    case CHARGE_STATE5:
+    case FUEL_STATE5:
       charger40_disable();
       charger160_enable();
       //      charger280_enable();
-      charge_state = CHARGE_STATE6;
+      charge_state = FUEL_STATE6;
       break;
-    case CHARGE_STATE6:
+    case FUEL_STATE6:
       charger40_disable();
       charger160_enable();
       stat = charger160_status();
@@ -204,12 +204,12 @@ void charge( void ) {
           charge_state = 221;
           break;
         case CHARGER_TOPOFF_CHARGE:
-          set_charge_state(CHARGE_STATE7);
+          set_charge_state(FUEL_STATE7);
           break;
         case CHARGER_SHUTDOWN:
           // This would mean charger 160 either went from full charge to disabled,
           // or was disabled when we got to state 5.  For now treating this a as an error
-          set_charge_state(CHARGE_STATE8);
+          set_charge_state(FUEL_STATE8);
           //system_state |= CHARGER160_ERROR;
           //charge_state = 222;
           break;
@@ -223,7 +223,7 @@ void charge( void ) {
       break;
     // Charger 160 top off
     // Charger 160 top off
-    case CHARGE_STATE7:
+    case FUEL_STATE7:
       charger160_enable();
       //charger280_enable();
       stat = charger160_status();
@@ -240,7 +240,7 @@ void charge( void ) {
           // Stay here.
           break;
         case CHARGER_SHUTDOWN:
-          set_charge_state(CHARGE_STATE8);
+          set_charge_state(FUEL_STATE8);
           break;
         default:
           // BAD BAD BAD
@@ -251,12 +251,12 @@ void charge( void ) {
       }
       break;
     // Charger 280 normal
-    case CHARGE_STATE8:
+    case FUEL_STATE8:
       charger160_disable();
       charger280_enable(); // maybe a step is required
-      charge_state = CHARGE_STATE9;
+      charge_state = FUEL_STATE9;
       break;
-    case CHARGE_STATE9:
+    case FUEL_STATE9:
       charger160_disable();
       charger280_enable();
       stat = charger280_status();
@@ -269,7 +269,7 @@ void charge( void ) {
           charge_state = 231;
           break;
         case CHARGER_TOPOFF_CHARGE:
-          set_charge_state(CHARGE_STATE10);
+          set_charge_state(FUEL_STATE10);
           break;
         case CHARGER_SHUTDOWN:
           // Again, confusing, see above
@@ -285,7 +285,7 @@ void charge( void ) {
       }
       break;
     // Charger 280 top off
-    case CHARGE_STATE10:
+    case FUEL_STATE10:
       charger280_enable();
       stat = charger280_status();
       switch(stat) {
@@ -304,8 +304,8 @@ void charge( void ) {
           // Not quite clean code, but to explain, this will set EEPROM charge state to 0
           // but keep the ram state to 10, if we restart we know we didn't interrupt
           // charging, but if we keep running then we know we have fully charged.
-          set_charge_state(CHARGE_STATE0);
-          charge_state = CHARGE_STATE11;
+          set_charge_state(FUEL_STATE0);
+          charge_state = FUEL_STATE11;
           break;
         default:
           // BAD BAD BAD
@@ -316,7 +316,7 @@ void charge( void ) {
       }
       break;
     // Charge complete
-    case CHARGE_STATE11:
+    case FUEL_STATE11:
       charger40_disable();
       charger160_disable();
       charger280_disable();
