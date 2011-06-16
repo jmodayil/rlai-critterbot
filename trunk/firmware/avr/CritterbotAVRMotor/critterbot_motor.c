@@ -10,6 +10,7 @@ volatile uint16_t enc_count, enc_old_count;
 volatile uint8_t rstate, event, event_count;
 uint8_t adc_mux;
 volatile uint8_t dat, dummy, current, temperature;
+volatile uint8_t voltage_out;
 volatile uint8_t v_now;
 volatile uint8_t motor_mode;
 extern int8_t voltage_limit;
@@ -48,7 +49,7 @@ ISR(SPI_STC_vect) {
       break;
     case 3:
       dummy = (uint8_t)SPDR;
-      SPDR = SPI_PADDING;
+      SPDR = voltage_out;//SPI_PADDING;
       rstate = 4;
       break;
     case 4:
@@ -181,6 +182,7 @@ int main(void) {
   spi_init_slave();
   rstate = 0;
   motor_mode = 0;
+  voltage_out=0;
 
   motor_init();
 
@@ -201,6 +203,7 @@ int main(void) {
       }
       set_voltage(command);
 
+      voltage_out=command;
       event = 0;
     }
   }
