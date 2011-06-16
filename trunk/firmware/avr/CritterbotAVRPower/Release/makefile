@@ -73,7 +73,7 @@ CritterbotAVRPower.eep: CritterbotAVRPower.elf
 
 sizedummy: CritterbotAVRPower.elf
 	@echo 'Invoking: Print Size'
-	-avr-size --format=berkeley -t CritterbotAVRPower.elf
+	-avr-size --format=avr --mcu=atmega324p CritterbotAVRPower.elf
 	@echo 'Finished building: $@'
 	@echo ' '
 
