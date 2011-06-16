@@ -7,6 +7,7 @@
 import critter as C
 
 c=C.critter("10.0.1.10",2330)
-
-print c.observe()
+v=c.observe().items()
+v.sort()
+print v
 
