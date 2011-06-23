@@ -3,6 +3,7 @@
 #include "lib_leddrive.h"
 #include "lib_motor.h"
 #include "lib_accel.h"
+#include "lib_power.h"
 
 event_s leddrive_event_s = {
   leddrive_init,
@@ -256,10 +257,13 @@ void led_chargemax(int max) {
     leddrive_charge_max = 13; 
     break;
   case 9:
-    leddrive_charge_max = 15; 
+    leddrive_charge_max = 14; 
     break;
   case 10:
-    leddrive_charge_max = 16; 
+    leddrive_charge_max = 15; 
+    break;
+  case POWER_CHARGE_COMPLETE:
+    leddrive_charge_max = 16;
     break;
   default:
     leddrive_charge_max = 0;
