@@ -14,7 +14,7 @@
 uint8_t charge_state;
 uint8_t saved_charge_state;
 
-enum swish {FUEL_STATE0,FUEL_STATE1,FUEL_STATE2,FUEL_STATE3,FUEL_STATE4,FUEL_STATE5,FUEL_STATE6,FUEL_STATE7,FUEL_STATE8,FUEL_STATE9,FUEL_STATE10,FUEL_STATE11};  // These are all normal states for the charger state machine, errors are 200 and above.
+enum swish {FUEL_STATE0,FUEL_STATE1,FUEL_STATE2,FUEL_STATE3,FUEL_STATE4,FUEL_STATE5,FUEL_STATE6,FUEL_STATE7,FUEL_STATE8,FUEL_STATE9,FUEL_STATE10,FUEL_STATE11, CHARGING_INTERRUPTED=201};  // These are operating states for the charger state machine, fatal errors are 210 and above.
 
 void set_charge_state(uint8_t new_state) {
   charge_state = new_state;
@@ -47,23 +47,27 @@ void charge( void ) {
   // Signal an error if we were in the middle of charging.
   if(!(system_state & CHARGE_OK)) {
     // Error if we were charging and the charger was unplugged.
-    if(charge_state > 0 && charge_state < 11) {
+    if(charge_state > FUEL_STATE0 && charge_state < FUEL_STATE11) {
       // We explicitly don't want to save this change to eeprom.
       // Charging was interrupted and we want to preserve the previous
       // state to resume from.
-      charge_state = 201;
+      charge_state = CHARGING_INTERRUPTED;
     }
     // All is okay if we finished charging when it was unplugged.
-    if(charge_state == 11) {
+    if(charge_state == FUEL_STATE11) {
       charge_state = FUEL_STATE0;
       // LED1_PORT &= ~LED1;
     }
     return;
   }
-  else if (charge_state == 201) // and system_state & CHARGE_OK implicitly
-    // If we are plugged back in after being disconnected, resume charge
-    read_charge_state();
-
+  else if (charge_state == CHARGING_INTERRUPTED) { // and system_state & CHARGE_OK implicitly
+    if (bat40v < MIN_BAT_CHARGE_VOLTAGE)  
+      // restart process if the batteries have discharged
+      set_charge_state(FUEL_STATE0);
+    else 
+      // If we are plugged back in after being disconnected, resume charge
+      read_charge_state();
+  }
   // Due to the above test, we should never get this far unless we are in
   // system_state 3 or 7.
 
